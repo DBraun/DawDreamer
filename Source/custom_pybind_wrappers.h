@@ -2,6 +2,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include "pybind11/stl.h" // this lets std::vector<float> be a default arg
 
 namespace py = pybind11;
 
