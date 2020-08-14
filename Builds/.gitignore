@@ -1,0 +1,5 @@
+VisualStudio*/.vs
+VisualStudio*/x64
+LinuxMakefile/*
+MacOSX/build/*
+MacOSX/RecentFiles*

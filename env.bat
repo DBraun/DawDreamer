@@ -1,0 +1,1 @@
+cmd /k call C:\Python38dawdreamer\Scripts\activate.bat

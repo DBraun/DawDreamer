@@ -1,0 +1,44 @@
+# prevent parsing errors with https://config.travis-ci.com/explore
+language: cpp
+compiler: clang
+
+jobs:
+  include:
+    # - name: "Python 3.8.0 on Xenial Linux"
+    #   os: linux
+    #   python: 3.8           # this works for Linux but is ignored on macOS or Windows
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - libboost-python-dev
+    #         - libfreetype6-dev
+    #         - libx11-dev
+    #         - libxinerama-dev
+    #         - libxrandr-dev
+    #         - libxcursor-dev
+    #         - mesa-common-dev
+    #         - libasound2-dev
+    #         - freeglut3-dev
+    #         - libxcomposite-dev
+    #         - libcurl4-gnutls-dev
+    - name: "Python 3.8.5 on macOS"
+      os: osx
+      osx_image: xcode11.2  # Python 3.7.4 running on macOS 10.14.4
+      before_install:
+        brew update && brew upgrade pyenv && env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.8.5
+    - name: "Python 3.8.5 on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      before_install:
+        - choco install python --version 3.8.5
+        # - python -m pip install --upgrade pip
+      env:
+        - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
+      script:
+        - export PATH=$MSBUILD_PATH:$PATH
+        - PATH=/c/Python38:/c/Python38/Scripts:$PATH
+        - MSBuild.exe //p:Configuration=Release Builds/VisualStudio2017/DawDreamer.sln
+
+# build
+script:
+  - if [ $TRAVIS_OS_NAME = linux ]; then  make --directory=Builds/LinuxMakefile/;                 fi
+  - if [ $TRAVIS_OS_NAME = osx ]; then  xcodebuild -project Builds/MacOSX/DawDreamer.xcodeproj/;  fi
