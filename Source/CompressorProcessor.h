@@ -13,7 +13,6 @@ public:
         myCompressor.setRatio(myRatio);
         myCompressor.setAttack(myAttack);
         myCompressor.setRelease(myRelease);
-
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
@@ -33,10 +32,28 @@ public:
 
     const juce::String getName() { return "CompressorProcessor"; };
 
+    void setThreshold(float threshold) { myThreshold = threshold; updateParameters(); }
+    float getThreshold() { return myThreshold; }
+
+    void setRatio(float ratio) { myRatio = ratio; updateParameters(); }
+    float getRatio() { return myRatio; }
+
+    void setAttack(float attack) { myAttack = attack; updateParameters(); }
+    float getAttack() { return myAttack; }
+
+    void setRelease(float release) { myRelease = release; updateParameters(); }
+    float getRelease() { return myRelease; }
+
+
 private:
     juce::dsp::Compressor<float> myCompressor;
     float myThreshold;
     float myRatio;
     float myAttack;
     float myRelease;
+
+    void updateParameters() {
+
+    }
+
 };

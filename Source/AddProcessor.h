@@ -52,6 +52,10 @@ public:
 
     const juce::String getName() { return "AddProcessor"; };
 
+    void setGainLevels(const std::vector<float> gainLevels) { myGainLevels = gainLevels; }
+    const std::vector<float> getGainLevels() { return myGainLevels; }
+
+
 private:
 
     std::vector<float> myGainLevels;

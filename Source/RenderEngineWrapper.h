@@ -31,7 +31,7 @@ public:
     std::shared_ptr<AddProcessor> makeAddProcessor(const std::string& name, std::vector<float> gainLevels);
 
     /// @brief
-    std::shared_ptr<ReverbProcessor> makeReverbProcessor(const std::string& name);
+    std::shared_ptr<ReverbProcessor> makeReverbProcessor(const std::string& name, float roomSize, float damping, float wetLevel, float dryLevel, float width);
 
     bool loadGraphWrapper(py::object dagObj, int numInputAudioChans, int numOutputAudioChans);
 

@@ -47,53 +47,19 @@ RenderEngineWrapper::makePluginProcessor(const std::string& name, const std::str
 
 /// @brief
 std::shared_ptr<PlaybackProcessor>
-RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array input)
+RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array data)
 {
-    float* input_ptr = (float *) input.data();
-
-    std::vector<std::vector<float>> outData(input.shape(0), std::vector<float>(input.shape(1)));
-
-    for (int y = 0; y < input.shape(1); y++) {
-        for (int x = 0; x < input.shape(0); x++) {
-            outData[x][y] = *(input_ptr++);
-        }
-    }
-
-    return std::shared_ptr<PlaybackProcessor>{new PlaybackProcessor{ name, outData }};
+    return std::shared_ptr<PlaybackProcessor>{new PlaybackProcessor{ name, data }};
 }
 
 std::shared_ptr<FilterProcessor>
 RenderEngineWrapper::makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain) {
 
-    FILTER_FilterFormat format = FILTER_FilterFormat::HIGH_PASS; // default choice.
-
-    if (!mode.compare("low")) {
-        format = FILTER_FilterFormat::LOW_PASS;
-    }
-    else if (!mode.compare("high")) {
-        format = FILTER_FilterFormat::HIGH_PASS;
-    }
-    else if (!mode.compare("band")) {
-        format = FILTER_FilterFormat::BAND_PASS;
-    }
-    else if (!mode.compare("low_shelf")) {
-        format = FILTER_FilterFormat::LOW_SHELF;
-    }
-    else if (!mode.compare("high_shelf")) {
-        format = FILTER_FilterFormat::HIGH_SHELF;
-    }
-    else if (!mode.compare("notch")) {
-        format = FILTER_FilterFormat::NOTCH;
-    }
-    else {
-        std::cout << "Warning: Unrecognized filter mode: " << mode << std::endl;
-    }
-
     float validFreq = std::max(.0001f, freq);
     float validQ = std::max(.0001f, q);
     float validGain = std::max(.0001f, gain);
 
-    return std::shared_ptr<FilterProcessor>{new FilterProcessor{ name, format, validFreq, validQ, validGain }};
+    return std::shared_ptr<FilterProcessor>{new FilterProcessor{ name, mode, validFreq, validQ, validGain }};
 }
 
 std::shared_ptr<CompressorProcessor>
@@ -115,8 +81,9 @@ RenderEngineWrapper::makeAddProcessor(const std::string& name, std::vector<float
 
 
 std::shared_ptr<ReverbProcessor>
-RenderEngineWrapper::makeReverbProcessor(const std::string& name) {
-    return std::shared_ptr<ReverbProcessor>{new ReverbProcessor{ name }};
+RenderEngineWrapper::makeReverbProcessor(const std::string& name, float roomSize = 0.5f, float damping = 0.5f, float wetLevel = 0.33f,
+    float dryLevel = 0.4f, float width = 1.0f) {
+    return std::shared_ptr<ReverbProcessor>{new ReverbProcessor{ name, roomSize, damping, wetLevel, dryLevel, width }};
 }
 
 bool
@@ -126,7 +93,6 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans=
         return false;
     }
 
-   // DAG buildingDag;
     DAG* buildingDag = new DAG();
 
     for (py::handle theTuple : dagObj) {  // iterators!

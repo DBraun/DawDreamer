@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ProcessorBase.h"
+#include "custom_pybind_wrappers.h"
 
 class PlaybackProcessor : public ProcessorBase
 {
@@ -8,6 +9,11 @@ public:
     PlaybackProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData) : ProcessorBase{ newUniqueName }
     {
         myPlaybackData = inputData;
+    }
+
+    PlaybackProcessor(std::string newUniqueName, py::array input) : ProcessorBase{ newUniqueName }
+    {
+        setData(input);
     }
 
     void
@@ -44,6 +50,18 @@ public:
     }
 
     const juce::String getName() const { return "PlaybackProcessor"; }
+
+    void setData(py::array input) {
+        float* input_ptr = (float*)input.data();
+
+        myPlaybackData = std::vector<std::vector<float>>(input.shape(0), std::vector<float>(input.shape(1)));
+
+        for (int y = 0; y < input.shape(1); y++) {
+            for (int x = 0; x < input.shape(0); x++) {
+                myPlaybackData[x][y] = *(input_ptr++);
+            }
+        }
+    }
 
 private:
 
