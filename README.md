@@ -233,6 +233,7 @@ synth.add_midi_note(60, 127, 0.5, .25)  # (MIDI note, velocity, start sec, durat
 # Examples of other Processors
 vocals = load_audio_file(VOCALS_PATH, duration=10.)
 playback_processor = engine.make_playback_processor("my_vocals", vocals)
+playback_processor.set_data(vocals) # You can do this anytime.
 
 threshold = 0. # dB level of threshold
 ratio = 2. # greater than or equal to 1.
@@ -240,6 +241,11 @@ attack = 2. # attack of compressor in milliseconds
 release = 50. # attack of compressor in milliseconds
 
 compressor_processor = engine.make_compressor_processor("my_compressor", threshold, ratio, attack, release)
+# CompressorProcessor has getters/setters
+compressor_processor.threshold = threshold
+compressor_processor.ratio = ratio
+compressor_processor.attack = attack
+compressor_processor.release = release
 
 # The add processor sums signals together.
 # When you add it to a graph, you probably want to use multiple inputs.
@@ -249,9 +255,21 @@ add_processor = engine.make_add_processor("my_add")
 # Assuming we will provide two inputs to this processor, we can construct
 # the add processor and pass an array of gain levels at the same time.
 add_processor = engine.make_add_processor("my_add", [0.5, 0.8])
+add_processor.gain_levels = [0.7, 0.7] # Adjust gain levels whenever you want.
 
 # Basic reverb processor from JUCE.
-reverb_processor = engine.make_reverb_processor("my_reverb")
+room_size = 0.5
+damping = 0.5
+wet_level = 0.33
+dry_level = 0.4
+width = 1.
+reverb_processor = engine.make_reverb_processor("my_reverb", room_size, damping, wet_level, dry_level, width)
+# ReverbProcessor has getters/setters
+reverb_processor.room_size = room_size
+reverb_processor.damping = damping
+reverb_processor.wet_level = wet_level
+reverb_processor.dry_level = dry_level
+reverb_processor.width = width
 
 # Basic filter processor from JUCE.
 filter_mode = "high" # "low", "high", "band", "low_shelf", "high_shelf", "notch"
@@ -259,7 +277,12 @@ freq = 1000.0  # cutoff frequency in Hz.
 q = 0.707107 # safe choice is 1./rad(2)=0.707107.
 gain = 1. # gain values only matter when the mode is low_shelf or high_shelf.
 
-filter_processor = engine.make_filter_processor("my_reverb", filter_mode, freq, q, gain)
+filter_processor = engine.make_filter_processor("my_filter", filter_mode, freq, q, gain)
+# FilterProcessor has getters/setters
+reverb_processor.mode = filter_mode
+reverb_processor.freq = freq
+reverb_processor.q = q
+reverb_processor.gain = gain
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
@@ -271,7 +294,8 @@ filter_processor = engine.make_filter_processor("my_reverb", filter_mode, freq, 
 graph = [
   (synth, []),
   (playback_processor, []),
-  (add_processor, ["my_synth", "my_vocals"]),
+  (reverb_processor, ["my_vocals"]),
+  (add_processor, ["my_synth", "my_reverb"]),
   (compressor_processor, ["my_add"]),
   (filter_processor, ["my_compressor"])
 ]
@@ -284,6 +308,8 @@ audio = engine.get_audio()  # Returns python list of lists. The shape is (2, NUM
 # Even after a render, we can still modify our processors and re-render the graph.
 # All of our MIDI is still loaded.
 synth.load_preset("C:/path/to/other_preset.fxp")
+reverb_processor.freq = 2000.0 # change a parameter on a processor.
+playback_processor.set_data(load_audio_file("piano.wav", duration=10.))  # give different waveform
 engine.render(10.)  # render audio again!
 
 # or load a new graph
