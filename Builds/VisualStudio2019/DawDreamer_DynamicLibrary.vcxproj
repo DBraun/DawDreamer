@@ -2165,6 +2165,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\PannerProcessor.h"/>
     <ClInclude Include="..\..\Source\ReverbProcessor.h"/>
     <ClInclude Include="..\..\Source\AddProcessor.h"/>
     <ClInclude Include="..\..\Source\CompressorProcessor.h"/>

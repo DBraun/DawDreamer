@@ -11,6 +11,10 @@ PYBIND11_MODULE(dawdreamer, m)
     
     py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>>(m, "PlaybackProcessor", py::base<ProcessorBase>())
         .def("set_data", &PlaybackProcessor::setData);
+
+    py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>>(m, "PannerProcessor", py::base<ProcessorBase>())
+        .def_property("rule", &PannerProcessor::getRule, &PannerProcessor::setRule)
+        .def_property("pan", &PannerProcessor::getPan, &PannerProcessor::setPan);
     
     py::class_<CompressorProcessor, std::shared_ptr<CompressorProcessor>>(m, "CompressorProcessor", py::base<ProcessorBase>())
         .def_property("threshold", &CompressorProcessor::getThreshold, &CompressorProcessor::setThreshold)
@@ -70,6 +74,8 @@ PYBIND11_MODULE(dawdreamer, m)
             arg("dryLevel")= 0.4f, arg("width") = 1.0f)
         .def("make_add_processor", &RenderEngineWrapper::makeAddProcessor, returnPolicy,
             arg("name"), arg("gainLevels") = defaultGain)
+        .def("make_panner_processor", &RenderEngineWrapper::makePannerProcessor, returnPolicy,
+            arg("name"), arg("rule") = "linear", arg("pan")=0.f)
         .def("make_compressor_processor", &RenderEngineWrapper::makeCompressorProcessor, returnPolicy,
             arg("name"), arg("threshold")=0.f, arg("ratio")=2.f, arg("attack")=2.0f, arg("release")=50.f);
 }

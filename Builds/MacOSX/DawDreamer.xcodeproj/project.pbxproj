@@ -663,6 +663,13 @@
 			path = "../../JuceLibraryCode/modules/juce_gui_basics";
 			sourceTree = "SOURCE_ROOT";
 		};
+		E650A1CEFBCEA41ACC720536 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = PannerProcessor.h;
+			path = ../../Source/PannerProcessor.h;
+			sourceTree = "SOURCE_ROOT";
+		};
 		E708FA619BD84DB7FB29A04F = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -708,6 +715,7 @@
 		E553BE5C53ED6D87F71CC515 = {
 			isa = PBXGroup;
 			children = (
+				E650A1CEFBCEA41ACC720536,
 				C20139B2E8CF4DC6B19AC0A6,
 				8038F1D9B3CEBD503DE7AD1F,
 				4915A3C580F0DAA69FAAED98,

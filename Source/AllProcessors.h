@@ -9,3 +9,4 @@
 #include "PluginProcessor.h"
 #include "RecorderProcessor.h"
 #include "ReverbProcessor.h"
+#include "PannerProcessor.h"

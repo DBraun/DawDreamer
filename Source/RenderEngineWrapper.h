@@ -33,6 +33,10 @@ public:
     /// @brief
     std::shared_ptr<ReverbProcessor> makeReverbProcessor(const std::string& name, float roomSize, float damping, float wetLevel, float dryLevel, float width);
 
+    ///
+    std::shared_ptr<PannerProcessor> makePannerProcessor(const std::string& name, std::string rule, float panVal);
+
+
     bool loadGraphWrapper(py::object dagObj, int numInputAudioChans, int numOutputAudioChans);
 
 };

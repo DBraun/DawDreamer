@@ -2643,6 +2643,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\PannerProcessor.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\ReverbProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>

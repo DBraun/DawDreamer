@@ -6,6 +6,8 @@
               cppLanguageStandard="14" companyCopyright="" jucerFormatVersion="1">
   <MAINGROUP id="tONOKg" name="DawDreamer">
     <GROUP id="{7CC9F263-A7AC-3CCC-E658-863D58B298DA}" name="Processors">
+      <FILE id="t8Bx2b" name="PannerProcessor.h" compile="0" resource="0"
+            file="Source/PannerProcessor.h"/>
       <FILE id="ys92eD" name="ReverbProcessor.h" compile="0" resource="0"
             file="Source/ReverbProcessor.h"/>
       <FILE id="jkEvDu" name="AddProcessor.h" compile="0" resource="0" file="Source/AddProcessor.h"/>

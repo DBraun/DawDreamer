@@ -86,6 +86,15 @@ RenderEngineWrapper::makeReverbProcessor(const std::string& name, float roomSize
     return std::shared_ptr<ReverbProcessor>{new ReverbProcessor{ name, roomSize, damping, wetLevel, dryLevel, width }};
 }
 
+std::shared_ptr<PannerProcessor>
+RenderEngineWrapper::makePannerProcessor(const std::string& name, std::string rule, float pan) {
+
+    float safeVal = std::max(-1.f, pan);
+    safeVal = std::min(1.f, pan);
+
+    return std::shared_ptr<PannerProcessor>{new PannerProcessor{ name, rule, safeVal }};
+}
+
 bool
 RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans=2, int numOutputAudioChans=2) {
 
