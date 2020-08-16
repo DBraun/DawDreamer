@@ -284,9 +284,9 @@ reverb_processor.freq = freq
 reverb_processor.q = q
 reverb_processor.gain = gain
 
-panner_processor = engine.makePannerProcessor("my_panner", "linear", 0.)
+panner_processor = engine.make_panner_processor("my_panner", "linear", 0.)
 panner_processor.rule = "balanced" # "linear", "balanced", "sin3dB", "sin4p5dB", "sin6dB", "squareRoot3dB", "squareRoot4p5dB"
-panner_processor.pan = -1. # -1. is fully left and 1. is fully right
+panner_processor.pan = -.5 # -1. is fully left and 1. is fully right
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
