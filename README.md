@@ -288,6 +288,14 @@ panner_processor = engine.make_panner_processor("my_panner", "linear", 0.)
 panner_processor.rule = "balanced" # "linear", "balanced", "sin3dB", "sin4p5dB", "sin6dB", "squareRoot3dB", "squareRoot4p5dB"
 panner_processor.pan = -.5 # -1. is fully left and 1. is fully right
 
+delay_rule = "linear" # only linear is supported right now
+delay_ms = 200. # delay in milliseconds
+delay_wet = .3 # 0 means use all of original signal and none of the "wet" delayed signal. 1. is the opposite.
+delay_processor = engine.make_delay_processor("my_delay", delay_rule, delay_ms, delay_wet)
+# delay_processor.rule = "linear" # modifying the rule is not supported yet.
+delay_processor.delay = delay_ms
+delay_processor.wet = delay_wet
+
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
 # In each tuple, the first item is an audio processor.
@@ -302,7 +310,8 @@ graph = [
   (reverb_processor, ["my_panner"]),
   (add_processor, ["my_synth", "my_reverb"]),
   (compressor_processor, ["my_add"]),
-  (filter_processor, ["my_compressor"])
+  (filter_processor, ["my_compressor"]),
+  (delay_processor, ["my_filter"])
 ]
 
 engine.load_graph(graph)

@@ -21,6 +21,10 @@ PYBIND11_MODULE(dawdreamer, m)
         .def_property("ratio", &CompressorProcessor::getRatio, &CompressorProcessor::setRatio)
         .def_property("attack", &CompressorProcessor::getAttack, &CompressorProcessor::setAttack)
         .def_property("release", &CompressorProcessor::getRelease, &CompressorProcessor::setRelease);
+
+    py::class_<DelayProcessor, std::shared_ptr<DelayProcessor>>(m, "DelayProcessor", py::base<ProcessorBase>())
+        .def_property("delay", &DelayProcessor::getDelay, &DelayProcessor::setDelay)
+        .def_property("wet", &DelayProcessor::getWet, &DelayProcessor::setWet);
     
     py::class_<FilterProcessor, std::shared_ptr<FilterProcessor>>(m, "FilterProcessor", py::base<ProcessorBase>())
         .def_property("mode", &FilterProcessor::getMode, &FilterProcessor::setMode)
@@ -74,6 +78,8 @@ PYBIND11_MODULE(dawdreamer, m)
             arg("dryLevel")= 0.4f, arg("width") = 1.0f)
         .def("make_add_processor", &RenderEngineWrapper::makeAddProcessor, returnPolicy,
             arg("name"), arg("gainLevels") = defaultGain)
+        .def("make_delay_processor", &RenderEngineWrapper::makeDelayProcessor, returnPolicy,
+            arg("name"), arg("rule")="linear", arg("delay") = 10.f, arg("wet")=.1f)
         .def("make_panner_processor", &RenderEngineWrapper::makePannerProcessor, returnPolicy,
             arg("name"), arg("rule") = "linear", arg("pan")=0.f)
         .def("make_compressor_processor", &RenderEngineWrapper::makeCompressorProcessor, returnPolicy,

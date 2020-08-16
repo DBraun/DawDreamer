@@ -87,12 +87,21 @@ RenderEngineWrapper::makeReverbProcessor(const std::string& name, float roomSize
 }
 
 std::shared_ptr<PannerProcessor>
-RenderEngineWrapper::makePannerProcessor(const std::string& name, std::string rule, float pan) {
+RenderEngineWrapper::makePannerProcessor(const std::string& name, std::string& rule, float pan) {
 
     float safeVal = std::max(-1.f, pan);
     safeVal = std::min(1.f, pan);
 
     return std::shared_ptr<PannerProcessor>{new PannerProcessor{ name, rule, safeVal }};
+}
+
+std::shared_ptr<DelayProcessor>
+RenderEngineWrapper::makeDelayProcessor(const std::string& name, std::string& rule, float delay, float wet) {
+    float safeDelay = std::max(0.f, delay);
+
+    float safeWet = std::min(1.f, std::max(0.f, wet));
+
+    return std::shared_ptr<DelayProcessor>{new DelayProcessor{ name, rule, safeDelay, safeWet }};
 }
 
 bool

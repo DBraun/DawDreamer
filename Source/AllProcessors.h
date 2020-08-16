@@ -3,6 +3,7 @@
 #include "ProcessorBase.h"
 #include "AddProcessor.h"
 #include "CompressorProcessor.h"
+#include "DelayProcessor.h"
 #include "FilterProcessor.h"
 #include "OscillatorProcessor.h"
 #include "PlaybackProcessor.h"

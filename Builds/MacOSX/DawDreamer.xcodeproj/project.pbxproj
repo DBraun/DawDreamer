@@ -439,6 +439,13 @@
 			path = "../../JuceLibraryCode/modules/juce_audio_devices";
 			sourceTree = "SOURCE_ROOT";
 		};
+		78374C29A67C0EFF6E21ED37 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = DelayProcessor.h;
+			path = ../../Source/DelayProcessor.h;
+			sourceTree = "SOURCE_ROOT";
+		};
 		7EC708BB8670BC4B971F031E = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -715,6 +722,7 @@
 		E553BE5C53ED6D87F71CC515 = {
 			isa = PBXGroup;
 			children = (
+				78374C29A67C0EFF6E21ED37,
 				E650A1CEFBCEA41ACC720536,
 				C20139B2E8CF4DC6B19AC0A6,
 				8038F1D9B3CEBD503DE7AD1F,
