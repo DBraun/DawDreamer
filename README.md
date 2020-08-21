@@ -116,7 +116,7 @@ Use pyenv to install Python 3.8.5:
 ```bash
 brew update && brew upgrade pyenv && env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.8.5
 ```
-Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python wont be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
+Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python won't be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
 ```bash
 mv dawdreamer.so.dylib dawdreamer.so
 ```
@@ -137,11 +137,11 @@ Then try `DawDreamer`:
 
 ### Linux
 
-Linux hasn't been tested since the transition from RenderMan, but it might work.
+Linux hasn't been tested since the transition from RenderMan, but it might work. There's also not yet a `Builds/Linux/make` file.
 
 Install [Python 3.8.x](https://www.python.org/downloads/source/).
 
-JUCE itself has a list of dependancies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependancies. Find the respective packages for other distros using Google please!
+JUCE itself has a list of dependencies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependencies. Find the respective packages for other distros using Google please!
 
 ```bash
 sudo apt-get -y install llvm
