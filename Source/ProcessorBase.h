@@ -22,9 +22,7 @@ public:
 
     juce::AudioProcessorValueTreeState::ParameterLayout createEmtpyParameterLayout()
     {
-        std::cout << "bad createParameterLayout start" << std::endl;
         juce::AudioProcessorValueTreeState::ParameterLayout params;
-        std::cout << "bad createParameterLayout end" << std::endl;
         return params;
     }
 
