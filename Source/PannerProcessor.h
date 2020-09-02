@@ -6,11 +6,9 @@ class PannerProcessor : public ProcessorBase
 {
 public:
     PannerProcessor(std::string newUniqueName, std::string rule, float panVal) :
-        ProcessorBase(newUniqueName), myPanVal{ panVal} {
-
+        ProcessorBase(createParameterLayout, newUniqueName) {
         myRule = stringToRule(rule);
-        updateParameters();
-
+        myPan = myParameters.getRawParameterValue("pan");
         juce::dsp::Reverb::Parameters params;
     }
 
@@ -23,19 +21,34 @@ public:
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
+
+        automateParameters(myPlayheadIndex);
+
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myPanner.process(context);
+
+        myPlayheadIndex += buffer.getNumSamples();
+    }
+
+    void automateParameters(size_t index) {
+
+        // todo: redesign this style.
+        *myPan = ((AutomateParameterFloat*)myParameters.getParameter("pan"))->sample(index);
+
+        updateParameters();
+
     }
 
     void reset() {
         myPanner.reset();
+        myPlayheadIndex = 0;
     };
 
     const juce::String getName() { return "PannerProcessor"; };
 
-    void setPan(float newPanVal) { myPanVal = newPanVal; updateParameters(); }
-    float getPan() { return myPanVal; }
+    void setPan(float newPanVal) { *myPan = newPanVal; updateParameters(); }
+    float getPan() { return *myPan; }
 
     void setRule(std::string newRule) {
         myRule = stringToRule(newRule);
@@ -45,15 +58,22 @@ public:
         return ruleToString(myRule);
     }
 
-
 private:
     juce::dsp::Panner<float> myPanner;
     juce::dsp::PannerRule myRule;
-    float myPanVal;
+    std::atomic<float>* myPan;
+
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout params;
+
+        params.add(std::make_unique<AutomateParameterFloat>("pan", "pan", NormalisableRange<float>(-1.f, 1.f), 0.f));
+        return params;
+    }
 
     void updateParameters() {
         myPanner.setRule(myRule);
-        myPanner.setPan(myPanVal);
+        myPanner.setPan(*myPan);
     }
 
     std::string ruleToString(juce::dsp::PannerRule rule) {

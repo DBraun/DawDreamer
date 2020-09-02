@@ -2182,6 +2182,7 @@
     <ClInclude Include="..\..\Source\Maximilian\libs\maxiMFCC.h"/>
     <ClInclude Include="..\..\Source\Maximilian\libs\sineTable.h"/>
     <ClInclude Include="..\..\Source\Maximilian\maximilian.h"/>
+    <ClInclude Include="..\..\Source\CustomParameters.h"/>
     <ClInclude Include="..\..\Source\custom_pybind_wrappers.h"/>
     <ClInclude Include="..\..\Source\RenderEngine.h"/>
     <ClInclude Include="..\..\Source\RenderEngineWrapper.h"/>

@@ -5,7 +5,9 @@ PYBIND11_MODULE(dawdreamer, m)
 {
     using arg = py::arg;
 
-    py::class_<ProcessorBase, std::shared_ptr<ProcessorBase>>(m, "ProcessorBase");
+    py::class_<ProcessorBase, std::shared_ptr<ProcessorBase>>(m, "ProcessorBase")
+        .def("set_automation", &ProcessorBase::setAutomation)
+        .def("get_automation", &ProcessorBase::getAutomation);
 
     py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>>(m, "OscillatorProcessor", py::base<ProcessorBase>());
     

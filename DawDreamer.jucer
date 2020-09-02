@@ -48,6 +48,8 @@
       <FILE id="ducH0M" name="maximilian.h" compile="0" resource="0" file="Source/Maximilian/maximilian.h"/>
     </GROUP>
     <GROUP id="{6A50F3BF-C55C-AF7D-5BA6-E62FF469B8C4}" name="Source"/>
+    <FILE id="ejbgC9" name="CustomParameters.h" compile="0" resource="0"
+          file="Source/CustomParameters.h"/>
     <FILE id="rDTPMs" name="custom_pybind_wrappers.h" compile="0" resource="0"
           file="Source/custom_pybind_wrappers.h"/>
     <FILE id="p932XA" name="custom_pybind_wrappers.cpp" compile="1" resource="0"
