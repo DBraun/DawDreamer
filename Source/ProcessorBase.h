@@ -14,18 +14,10 @@ public:
         this->setNonRealtime(true);
     }
 
-    ProcessorBase(std::string newUniqueName = "") : myParameters(*this, nullptr, newUniqueName.c_str(), createEmtpyParameterLayout()) {
+    ProcessorBase(std::string newUniqueName = "") : myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
         myUniqueName = newUniqueName;
         this->setNonRealtime(true);
     }
-
-
-    juce::AudioProcessorValueTreeState::ParameterLayout createEmtpyParameterLayout()
-    {
-        juce::AudioProcessorValueTreeState::ParameterLayout params;
-        return params;
-    }
-
 
     //==============================================================================
     void prepareToPlay(double, int) override {}
@@ -92,6 +84,12 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProcessorBase)
     std::string myUniqueName;
+
+    juce::AudioProcessorValueTreeState::ParameterLayout createEmptyParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout params;
+        return params;
+    }
 
 protected:
 
