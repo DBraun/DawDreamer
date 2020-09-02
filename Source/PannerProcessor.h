@@ -8,16 +8,15 @@ public:
     PannerProcessor(std::string newUniqueName, std::string rule, float panVal) :
         ProcessorBase(createParameterLayout, newUniqueName) {
         myRule = stringToRule(rule);
+
         myPan = myParameters.getRawParameterValue("pan");
-        juce::dsp::Reverb::Parameters params;
+        ((AutomateParameter*)myParameters.getParameter("pan"))->setAutomation(panVal);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         const int numChannels = 2;
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), numChannels };
         myPanner.prepare(spec);
-
-        updateParameters();
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {

@@ -57,9 +57,9 @@ public:
         {
             auto parameter = (AutomateParameter*)myParameters.getParameter(parameterName);
             std::cout << "setAutomation debug 2 " << std::endl;
-            //parameter->setAutomation(automation);
-            std::vector<float> data = { 0.f, 0.f, 0.f };
-            parameter->setAutomation(data);
+            parameter->setAutomation(automation);
+            //std::vector<float> data = { 0.f, 0.f, 0.f };
+            //parameter->setAutomation(data);
             std::cout << "setAutomation debug 3 " << std::endl;
         }
         catch (const std::exception& e)

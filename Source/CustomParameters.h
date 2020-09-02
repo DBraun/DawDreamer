@@ -12,10 +12,12 @@ public:
     }
 
     void setAutomation(std::vector<float> automation) {
+        std::cout << "setAutomation(std::vector<float> automation)" << std::endl;
         myAutomation = automation;
     }
 
     void setAutomation(float automation) {
+        std::cout << "setAutomation(float automation)" << std::endl;
         myAutomation = { automation };
     }
 
