@@ -22,9 +22,7 @@ public:
 
     bool loadPreset(const std::string& path);
 
-    bool overridePluginParameter(const int index, const float value);
-    bool removeOverridenParameter(const int index);
-    void fillAvailablePluginParameters(PluginPatch& params);
+    void createParameterLayout();  // NB: this is different from other processors because it's called after a VST is loaded.
 
     void setPatch(const PluginPatch patch);
     float getParameter(const int parameter);
@@ -53,8 +51,6 @@ private:
     std::string myPluginPath;
     double mySampleRate;
 
-    PluginPatch myPluginParameters;
-    PluginPatch myOverridenParameters;
     MidiBuffer myMidiBuffer;
     MidiBuffer myRenderMidiBuffer;
     MidiMessage myMidiMessage;
@@ -63,6 +59,8 @@ private:
     MidiBuffer::Iterator* myMidiIterator = nullptr;
     bool myIsMessageBetween = false;
     bool myMidiEventsDoRemain = false;
+
+    void PluginProcessor::automateParameters(size_t index);
 
 protected:
 

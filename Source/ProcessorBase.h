@@ -43,43 +43,11 @@ public:
     void getStateInformation(juce::MemoryBlock&);
     void setStateInformation(const void*, int);
 
-    bool setAutomation(std::string parameterName, py::array input) {
+    bool setAutomation(std::string parameterName, py::array input);
 
-        try
-        {
-            auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
-            parameter->setAutomation(input);
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << "Failed to set automation: " << e.what() << std::endl;
-            return false;
-        }
+    bool setParameter(std::string parameterName, float val);
 
-        return true;
-    }
-
-    bool setParameter(std::string parameterName, float val) {
-
-        try
-        {
-            auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
-            parameter->setAutomation(val);
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << "Failed to set parameter: " << e.what() << std::endl;
-            return false;
-        }
-
-        return true;
-    }
-
-    std::vector<float> getAutomation(std::string parameterName, int maxSamples) {
-        auto parameter = (AutomateParameter*)myParameters.getParameter(parameterName);
-
-        return parameter->getAutomation();
-    }
+    std::vector<float> getAutomation(std::string parameterName, int maxSamples);
 
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
@@ -91,14 +59,15 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProcessorBase)
     std::string myUniqueName;
 
+protected:
+
+    AudioProcessorValueTreeState myParameters;
+    size_t myPlayheadIndex = 0;
+
     juce::AudioProcessorValueTreeState::ParameterLayout createEmptyParameterLayout()
     {
         juce::AudioProcessorValueTreeState::ParameterLayout params;
         return params;
     }
 
-protected:
-
-    AudioProcessorValueTreeState myParameters;
-    size_t myPlayheadIndex = 0;
 };

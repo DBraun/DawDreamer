@@ -9,7 +9,7 @@ public:
 
     AutomateParameter() {}
 
-    bool setAutomation(py::array input) {
+    bool setAutomation(py::array_t<float> input) {
 
         try
         {
@@ -35,7 +35,6 @@ public:
     void setAutomation(const float val) {
         myAutomation.clear();
         myAutomation.push_back(val);
-
     }
 
     std::vector<float> getAutomation() {

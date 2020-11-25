@@ -41,7 +41,6 @@ public:
 
     void automateParameters(size_t index) {
 
-        // todo: redesign this style.
         *myRoomSize = ((AutomateParameterFloat*)myParameters.getParameter("room_size"))->sample(index);
         *myDamping = ((AutomateParameterFloat*)myParameters.getParameter("damping"))->sample(index);
         *myDryLevel = ((AutomateParameterFloat*)myParameters.getParameter("dry_level"))->sample(index);

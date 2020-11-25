@@ -51,7 +51,7 @@ public:
 
     const juce::String getName() const { return "PlaybackProcessor"; }
 
-    void setData(py::array input) {
+    void setData(py::array_t<float> input) {
         float* input_ptr = (float*)input.data();
 
         myPlaybackData = std::vector<std::vector<float>>(input.shape(0), std::vector<float>(input.shape(1)));
