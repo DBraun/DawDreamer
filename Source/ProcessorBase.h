@@ -60,6 +60,7 @@ public:
     }
 
     bool setParameter(std::string parameterName, float val) {
+
         try
         {
             auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
@@ -70,6 +71,7 @@ public:
             std::cout << "Failed to set parameter: " << e.what() << std::endl;
             return false;
         }
+
         return true;
     }
 
@@ -81,6 +83,8 @@ public:
 
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
+
+    void automateParameters(size_t index) {};
 
 private:
     //==============================================================================

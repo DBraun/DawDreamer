@@ -77,9 +77,7 @@ public:
             parameterLabel,
             parameterCategory,
             stringFromValue,
-            valueFromString) {
-        //std::cout << "init AutomateParameter() 1" << std::endl;
-    }
+            valueFromString) {}
 
     AutomateParameterFloat(String parameterID,
         String parameterName,
@@ -92,8 +90,6 @@ public:
             minValue,
             maxValue,
             defaultValue
-        ) {
-        //std::cout << "init AutomateParameter() 2" << std::endl;
-    }
+        ) {}
 
 };

@@ -9,13 +9,15 @@ public:
         ProcessorBase(createParameterLayout, newUniqueName) {
         myRule = stringToRule(rule);
 
+        setPan(panVal);
+
         myPan = myParameters.getRawParameterValue("pan");
 
-        ((AutomateParameterFloat *)myParameters.getParameter("pan"))->setAutomation(panVal);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         const int numChannels = 2;
+        automateParameters(myPlayheadIndex); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), numChannels };
         myPanner.prepare(spec);
     }
@@ -33,7 +35,6 @@ public:
 
     void automateParameters(size_t index) {
 
-        // todo: redesign this style.
         *myPan = ((AutomateParameterFloat*)myParameters.getParameter("pan"))->sample(index);
         updateParameters();
     }

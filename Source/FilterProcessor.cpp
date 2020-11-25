@@ -2,31 +2,88 @@
 
 FilterProcessor::FilterProcessor(std::string newUniqueName, std::string mode, float freq = 1000.f, float q=0.707107f, float gain=1.f)
 
-    : ProcessorBase{ newUniqueName }, myFreq{ freq }, myQ{ q }, myGain{ gain }
+    : ProcessorBase{ createParameterLayout, newUniqueName }
 {
+    setFrequency(freq);
+    setQ(q);
+    setGain(gain);
+
+    myFreq = myParameters.getRawParameterValue("freq");
+    myQ = myParameters.getRawParameterValue("q");
+    myGain = myParameters.getRawParameterValue("gain");
+
     setMode(mode);
 }
+
+const juce::String FilterProcessor::getName() { return "FilterProcessor"; }
 
 void
 FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     mySampleRate = sampleRate;
     mySamplesPerBlock = samplesPerBlock;
-    FilterProcessor::updateParameters();
+
+    automateParameters(0);  // this gives the filters an initial state.
+
+    int numChannels = 2;
+    juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), numChannels };
+    myFilter.prepare(spec);  // todo: need to do this?
 }
 
 void
 FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
+    automateParameters(myPlayheadIndex);
+
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     myFilter.process(context);
+
+    myPlayheadIndex += buffer.getNumSamples();
+}
+
+
+void FilterProcessor::automateParameters(size_t index) {
+
+    *myFreq = ((AutomateParameterFloat*)myParameters.getParameter("freq"))->sample(index);
+    *myQ = ((AutomateParameterFloat*)myParameters.getParameter("q"))->sample(index);
+    *myGain = ((AutomateParameterFloat*)myParameters.getParameter("gain"))->sample(index);
+    
+    switch (myMode)
+    {
+    case FILTER_FilterFormat::Invalid:
+        return; // todo: throw error
+        break;
+    case FILTER_FilterFormat::LOW_PASS:
+        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(mySampleRate, *myFreq, *myQ);
+        break;
+    case FILTER_FilterFormat::BAND_PASS:
+        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeBandPass(mySampleRate, *myFreq, *myQ);
+        break;
+    case FILTER_FilterFormat::HIGH_PASS:
+        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(mySampleRate, *myFreq, *myQ);
+        break;
+    case FILTER_FilterFormat::LOW_SHELF:
+        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowShelf(mySampleRate, *myFreq, *myQ, *myGain);
+        break;
+    case FILTER_FilterFormat::HIGH_SHELF:
+        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighShelf(mySampleRate, *myFreq, *myQ, *myGain);
+        break;
+    case FILTER_FilterFormat::NOTCH:
+        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeNotch(mySampleRate, *myFreq, *myQ);
+        break;
+    default:
+        return; // todo: throw error
+        break;
+    }
+
 }
 
 void
 FilterProcessor::reset()
 {
     myFilter.reset();
+    myPlayheadIndex = 0;
 }
 
 std::string
@@ -84,44 +141,6 @@ FilterProcessor::stringToMode(std::string s) {
     return FILTER_FilterFormat::Invalid;
 }
 
-void FilterProcessor::updateParameters() {
-    const int numChannels = 2; // todo: make configurable.
-
-    switch (myMode)
-    {
-    case FILTER_FilterFormat::Invalid:
-        return; // todo: throw error
-        break;
-    case FILTER_FilterFormat::LOW_PASS:
-        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(mySampleRate, myFreq, myQ);
-        break;
-    case FILTER_FilterFormat::BAND_PASS:
-        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeBandPass(mySampleRate, myFreq, myQ);
-        break;
-    case FILTER_FilterFormat::HIGH_PASS:
-        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(mySampleRate, myFreq, myQ);
-        break;
-    case FILTER_FilterFormat::LOW_SHELF:
-        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowShelf(mySampleRate, myFreq, myQ, myGain);
-        break;
-    case FILTER_FilterFormat::HIGH_SHELF:
-        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighShelf(mySampleRate, myFreq, myQ, myGain);
-        break;
-    case FILTER_FilterFormat::NOTCH:
-        *myFilter.state = *juce::dsp::IIR::Coefficients<float>::makeNotch(mySampleRate, myFreq, myQ);
-        break;
-    default:
-        return; // todo: throw error
-        break;
-    }
-
-    juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), numChannels };
-    myFilter.prepare(spec);
-}
-
-const juce::String
-FilterProcessor::getName() { return "FilterProcessor"; }
-
 void
 FilterProcessor::setMode(std::string mode) {
     myMode = stringToMode(mode);
@@ -129,7 +148,6 @@ FilterProcessor::setMode(std::string mode) {
         // todo: better error handling.
         std::cout << "Warning: Unrecognized filter mode: " << mode << std::endl;
     };
-    updateParameters();
 }
 
 std::string
@@ -138,16 +156,16 @@ FilterProcessor::getMode() {
 }
 
 void
-FilterProcessor::setFrequency(float freq) { myFreq = freq; updateParameters(); }
+FilterProcessor::setFrequency(float freq) { setParameter("freq", freq);}
 float
-FilterProcessor::getFrequency() { return myFreq; }
+FilterProcessor::getFrequency() { return *myFreq; }
 
 void
-FilterProcessor::setQ(float q) { myQ = q; updateParameters(); }
+FilterProcessor::setQ(float q) { setParameter("q", q);}
 float
-FilterProcessor::getQ() { return myQ; }
+FilterProcessor::getQ() { return *myQ; }
 
 void
-FilterProcessor::setGain(float gain) { myGain = gain; updateParameters(); }
+FilterProcessor::setGain(float gain) { setParameter("gain", gain);}
 float
-FilterProcessor::getGain() { return myGain; }
+FilterProcessor::getGain() { return *myGain; }
