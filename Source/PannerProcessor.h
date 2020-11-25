@@ -10,7 +10,8 @@ public:
         myRule = stringToRule(rule);
 
         myPan = myParameters.getRawParameterValue("pan");
-        ((AutomateParameter*)myParameters.getParameter("pan"))->setAutomation(panVal);
+
+        ((AutomateParameterFloat *)myParameters.getParameter("pan"))->setAutomation(panVal);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
@@ -34,9 +35,7 @@ public:
 
         // todo: redesign this style.
         *myPan = ((AutomateParameterFloat*)myParameters.getParameter("pan"))->sample(index);
-
         updateParameters();
-
     }
 
     void reset() {
@@ -46,7 +45,7 @@ public:
 
     const juce::String getName() { return "PannerProcessor"; };
 
-    void setPan(float newPanVal) { *myPan = newPanVal; updateParameters(); }
+    void setPan(float newPanVal) { setParameter("pan", newPanVal); }
     float getPan() { return *myPan; }
 
     void setRule(std::string newRule) {

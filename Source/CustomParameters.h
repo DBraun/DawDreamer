@@ -7,18 +7,35 @@ class AutomateParameter
 
 public:
 
-    AutomateParameter() {
-        //std::cout << "init AutomateParameter()" << std::endl;
+    AutomateParameter() {}
+
+    bool setAutomation(py::array input) {
+
+        try
+        {
+            float* input_ptr = (float*)input.data();
+            myAutomation.clear();
+
+            myAutomation = std::vector<float>(input.shape(0), 0.f);
+
+            for (int x = 0; x < input.shape(0); x++) {
+                myAutomation[x] = *(input_ptr++);
+            }
+
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << "Error: setAutomation: " << e.what() << std::endl;
+            return false;
+        }
+
+        return true;
     }
 
-    void setAutomation(std::vector<float> automation) {
-        std::cout << "setAutomation(std::vector<float> automation)" << std::endl;
-        myAutomation = automation;
-    }
+    void setAutomation(const float val) {
+        myAutomation.clear();
+        myAutomation.push_back(val);
 
-    void setAutomation(float automation) {
-        std::cout << "setAutomation(float automation)" << std::endl;
-        myAutomation = { automation };
     }
 
     std::vector<float> getAutomation() {
@@ -26,14 +43,12 @@ public:
     }
 
     float sample(size_t index) {
-        //std::cout << " sample: " << std::endl;
-        //std::cout << " sample! " << myAutomation.size() << std::endl;
         auto i = std::min(myAutomation.size() - 1, index);
         i = std::max((size_t)0, i);
         return myAutomation.at(i);
     }
 
-//private:
+protected:
 
     std::vector<float> myAutomation;
 

@@ -9,13 +9,11 @@ class ProcessorBase : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") : myParameters( *this, nullptr, "PARAMETERS", createParameterFunc()) {
-        myUniqueName = newUniqueName;
+    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") : myUniqueName{ newUniqueName }, myParameters(*this, nullptr, "PARAMETERS", createParameterFunc()) {
         this->setNonRealtime(true);
     }
 
-    ProcessorBase(std::string newUniqueName = "") : myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
-        myUniqueName = newUniqueName;
+    ProcessorBase(std::string newUniqueName = "") : myUniqueName{ newUniqueName }, myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
         this->setNonRealtime(true);
     }
 
@@ -46,21 +44,11 @@ public:
     void setStateInformation(const void*, int);
 
     bool setAutomation(std::string parameterName, py::array input) {
-        float* input_ptr = (float*)input.data();
-        std::cout << "size: " << input.shape(0) << std::endl;
-        std::vector<float> automation = std::vector<float>(input.shape(0), 0.f);
-        std::cout << "setAutomation debug 1 " << std::endl;
-
-        memcpy(automation.data(), input_ptr, sizeof(float) * input.shape(0));
 
         try
         {
-            auto parameter = (AutomateParameter*)myParameters.getParameter(parameterName);
-            std::cout << "setAutomation debug 2 " << std::endl;
-            parameter->setAutomation(automation);
-            //std::vector<float> data = { 0.f, 0.f, 0.f };
-            //parameter->setAutomation(data);
-            std::cout << "setAutomation debug 3 " << std::endl;
+            auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
+            parameter->setAutomation(input);
         }
         catch (const std::exception& e)
         {
@@ -68,6 +56,20 @@ public:
             return false;
         }
 
+        return true;
+    }
+
+    bool setParameter(std::string parameterName, float val) {
+        try
+        {
+            auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
+            parameter->setAutomation(val);
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << "Failed to set parameter: " << e.what() << std::endl;
+            return false;
+        }
         return true;
     }
 
