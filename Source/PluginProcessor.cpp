@@ -427,6 +427,12 @@ PluginProcessorWrapper::wrapperGetParameter(int parameter)
     return PluginProcessor::getParameter(parameter);
 }
 
+std::string
+PluginProcessorWrapper::wrapperGetParameterName(int parameter)
+{
+    return myPlugin->getParameterName(parameter).toStdString();
+}
+
 void
 PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 {

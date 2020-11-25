@@ -82,6 +82,8 @@ public:
 
     float wrapperGetParameter(int parameter);
 
+    std::string wrapperGetParameterName(int parameter);
+
     void wrapperSetParameter(int parameter, float value);
 
     int wrapperGetPluginParameterSize();
