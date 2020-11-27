@@ -16,7 +16,6 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
     {
-        myWriteIndex = 0;
         const auto readptrs = buffer.getArrayOfReadPointers();
         const int numberChannels = buffer.getNumChannels();
 
@@ -25,47 +24,25 @@ public:
         for (i = 0; i < buffer.getNumSamples(); ++i)
         {
             for (int chan = 0; chan < numberChannels; chan++) {
-                // Write the sample to our recorded history for the right channel.
-                myRecordedSamples[chan][myWriteIndex] = readptrs[chan][i];
+                // Write the sample to the engine's history for the correct channel.
+                (*myEngineBuffer)[chan][myWriteIndex] = readptrs[chan][i];
             }
             myWriteIndex++;
         }
-
-        // Write zeros for the rest
-        for (; i < myLength; ++i)
-        {
-            for (int chan = 0; chan < numberChannels; chan++) {
-                // Write the sample to our recorded history for the right channel.
-                myRecordedSamples[chan][myWriteIndex] = 0;
-            }
-            myWriteIndex++;
-        }
-
     }
 
     void reset()
     {
+        myWriteIndex = 0;
     }
 
     const juce::String getName() const { return "RecorderProcessor"; }
 
-    void reserveSamples(size_t numChannels, size_t numSamples) {
-        myRecordedSamples.clear();
-        myRecordedSamples = std::vector<std::vector<float>>(numChannels, std::vector<float>(numSamples));
-        myLength = numSamples;
-    }
-
-    void clearSamples() {
-        myRecordedSamples.clear();
-    }
-
-public:
-    std::vector<std::vector<float>> getRecordedSamples() {
-        return myRecordedSamples;
+    void setRecorderBuffer(std::vector<std::vector<float>>* engineBuffer) {
+        myEngineBuffer = engineBuffer;
     }
 
 private:
     int myWriteIndex = 0;
-    size_t myLength = 0;
-    std::vector<std::vector<float>> myRecordedSamples;
+    std::vector<std::vector<float>>* myEngineBuffer;
 };

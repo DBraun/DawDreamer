@@ -921,11 +921,21 @@
 					"\"/usr/local/lib\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_HEADER_SEARCH_PATHS = (
+					"../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK",
+					"../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK",
+					"../../JuceLibraryCode",
+					"../../JuceLibraryCode/modules",
+					"$(HOME)/.pyenv/versions/3.8.5/Python.framework/Versions/3.8/include/python3.8",
+					"../../thirdparty/pybind11/include",
+					"/usr/local/include",
+				);
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-shared -lpython3.8";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Debug;
 		};
@@ -975,11 +985,21 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_HEADER_SEARCH_PATHS = (
+					"../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK",
+					"../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK",
+					"../../JuceLibraryCode",
+					"../../JuceLibraryCode/modules",
+					"$(HOME)/.pyenv/versions/3.8.5/Python.framework/Versions/3.8/include/python3.8",
+					"../../thirdparty/pybind11/include",
+					"/usr/local/include",
+				);
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-shared -lpython3.8";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Release;
 		};
@@ -1177,7 +1197,7 @@
 		4A73310BAAAEBD94149F5709 = {
 			isa = PBXProject;
 			buildConfigurationList = 2DB318F4D74C3E6033F2C720;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = ""; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = ""; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 59B6415E3F36E89A3029631B;

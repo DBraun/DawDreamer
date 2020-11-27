@@ -126,8 +126,10 @@ RenderEngine::render(const double renderLength) {
     // Clear main buffer and prepare to record samples over multiple buffer passes.
     myRecordedSamples.clear();
     myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numSamples));
-
-    myWriteIndex = 0;
+    for (size_t i = 0; i < myNumOutputAudioChans; i++)
+    {
+        std::fill(myRecordedSamples[i].begin(), myRecordedSamples[i].end(), 0.f);
+    }
 
     myMainProcessorGraph->setPlayConfigDetails(myNumInputAudioChans,
         myNumOutputAudioChans,
@@ -140,24 +142,16 @@ RenderEngine::render(const double renderLength) {
     myMainProcessorGraph->reset();
 
     RecorderProcessor* recorder = (RecorderProcessor*)(myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes() - 1)->getProcessor());
-    recorder->clearSamples();
-    recorder->reserveSamples(myNumOutputAudioChans, numSamples);
+
+    // the Recorder holds a pointer to the engine's recorded samples buffer.
+    recorder->setRecorderBuffer(&myRecordedSamples);
 
     MidiBuffer renderMidiBuffer;
 
     for (long long int i = 0; i < numberOfBuffers; ++i)
     {
+        // This gets RecorderProcessor to write to this RenderEngine's myRecordedSamples.
         myMainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
-
-        auto recordedSamples = recorder->getRecordedSamples();
-
-        for (int i = 0; i < myBufferSize; i++) {
-            for (int chan = 0; chan < myNumOutputAudioChans; ++chan) {
-                myRecordedSamples[chan][myWriteIndex] = recordedSamples[chan][i];
-            }
-            myWriteIndex++;
-        }
-
     }
 }
 

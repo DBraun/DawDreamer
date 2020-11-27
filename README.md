@@ -238,7 +238,7 @@ playback_processor.set_data(vocals) # You can do this anytime.
 threshold = 0. # dB level of threshold
 ratio = 2. # greater than or equal to 1.
 attack = 2. # attack of compressor in milliseconds
-release = 50. # attack of compressor in milliseconds
+release = 50. # release of compressor in milliseconds
 
 compressor_processor = engine.make_compressor_processor("my_compressor", threshold, ratio, attack, release)
 # CompressorProcessor has getters/setters
