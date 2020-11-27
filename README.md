@@ -6,7 +6,7 @@
  | |__| | | (_| |  \ V  V /  | |__| | | |    |  __/ | (_| | | | | | | | |  __/ | |   
  |_____/   \__,_|   \_/\_/   |_____/  |_|     \___|  \__,_| |_| |_| |_|  \___| |_|   
                                                                                      
-* * Digital Audio Workstation (DAW) without a GUI * *
+* * VST Instruments and Effects with Python * *
 ```
 
 | `build` |
@@ -15,7 +15,7 @@
 
 # DawDreamer
 
-DawDreamer is an audio-processing Python framework supporting core DAW features such as audio playback, VST MIDI instruments, and VST effects. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
+DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, and VST effects. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Basic Example
 ```python
@@ -116,7 +116,7 @@ Use pyenv to install Python 3.8.5:
 ```bash
 brew update && brew upgrade pyenv && env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.8.5
 ```
-Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python wont be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
+Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python won't be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
 ```bash
 mv dawdreamer.so.dylib dawdreamer.so
 ```
@@ -137,11 +137,11 @@ Then try `DawDreamer`:
 
 ### Linux
 
-Linux hasn't been tested since the transition from RenderMan, but it might work.
+Linux hasn't been tested since the transition from RenderMan, but it might work. There's also not yet a `Builds/Linux/make` file.
 
 Install [Python 3.8.x](https://www.python.org/downloads/source/).
 
-JUCE itself has a list of dependancies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependancies. Find the respective packages for other distros using Google please!
+JUCE itself has a list of dependencies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependencies. Find the respective packages for other distros using Google please!
 
 ```bash
 sudo apt-get -y install llvm
@@ -238,7 +238,7 @@ playback_processor.set_data(vocals) # You can do this anytime.
 threshold = 0. # dB level of threshold
 ratio = 2. # greater than or equal to 1.
 attack = 2. # attack of compressor in milliseconds
-release = 50. # attack of compressor in milliseconds
+release = 50. # release of compressor in milliseconds
 
 compressor_processor = engine.make_compressor_processor("my_compressor", threshold, ratio, attack, release)
 # CompressorProcessor has getters/setters
@@ -345,5 +345,17 @@ If you use DawDreamer, you must obey the licenses of JUCE, pybind11, and Steinbe
 * [harritaylor](https://github.com/harritaylor)
 * [cannoneyed](https://github.com/cannoneyed/)
 
-If you use this code for academic works, feel free to refer to the DawDreamer repo and RenderMan's DOI:
+If you use this code academically, please consider citing the DawDreamer repo:
+```
+@misc{DawDreamer2020,
+      author = {Braun, David},
+      title = {DawDreamer: VST Instruments and Effects with Python},
+      year = {2020},
+      publisher = {GitHub},
+      journal = {GitHub repository},
+      howpublished = {\url{https://github.com/DBraun/DawDreamer}},
+      commit = {1cc9681caee26d963299d316ef6cf3a65ee47ad3}}
+```
+
+and RenderMan's DOI:
 [![DOI](https://zenodo.org/badge/82790125.svg)](https://zenodo.org/badge/latestdoi/82790125)

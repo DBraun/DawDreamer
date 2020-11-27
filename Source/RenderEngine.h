@@ -55,6 +55,4 @@ private:
     int myNumInputAudioChans = 2;
     int myNumOutputAudioChans = 2;
 
-    long long int myWriteIndex = 0;
 };
-
