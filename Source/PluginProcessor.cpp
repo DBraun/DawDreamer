@@ -88,7 +88,7 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 }
 
 void
-PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
+PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
     automateParameters(myPlayheadIndex);
 
@@ -117,8 +117,6 @@ PluginProcessor::automateParameters(size_t index) {
 
     if (myPlugin) {
 
-        //get the parameters as an AudioProcessorParameter array
-        const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
         for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
             auto theName = myPlugin->getParameterName(i);
