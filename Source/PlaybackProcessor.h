@@ -17,7 +17,7 @@ public:
     }
 
     void
-    prepareToPlay(double sampleRate, int samplesPerBlock)
+    prepareToPlay(double, int)
     {
         myPlaybackIndex = 0;
     }
@@ -34,9 +34,9 @@ public:
         }
 
         // todo:  buffer.getWritePointer would probably be faster.
-        for (size_t i = 0; i < buffer.getNumSamples() && myPlaybackIndex < myLength; i++)
+        for (int i = 0; i < buffer.getNumSamples() && myPlaybackIndex < myLength; i++)
         {
-            for (size_t chan = 0; chan < buffer.getNumChannels(); chan++) {
+            for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
                 buffer.setSample(chan, i, myPlaybackData[chan][myPlaybackIndex]);
             }
             myPlaybackIndex++;

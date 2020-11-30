@@ -45,14 +45,14 @@ public:
 
     bool setAutomation(std::string parameterName, py::array input);
 
-    bool setParameter(std::string parameterName, float val);
+    bool setAutomationVal(std::string parameterName, float val);
 
-    std::vector<float> getAutomation(std::string parameterName, int maxSamples);
+    std::vector<float> getAutomation(std::string parameterName);
 
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
 
-    void automateParameters(size_t index) {};
+    void automateParameters(size_t) {};
 
 private:
     //==============================================================================

@@ -156,16 +156,16 @@ FilterProcessor::getMode() {
 }
 
 void
-FilterProcessor::setFrequency(float freq) { setParameter("freq", freq);}
+FilterProcessor::setFrequency(float freq) { setAutomationVal("freq", freq);}
 float
 FilterProcessor::getFrequency() { return *myFreq; }
 
 void
-FilterProcessor::setQ(float q) { setParameter("q", q);}
+FilterProcessor::setQ(float q) { setAutomationVal("q", q);}
 float
 FilterProcessor::getQ() { return *myQ; }
 
 void
-FilterProcessor::setGain(float gain) { setParameter("gain", gain);}
+FilterProcessor::setGain(float gain) { setAutomationVal("gain", gain);}
 float
 FilterProcessor::getGain() { return *myGain; }

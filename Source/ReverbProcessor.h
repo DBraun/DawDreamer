@@ -57,19 +57,19 @@ public:
 
     const juce::String getName() { return "ReverbProcessor"; };
 
-    void setRoomSize(float roomSize) { setParameter("room_size", roomSize); }
+    void setRoomSize(float roomSize) { setAutomationVal("room_size", roomSize); }
     float getRoomSize() { return *myRoomSize; }
 
-    void setDamping(float damping) { setParameter("damping", damping); }
+    void setDamping(float damping) { setAutomationVal("damping", damping); }
     float getDamping() { return *myDamping; }
 
-    void setWetLevel(float wetLevel) { setParameter("wet_level", wetLevel); }
+    void setWetLevel(float wetLevel) { setAutomationVal("wet_level", wetLevel); }
     float getWetLevel() { return *myWetLevel; }
 
-    void setDryLevel(float dryLevel) { setParameter("dry_level", dryLevel); }
+    void setDryLevel(float dryLevel) { setAutomationVal("dry_level", dryLevel); }
     float getDryLevel() { return *myDryLevel; }
 
-    void setWidth(float width) { setParameter("width", width); }
+    void setWidth(float width) { setAutomationVal("width", width); }
     float getWidth() { return *myWidth; }
 
 

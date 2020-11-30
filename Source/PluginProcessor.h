@@ -25,9 +25,9 @@ public:
     void createParameterLayout();  // NB: this is different from other processors because it's called after a VST is loaded.
 
     void setPatch(const PluginPatch patch);
-    float getParameter(const int parameter);
+
     std::string getParameterAsText(const int parameter);
-    void setParameter(const int paramIndex, const float value);
+    void setParameter(int paramIndex, float newValue);
     const PluginPatch getPatch();
     const size_t getPluginParameterSize();
 

@@ -41,7 +41,7 @@ bool ProcessorBase::setAutomation(std::string parameterName, py::array input) {
     return true;
 }
 
-bool ProcessorBase::setParameter(std::string parameterName, float val) {
+bool ProcessorBase::setAutomationVal(std::string parameterName, float val) {
 
     try
     {
@@ -63,7 +63,7 @@ bool ProcessorBase::setParameter(std::string parameterName, float val) {
     return true;
 }
 
-std::vector<float> ProcessorBase::getAutomation(std::string parameterName, int maxSamples) {
+std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
     auto parameter = (AutomateParameter*)myParameters.getParameter(parameterName);
 
     return parameter->getAutomation();

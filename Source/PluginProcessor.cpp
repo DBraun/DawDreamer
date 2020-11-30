@@ -6,7 +6,7 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
 {
     myPluginPath = path;
 
-    bool didLoadPlugin = loadPlugin(sampleRate, samplesPerBlock);
+    loadPlugin(sampleRate, samplesPerBlock);
 }
 
 bool
@@ -220,7 +220,7 @@ PluginProcessor::createParameterLayout()
 
             myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
             // give it a valid single sample of automation.
-            ProcessorBase::setParameter(parameterName.toStdString(), myPlugin->getParameter(i));
+            ProcessorBase::setAutomationVal(parameterName.toStdString(), myPlugin->getParameter(i));
         }
     }
 }
@@ -241,17 +241,6 @@ PluginProcessor::setPatch(const PluginPatch patch)
         }
     }
 
-}
-
-//==============================================================================
-float
-PluginProcessor::getParameter(const int parameter)
-{
-    if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
-        return 0.;
-    }
-    return myPlugin->getParameter(parameter);
 }
 
 //==============================================================================
@@ -279,7 +268,7 @@ PluginProcessor::setParameter(const int paramIndex, const float value)
         return;
     }
 
-    ProcessorBase::setParameter(parameterName.toStdString(), value);
+    ProcessorBase::setAutomationVal(parameterName.toStdString(), value);
 }
 
 //==============================================================================
@@ -296,7 +285,6 @@ PluginProcessor::getPatch() {
     params.clear();
     params.reserve(myPlugin->getNumParameters());
 
-    const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
     for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
         auto theName = myPlugin->getParameterName(i);
@@ -424,7 +412,11 @@ PluginProcessorWrapper::wrapperGetPatch()
 float
 PluginProcessorWrapper::wrapperGetParameter(int parameter)
 {
-    return PluginProcessor::getParameter(parameter);
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return 0.;
+    }
+    return myPlugin->getParameter(parameter);
 }
 
 std::string

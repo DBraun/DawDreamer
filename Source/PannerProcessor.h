@@ -46,7 +46,7 @@ public:
 
     const juce::String getName() { return "PannerProcessor"; };
 
-    void setPan(float newPanVal) { setParameter("pan", newPanVal); }
+    void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
     float getPan() { return *myPan; }
 
     void setRule(std::string newRule) {

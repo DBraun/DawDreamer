@@ -38,7 +38,7 @@ public:
 
         buffer.applyGain(1.f - *myWetLevel);
 
-        for (size_t chan = 0; chan < buffer.getNumChannels(); chan++)
+        for (int chan = 0; chan < buffer.getNumChannels(); chan++)
         {
             buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), *myWetLevel);
         }
@@ -60,10 +60,10 @@ public:
 
     const juce::String getName() { return "DelayProcessor"; };
 
-    void setDelay(float newDelaySize) { setParameter("delay", newDelaySize);}
+    void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize);}
     float getDelay() { return *myDelaySize; }
 
-    void setWet(float newWet) { setParameter("wet_level", newWet);}
+    void setWet(float newWet) { setAutomationVal("wet_level", newWet);}
     float getWet() { return *myWetLevel; }
 
 
@@ -83,7 +83,7 @@ private:
 
     void updateParameters() {
         // convert milliseconds to samples
-        myDelay.setDelay(*myDelaySize*.001*mySampleRate);
+        myDelay.setDelay((*myDelaySize)*.001f*(float)mySampleRate);
     }
 
     void initDelay() {

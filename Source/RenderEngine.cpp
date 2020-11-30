@@ -46,7 +46,7 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
 
         slots.set(nodeInt, myNode);
         //slots.getUnchecked(nodeInt)->getProcessor()->setNonRealtime(true); // assume processors are initialized in non-real-time mode.
-        slots.getUnchecked(nodeInt)->getProcessor()->setPlayConfigDetails(myNumOutputAudioChans *inputs.size(),
+        slots.getUnchecked(nodeInt)->getProcessor()->setPlayConfigDetails(myNumOutputAudioChans *(int)(inputs.size()),
             myNumOutputAudioChans,
             mySampleRate, myBufferSize);
 

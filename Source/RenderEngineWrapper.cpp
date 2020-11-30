@@ -152,7 +152,7 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans=
         try {
             dagNode.processorBase = castedTuple[0].cast<ProcessorBase*>();
         }
-        catch (std::exception& e) {
+        catch (std::exception&) {
             std::cout << "Error: load_graph. First argument in tuple wasn't a Processor object." << std::endl;
             return false;
         }
