@@ -15,7 +15,7 @@
 
 # DawDreamer
 
-DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, and VST effects. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
+DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, VST effects, and parameter automation. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Basic Example
 ```python
@@ -25,10 +25,10 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 512
-SYNTH_PLUGIN = "C:/path/to/synth.dll"  # .vst3 files work too.
+BUFFER_SIZE = 512  # Choose a smaller buffer such as 128 when using automation.
+SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
 SYNTH_PRESET = "C:/path/to/preset.fxp"
-REVERB_PLUGIN = "C:/path/to/reverb.dll"  # .vst3 files work too.
+REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work
 VOCALS_PATH = "C:/path/to/vocals.wav"
 PIANO_PATH = "C:/path/to/piano.wav"
 
@@ -37,8 +37,15 @@ def load_audio_file(file_path, duration=None):
   assert(rate == SAMPLE_RATE)
   return sig
 
+def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
+  """Return sine wave based on freq in Hz and duration in seconds"""
+  N = int(duration * sr)  # Number of samples 
+  return np.sin(np.pi*2.*freq*np.arange(N)/sr)
+
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+DURATION = 10  # How many seconds we want to render.
 
 vocals = load_audio_file(VOCALS_PATH, duration=10.)
 piano = load_audio_file(PIANO_PATH, duration=10.)
@@ -50,6 +57,10 @@ synth.set_parameter(5, 0.1234)  # override a specific parameter.
 synth.load_midi("C:/path/to/song.mid")
 # We can also add notes one at a time.
 synth.add_midi_note(67, 127, 0.5, .25)  # (MIDI note, velocity, start sec, duration sec)
+
+filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
+freq_automation = make_sine(.5, DURATION)*5000. + 7000.  # 0.5 Hz sine wave centered at 7000 with amp 5000.
+filter_processor.set_automation("freq", freq_automation)  # argument is single channel numpy array.
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
@@ -63,20 +74,20 @@ graph = [
   (engine.make_reverb_processor("reverb"), ["my_synth"]), # Apply JUCE reverb to the synth named earlier
   (engine.make_plugin_processor("more_reverb", REVERB_PLUGIN), ["reverb"]), # Apply VST reverb
   (engine.make_playback_processor("vocals", vocals), []), # Playback has no inputs.
-  (engine.make_filter_processor("filter", "high", 7000.0, .5, 1.), ["vocals"]), # High-pass filter
+  (filter_processor, ["vocals"]), # High-pass filter with automation set earlier.
   (engine.make_add_processor("added"), ["more_reverb", "filter"])
 ]
 
 engine.load_graph(graph)
 
-engine.render(10.)  # Render 10 seconds audio.
+engine.render(DURATION)  # Render 10 seconds audio.
 audio = engine.get_audio()  # Returns python list of lists of shape (2, NUM_SAMPLES)
 audio = np.array(audio, np.float32).transpose()
 wavfile.write('my_song.wav', SAMPLE_RATE, audio)
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")
-engine.render(10.)  # render audio again!
+engine.render(DURATION)  # render audio again!
 ```
 
 ## Building / Installation
@@ -87,7 +98,7 @@ The goal is to have a working Linux Make file, Visual Studio Solution, and Xcode
 
 ### Windows
 
-I've tested with Visual Studio 2019 and VS2019 Build Tools (v142).
+DawDreamer has been tested with Visual Studio 2019 and VS2019 Build Tools (v142).
 
 On Windows, the JUCE project makes several assumptions about having a Python 3.8 virtual environment located at `C:/Python38dawdreamer`.  You can use a different virtual environment as long as you modify all references in `DawDreamer.jucer`, which is actually a text file.
 
@@ -173,13 +184,14 @@ Proper documentation will be created eventually, but in the meantime look at mor
 ```python
 import dawdreamer as daw
 import librosa
+import numpy as np
 
 # SAMPLE_RATE is the number of audio samples per second.
 SAMPLE_RATE = 44100  
 
 # Audio is rendered one block at a time, and the size of the block is
-# the BUFFER_SIZE. Eventually, DawDreamer will support animating parameters
-# over time, and you'll probably want a smaller buffer size if you're animating.
+# the BUFFER_SIZE. If you're using the set_automation function, you should
+# choose a smaller power of 2 buffer size such as 64 or 128.
 BUFFER_SIZE = 512
 
 SYNTH_PLUGIN = "C:/path/to/synth.dll"
