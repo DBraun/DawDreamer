@@ -58,16 +58,16 @@ synth.load_midi("C:/path/to/song.mid")
 # We can also add notes one at a time.
 synth.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
 
-# We can automate VST parameters over time. First, we must know the paramter names.
+# We can automate VST parameters over time. First, we must know the parameter names.
 # Get a list of dictionaries where each dictionary describes a controllable parameter.
 print(synth.get_plugin_parameters_description()) 
-print(synth.get_parameter_name(1))  # For Serum, returns "A Pan" (the panning of oscillator A)
-synth.set_automation("A Pan", make_sine(.5, DURATION))  # 0.5 Hz sine wave.
+print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
+synth.set_automation("A Pan", make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
-freq_automation = make_sine(.5, DURATION)*5000. + 7000.  # 0.5 Hz sine wave centered at 7000 with amp 5000.
-filter_processor.set_automation("freq", freq_automation)  # argument is single channel numpy array.
+freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 with amp 5000.
+filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
