@@ -26,7 +26,7 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     automateParameters(0);  // this gives the filters an initial state.
 
     int numChannels = 2;
-    juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), numChannels };
+    juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), static_cast<juce::uint32> (numChannels) };
     myFilter.prepare(spec);  // todo: need to do this?
 }
 
