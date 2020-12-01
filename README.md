@@ -25,7 +25,7 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 512  # Choose a smaller buffer such as 128 when using automation.
+BUFFER_SIZE = 128 # For speed when not using automation, choose a larger buffer such as 512.
 SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
 SYNTH_PRESET = "C:/path/to/preset.fxp"
 REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work
@@ -39,13 +39,13 @@ def load_audio_file(file_path, duration=None):
 
 def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
   """Return sine wave based on freq in Hz and duration in seconds"""
-  N = int(duration * sr)  # Number of samples 
+  N = int(duration * sr) # Number of samples 
   return np.sin(np.pi*2.*freq*np.arange(N)/sr)
 
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-DURATION = 10  # How many seconds we want to render.
+DURATION = 10 # How many seconds we want to render.
 
 vocals = load_audio_file(VOCALS_PATH, duration=10.)
 piano = load_audio_file(PIANO_PATH, duration=10.)
@@ -53,11 +53,18 @@ piano = load_audio_file(PIANO_PATH, duration=10.)
 # Make a processor and give it the name "my_synth", which we must remember later.
 synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
 synth.load_preset(SYNTH_PRESET)
-synth.set_parameter(5, 0.1234)  # override a specific parameter.
+synth.set_parameter(5, 0.1234) # override a specific parameter.
 synth.load_midi("C:/path/to/song.mid")
 # We can also add notes one at a time.
-synth.add_midi_note(67, 127, 0.5, .25)  # (MIDI note, velocity, start sec, duration sec)
+synth.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
 
+# We can automate VST parameters over time. First, we must know the paramter names.
+# Get a list of dictionaries where each dictionary describes a controllable parameter.
+print(synth.get_plugin_parameters_description()) 
+print(synth.get_parameter_name(1))  # For Serum, returns "A Pan" (the panning of oscillator A)
+synth.set_automation("A Pan", make_sine(.5, DURATION))  # 0.5 Hz sine wave.
+
+# We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
 freq_automation = make_sine(.5, DURATION)*5000. + 7000.  # 0.5 Hz sine wave centered at 7000 with amp 5000.
 filter_processor.set_automation("freq", freq_automation)  # argument is single channel numpy array.
@@ -82,7 +89,7 @@ engine.load_graph(graph)
 
 engine.render(DURATION)  # Render 10 seconds audio.
 audio = engine.get_audio()  # Returns numpy.ndarray shaped (2, NUM_SAMPLES)
-wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose())
+wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose()) # don't forget to transpose!
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")
@@ -215,7 +222,7 @@ synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
 assert(synth.load_preset(SYNTH_PRESET))
 
 # a list of dictionaries where each dictionary describes a controllable parameter
-print(synth.get_plugin_parameters_description()) 
+print(synth.get_plugin_parameters_description())
 
 synth.get_parameter(5)  # Get the parameter at index 5. It'll be between 0 and 1.
 
