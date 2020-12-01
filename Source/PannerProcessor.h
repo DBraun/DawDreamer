@@ -18,7 +18,7 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         const int numChannels = 2;
         automateParameters(myPlayheadIndex); // do this to give a valid state to the filter.
-        juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), numChannels };
+        juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
         myPanner.prepare(spec);
     }
 

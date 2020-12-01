@@ -23,7 +23,7 @@ public:
         initDelay();
         
         const int numChannels = 2;
-        juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), numChannels };
+        juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
         myDelay.prepare(spec);
     }
 

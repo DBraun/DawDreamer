@@ -60,7 +60,7 @@ private:
     bool myIsMessageBetween = false;
     bool myMidiEventsDoRemain = false;
 
-    void PluginProcessor::automateParameters(size_t index);
+    void automateParameters(size_t index);
 
 protected:
 
