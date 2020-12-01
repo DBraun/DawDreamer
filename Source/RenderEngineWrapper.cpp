@@ -5,31 +5,25 @@ RenderEngineWrapper::RenderEngineWrapper(double sr, int bs) :
 {
 }
 
-py::list
+py::array_t<float>
 RenderEngineWrapper::wrapperGetAudioFrames()
 {
     std::vector<std::vector<float>> channelBuffers = RenderEngine::getAudioFrames();
-    py::list theList;
-    for (auto oneBuffer = channelBuffers.begin(); oneBuffer != channelBuffers.end(); ++oneBuffer)
-    {
-        theList.append(customBoost::vectorToList<float>(*oneBuffer));
-    }
-    return theList;
-}
 
-//boost::python::numpy::ndarray
-//RenderEngineWrapper::wrapperGetAudioFrames()
-//{
-//    namespace p = boost::python;
-//    namespace np = boost::python::numpy;
-//
-//    std::vector<std::vector<float>> channelBuffers = RenderEngine::getAudioFrames();
-//    boost::python::tuple shape = p::make_tuple(channelBuffers.size(), channelBuffers[0].size());
-//    boost::python::tuple strides = p::make_tuple(channelBuffers.size(), channelBuffers[0].size());
-//    np::ndarray theArray = np::from_data(&channelBuffers, np::dtype::get_builtin<float>(), shape, strides, p::object());
-//
-//    return theArray;
-//}
+    py::array_t<float, py::array::c_style> arr({ 2, (int) channelBuffers[0].size() });
+
+    auto ra = arr.mutable_unchecked();
+
+    for (size_t i = 0; i <2; i++)
+    {
+        for (size_t j = 0; j < channelBuffers[0].size(); j++)
+        {
+            ra(i, j) = channelBuffers[i][j];
+        }
+    }
+
+    return arr;
+}
 
 /// @brief
 std::shared_ptr<OscillatorProcessor>

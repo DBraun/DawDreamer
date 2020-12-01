@@ -64,7 +64,29 @@ bool ProcessorBase::setAutomationVal(std::string parameterName, float val) {
 }
 
 std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
-    auto parameter = (AutomateParameter*)myParameters.getParameter(parameterName);
+    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
-    return parameter->getAutomation();
+    if (parameter) {
+        return parameter->getAutomation();
+    }
+    else {
+        std::cout << "Failed to get '" << parameterName << "' automation for parameter: " << parameterName << std::endl;
+        std::vector<float> empty;
+        return empty;
+    }
+}
+
+py::array_t<float> ProcessorBase::getAutomationNumpy(std::string parameterName) {
+    std::vector<float> data = getAutomation(parameterName);
+
+    py::array_t<float, py::array::c_style> arr({ (int)data.size() });
+
+    auto ra = arr.mutable_unchecked();
+
+    for (size_t i = 0; i < data.size(); i++)
+    {
+        ra(i) = data[i];
+    }
+
+    return arr;
 }

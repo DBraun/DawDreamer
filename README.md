@@ -81,9 +81,8 @@ graph = [
 engine.load_graph(graph)
 
 engine.render(DURATION)  # Render 10 seconds audio.
-audio = engine.get_audio()  # Returns python list of lists of shape (2, NUM_SAMPLES)
-audio = np.array(audio, np.float32).transpose()
-wavfile.write('my_song.wav', SAMPLE_RATE, audio)
+audio = engine.get_audio()  # Returns numpy.ndarray shaped (2, NUM_SAMPLES)
+wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose())
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")
@@ -329,7 +328,7 @@ graph = [
 engine.load_graph(graph)
 
 engine.render(10.)  # Render 10 seconds audio.
-audio = engine.get_audio()  # Returns python list of lists. The shape is (2, NUM_SAMPLES)
+audio = engine.get_audio()  # Returns numpy.ndarray shaped (2, NUM_SAMPLES)
 
 # Even after a render, we can still modify our processors and re-render the graph.
 # All of our MIDI is still loaded.
@@ -350,6 +349,10 @@ engine.render(10.)
 ## License
 
 If you use DawDreamer, you must obey the licenses of JUCE, pybind11, and Steinberg VST2/3, and Maximillian.
+
+## Release Notes
+
+[Release Notes](https://github.com/DBraun/DawDreamer/wiki/Release-Notes)
 
 ## Contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
 * [fedden](https://github.com/fedden), RenderMan creator

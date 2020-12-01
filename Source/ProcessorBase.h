@@ -48,6 +48,7 @@ public:
     bool setAutomationVal(std::string parameterName, float val);
 
     std::vector<float> getAutomation(std::string parameterName);
+    py::array_t<float> getAutomationNumpy(std::string parameterName);
 
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
