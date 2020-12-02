@@ -2694,6 +2694,9 @@
     <ClInclude Include="..\..\Source\Maximilian\maximilian.h">
       <Filter>DawDreamer\Maximilian</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\CustomParameters.h">
+      <Filter>DawDreamer</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\custom_pybind_wrappers.h">
       <Filter>DawDreamer</Filter>
     </ClInclude>

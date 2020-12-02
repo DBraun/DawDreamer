@@ -446,6 +446,13 @@
 			path = ../../Source/DelayProcessor.h;
 			sourceTree = "SOURCE_ROOT";
 		};
+		7C90363A6D8BA8EA0D91A985 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = CustomParameters.h;
+			path = ../../Source/CustomParameters.h;
+			sourceTree = "SOURCE_ROOT";
+		};
 		7EC708BB8670BC4B971F031E = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -770,6 +777,7 @@
 			children = (
 				E553BE5C53ED6D87F71CC515,
 				8A29B6DF20AB1997456EDBA9,
+				7C90363A6D8BA8EA0D91A985,
 				3319047264FBD43706A45A08,
 				A2CE988FDEA16DA46477FB4B,
 				094BECA334087BBDDA1CA022,

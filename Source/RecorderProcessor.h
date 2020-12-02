@@ -8,9 +8,10 @@ class RecorderProcessor : public ProcessorBase
 public:
     RecorderProcessor(std::string newUniqueName) : ProcessorBase{ newUniqueName }
     {
+
     }
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock)
+    void prepareToPlay(double, int)
     {
     }
 
@@ -44,5 +45,5 @@ public:
 
 private:
     int myWriteIndex = 0;
-    std::vector<std::vector<float>>* myEngineBuffer;
+    std::vector<std::vector<float>>* myEngineBuffer = nullptr;
 };

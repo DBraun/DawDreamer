@@ -41,9 +41,9 @@ public:
 private:
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> myFilter;
     FILTER_FilterFormat myMode;
-    float myFreq;
-    float myQ;
-    float myGain;
+    std::atomic<float>* myFreq;
+    std::atomic<float>* myQ;
+    std::atomic<float>* myGain;
 
     double mySampleRate;
     int mySamplesPerBlock;
@@ -51,5 +51,15 @@ private:
     std::string modeToString(FILTER_FilterFormat mode);
     FILTER_FilterFormat stringToMode(std::string s);
 
-    void updateParameters();
+    void automateParameters(size_t index);
+
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout params;
+
+        params.add(std::make_unique<AutomateParameterFloat>("freq", "freq", NormalisableRange<float>(0.f, 22050.f), 1000.f));
+        params.add(std::make_unique<AutomateParameterFloat>("q", "q", NormalisableRange<float>(0.01f, 10.f), 0.707107f));
+        params.add(std::make_unique<AutomateParameterFloat>("gain", "gain", NormalisableRange<float>(-100.f, 30.f), 1.f));
+        return params;
+    }
 };

@@ -6,7 +6,7 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
 {
     myPluginPath = path;
 
-    bool didLoadPlugin = loadPlugin(sampleRate, samplesPerBlock);
+    loadPlugin(sampleRate, samplesPerBlock);
 }
 
 bool
@@ -50,9 +50,8 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         myPlugin->setNonRealtime(true);
 
         mySampleRate = sampleRate;
-        // Resize the pluginParameters patch type to fit this plugin and init
-        // all the values to 0.0f!
-        fillAvailablePluginParameters(myPluginParameters);
+
+        createParameterLayout();
 
         return true;
     }
@@ -73,8 +72,11 @@ PluginProcessor::~PluginProcessor() {
 void
 PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
 
+    if (myPlugin) {
+        myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
+    }
+    
     if (myMidiIterator) {
         delete myMidiIterator;
     }
@@ -86,8 +88,10 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 }
 
 void
-PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
+PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
+    automateParameters(myPlayheadIndex);
+
     long long int start = myWriteIndex;
     long long int end = myWriteIndex + buffer.getNumSamples();
     myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
@@ -99,9 +103,37 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         }
     } while (myIsMessageBetween && myMidiEventsDoRemain);
 
-    myPlugin->processBlock(buffer, myRenderMidiBuffer);
- 
+    if (myPlugin) {
+        myPlugin->processBlock(buffer, myRenderMidiBuffer);
+    }
+
     myWriteIndex = end;
+
+    myPlayheadIndex += buffer.getNumSamples();
+}
+
+void
+PluginProcessor::automateParameters(size_t index) {
+
+    if (myPlugin) {
+
+        for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
+
+            auto theName = myPlugin->getParameterName(i);
+
+            if (theName == "Param") {
+                continue;
+            }
+
+            auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
+            if (theParameter) {
+                myPlugin->setParameter(i, theParameter->sample(index));
+            }
+            else {
+                std::cout << "Error automateParameters: " << theName << std::endl;
+            }
+        }
+    }
 }
 
 void
@@ -109,6 +141,7 @@ PluginProcessor::reset()
 {
     myWriteIndex = 0;
     myPlugin->reset();
+    myPlayheadIndex = 0;
 }
 
 #include <pluginterfaces/vst/ivstcomponent.h>
@@ -151,7 +184,8 @@ PluginProcessor::loadPreset(const std::string& path)
 #endif
 
         for (int i = 0; i < myPlugin->getNumParameters(); i++) {
-            myPluginParameters.at(i) = std::make_pair(i, myPlugin.get()->getParameter(i));
+            // set the values on the layout.
+            setParameter(i, myPlugin.get()->getParameter(i));
         }
 
         return true;
@@ -163,153 +197,58 @@ PluginProcessor::loadPreset(const std::string& path)
 
 }
 
-bool
-PluginProcessor::overridePluginParameter(const int   index,
-    const float value)
-{
-    int biggestParameterIndex = myPluginParameters.size() - 1;
-
-    if (biggestParameterIndex < 0)
-    {
-        std::cout << "PluginProcessor::overridePluginParameter error: " <<
-            "No patch set. Is the plugin loaded?" << std::endl;
-        return false;
-    }
-    else if (index > myPluginParameters[biggestParameterIndex].first)
-    {
-        std::cout << "PluginProcessor::overridePluginParameter error: " <<
-            "Overriden parameter index is greater than the biggest parameter index." <<
-            std::endl;
-        return false;
-    }
-    else if (index < 0)
-    {
-        std::cout << "PluginProcessor::overridePluginParameter error: " <<
-            "Overriden parameter index is less than the smallest parameter index." <<
-            std::endl;
-        return false;
-    }
-    else if (value < 0.0 || value > 1.0)
-    {
-        std::cout << "PluginProcessor::overridePluginParameter error: " <<
-            "Keep the overriden value between 0.0 and 1.0." <<
-            std::endl;
-        return false;
-    }
-
-    auto iterator = std::find_if(myOverridenParameters.begin(),
-        myOverridenParameters.end(),
-        [&index](const std::pair<int, float>& parameter)
-        {
-            return parameter.first == index;
-        });
-
-    bool exists = (iterator != myOverridenParameters.end());
-
-    if (exists)
-        iterator->second = value;
-    else
-        myOverridenParameters.push_back(std::make_pair(index, value));
-
-    return true;
-}
-
-
-bool
-PluginProcessor::removeOverridenParameter(const int index)
-{
-    int biggestParameterIndex = myPluginParameters.size() - 1;
-
-    if (biggestParameterIndex < 0)
-    {
-        std::cout << "PluginProcessor::removeOverridenParameter error: " <<
-            "No patch set. Is the plugin loaded?" << std::endl;
-        return false;
-    }
-    else if (index > myPluginParameters[biggestParameterIndex].first)
-    {
-        std::cout << "PluginProcessor::removeOverridenParameter error: " <<
-            "Overriden parameter index is greater than the biggest parameter index." <<
-            std::endl;
-        return false;
-    }
-    else if (index < 0)
-    {
-        std::cout << "PluginProcessor::removeOverridenParameter error: " <<
-            "Overriden parameter index is less than the smallest parameter index." <<
-            std::endl;
-        return false;
-    }
-
-    auto iterator = std::find_if(myOverridenParameters.begin(),
-        myOverridenParameters.end(),
-        [&index](const std::pair<int, float>& parameter)
-        {
-            return parameter.first == index;
-        });
-
-    bool exists = (iterator != myOverridenParameters.end());
-
-    if (exists)
-    {
-        myOverridenParameters.erase(iterator);
-        return true;
-    }
-
-    std::cout << "PluginProcessor::removeOverridenParameter error: " <<
-        "Overriden parameter does not exist." <<
-        std::endl;
-    return false;
-}
-
 void
-PluginProcessor::fillAvailablePluginParameters(PluginPatch& params)
+PluginProcessor::createParameterLayout()
 {
-    params.clear();
-    params.reserve(myPlugin->getNumParameters());
+
+    juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
+    
+    // clear existing parameters in the layout?
+    ValueTree blankState;
+    myParameters.replaceState(blankState);
 
     int usedParameterAmount = 0;
     for (int i = 0; i < myPlugin->getNumParameters(); ++i)
     {
+        auto parameterName = myPlugin->getParameterName(i);
         // Ensure the parameter is not unused.
-        if (myPlugin->getParameterName(i) != "Param")
+        if (parameterName != "Param")
         {
             ++usedParameterAmount;
-            params.push_back(std::make_pair(i, 0.0f));
+
+            myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
+            // give it a valid single sample of automation.
+            ProcessorBase::setAutomationVal(parameterName.toStdString(), myPlugin->getParameter(i));
         }
     }
-    params.shrink_to_fit();
 }
 
 void
 PluginProcessor::setPatch(const PluginPatch patch)
 {
-    const size_t currentParameterSize = myPluginParameters.size();
-    const size_t newPatchParameterSize = patch.size();
 
-    if (currentParameterSize == newPatchParameterSize)
-    {
-        myPluginParameters = patch;
-    }
-    else
-    {
-        std::cout << "RenderEngine::setPatch error: Incorrect patch size!" <<
-            "\n- Current size:  " << currentParameterSize <<
-            "\n- Supplied size: " << newPatchParameterSize << std::endl;
-    }
-}
+    for (auto pair : patch) {
 
-//==============================================================================
-float
-PluginProcessor::getParameter(const int parameter)
-{
-    return myPlugin->getParameter(parameter);
+        if (pair.first < myPlugin->getNumParameters()) {
+            setParameter(pair.first, pair.second);
+        }
+        else {
+            std::cout << "RenderEngine::setPatch error: Incorrect parameter index!" <<
+                "\n- Current index:  " << pair.first <<
+                "\n- Max index: " << myPlugin->getNumParameters()-1 << std::endl;
+        }
+    }
+
 }
 
 //==============================================================================
 std::string
 PluginProcessor::getParameterAsText(const int parameter)
 {
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return "";
+    }
     return myPlugin->getParameterText(parameter).toStdString();
 }
 
@@ -317,43 +256,71 @@ PluginProcessor::getParameterAsText(const int parameter)
 void
 PluginProcessor::setParameter(const int paramIndex, const float value)
 {
-    myPlugin->setParameter(paramIndex, value);
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return;
+    }
+    auto parameterName = myPlugin->getParameterName(paramIndex);
 
-    // save the value into the text
-    float actualValue = myPlugin->getParameter(paramIndex);
-    myPluginParameters.at(paramIndex) = std::make_pair(paramIndex, actualValue);
+    if (parameterName == "Param") {
+        return;
+    }
+
+    ProcessorBase::setAutomationVal(parameterName.toStdString(), value);
 }
 
 //==============================================================================
 const PluginPatch
-PluginProcessor::getPatch()
-{
-    if (myOverridenParameters.size() == 0)
-        return myPluginParameters;
+PluginProcessor::getPatch() {
 
-    PluginPatch overridenPluginParameters = myPluginParameters;
-    std::pair<int, float> copy;
+    PluginPatch params;
 
-    for (auto& parameter : overridenPluginParameters)
-    {
-        // Should we have overriden this parameter's index...
-        if (std::any_of(myOverridenParameters.begin(), myOverridenParameters.end(),
-            [parameter, &copy](std::pair<int, float> p)
-            {
-                copy = p;
-                return p.first == parameter.first;
-            }))
-        {
-            parameter = copy;
-        }
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return params;
     }
-    return overridenPluginParameters;
+
+    params.clear();
+    params.reserve(myPlugin->getNumParameters());
+
+    for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
+
+        auto theName = myPlugin->getParameterName(i);
+
+        if (theName == "Param") {
+            continue;
+        }
+
+        auto parameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
+        if (parameter) {
+            float val = parameter->sample(0);
+            if (parameter) {
+                params.push_back(std::make_pair(i, val));
+            }
+            else {
+                std::cout << "Error getPatch: " << theName << std::endl;
+            }
+        }
+        else {
+            std::cout << "Error getPatch with parameter: " << theName << std::endl;
+        }
+        
+    }
+
+    params.shrink_to_fit();
+
+    return params;
 }
 
 const size_t
 PluginProcessor::getPluginParameterSize()
 {
-    return myPluginParameters.size();
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return 0;
+    }
+
+    return myPlugin->getNumParameters();
 }
 
 int
@@ -443,7 +410,17 @@ PluginProcessorWrapper::wrapperGetPatch()
 float
 PluginProcessorWrapper::wrapperGetParameter(int parameter)
 {
-    return PluginProcessor::getParameter(parameter);
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return 0.;
+    }
+    return myPlugin->getParameter(parameter);
+}
+
+std::string
+PluginProcessorWrapper::wrapperGetParameterName(int parameter)
+{
+    return myPlugin->getParameterName(parameter).toStdString();
 }
 
 void

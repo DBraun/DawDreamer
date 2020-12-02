@@ -8,7 +8,7 @@ public:
     AddProcessor(std::string newUniqueName, std::vector<float> gainLevels) : ProcessorBase(newUniqueName), myGainLevels{ gainLevels } {
     }
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock) {
+    void prepareToPlay(double, int) {
 
     }
 
@@ -33,9 +33,6 @@ public:
         const int numTimesToSum = numInputs - 1;
 
         const auto readptrs = buffer.getArrayOfReadPointers();
-        const auto writeptrs = buffer.getArrayOfWritePointers();
-
-        //std::cout << "numTimesToSum: " << numTimesToSum << std::endl;
 
         buffer.applyGain(0, 0, buffer.getNumSamples(), getSafeGainLevel(0));
         buffer.applyGain(1, 0, buffer.getNumSamples(), getSafeGainLevel(0));

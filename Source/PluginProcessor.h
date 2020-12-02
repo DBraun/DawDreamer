@@ -22,14 +22,12 @@ public:
 
     bool loadPreset(const std::string& path);
 
-    bool overridePluginParameter(const int index, const float value);
-    bool removeOverridenParameter(const int index);
-    void fillAvailablePluginParameters(PluginPatch& params);
+    void createParameterLayout();  // NB: this is different from other processors because it's called after a VST is loaded.
 
     void setPatch(const PluginPatch patch);
-    float getParameter(const int parameter);
+
     std::string getParameterAsText(const int parameter);
-    void setParameter(const int paramIndex, const float value);
+    void setParameter(int paramIndex, float newValue);
     const PluginPatch getPatch();
     const size_t getPluginParameterSize();
 
@@ -53,8 +51,6 @@ private:
     std::string myPluginPath;
     double mySampleRate;
 
-    PluginPatch myPluginParameters;
-    PluginPatch myOverridenParameters;
     MidiBuffer myMidiBuffer;
     MidiBuffer myRenderMidiBuffer;
     MidiMessage myMidiMessage;
@@ -63,6 +59,8 @@ private:
     MidiBuffer::Iterator* myMidiIterator = nullptr;
     bool myIsMessageBetween = false;
     bool myMidiEventsDoRemain = false;
+
+    void automateParameters(size_t index);
 
 protected:
 
@@ -83,6 +81,8 @@ public:
     py::list wrapperGetPatch();
 
     float wrapperGetParameter(int parameter);
+
+    std::string wrapperGetParameterName(int parameter);
 
     void wrapperSetParameter(int parameter, float value);
 

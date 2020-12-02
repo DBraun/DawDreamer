@@ -6,72 +6,91 @@ class DelayProcessor : public ProcessorBase
 {
 public:
     DelayProcessor(std::string newUniqueName, std::string rule, float delaySize, float wet) :
-        ProcessorBase(newUniqueName), myRule{ rule }, myDelaySize{ delaySize }, myWet{ wet } {
+        ProcessorBase(createParameterLayout, newUniqueName), myRule{ rule }{
+
+        setDelay(delaySize);
+        setWet(wet);
+
+        myDelaySize = myParameters.getRawParameterValue("delay");
+        myWetLevel = myParameters.getRawParameterValue("wet_level");
+
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         mySampleRate = sampleRate;
+        automateParameters(myPlayheadIndex); // do this to give a valid state to the filter.
 
         initDelay();
         
         const int numChannels = 2;
-        juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), numChannels };
+        juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
         myDelay.prepare(spec);
-
-        updateParameters();
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
+
+        automateParameters(myPlayheadIndex);
+
         delayBuffer.makeCopyOf(buffer);
         juce::dsp::AudioBlock<float> block(delayBuffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myDelay.process(context);
 
-        buffer.applyGain(1.f - myWet);
+        buffer.applyGain(1.f - *myWetLevel);
 
-        for (size_t chan = 0; chan < buffer.getNumChannels(); chan++)
+        for (int chan = 0; chan < buffer.getNumChannels(); chan++)
         {
-            buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), myWet);
+            buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), *myWetLevel);
         }
+
+        myPlayheadIndex += buffer.getNumSamples();
+    }
+
+    void automateParameters(size_t index) {
+
+        *myWetLevel = getAutomationVal("wet_level", index);
+        *myDelaySize = getAutomationVal("delay", index);
+        updateParameters();
     }
 
     void reset() {
         myDelay.reset();
+        myPlayheadIndex = 0;
     };
 
     const juce::String getName() { return "DelayProcessor"; };
 
-    void setDelay(float newDelaySize) { myDelaySize = newDelaySize; updateParameters(); }
-    float getDelay() { return myDelaySize; }
+    void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
+    float getDelay() { return getAutomationVal("delay", 0); }
 
-    void setWet(float newWet) { myWet = newWet; updateParameters(); }
-    float getWet() { return myWet; }
+    void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
+    float getWet() { return getAutomationVal("wet_level", 0); }
 
 
 private:
 
     double mySampleRate = 44100.;
 
-    float myDelaySize; // delay in milliseconds
+    std::atomic<float>* myDelaySize; // delay in milliseconds
 
     // todo: very inconvenient that Linear is a struct and not an enum. It makes changing the type later difficult.
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> myDelay;
 
-    float myWet = .1; // 0 means use all of original signal and none of the "wet" delayed signal. 1. is the opposite.
+    std::atomic<float>* myWetLevel; // 0 means use all of original signal and none of the "wet" delayed signal. 1. is the opposite.
     std::string myRule; // todo: ugly because storing an enum would probably be better.
 
     juce::AudioSampleBuffer delayBuffer;
 
     void updateParameters() {
         // convert milliseconds to samples
-        myDelay.setDelay(myDelaySize*.001*mySampleRate);
+        myDelay.setDelay((*myDelaySize)*.001f*(float)mySampleRate);
     }
 
     void initDelay() {
         // todo: NB: DelayLine seems to need to be initialized with the maximum delay size you'll ever ask for before re-initializing.
         // todo: What's a more flexible solution so that through parameter automation we might be able to increase the delay over time?
 
-        int delayInSamples = int(myDelaySize * .001 * mySampleRate);
+        int delayInSamples = int(*myDelaySize * .001 * mySampleRate);
         if (!myRule.compare("linear"))
         {
             myDelay = juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>(delayInSamples);
@@ -81,4 +100,14 @@ private:
             myDelay = juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>(delayInSamples);
         }
     }
+
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout params;
+
+        params.add(std::make_unique<AutomateParameterFloat>("wet_level", "wet_level", NormalisableRange<float>(0.f, 1.f), .1f));
+        params.add(std::make_unique<AutomateParameterFloat>("delay", "delay", NormalisableRange<float>(0.f, 44100.f), 10.f)); // todo: proper max value
+        return params;
+    }
+
 };

@@ -5,54 +5,55 @@ PYBIND11_MODULE(dawdreamer, m)
 {
     using arg = py::arg;
 
-    py::class_<ProcessorBase, std::shared_ptr<ProcessorBase>>(m, "ProcessorBase");
+    py::class_<ProcessorBase, std::shared_ptr<ProcessorBase>>(m, "ProcessorBase")
+        .def("set_automation", &ProcessorBase::setAutomation)
+        .def("get_automation", &ProcessorBase::getAutomationNumpy);
 
-    py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>>(m, "OscillatorProcessor", py::base<ProcessorBase>());
+    py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>, ProcessorBase>(m, "OscillatorProcessor");
     
-    py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>>(m, "PlaybackProcessor", py::base<ProcessorBase>())
+    py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>, ProcessorBase>(m, "PlaybackProcessor")
         .def("set_data", &PlaybackProcessor::setData);
 
-    py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>>(m, "PannerProcessor", py::base<ProcessorBase>())
+    py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>, ProcessorBase>(m, "PannerProcessor")
         .def_property("rule", &PannerProcessor::getRule, &PannerProcessor::setRule)
         .def_property("pan", &PannerProcessor::getPan, &PannerProcessor::setPan);
     
-    py::class_<CompressorProcessor, std::shared_ptr<CompressorProcessor>>(m, "CompressorProcessor", py::base<ProcessorBase>())
+    py::class_<CompressorProcessor, std::shared_ptr<CompressorProcessor>, ProcessorBase>(m, "CompressorProcessor")
         .def_property("threshold", &CompressorProcessor::getThreshold, &CompressorProcessor::setThreshold)
         .def_property("ratio", &CompressorProcessor::getRatio, &CompressorProcessor::setRatio)
         .def_property("attack", &CompressorProcessor::getAttack, &CompressorProcessor::setAttack)
         .def_property("release", &CompressorProcessor::getRelease, &CompressorProcessor::setRelease);
 
-    py::class_<DelayProcessor, std::shared_ptr<DelayProcessor>>(m, "DelayProcessor", py::base<ProcessorBase>())
+    py::class_<DelayProcessor, std::shared_ptr<DelayProcessor>, ProcessorBase>(m, "DelayProcessor")
         .def_property("delay", &DelayProcessor::getDelay, &DelayProcessor::setDelay)
         .def_property("wet", &DelayProcessor::getWet, &DelayProcessor::setWet);
     
-    py::class_<FilterProcessor, std::shared_ptr<FilterProcessor>>(m, "FilterProcessor", py::base<ProcessorBase>())
+    py::class_<FilterProcessor, std::shared_ptr<FilterProcessor>, ProcessorBase>(m, "FilterProcessor")
         .def_property("mode", &FilterProcessor::getMode, &FilterProcessor::setMode)
         .def_property("frequency", &FilterProcessor::getFrequency, &FilterProcessor::setFrequency)
         .def_property("q", &FilterProcessor::getQ, &FilterProcessor::setQ)
         .def_property("gain", &FilterProcessor::getGain, &FilterProcessor::setGain);
     
-    py::class_<ReverbProcessor, std::shared_ptr<ReverbProcessor>>(m, "ReverbProcessor", py::base<ProcessorBase>())
+    py::class_<ReverbProcessor, std::shared_ptr<ReverbProcessor>, ProcessorBase>(m, "ReverbProcessor")
         .def_property("room_size", &ReverbProcessor::getRoomSize, &ReverbProcessor::setRoomSize)
         .def_property("damping", &ReverbProcessor::getDamping, &ReverbProcessor::setDamping)
         .def_property("wet_level", &ReverbProcessor::getWetLevel, &ReverbProcessor::setWetLevel)
         .def_property("dry_level", &ReverbProcessor::getDryLevel, &ReverbProcessor::setDryLevel)
         .def_property("width", &ReverbProcessor::getWidth, &ReverbProcessor::setWidth);
     
-    py::class_<AddProcessor, std::shared_ptr<AddProcessor>>(m, "AddProcessor", py::base<ProcessorBase>())
+    py::class_<AddProcessor, std::shared_ptr<AddProcessor>, ProcessorBase>(m, "AddProcessor")
         .def_property("gain_levels", &AddProcessor::getGainLevels, &AddProcessor::setGainLevels);
 
-    py::class_<PluginProcessorWrapper, std::shared_ptr<PluginProcessorWrapper>>(m, "PluginProcessor", py::base<ProcessorBase>())
+    py::class_<PluginProcessorWrapper, std::shared_ptr<PluginProcessorWrapper>, ProcessorBase>(m, "PluginProcessor")
         .def("load_preset", &PluginProcessorWrapper::loadPreset)
         .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
         .def("set_patch", &PluginProcessorWrapper::wrapperSetPatch)
         .def("get_parameter", &PluginProcessorWrapper::wrapperGetParameter)
+        .def("get_parameter_name", &PluginProcessorWrapper::wrapperGetParameterName)
         .def("get_parameter_text", &PluginProcessorWrapper::getParameterAsText)
         .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter)
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize)
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription)
-        .def("override_plugin_parameter", &PluginProcessorWrapper::overridePluginParameter)
-        .def("remove_overriden_plugin_parameter", &PluginProcessorWrapper::removeOverridenParameter)
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents)
         .def("load_midi", &PluginProcessorWrapper::loadMidi)
         .def("clear_midi", &PluginProcessorWrapper::clearMidi)
