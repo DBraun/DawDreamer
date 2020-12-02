@@ -45,9 +45,9 @@ FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 
 void FilterProcessor::automateParameters(size_t index) {
 
-    *myFreq = ((AutomateParameterFloat*)myParameters.getParameter("freq"))->sample(index);
-    *myQ = ((AutomateParameterFloat*)myParameters.getParameter("q"))->sample(index);
-    *myGain = ((AutomateParameterFloat*)myParameters.getParameter("gain"))->sample(index);
+    *myFreq = getAutomationVal("freq", index);
+    *myQ = getAutomationVal("q", index);
+    *myGain = getAutomationVal("gain", index);
     
     switch (myMode)
     {
@@ -158,14 +158,14 @@ FilterProcessor::getMode() {
 void
 FilterProcessor::setFrequency(float freq) { setAutomationVal("freq", freq);}
 float
-FilterProcessor::getFrequency() { return *myFreq; }
+FilterProcessor::getFrequency() { return getAutomationVal("freq", 0); }
 
 void
 FilterProcessor::setQ(float q) { setAutomationVal("q", q);}
 float
-FilterProcessor::getQ() { return *myQ; }
+FilterProcessor::getQ() { return getAutomationVal("q", 0); }
 
 void
 FilterProcessor::setGain(float gain) { setAutomationVal("gain", gain);}
 float
-FilterProcessor::getGain() { return *myGain; }
+FilterProcessor::getGain() { return getAutomationVal("gain", 0);}

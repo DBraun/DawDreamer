@@ -48,8 +48,8 @@ public:
 
     void automateParameters(size_t index) {
 
-        *myWetLevel = ((AutomateParameterFloat*)myParameters.getParameter("wet_level"))->sample(index);
-        *myDelaySize = ((AutomateParameterFloat*)myParameters.getParameter("delay"))->sample(index);
+        *myWetLevel = getAutomationVal("wet_level", index);
+        *myDelaySize = getAutomationVal("delay", index);
         updateParameters();
     }
 
@@ -60,11 +60,11 @@ public:
 
     const juce::String getName() { return "DelayProcessor"; };
 
-    void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize);}
-    float getDelay() { return *myDelaySize; }
+    void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
+    float getDelay() { return getAutomationVal("delay", 0); }
 
-    void setWet(float newWet) { setAutomationVal("wet_level", newWet);}
-    float getWet() { return *myWetLevel; }
+    void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
+    float getWet() { return getAutomationVal("wet_level", 0); }
 
 
 private:

@@ -47,6 +47,8 @@ public:
 
     bool setAutomationVal(std::string parameterName, float val);
 
+    float getAutomationVal(std::string parameterName, int index);
+
     std::vector<float> getAutomation(std::string parameterName);
     py::array_t<float> getAutomationNumpy(std::string parameterName);
 

@@ -35,7 +35,7 @@ public:
 
     void automateParameters(size_t index) {
 
-        *myPan = ((AutomateParameterFloat*)myParameters.getParameter("pan"))->sample(index);
+        *myPan = getAutomationVal("pan", index);
         updateParameters();
     }
 
@@ -47,7 +47,8 @@ public:
     const juce::String getName() { return "PannerProcessor"; };
 
     void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
-    float getPan() { return *myPan; }
+    float getPan() { return getAutomationVal("pan", 0);
+    }
 
     void setRule(std::string newRule) {
         myRule = stringToRule(newRule);

@@ -41,11 +41,11 @@ public:
 
     void automateParameters(size_t index) {
 
-        *myRoomSize = ((AutomateParameterFloat*)myParameters.getParameter("room_size"))->sample(index);
-        *myDamping = ((AutomateParameterFloat*)myParameters.getParameter("damping"))->sample(index);
-        *myDryLevel = ((AutomateParameterFloat*)myParameters.getParameter("dry_level"))->sample(index);
-        *myWetLevel = ((AutomateParameterFloat*)myParameters.getParameter("wet_level"))->sample(index);
-        *myWidth = ((AutomateParameterFloat*)myParameters.getParameter("width"))->sample(index);
+        *myRoomSize = getAutomationVal("room_size", index);
+        *myDamping = getAutomationVal("damping", index);
+        *myDryLevel = getAutomationVal("dry_level", index);
+        *myWetLevel = getAutomationVal("wet_level", index);
+        *myWidth = getAutomationVal("width", index);
 
         updateParameters();
     }
@@ -58,19 +58,19 @@ public:
     const juce::String getName() { return "ReverbProcessor"; };
 
     void setRoomSize(float roomSize) { setAutomationVal("room_size", roomSize); }
-    float getRoomSize() { return *myRoomSize; }
+    float getRoomSize() { return getAutomationVal("room_size", 0); }
 
     void setDamping(float damping) { setAutomationVal("damping", damping); }
-    float getDamping() { return *myDamping; }
+    float getDamping() { return getAutomationVal("damping", 0); }
 
     void setWetLevel(float wetLevel) { setAutomationVal("wet_level", wetLevel); }
-    float getWetLevel() { return *myWetLevel; }
+    float getWetLevel() { return getAutomationVal("wet_level", 0); }
 
     void setDryLevel(float dryLevel) { setAutomationVal("dry_level", dryLevel); }
-    float getDryLevel() { return *myDryLevel; }
+    float getDryLevel() { return getAutomationVal("dry_level", 0);  }
 
     void setWidth(float width) { setAutomationVal("width", width); }
-    float getWidth() { return *myWidth; }
+    float getWidth() { return getAutomationVal("width", 0);  }
 
 
 private:

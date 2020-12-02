@@ -53,8 +53,6 @@ private:
 
     void automateParameters(size_t index);
 
-    void updateParameters();
-
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     {
         juce::AudioProcessorValueTreeState::ParameterLayout params;

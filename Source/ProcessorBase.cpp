@@ -70,9 +70,21 @@ std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
         return parameter->getAutomation();
     }
     else {
-        std::cout << "Failed to get '" << parameterName << "' automation for parameter: " << parameterName << std::endl;
+        std::cout << "Failed to get automation values for parameter: " << parameterName << std::endl;
         std::vector<float> empty;
         return empty;
+    }
+}
+
+float ProcessorBase::getAutomationVal(std::string parameterName, int index) {
+    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
+
+    if (parameter) {
+        return parameter->sample(index);
+    }
+    else {
+        std::cout << "Failed to get automation value for parameter: " << parameterName << std::endl;
+        return 0.f;
     }
 }
 
