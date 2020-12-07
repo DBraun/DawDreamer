@@ -25,17 +25,20 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
             *pluginFormatManager.getFormat(i));
     }
 
-    // If there is a problem here first check the preprocessor definitions
-    // in the projucer are sensible - is it set up to scan for plugin's?
-    jassert(pluginDescriptions.size() > 0);
-
-    String errorMessage;
-
     if (myPlugin)
     {
         myPlugin->releaseResources();
         myPlugin.release();
     }
+
+    // If there is a problem here first check the preprocessor definitions
+    // in the projucer are sensible - is it set up to scan for plugin's?
+    if (pluginDescriptions.size() <= 0) {
+        std::cerr << "Unable to load plugin. The path should be absolute.\n";
+        return false;
+    }
+
+    String errorMessage;
 
     myPlugin = pluginFormatManager.createPluginInstance(*pluginDescriptions[0],
         sampleRate,
@@ -76,7 +79,7 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     if (myPlugin) {
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
     }
-    
+
     if (myMidiIterator) {
         delete myMidiIterator;
     }
@@ -176,11 +179,11 @@ PluginProcessor::loadPreset(const std::string& path)
 #if JUCE_PLUGINHOST_VST
         // The VST2 way of loading preset. You need the entire VST2 SDK source, which is not public.
         VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
-        
+
 #else
 
         setVST3PluginStateDirect(myPlugin.get(), mb);
-        
+
 #endif
 
         for (int i = 0; i < myPlugin->getNumParameters(); i++) {
@@ -202,7 +205,7 @@ PluginProcessor::createParameterLayout()
 {
 
     juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
-    
+
     // clear existing parameters in the layout?
     ValueTree blankState;
     myParameters.replaceState(blankState);
@@ -235,7 +238,7 @@ PluginProcessor::setPatch(const PluginPatch patch)
         else {
             std::cout << "RenderEngine::setPatch error: Incorrect parameter index!" <<
                 "\n- Current index:  " << pair.first <<
-                "\n- Max index: " << myPlugin->getNumParameters()-1 << std::endl;
+                "\n- Max index: " << myPlugin->getNumParameters() - 1 << std::endl;
         }
     }
 
@@ -304,7 +307,7 @@ PluginProcessor::getPatch() {
         else {
             std::cout << "Error getPatch with parameter: " << theName << std::endl;
         }
-        
+
     }
 
     params.shrink_to_fit();
