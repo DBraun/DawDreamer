@@ -113,6 +113,15 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
         node->getProcessor()->enableAllBuses();
     }
 
+    myMainProcessorGraph->setPlayConfigDetails(myNumInputAudioChans,
+        myNumOutputAudioChans,
+        mySampleRate, myBufferSize);
+
+    myMainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
+    for (auto node : myMainProcessorGraph->getNodes()) {
+        node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
+    }
+
     return true;
 }
 
@@ -131,14 +140,6 @@ RenderEngine::render(const double renderLength) {
         std::fill(myRecordedSamples[i].begin(), myRecordedSamples[i].end(), 0.f);
     }
 
-    myMainProcessorGraph->setPlayConfigDetails(myNumInputAudioChans,
-        myNumOutputAudioChans,
-        mySampleRate, myBufferSize);
-
-    myMainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
-    for (auto node : myMainProcessorGraph->getNodes()) {
-        node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
-    }
     myMainProcessorGraph->reset();
 
     RecorderProcessor* recorder = (RecorderProcessor*)(myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes() - 1)->getProcessor());

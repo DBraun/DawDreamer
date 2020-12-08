@@ -13,6 +13,8 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock);
 
+    bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
+
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);
 
     bool acceptsMidi() const { return true; }
@@ -65,6 +67,9 @@ private:
 protected:
 
     std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> myPlugin;
+    // For an explanation of myCopyBuffer, read PluginProcessor::processBlock
+    juce::AudioBuffer<float>* myCopyBuffer = nullptr;
+    int myCopyBufferNumChans = 2;
 
 };
 
