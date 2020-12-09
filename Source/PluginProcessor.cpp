@@ -7,6 +7,9 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
     myPluginPath = path;
 
     loadPlugin(sampleRate, samplesPerBlock);
+
+    // in processBlock, the size will be set correctly.
+    myCopyBuffer = new juce::AudioBuffer<float>(myCopyBufferNumChans, 512);
 }
 
 bool
@@ -25,17 +28,20 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
             *pluginFormatManager.getFormat(i));
     }
 
-    // If there is a problem here first check the preprocessor definitions
-    // in the projucer are sensible - is it set up to scan for plugin's?
-    jassert(pluginDescriptions.size() > 0);
-
-    String errorMessage;
-
     if (myPlugin)
     {
         myPlugin->releaseResources();
         myPlugin.release();
     }
+
+    // If there is a problem here first check the preprocessor definitions
+    // in the projucer are sensible - is it set up to scan for plugin's?
+    if (pluginDescriptions.size() <= 0) {
+        std::cerr << "Unable to load plugin. The path should be absolute.\n";
+        return false;
+    }
+
+    String errorMessage;
 
     myPlugin = pluginFormatManager.createPluginInstance(*pluginDescriptions[0],
         sampleRate,
@@ -48,6 +54,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         // parameters from this given plugin.
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
         myPlugin->setNonRealtime(true);
+        myCopyBufferNumChans = std::max(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
 
         mySampleRate = sampleRate;
 
@@ -67,6 +74,10 @@ PluginProcessor::~PluginProcessor() {
         myPlugin->releaseResources();
         myPlugin.release();
     }
+
+    if (myCopyBuffer) {
+        delete myCopyBuffer;
+    }
 }
 
 void
@@ -76,7 +87,7 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     if (myPlugin) {
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
     }
-    
+
     if (myMidiIterator) {
         delete myMidiIterator;
     }
@@ -104,7 +115,37 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
     } while (myIsMessageBetween && myMidiEventsDoRemain);
 
     if (myPlugin) {
-        myPlugin->processBlock(buffer, myRenderMidiBuffer);
+
+        /*
+        First copy from buffer to myCopyBuffer.
+        Why? Some plugins involve multiple buses (e.g., sidechain compression). You can check this with
+        `myPlugin->getBusCount()`. However, it can be difficult to add or remove buses: `myPlugin->canRemoveBus(1);`
+        That function may actually not be able to remove a secondary (optional) sidechain bus.
+        myPlugin->processBlock will expect to receive a buffer whose number of channels is the max(the total of all the input bus
+        channels, the total of all output bus channels). When users create a graph with DawDreamer, they may pass only 1 stereo input
+        to a plugin with an optional sidechain. This will cause the arg buffer to have 2 channels. However, myPlugin->processBlock would
+        expect 4 channels (2 channels for each input bus, the second bus being the unspecified sidechain input). Therefore, the solution
+        is to have myCopyBuffer be the larger size, and to copy whatever channels exist in buffer into it. In effect, the sidechain input
+        will have zeros. Then we copy the results of myCopyBuffer back to buffer so that other processors receive the result.
+        */
+
+        int numSamples = buffer.getNumSamples();
+
+        myCopyBuffer->setSize(std::max(buffer.getNumChannels(), myCopyBufferNumChans), numSamples, false, true, false);
+
+        for (int i = 0; i < buffer.getNumChannels(); i++)
+        {
+            myCopyBuffer->copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
+        }
+
+        myPlugin->processBlock(*myCopyBuffer, myRenderMidiBuffer);
+
+        // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
+        for (int i = 0; i < 2; i++)
+        {
+            buffer.copyFrom(i, 0, myCopyBuffer->getReadPointer(i), numSamples);
+        }
+
     }
 
     myWriteIndex = end;
@@ -176,11 +217,11 @@ PluginProcessor::loadPreset(const std::string& path)
 #if JUCE_PLUGINHOST_VST
         // The VST2 way of loading preset. You need the entire VST2 SDK source, which is not public.
         VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
-        
+
 #else
 
         setVST3PluginStateDirect(myPlugin.get(), mb);
-        
+
 #endif
 
         for (int i = 0; i < myPlugin->getNumParameters(); i++) {
@@ -202,7 +243,7 @@ PluginProcessor::createParameterLayout()
 {
 
     juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
-    
+
     // clear existing parameters in the layout?
     ValueTree blankState;
     myParameters.replaceState(blankState);
@@ -235,7 +276,7 @@ PluginProcessor::setPatch(const PluginPatch patch)
         else {
             std::cout << "RenderEngine::setPatch error: Incorrect parameter index!" <<
                 "\n- Current index:  " << pair.first <<
-                "\n- Max index: " << myPlugin->getNumParameters()-1 << std::endl;
+                "\n- Max index: " << myPlugin->getNumParameters() - 1 << std::endl;
         }
     }
 
@@ -304,7 +345,7 @@ PluginProcessor::getPatch() {
         else {
             std::cout << "Error getPatch with parameter: " << theName << std::endl;
         }
-        
+
     }
 
     params.shrink_to_fit();
