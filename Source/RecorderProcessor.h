@@ -17,16 +17,13 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
     {
-        const auto readptrs = buffer.getArrayOfReadPointers();
         const int numberChannels = buffer.getNumChannels();
 
-        int i = 0;
-
-        for (i = 0; i < buffer.getNumSamples(); ++i)
+        for (int i = 0; i < buffer.getNumSamples(); i++)
         {
             for (int chan = 0; chan < numberChannels; chan++) {
-                // Write the sample to the engine's history for the correct channel.
-                (*myEngineBuffer)[chan][myWriteIndex] = readptrs[chan][i];
+                // Write the sample to the engine's history for the correct channel.                
+                (*myEngineBuffer)[chan][myWriteIndex] = buffer.getSample(chan, i);
             }
             myWriteIndex++;
         }

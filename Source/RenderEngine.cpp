@@ -7,6 +7,7 @@ RenderEngine::RenderEngine(double sr, int bs) :
 {
     myMainProcessorGraph.reset(new juce::AudioProcessorGraph());
     myMainProcessorGraph->setNonRealtime(true);
+    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(0));
 }
 
 RenderEngine::~RenderEngine()
@@ -134,11 +135,7 @@ RenderEngine::render(const double renderLength) {
 
     // Clear main buffer and prepare to record samples over multiple buffer passes.
     myRecordedSamples.clear();
-    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numSamples));
-    for (size_t i = 0; i < myNumOutputAudioChans; i++)
-    {
-        std::fill(myRecordedSamples[i].begin(), myRecordedSamples[i].end(), 0.f);
-    }
+    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numSamples, 0.f));
 
     myMainProcessorGraph->reset();
 

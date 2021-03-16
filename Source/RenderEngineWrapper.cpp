@@ -10,13 +10,16 @@ RenderEngineWrapper::wrapperGetAudioFrames()
 {
     std::vector<std::vector<float>> channelBuffers = RenderEngine::getAudioFrames();
 
-    py::array_t<float, py::array::c_style> arr({ 2, (int) channelBuffers[0].size() });
+    size_t num_channels = channelBuffers.size();
+    size_t num_samples = channelBuffers[0].size();
+
+    py::array_t<float, py::array::c_style> arr({ (int)num_channels, (int)num_samples });
 
     auto ra = arr.mutable_unchecked();
 
-    for (size_t i = 0; i <2; i++)
+    for (size_t i = 0; i < num_channels; i++)
     {
-        for (size_t j = 0; j < channelBuffers[0].size(); j++)
+        for (size_t j = 0; j < num_samples; j++)
         {
             ra(i, j) = channelBuffers[i][j];
         }
