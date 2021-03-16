@@ -19,7 +19,6 @@ public:
     void
     prepareToPlay(double, int)
     {
-        myPlaybackIndex = 0;
     }
 
     void
@@ -51,7 +50,7 @@ public:
 
     const juce::String getName() const { return "PlaybackProcessor"; }
 
-    void setData(py::array_t<float> input) {
+    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
         float* input_ptr = (float*)input.data();
 
         myPlaybackData = std::vector<std::vector<float>>(input.shape(0), std::vector<float>(input.shape(1)));
