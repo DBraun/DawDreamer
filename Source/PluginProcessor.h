@@ -85,7 +85,7 @@ public:
 
     py::list wrapperGetPatch();
 
-    float wrapperGetParameter(int parameter);
+    float wrapperGetParameter(int parameterIndex);
 
     std::string wrapperGetParameterName(int parameter);
 

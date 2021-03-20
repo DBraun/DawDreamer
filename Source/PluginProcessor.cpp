@@ -449,13 +449,21 @@ PluginProcessorWrapper::wrapperGetPatch()
 }
 
 float
-PluginProcessorWrapper::wrapperGetParameter(int parameter)
+PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
 {
     if (!myPlugin) {
         std::cout << "Please load the plugin first!" << std::endl;
         return 0.;
     }
-    return myPlugin->getParameter(parameter);
+
+    if (parameterIndex >= myPlugin->AudioProcessor::getNumParameters()) {
+        std::cout << "Parameter not found for index: " << parameterIndex << std::endl;
+        return 0.;
+    }
+
+    auto parameterName = myPlugin->getParameterName(parameterIndex);
+
+    return ProcessorBase::getAutomationVal(parameterName.toStdString(), 0);
 }
 
 std::string
