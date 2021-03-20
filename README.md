@@ -68,6 +68,7 @@ synth.set_automation("A Pan", make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
 freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 with amp 5000.
 filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
+freq_automation = filter_processor.get_automation("freq")  # You can get the automation of most processor parameters.
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
@@ -314,6 +315,10 @@ delay_processor = engine.make_delay_processor("my_delay", delay_rule, delay_ms, 
 delay_processor.delay = delay_ms
 delay_processor.wet = delay_wet
 
+# Some plugins can take more than one input. For example, a sidechain processor plugin
+# can reduce the volume of the first input according to the second input's volume.
+sidechain_processor = engine.make_plugin_processor("sidechain_compressor", "path/to/sidechain.dll")
+
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
 # In each tuple, the first item is an audio processor.
@@ -329,7 +334,8 @@ graph = [
   (add_processor, ["my_synth", "my_reverb"]),
   (compressor_processor, ["my_add"]),
   (filter_processor, ["my_compressor"]),
-  (delay_processor, ["my_filter"])
+  (delay_processor, ["my_filter"]),
+  (sidechain_processor, ["my_filter", "my_vocals"])
 ]
 
 engine.load_graph(graph)
