@@ -11,7 +11,7 @@ public:
         myPlaybackData = inputData;
     }
 
-    PlaybackProcessor(std::string newUniqueName, py::array input) : ProcessorBase{ newUniqueName }
+    PlaybackProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input) : ProcessorBase{ newUniqueName }
     {
         setData(input);
     }
@@ -57,7 +57,7 @@ public:
 
         for (int y = 0; y < input.shape(1); y++) {
             for (int x = 0; x < input.shape(0); x++) {
-                myPlaybackData[x][y] = *(input_ptr++);
+                myPlaybackData[x][y] = input_ptr[x * input.shape(1) + y];
             }
         }
     }
