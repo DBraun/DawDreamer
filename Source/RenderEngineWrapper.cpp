@@ -52,21 +52,21 @@ RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array da
 std::shared_ptr<FilterProcessor>
 RenderEngineWrapper::makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain) {
 
-    float validFreq = std::max(.0001f, freq);
-    float validQ = std::max(.0001f, q);
-    float validGain = std::max(.0001f, gain);
+    float validFreq = std::fmax(.0001f, freq);
+    float validQ = std::fmax(.0001f, q);
+    float validGain = std::fmax(.0001f, gain);
 
     return std::shared_ptr<FilterProcessor>{new FilterProcessor{ name, mode, validFreq, validQ, validGain }};
 }
 
 std::shared_ptr<CompressorProcessor>
-RenderEngineWrapper::makeCompressorProcessor(const std::string& name, float threshold=0.f, float ratio=2.f, float attack=2.f, float release=50.f) {
+RenderEngineWrapper::makeCompressorProcessor(const std::string& name, float threshold = 0.f, float ratio = 2.f, float attack = 2.f, float release = 50.f) {
 
     // ratio must be >= 1.0
     // attack and release are in milliseconds
-    float validRatio = std::max(1.0f, ratio);
-    float validAttack = std::max(0.f, attack);
-    float validRelease = std::max(0.f, release);
+    float validRatio = std::fmax(1.0f, ratio);
+    float validAttack = std::fmax(0.f, attack);
+    float validRelease = std::fmax(0.f, release);
     return std::shared_ptr<CompressorProcessor>{new CompressorProcessor{ name, threshold, validRatio, validAttack, validRelease }};
 }
 
@@ -86,23 +86,30 @@ RenderEngineWrapper::makeReverbProcessor(const std::string& name, float roomSize
 std::shared_ptr<PannerProcessor>
 RenderEngineWrapper::makePannerProcessor(const std::string& name, std::string& rule, float pan) {
 
-    float safeVal = std::max(-1.f, pan);
-    safeVal = std::min(1.f, pan);
+    float safeVal = std::fmax(-1.f, pan);
+    safeVal = std::fmin(1.f, pan);
 
     return std::shared_ptr<PannerProcessor>{new PannerProcessor{ name, rule, safeVal }};
 }
 
 std::shared_ptr<DelayProcessor>
 RenderEngineWrapper::makeDelayProcessor(const std::string& name, std::string& rule, float delay, float wet) {
-    float safeDelay = std::max(0.f, delay);
+    float safeDelay = std::fmax(0.f, delay);
 
-    float safeWet = std::min(1.f, std::max(0.f, wet));
+    float safeWet = std::fmin(1.f, std::fmax(0.f, wet));
 
     return std::shared_ptr<DelayProcessor>{new DelayProcessor{ name, rule, safeDelay, safeWet }};
 }
 
+/// @brief
+std::shared_ptr<SamplerProcessor>
+RenderEngineWrapper::makeSamplerProcessor(const std::string& name, py::array data)
+{
+    return std::shared_ptr<SamplerProcessor>{new SamplerProcessor{ name, data, mySampleRate, myBufferSize }};
+}
+
 bool
-RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans=2, int numOutputAudioChans=2) {
+RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans = 2, int numOutputAudioChans = 2) {
 
     if (!py::isinstance<py::list>(dagObj)) {
         return false;
@@ -153,7 +160,7 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans=
             std::cout << "Error: load_graph. First argument in tuple wasn't a Processor object." << std::endl;
             return false;
         }
-        
+
         dagNode.inputs = inputs;
 
         buildingDag->nodes.push_back(dagNode);

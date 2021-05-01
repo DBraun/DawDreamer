@@ -86,6 +86,7 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 
     if (myPlugin) {
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
+        myPlugin->setPlayHead(this->getPlayHead());
     }
 
     if (myMidiIterator) {

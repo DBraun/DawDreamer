@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="DawDreamer\Processors\Sampler">
+      <UniqueIdentifier>{BABA15F2-E769-C3C9-2746-7717EABAF785}</UniqueIdentifier>
+    </Filter>
     <Filter Include="DawDreamer\Processors">
       <UniqueIdentifier>{F0591685-F411-EF72-1CD6-1B2E276D13BD}</UniqueIdentifier>
     </Filter>
@@ -199,6 +202,21 @@
     </Filter>
     <Filter Include="JUCE Modules\juce_audio_processors">
       <UniqueIdentifier>{67BE498C-9E1F-C73A-B99A-387C034CE680}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_utils\audio_cd">
+      <UniqueIdentifier>{1A9C8538-959B-25E3-473D-B462C9A9D458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_utils\gui">
+      <UniqueIdentifier>{AA9F594C-DFAF-C0A7-0CCD-9F90E54D3A01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_utils\native">
+      <UniqueIdentifier>{230BF784-34F4-3BE8-46D4-54E6B67E5E9E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_utils\players">
+      <UniqueIdentifier>{39F680F3-5161-4D1C-EAD0-3911ED808874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_audio_utils">
+      <UniqueIdentifier>{3197198B-A978-E330-C7FB-07E5CE8236C7}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_core\containers">
       <UniqueIdentifier>{42F7BE9D-3C8A-AE26-289B-8F355C068036}</UniqueIdentifier>
@@ -472,6 +490,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Sampler\Source\DataModel.cpp">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Sampler\Source\Main.cpp">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Sampler\Source\MPESamplerVoiceDataModel.cpp">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Sampler\Source\MPESettingsDataModel.cpp">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.cpp">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.cpp">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\FilterProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>
@@ -1149,6 +1185,69 @@
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_processors\juce_audio_processors.mm">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\audio_cd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioAppComponent.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioThumbnail.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_android_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_ios_BluetoothMidiDevicePairingDialogue.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_linux_AudioCDReader.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_linux_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_mac_AudioCDBurner.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_mac_AudioCDReader.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_mac_BluetoothMidiDevicePairingDialogue.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_win32_AudioCDBurner.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\native\juce_win32_AudioCDReader.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\players</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\players\juce_SoundPlayer.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\players</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\juce_audio_utils.cpp">
+      <Filter>JUCE Modules\juce_audio_utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_utils\juce_audio_utils.mm">
+      <Filter>JUCE Modules\juce_audio_utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_core\containers\juce_AbstractFifo.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
@@ -2611,6 +2710,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -2643,6 +2745,87 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Sampler\Source\CommandFifo.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModel.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\DemoUtilities.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\FileAudioFormatReaderFactory.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\LoopPointMarker.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\LoopPointsOverlay.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MainSamplerView.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MemoryAudioFormatReaderFactory.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Misc.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPELegacySettingsComponent.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPENewSettingsComponent.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerSound.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerVoice.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerVoiceDataModel.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPESettingsComponent.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\MPESettingsDataModel.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\PlaybackPositionOverlay.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\ProcessorState.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Ruler.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Sample.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\SamplerPluginDemo.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\VisibleRangeDataModel.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\WaveformEditor.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\WaveformView.h">
+      <Filter>DawDreamer\Processors\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\SamplerProcessor.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\DelayProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
@@ -3623,6 +3806,45 @@
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_processors\juce_audio_processors.h">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\audio_cd\juce_AudioCDBurner.h">
+      <Filter>JUCE Modules\juce_audio_utils\audio_cd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.h">
+      <Filter>JUCE Modules\juce_audio_utils\audio_cd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioAppComponent.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioThumbnail.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioThumbnailBase.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_BluetoothMidiDevicePairingDialogue.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.h">
+      <Filter>JUCE Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.h">
+      <Filter>JUCE Modules\juce_audio_utils\players</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\players\juce_SoundPlayer.h">
+      <Filter>JUCE Modules\juce_audio_utils\players</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_utils\juce_audio_utils.h">
+      <Filter>JUCE Modules\juce_audio_utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_core\containers\juce_AbstractFifo.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>

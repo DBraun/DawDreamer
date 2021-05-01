@@ -7,6 +7,7 @@ RenderEngine::RenderEngine(double sr, int bs) :
 {
     myMainProcessorGraph.reset(new juce::AudioProcessorGraph());
     myMainProcessorGraph->setNonRealtime(true);
+    myMainProcessorGraph->setPlayHead(this);
     myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(0));
 }
 
@@ -121,6 +122,7 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
     myMainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
     for (auto node : myMainProcessorGraph->getNodes()) {
         node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
+        node->getProcessor()->setPlayHead(this);
     }
 
     return true;
@@ -138,6 +140,15 @@ RenderEngine::render(const double renderLength) {
     myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numSamples, 0.f));
 
     myMainProcessorGraph->reset();
+    myMainProcessorGraph->setPlayHead(this);
+
+    myCurrentPositionInfo.bpm = 120.; // todo: user controlled
+    myCurrentPositionInfo.isPlaying = true;
+    myCurrentPositionInfo.isRecording = true;
+    myCurrentPositionInfo.timeInSamples = 0;
+    myCurrentPositionInfo.timeSigNumerator = 4;
+    myCurrentPositionInfo.timeSigDenominator = 4;
+    myCurrentPositionInfo.isLooping = false;
 
     RecorderProcessor* recorder = (RecorderProcessor*)(myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes() - 1)->getProcessor());
 
@@ -150,7 +161,12 @@ RenderEngine::render(const double renderLength) {
     {
         // This gets RecorderProcessor to write to this RenderEngine's myRecordedSamples.
         myMainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
+
+        myCurrentPositionInfo.timeInSamples += myBufferSize;
     }
+
+    myCurrentPositionInfo.isPlaying = false;
+    myCurrentPositionInfo.isRecording = false;
 }
 
 const std::vector<std::vector<float>>
@@ -158,3 +174,26 @@ RenderEngine::getAudioFrames()
 {
     return myRecordedSamples;
 }
+
+
+bool
+RenderEngine::getCurrentPosition(CurrentPositionInfo& result) {
+    result = myCurrentPositionInfo;
+    return true;
+};
+
+/** Returns true if this object can control the transport. */
+bool
+RenderEngine::canControlTransport() { return true; }
+
+/** Starts or stops the audio. */
+void
+RenderEngine::transportPlay(bool shouldStartPlaying) { }
+
+/** Starts or stops recording the audio. */
+void
+RenderEngine::transportRecord(bool shouldStartRecording) { }
+
+/** Rewinds the audio. */
+void
+RenderEngine::transportRewind() {}

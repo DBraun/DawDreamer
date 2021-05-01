@@ -4,3 +4,6 @@
 [submodule "thirdparty/JUCE"]
 	path = thirdparty/JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "Source/Sampler"]
+	path = Source/Sampler
+	url = https://github.com/DBraun/Sampler
