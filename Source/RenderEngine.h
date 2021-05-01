@@ -37,6 +37,8 @@ public:
 
     void render (const double renderLength);
 
+    void setBPM(double bpm);
+
     const std::vector<std::vector<float>> getAudioFrames();
 
     bool getCurrentPosition(CurrentPositionInfo& result) override;
@@ -49,6 +51,7 @@ protected:
 
     double mySampleRate;
     int myBufferSize;
+    double myBPM = 120.;
 
 private:
                            

@@ -142,7 +142,7 @@ RenderEngine::render(const double renderLength) {
     myMainProcessorGraph->reset();
     myMainProcessorGraph->setPlayHead(this);
 
-    myCurrentPositionInfo.bpm = 120.; // todo: user controlled
+    myCurrentPositionInfo.bpm = myBPM;
     myCurrentPositionInfo.isPlaying = true;
     myCurrentPositionInfo.isRecording = true;
     myCurrentPositionInfo.timeInSamples = 0;
@@ -167,6 +167,14 @@ RenderEngine::render(const double renderLength) {
 
     myCurrentPositionInfo.isPlaying = false;
     myCurrentPositionInfo.isRecording = false;
+}
+
+void RenderEngine::setBPM(double bpm) {
+    if (bpm <= 0) {
+        std::cerr << "BPM must be positive.";
+        return;
+    }
+    myBPM = bpm;
 }
 
 const std::vector<std::vector<float>>
