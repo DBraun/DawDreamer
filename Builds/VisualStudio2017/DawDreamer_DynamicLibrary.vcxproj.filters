@@ -2,6 +2,12 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="DawDreamer\Processors\Sampler\Components">
+      <UniqueIdentifier>{D17DFF5D-2619-ECB8-42FF-86E5223B4C51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Processors\Sampler\DataModels">
+      <UniqueIdentifier>{4460E84B-E9A5-810E-03AD-00711DA7E7A6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="DawDreamer\Processors\Sampler">
       <UniqueIdentifier>{BABA15F2-E769-C3C9-2746-7717EABAF785}</UniqueIdentifier>
     </Filter>
@@ -490,16 +496,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Sampler\Source\DataModel.cpp">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
+    <ClCompile Include="..\..\Source\Sampler\Source\DataModels\DataModel.cpp">
+      <Filter>DawDreamer\Processors\Sampler\DataModels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Sampler\Source\DataModels\MPESettingsDataModel.cpp">
+      <Filter>DawDreamer\Processors\Sampler\DataModels</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Sampler\Source\Main.cpp">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Sampler\Source\MPESamplerVoiceDataModel.cpp">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Sampler\Source\MPESettingsDataModel.cpp">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.cpp">
@@ -2745,10 +2748,46 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\Sampler\Source\CommandFifo.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\DataModel.h">
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointsOverlay.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MainSamplerView.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MPELegacySettingsComponent.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MPENewSettingsComponent.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MPESettingsComponent.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\PlaybackPositionOverlay.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\Ruler.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\WaveformEditor.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\WaveformView.h">
+      <Filter>DawDreamer\Processors\Sampler\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModels\DataModel.h">
+      <Filter>DawDreamer\Processors\Sampler\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModels\MPESettingsDataModel.h">
+      <Filter>DawDreamer\Processors\Sampler\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModels\VisibleRangeDataModel.h">
+      <Filter>DawDreamer\Processors\Sampler\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Sampler\Source\CommandFifo.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\DemoUtilities.h">
@@ -2757,25 +2796,10 @@
     <ClInclude Include="..\..\Source\Sampler\Source\FileAudioFormatReaderFactory.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\LoopPointMarker.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\LoopPointsOverlay.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\MainSamplerView.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\MemoryAudioFormatReaderFactory.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\Misc.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPELegacySettingsComponent.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPENewSettingsComponent.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerSound.h">
@@ -2784,22 +2808,7 @@
     <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerVoice.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerVoiceDataModel.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPESettingsComponent.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPESettingsDataModel.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\PlaybackPositionOverlay.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\ProcessorState.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\Ruler.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\Sample.h">
@@ -2812,15 +2821,6 @@
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerPluginDemo.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\VisibleRangeDataModel.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\WaveformEditor.h">
-      <Filter>DawDreamer\Processors\Sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Sampler\Source\WaveformView.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SamplerProcessor.h">

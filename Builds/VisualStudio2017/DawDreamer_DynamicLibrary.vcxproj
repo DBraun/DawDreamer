@@ -147,12 +147,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Sampler\Source\DataModel.cpp"/>
+    <ClCompile Include="..\..\Source\Sampler\Source\DataModels\DataModel.cpp"/>
+    <ClCompile Include="..\..\Source\Sampler\Source\DataModels\MPESettingsDataModel.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\Main.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Sampler\Source\MPESamplerVoiceDataModel.cpp"/>
-    <ClCompile Include="..\..\Source\Sampler\Source\MPESettingsDataModel.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.cpp"/>
     <ClCompile Include="..\..\Source\FilterProcessor.cpp"/>
@@ -2217,32 +2216,31 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointsOverlay.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MainSamplerView.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MPELegacySettingsComponent.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MPENewSettingsComponent.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\MPESettingsComponent.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\PlaybackPositionOverlay.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\Ruler.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\WaveformEditor.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\Components\WaveformView.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModels\DataModel.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModels\MPESettingsDataModel.h"/>
+    <ClInclude Include="..\..\Source\Sampler\Source\DataModels\VisibleRangeDataModel.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\CommandFifo.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\DataModel.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\DemoUtilities.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\FileAudioFormatReaderFactory.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\LoopPointMarker.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\LoopPointsOverlay.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\MainSamplerView.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\MemoryAudioFormatReaderFactory.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Misc.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPELegacySettingsComponent.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPENewSettingsComponent.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerSound.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerVoice.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPESamplerVoiceDataModel.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPESettingsComponent.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\MPESettingsDataModel.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\PlaybackPositionOverlay.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\ProcessorState.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\Ruler.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Sample.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerPluginDemo.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\VisibleRangeDataModel.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\WaveformEditor.h"/>
-    <ClInclude Include="..\..\Source\Sampler\Source\WaveformView.h"/>
     <ClInclude Include="..\..\Source\SamplerProcessor.h"/>
     <ClInclude Include="..\..\Source\DelayProcessor.h"/>
     <ClInclude Include="..\..\Source\PannerProcessor.h"/>

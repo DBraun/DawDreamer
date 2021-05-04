@@ -24,6 +24,12 @@ public:
     bool acceptsMidi() const { return true; }
     bool producesMidi() const { return true; }
 
+    void
+    setParameter(const int paramIndex, const float value)
+    {
+        sampler.setParameterNotifyingHost(paramIndex, value);
+    }
+
     void setPlayHead(AudioPlayHead* newPlayHead)
     {
         AudioProcessor::setPlayHead(newPlayHead);
@@ -159,6 +165,50 @@ public:
 
         return true;
     }
+
+    std::string wrapperGetParameterName(int parameter)
+    {
+        return sampler.getParameterName(parameter).toStdString();
+    }
+
+    std::string wrapperGetParameterAsText(const int parameter)
+    {
+        return sampler.getParameterText(parameter).toStdString();
+    }
+
+    int wrapperGetPluginParameterSize()
+    {
+        return sampler.getNumParameters();
+    }
+
+    py::list getPluginParametersDescription()
+    {
+        py::list myList;
+
+        //get the parameters as an AudioProcessorParameter array
+        const Array<AudioProcessorParameter*>& processorParams = sampler.getParameters();
+        for (int i = 0; i < sampler.getNumParameters(); i++) {
+
+            int maximumStringLength = 64;
+
+            std::string theName = (processorParams[i])->getName(maximumStringLength).toStdString();
+            std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), maximumStringLength).toStdString();
+            std::string label = processorParams[i]->getLabel().toStdString();
+
+            py::dict myDictionary;
+            myDictionary["index"] = i;
+            myDictionary["name"] = theName;
+            myDictionary["numSteps"] = processorParams[i]->getNumSteps();
+            myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
+            myDictionary["label"] = label;
+            myDictionary["text"] = currentText;
+
+            myList.append(myDictionary);
+        }
+ 
+        return myList;
+    }
+
 
 private:
 
