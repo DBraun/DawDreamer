@@ -8,6 +8,7 @@ class SamplerProcessor : public ProcessorBase
 public:
     SamplerProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr, int blocksize) : ProcessorBase{ newUniqueName }, mySampleRate{sr}
     {
+        createParameterLayout();
         sampler.setNonRealtime(true);
         sampler.setSample(inputData, mySampleRate);
         
@@ -15,6 +16,7 @@ public:
 
     SamplerProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, int blocksize) : ProcessorBase{ newUniqueName }, mySampleRate{ sr }
     {
+        createParameterLayout();
         sampler.setNonRealtime(true);
         setData(input);
     }
@@ -25,7 +27,7 @@ public:
     bool producesMidi() const { return true; }
 
     void
-    setParameter(const int paramIndex, const float value)
+    wrapperSetParameter(const int paramIndex, const float value)
     {
         sampler.setParameterNotifyingHost(paramIndex, value);
     }
@@ -207,6 +209,53 @@ public:
         }
  
         return myList;
+    }
+
+    void
+    createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
+
+        // clear existing parameters in the layout?
+        ValueTree blankState;
+        myParameters.replaceState(blankState);
+
+        int usedParameterAmount = 0;
+        for (int i = 0; i < sampler.getNumParameters(); ++i)
+        {
+            auto parameterName = sampler.getParameterName(i);
+            // Ensure the parameter is not unused.
+            if (parameterName != "Param")
+            {
+                ++usedParameterAmount;
+
+                myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
+                // give it a valid single sample of automation.
+                ProcessorBase::setAutomationVal(parameterName.toStdString(), sampler.getParameter(i));
+            }
+        }
+    }
+
+    void
+    automateParameters(size_t index) {
+
+        for (int i = 0; i < sampler.getNumParameters(); i++) {
+
+            auto theName = sampler.getParameterName(i);
+
+            if (theName == "Param") {
+                continue;
+            }
+
+            auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
+            if (theParameter) {
+                sampler.setParameter(i, theParameter->sample(index));
+            }
+            else {
+                std::cout << "Error automateParameters: " << theName << std::endl;
+            }
+        }
+        
     }
 
 

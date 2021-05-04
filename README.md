@@ -72,11 +72,12 @@ synth.set_automation("A Pan", make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 # inspect with `get_parameters_description()`
 sampler = engine.make_sampler_processor("my_sampler", load_audio_file(SAMPLE_PATH))
 # sampler.set_data(load_audio_file(SAMPLE_PATH_2))  # this is allowed too at any time.
-sampler.set_parameter(3, 0.1234) # override a specific parameter.
+print(sampler.get_parameters_description())
+sampler.set_parameter(0, 60./127.)  # set the center frequency to middle C (60)
+sampler.set_parameter(3, 0.1234) # override some other parameter.
 sampler.load_midi("C:/path/to/sampler_rhythm.mid")
 # We can also add notes one at a time.
 sampler.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
-
 
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
