@@ -181,7 +181,7 @@ public:
         return sampler.getNumParameters();
     }
 
-    py::list getPluginParametersDescription()
+    py::list getParametersDescription()
     {
         py::list myList;
 
