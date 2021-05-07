@@ -99,10 +99,13 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
-    automateParameters(myPlayheadIndex);
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
 
-    long long int start = myWriteIndex;
-    long long int end = myWriteIndex + buffer.getNumSamples();
+    automateParameters();
+
+    long long int start = posInfo.timeInSamples;
+    long long int end = start + buffer.getNumSamples();
     myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
     do {
         if (myIsMessageBetween) {
@@ -136,7 +139,6 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
             myCopyBuffer->copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
         }
 
-        
         myPlugin->processBlock(*myCopyBuffer, myRenderMidiBuffer);
 
         // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
@@ -146,14 +148,13 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         }
 
     }
-
-    myWriteIndex = end;
-
-    myPlayheadIndex += buffer.getNumSamples();
 }
 
 void
-PluginProcessor::automateParameters(size_t index) {
+PluginProcessor::automateParameters() {
+
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
 
     if (myPlugin) {
 
@@ -167,7 +168,7 @@ PluginProcessor::automateParameters(size_t index) {
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                myPlugin->setParameter(i, theParameter->sample(index));
+                myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
                 std::cout << "Error automateParameters: " << theName << std::endl;
@@ -179,8 +180,6 @@ PluginProcessor::automateParameters(size_t index) {
 void
 PluginProcessor::reset()
 {
-    myWriteIndex = 0;
-    myPlayheadIndex = 0;
     myPlugin->reset();
 
     if (myMidiIterator) {

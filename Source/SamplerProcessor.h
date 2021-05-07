@@ -56,7 +56,7 @@ public:
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
     {
-        automateParameters(myPlayheadIndex);
+        automateParameters();
 
         long long int start = myWriteIndex;
         long long int end = myWriteIndex + buffer.getNumSamples();
@@ -74,8 +74,6 @@ public:
         myRenderMidiBuffer.clear();
 
         myWriteIndex = end;
-
-        myPlayheadIndex += buffer.getNumSamples();
     }
 
     void
@@ -84,7 +82,6 @@ public:
         sampler.reset();
 
         myWriteIndex = 0;
-        myPlayheadIndex = 0;
     }
 
     const juce::String getName() const { return "SamplerProcessor"; }
@@ -237,7 +234,10 @@ public:
     }
 
     void
-    automateParameters(size_t index) {
+    automateParameters() {
+
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
 
         for (int i = 0; i < sampler.getNumParameters(); i++) {
 
@@ -249,7 +249,7 @@ public:
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                sampler.setParameter(i, theParameter->sample(index));
+                sampler.setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
                 std::cout << "Error automateParameters: " << theName << std::endl;

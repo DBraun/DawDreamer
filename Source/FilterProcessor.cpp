@@ -23,7 +23,7 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     mySampleRate = sampleRate;
     mySamplesPerBlock = samplesPerBlock;
 
-    automateParameters(0);  // this gives the filters an initial state.
+    automateParameters();  // this gives the filters an initial state.
 
     int numChannels = 2;
     juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), static_cast<juce::uint32> (numChannels) };
@@ -33,21 +33,22 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
-    automateParameters(myPlayheadIndex);
+    automateParameters();
 
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     myFilter.process(context);
-
-    myPlayheadIndex += buffer.getNumSamples();
 }
 
 
-void FilterProcessor::automateParameters(size_t index) {
+void FilterProcessor::automateParameters() {
 
-    *myFreq = getAutomationVal("freq", index);
-    *myQ = getAutomationVal("q", index);
-    *myGain = getAutomationVal("gain", index);
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
+
+    *myFreq = getAutomationVal("freq", posInfo.timeInSamples);
+    *myQ = getAutomationVal("q", posInfo.timeInSamples);
+    *myGain = getAutomationVal("gain", posInfo.timeInSamples);
     
     switch (myMode)
     {
@@ -83,7 +84,6 @@ void
 FilterProcessor::reset()
 {
     myFilter.reset();
-    myPlayheadIndex = 0;
 }
 
 std::string

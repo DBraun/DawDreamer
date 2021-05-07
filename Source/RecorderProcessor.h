@@ -17,22 +17,21 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
     {
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
         const int numberChannels = buffer.getNumChannels();
 
         for (int i = 0; i < buffer.getNumSamples(); i++)
         {
             for (int chan = 0; chan < numberChannels; chan++) {
                 // Write the sample to the engine's history for the correct channel.                
-                (*myEngineBuffer)[chan][myWriteIndex] = buffer.getSample(chan, i);
+                (*myEngineBuffer)[chan][posInfo.timeInSamples+i] = buffer.getSample(chan, i);
             }
-            myWriteIndex++;
         }
     }
 
-    void reset()
-    {
-        myWriteIndex = 0;
-    }
+    void reset(){}
 
     const juce::String getName() const { return "RecorderProcessor"; }
 
@@ -41,6 +40,5 @@ public:
     }
 
 private:
-    int myWriteIndex = 0;
     std::vector<std::vector<float>>* myEngineBuffer = nullptr;
 };

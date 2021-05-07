@@ -45,6 +45,7 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+engine.set_bpm(120.)  # default is 120.
 
 DURATION = 10 # How many seconds we want to render.
 

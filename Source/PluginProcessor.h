@@ -58,13 +58,12 @@ private:
     MidiBuffer myMidiBuffer;
     MidiBuffer myRenderMidiBuffer;
     MidiMessage myMidiMessage;
-    long long int myWriteIndex = 0;
     int myMidiMessagePosition = -1;
     MidiBuffer::Iterator* myMidiIterator = nullptr;
     bool myIsMessageBetween = false;
     bool myMidiEventsDoRemain = false;
 
-    void automateParameters(size_t index);
+    void automateParameters();
 
 protected:
 
