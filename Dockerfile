@@ -26,7 +26,7 @@ RUN apt-get update -yq \
 && update-ca-certificates \
 && apt-get clean -y
 
-RUN git clone --recursive https://github.com/guillaumephd/DawDreamer.git
+RUN git clone --recursive https://github.com/DBraun/DawDreamer.git
 
 # Build
 WORKDIR DawDreamer/Builds/LinuxMakefile
