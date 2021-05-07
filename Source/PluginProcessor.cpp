@@ -80,23 +80,20 @@ PluginProcessor::~PluginProcessor() {
     }
 }
 
+void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
+{
+    AudioProcessor::setPlayHead(newPlayHead);
+    if (myPlugin) {
+        myPlugin->setPlayHead(newPlayHead);
+    }
+}
+
 void
 PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-
     if (myPlugin) {
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
-        myPlugin->setPlayHead(this->getPlayHead());
     }
-
-    if (myMidiIterator) {
-        delete myMidiIterator;
-    }
-
-    myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
-    myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
-    myWriteIndex = 0;
-    myRenderMidiBuffer.clear();
 }
 
 void
@@ -139,6 +136,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
             myCopyBuffer->copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
         }
 
+        
         myPlugin->processBlock(*myCopyBuffer, myRenderMidiBuffer);
 
         // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
@@ -182,8 +180,16 @@ void
 PluginProcessor::reset()
 {
     myWriteIndex = 0;
-    myPlugin->reset();
     myPlayheadIndex = 0;
+    myPlugin->reset();
+
+    if (myMidiIterator) {
+        delete myMidiIterator;
+    }
+
+    myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
+    myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+    myRenderMidiBuffer.clear();
 }
 
 #include <pluginterfaces/vst/ivstcomponent.h>

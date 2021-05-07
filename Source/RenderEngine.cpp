@@ -142,6 +142,8 @@ RenderEngine::render(const double renderLength) {
     myMainProcessorGraph->reset();
     myMainProcessorGraph->setPlayHead(this);
 
+    myCurrentPositionInfo.resetToDefault();
+
     myCurrentPositionInfo.bpm = myBPM;
     myCurrentPositionInfo.isPlaying = true;
     myCurrentPositionInfo.isRecording = true;
@@ -163,6 +165,7 @@ RenderEngine::render(const double renderLength) {
         myMainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
 
         myCurrentPositionInfo.timeInSamples += myBufferSize;
+        myCurrentPositionInfo.ppqPosition = (myCurrentPositionInfo.timeInSamples / (mySampleRate * 60.)) * myBPM;
     }
 
     myCurrentPositionInfo.isPlaying = false;

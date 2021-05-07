@@ -46,6 +46,8 @@ public:
         const double noteStart,
         const double noteLength);
 
+    void setPlayHead(AudioPlayHead* newPlayHead);
+
 private:
 
     bool loadPlugin(double sampleRate, int samplesPerBlock);
