@@ -117,7 +117,7 @@ engine.render(DURATION)  # render audio again!
 
 ### All Platforms
 
-The goal is to have a working Linux Make file, Visual Studio Solution, and Xcode Project in the builds folder. If the build for your platform isn't working, you should use [JUCE's Projucer](https://juce.com/get-juce) to open `DawDreamer.jucer` and create it.
+You can find a working Linux Make file, Visual Studio Solution, and Xcode Project in the `Builds/` folder. If the build for your platform isn't working, you should use [JUCE's Projucer](https://juce.com/get-juce) to open `DawDreamer.jucer` and create it.
 
 ### Windows
 
@@ -171,15 +171,18 @@ Then try `DawDreamer`:
 
 ### Linux
 
-Linux hasn't been tested since the transition from RenderMan, but it might work. There's also not yet a `Builds/Linux/make` file.
-
-Install [Python 3.8.x](https://www.python.org/downloads/source/).
-
-JUCE itself has a list of dependencies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependencies. Find the respective packages for other distros using Google please!
+To build `DawDreamer` on Linux, you first need to install a few packages for JUCE.
+JUCE itself has a list of dependencies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out!
+Depending on your distribution and setup you may already have some / all of the following libraries.
+If you are on Ubuntu, the following commands will install your dependencies:
 
 ```bash
-sudo apt-get -y install llvm
+sudo apt-get -y install ca-certificates
+sudo apt-get -y install build-essential
 sudo apt-get -y install clang
+sudo apt-get -y install pkg-config
+sudo apt-get -y install libboost-all-dev
+sudo apt-get -y install libboost-python-dev
 sudo apt-get -y install libfreetype6-dev
 sudo apt-get -y install libx11-dev
 sudo apt-get -y install libxinerama-dev
@@ -190,14 +193,47 @@ sudo apt-get -y install libasound2-dev
 sudo apt-get -y install freeglut3-dev
 sudo apt-get -y install libxcomposite-dev
 sudo apt-get -y install libcurl4-gnutls-dev
+sudo apt-get -y install git
+sudo apt-get -y install python3
+sudo apt-get -y install python3-dev
 ```
 
-Well done! You've made it this far! Should you still have problems, which is always a possibility with Linux, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121).
+Should you still have problems, which is always a possibility with Linux, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121).
 
-To build the library for Linux, change to the right directory and run make:
-```
+A Linux Makefile (for dawdreamer with python3) is provided in `Builds/LinuxMakefile/`.
+
+To build the library for Linux, change to the right directory and run make. You also need to rename the library in order to use it in Python.
+
+```bash
 cd Builds/LinuxMakefile/
 make
+
+cd build
+mv libdawdreamer.so dawdreamer.so
+```
+
+That's almost it! To install `dawdreamer` globally, run:
+
+```bash
+sudo cp dawdreamer.so `python -c "import site; print(site.getsitepackages()[-1])"`
+```
+
+That's it! In python3 you can now import dawdreamer:
+
+```python
+import dawdreamer as daw
+# ...
+# (see API section below)
+```
+
+Note: for troubleshooting, you can look at the `Dockerfile` file.
+
+### Docker
+
+A `Dockerfile` is provided. To build it, run:
+
+```bash
+docker build -t dawdreamer .
 ```
 
 ## API
@@ -217,6 +253,8 @@ SAMPLE_RATE = 44100
 # choose a smaller power of 2 buffer size such as 64 or 128.
 BUFFER_SIZE = 512
 
+# Note: all paths must be absolute paths
+# Note: only VST2 plugins are supported for now (i.e. VST3 plugins do not work, for now)
 SYNTH_PLUGIN = "C:/path/to/synth.dll"
 REVERB_PLUGIN = "C:/path/to/reverb.dll"
 # fxp is a conventional file extension for VST presets.
@@ -392,13 +430,14 @@ If you use DawDreamer, you must obey the licenses of JUCE, pybind11, and Steinbe
 If you use this code academically, please consider citing the DawDreamer repo:
 ```
 @misc{DawDreamer2020,
-      author = {Braun, David},
-      title = {DawDreamer: VST Instruments and Effects with Python},
-      year = {2020},
-      publisher = {GitHub},
-      journal = {GitHub repository},
-      howpublished = {\url{https://github.com/DBraun/DawDreamer}},
-      commit = {1cc9681caee26d963299d316ef6cf3a65ee47ad3}}
+    author = {Braun, David},
+    title = {DawDreamer: VST Instruments and Effects with Python},
+    year = {2020},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/DBraun/DawDreamer}},
+    commit = {1cc9681caee26d963299d316ef6cf3a65ee47ad3}
+}
 ```
 
 and RenderMan's DOI:
