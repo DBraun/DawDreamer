@@ -31,6 +31,7 @@ SYNTH_PRESET = "C:/path/to/preset.fxp"
 REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work
 VOCALS_PATH = "C:/path/to/vocals.wav"
 PIANO_PATH = "C:/path/to/piano.wav"
+SAMPLE_PATH = "C:/path/to/clap.wav"  # sound to be used for sampler instrument.
 
 def load_audio_file(file_path, duration=None):
   sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE)
@@ -44,6 +45,7 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+engine.set_bpm(120.)  # default is 120.
 
 DURATION = 10 # How many seconds we want to render.
 
@@ -64,6 +66,20 @@ print(synth.get_plugin_parameters_description())
 print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
 synth.set_automation("A Pan", make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 
+# The sampler processor works like the plugin processor.
+# Provide audio for the sample, and then provide MIDI.
+# The note value affects the pitch and playback speed of the sample.
+# There are basic sampler parameters such as ADSR for volume and filters which you can
+# inspect with `get_parameters_description()`
+sampler = engine.make_sampler_processor("my_sampler", load_audio_file(SAMPLE_PATH))
+# sampler.set_data(load_audio_file(SAMPLE_PATH_2))  # this is allowed too at any time.
+print(sampler.get_parameters_description())
+sampler.set_parameter(0, 60./127.)  # set the center frequency to middle C (60)
+sampler.set_parameter(3, 0.1234) # override some other parameter.
+sampler.load_midi("C:/path/to/sampler_rhythm.mid")
+# We can also add notes one at a time.
+sampler.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
+
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
 freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 with amp 5000.
@@ -79,11 +95,12 @@ freq_automation = filter_processor.get_automation("freq")  # You can get the aut
 # The audio from the last tuple's processor will be accessed automatically later by engine.get_audio()
 graph = [
   (synth, []),  # synth takes no inputs, so we give an empty list.
+  (sampler, []),  # sampler takes no inputs.
   (engine.make_reverb_processor("reverb"), ["my_synth"]), # Apply JUCE reverb to the synth named earlier
   (engine.make_plugin_processor("more_reverb", REVERB_PLUGIN), ["reverb"]), # Apply VST reverb
   (engine.make_playback_processor("vocals", vocals), []), # Playback has no inputs.
   (filter_processor, ["vocals"]), # High-pass filter with automation set earlier.
-  (engine.make_add_processor("added"), ["more_reverb", "filter"])
+  (engine.make_add_processor("added"), ["more_reverb", "filter", "my_sampler"])
 ]
 
 engine.load_graph(graph)

@@ -18,7 +18,7 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         mySampleRate = sampleRate;
-        automateParameters(myPlayheadIndex); // do this to give a valid state to the filter.
+        automateParameters(); // do this to give a valid state to the filter.
 
         initDelay();
         
@@ -29,7 +29,7 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
 
-        automateParameters(myPlayheadIndex);
+        automateParameters();
 
         delayBuffer.makeCopyOf(buffer);
         juce::dsp::AudioBlock<float> block(delayBuffer);
@@ -42,20 +42,20 @@ public:
         {
             buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), *myWetLevel);
         }
-
-        myPlayheadIndex += buffer.getNumSamples();
     }
 
-    void automateParameters(size_t index) {
+    void automateParameters() {
 
-        *myWetLevel = getAutomationVal("wet_level", index);
-        *myDelaySize = getAutomationVal("delay", index);
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
+        *myWetLevel = getAutomationVal("wet_level", posInfo.timeInSamples);
+        *myDelaySize = getAutomationVal("delay", posInfo.timeInSamples);
         updateParameters();
     }
 
     void reset() {
         myDelay.reset();
-        myPlayheadIndex = 0;
     };
 
     const juce::String getName() { return "DelayProcessor"; };

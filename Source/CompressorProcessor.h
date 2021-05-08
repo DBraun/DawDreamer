@@ -28,27 +28,28 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
 
-        automateParameters(myPlayheadIndex);
+        automateParameters();
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myCompressor.process(context);
 
-        myPlayheadIndex += buffer.getNumSamples();
     }
 
-    void automateParameters(size_t index) {
+    void automateParameters() {
 
-        *myThreshold = getAutomationVal("threshold", index);
-        *myRatio = getAutomationVal("ratio", index);
-        *myAttack = getAutomationVal("attack", index);
-        *myRelease = getAutomationVal("release", index);
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
+        *myThreshold = getAutomationVal("threshold", posInfo.timeInSamples);
+        *myRatio = getAutomationVal("ratio", posInfo.timeInSamples);
+        *myAttack = getAutomationVal("attack", posInfo.timeInSamples);
+        *myRelease = getAutomationVal("release", posInfo.timeInSamples);
         updateParameters();
     }
 
     void reset() {
         myCompressor.reset();
-        myPlayheadIndex = 0;
     };
 
     const juce::String getName() { return "CompressorProcessor"; };

@@ -3,9 +3,69 @@
 <JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="1.0.0"
               bundleIdentifier="com.yourcompany.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
-              cppLanguageStandard="14" companyCopyright="" jucerFormatVersion="1">
+              cppLanguageStandard="14" companyCopyright="" jucerFormatVersion="1"
+              defines="PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==">
   <MAINGROUP id="tONOKg" name="DawDreamer">
     <GROUP id="{7CC9F263-A7AC-3CCC-E658-863D58B298DA}" name="Processors">
+      <GROUP id="{D5318407-55AB-D493-B9CC-88A8BBA22E03}" name="Sampler">
+        <GROUP id="{8E8661E0-FBB6-10E7-B37B-8807571601AE}" name="Components">
+          <FILE id="NjHoz1" name="LoopPointMarker.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/LoopPointMarker.h"/>
+          <FILE id="H6cQfv" name="LoopPointsOverlay.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/LoopPointsOverlay.h"/>
+          <FILE id="cNiIzJ" name="MainSamplerView.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/MainSamplerView.h"/>
+          <FILE id="d5875C" name="MPELegacySettingsComponent.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/MPELegacySettingsComponent.h"/>
+          <FILE id="a3LrYy" name="MPENewSettingsComponent.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/MPENewSettingsComponent.h"/>
+          <FILE id="o5Y4NN" name="MPESettingsComponent.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/MPESettingsComponent.h"/>
+          <FILE id="HTWzw2" name="PlaybackPositionOverlay.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/PlaybackPositionOverlay.h"/>
+          <FILE id="S1KZ1M" name="Ruler.h" compile="0" resource="0" file="Source/Sampler/Source/Components/Ruler.h"/>
+          <FILE id="uQ77Y3" name="WaveformEditor.h" compile="0" resource="0"
+                file="Source/Sampler/Source/Components/WaveformEditor.h"/>
+          <FILE id="BesjBK" name="WaveformView.h" compile="0" resource="0" file="Source/Sampler/Source/Components/WaveformView.h"/>
+        </GROUP>
+        <GROUP id="{6E9F493F-31E0-1A31-962A-45D040F6BF4C}" name="DataModels">
+          <FILE id="F9KQFN" name="DataModel.cpp" compile="1" resource="0" file="Source/Sampler/Source/DataModels/DataModel.cpp"/>
+          <FILE id="fFG3ej" name="DataModel.h" compile="0" resource="0" file="Source/Sampler/Source/DataModels/DataModel.h"/>
+          <FILE id="QEF3Ei" name="MPESettingsDataModel.cpp" compile="1" resource="0"
+                file="Source/Sampler/Source/DataModels/MPESettingsDataModel.cpp"/>
+          <FILE id="dSMQ80" name="MPESettingsDataModel.h" compile="0" resource="0"
+                file="Source/Sampler/Source/DataModels/MPESettingsDataModel.h"/>
+          <FILE id="TXtCF9" name="VisibleRangeDataModel.h" compile="0" resource="0"
+                file="Source/Sampler/Source/DataModels/VisibleRangeDataModel.h"/>
+        </GROUP>
+        <FILE id="vUwl7m" name="CommandFifo.h" compile="0" resource="0" file="Source/Sampler/Source/CommandFifo.h"/>
+        <FILE id="djy6bB" name="DemoUtilities.h" compile="0" resource="0" file="Source/Sampler/Source/DemoUtilities.h"/>
+        <FILE id="k8BFzu" name="FileAudioFormatReaderFactory.h" compile="0"
+              resource="0" file="Source/Sampler/Source/FileAudioFormatReaderFactory.h"/>
+        <FILE id="w1zvyE" name="Main.cpp" compile="0" resource="0" file="Source/Sampler/Source/Main.cpp"/>
+        <FILE id="DS7V7g" name="MemoryAudioFormatReaderFactory.h" compile="0"
+              resource="0" file="Source/Sampler/Source/MemoryAudioFormatReaderFactory.h"/>
+        <FILE id="HxDCb7" name="Misc.h" compile="0" resource="0" file="Source/Sampler/Source/Misc.h"/>
+        <FILE id="D68rVL" name="MPESamplerSound.h" compile="0" resource="0"
+              file="Source/Sampler/Source/MPESamplerSound.h"/>
+        <FILE id="iqFxOj" name="MPESamplerVoice.h" compile="0" resource="0"
+              file="Source/Sampler/Source/MPESamplerVoice.h"/>
+        <FILE id="R8TZ2w" name="ProcessorState.h" compile="0" resource="0"
+              file="Source/Sampler/Source/ProcessorState.h"/>
+        <FILE id="pRkamr" name="Sample.h" compile="0" resource="0" file="Source/Sampler/Source/Sample.h"/>
+        <FILE id="yG8z1j" name="SamplerAudioProcessor.cpp" compile="1" resource="0"
+              file="Source/Sampler/Source/SamplerAudioProcessor.cpp"/>
+        <FILE id="KVJS25" name="SamplerAudioProcessor.h" compile="0" resource="0"
+              file="Source/Sampler/Source/SamplerAudioProcessor.h"/>
+        <FILE id="QuV9cZ" name="SamplerAudioProcessorEditor.cpp" compile="1"
+              resource="0" file="Source/Sampler/Source/SamplerAudioProcessorEditor.cpp"/>
+        <FILE id="jmECzS" name="SamplerAudioProcessorEditor.h" compile="0"
+              resource="0" file="Source/Sampler/Source/SamplerAudioProcessorEditor.h"/>
+        <FILE id="xMOxP3" name="SamplerPluginDemo.h" compile="0" resource="0"
+              file="Source/Sampler/Source/SamplerPluginDemo.h"/>
+      </GROUP>
+      <FILE id="VCI1MC" name="SamplerProcessor.h" compile="0" resource="0"
+            file="Source/SamplerProcessor.h"/>
       <FILE id="DzAh2I" name="DelayProcessor.h" compile="0" resource="0"
             file="Source/DelayProcessor.h"/>
       <FILE id="t8Bx2b" name="PannerProcessor.h" compile="0" resource="0"
@@ -92,6 +152,7 @@
         <MODULEPATH id="juce_audio_formats" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_dsp" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
@@ -118,6 +179,7 @@
         <MODULEPATH id="juce_audio_formats" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_dsp" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <VS2019 targetFolder="Builds/VisualStudio2019" vst3Folder="VST3_SDK"
@@ -145,6 +207,7 @@
         <MODULEPATH id="juce_audio_devices" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_audio_basics" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_dsp" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2019>
     <VS2017 targetFolder="Builds/VisualStudio2017" vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK">
@@ -169,6 +232,7 @@
         <MODULEPATH id="juce_audio_formats"/>
         <MODULEPATH id="juce_audio_devices"/>
         <MODULEPATH id="juce_audio_basics"/>
+        <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
@@ -177,6 +241,7 @@
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>

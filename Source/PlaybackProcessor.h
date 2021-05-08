@@ -17,9 +17,7 @@ public:
     }
 
     void
-    prepareToPlay(double, int)
-    {
-    }
+    prepareToPlay(double, int) {}
 
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
@@ -32,21 +30,20 @@ public:
             myLength = 0;
         }
 
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
         // todo:  buffer.getWritePointer would probably be faster.
-        for (int i = 0; i < buffer.getNumSamples() && myPlaybackIndex < myLength; i++)
+        for (int i = 0; i < buffer.getNumSamples() && posInfo.timeInSamples < myLength; i++)
         {
             for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
-                buffer.setSample(chan, i, myPlaybackData[chan][myPlaybackIndex]);
+                buffer.setSample(chan, i, myPlaybackData[chan][posInfo.timeInSamples+i]);
             }
-            myPlaybackIndex++;
         }
     }
 
     void
-    reset()
-    {
-        myPlaybackIndex = 0;
-    }
+    reset() {}
 
     const juce::String getName() const { return "PlaybackProcessor"; }
 
@@ -65,6 +62,5 @@ public:
 private:
 
     std::vector<std::vector<float>> myPlaybackData;
-    uint32_t myPlaybackIndex = 0;
 
 };

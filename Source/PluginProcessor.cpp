@@ -80,31 +80,32 @@ PluginProcessor::~PluginProcessor() {
     }
 }
 
+void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
+{
+    AudioProcessor::setPlayHead(newPlayHead);
+    if (myPlugin) {
+        myPlugin->setPlayHead(newPlayHead);
+    }
+}
+
 void
 PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-
     if (myPlugin) {
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
     }
-
-    if (myMidiIterator) {
-        delete myMidiIterator;
-    }
-
-    myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
-    myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
-    myWriteIndex = 0;
-    myRenderMidiBuffer.clear();
 }
 
 void
 PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 {
-    automateParameters(myPlayheadIndex);
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
 
-    long long int start = myWriteIndex;
-    long long int end = myWriteIndex + buffer.getNumSamples();
+    automateParameters();
+
+    long long int start = posInfo.timeInSamples;
+    long long int end = start + buffer.getNumSamples();
     myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
     do {
         if (myIsMessageBetween) {
@@ -147,14 +148,13 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         }
 
     }
-
-    myWriteIndex = end;
-
-    myPlayheadIndex += buffer.getNumSamples();
 }
 
 void
-PluginProcessor::automateParameters(size_t index) {
+PluginProcessor::automateParameters() {
+
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
 
     if (myPlugin) {
 
@@ -168,7 +168,7 @@ PluginProcessor::automateParameters(size_t index) {
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                myPlugin->setParameter(i, theParameter->sample(index));
+                myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
                 std::cout << "Error automateParameters: " << theName << std::endl;
@@ -180,9 +180,15 @@ PluginProcessor::automateParameters(size_t index) {
 void
 PluginProcessor::reset()
 {
-    myWriteIndex = 0;
     myPlugin->reset();
-    myPlayheadIndex = 0;
+
+    if (myMidiIterator) {
+        delete myMidiIterator;
+    }
+
+    myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
+    myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+    myRenderMidiBuffer.clear();
 }
 
 #include <pluginterfaces/vst/ivstcomponent.h>

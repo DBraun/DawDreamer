@@ -23,36 +23,37 @@ public:
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
-        automateParameters(myPlayheadIndex); // do this to give a valid state to the filter.
+        automateParameters(); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock) };
         myReverb.prepare(spec);
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
 
-        automateParameters(myPlayheadIndex);
+        automateParameters();
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myReverb.process(context);
 
-        myPlayheadIndex += buffer.getNumSamples();
     }
 
-    void automateParameters(size_t index) {
+    void automateParameters() {
 
-        *myRoomSize = getAutomationVal("room_size", index);
-        *myDamping = getAutomationVal("damping", index);
-        *myDryLevel = getAutomationVal("dry_level", index);
-        *myWetLevel = getAutomationVal("wet_level", index);
-        *myWidth = getAutomationVal("width", index);
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
+        *myRoomSize = getAutomationVal("room_size", posInfo.timeInSamples);
+        *myDamping = getAutomationVal("damping", posInfo.timeInSamples);
+        *myDryLevel = getAutomationVal("dry_level", posInfo.timeInSamples);
+        *myWetLevel = getAutomationVal("wet_level", posInfo.timeInSamples);
+        *myWidth = getAutomationVal("width", posInfo.timeInSamples);
 
         updateParameters();
     }
 
     void reset() {
         myReverb.reset();
-        myPlayheadIndex = 0;
     };
 
     const juce::String getName() { return "ReverbProcessor"; };

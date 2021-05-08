@@ -55,7 +55,7 @@ public:
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
 
-    void automateParameters(size_t) {};
+    void automateParameters() {};
 
 private:
     //==============================================================================
@@ -65,7 +65,6 @@ private:
 protected:
 
     AudioProcessorValueTreeState myParameters;
-    size_t myPlayheadIndex = 0;
 
     juce::AudioProcessorValueTreeState::ParameterLayout createEmptyParameterLayout()
     {

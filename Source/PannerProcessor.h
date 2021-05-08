@@ -17,38 +17,37 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         const int numChannels = 2;
-        automateParameters(myPlayheadIndex); // do this to give a valid state to the filter.
+        automateParameters(); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
         myPanner.prepare(spec);
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
 
-        automateParameters(myPlayheadIndex);
+        automateParameters();
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myPanner.process(context);
-
-        myPlayheadIndex += buffer.getNumSamples();
     }
 
-    void automateParameters(size_t index) {
+    void automateParameters() {
 
-        *myPan = getAutomationVal("pan", index);
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
+        *myPan = getAutomationVal("pan", posInfo.timeInSamples);
         updateParameters();
     }
 
     void reset() {
         myPanner.reset();
-        myPlayheadIndex = 0;
     };
 
     const juce::String getName() { return "PannerProcessor"; };
 
     void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
-    float getPan() { return getAutomationVal("pan", 0);
-    }
+    float getPan() { return getAutomationVal("pan", 0); }
 
     void setRule(std::string newRule) {
         myRule = stringToRule(newRule);

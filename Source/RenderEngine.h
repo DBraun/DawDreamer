@@ -21,7 +21,7 @@ public:
     std::vector<DAGNode> nodes;
 };
 
-class RenderEngine
+class RenderEngine : AudioPlayHead
 {
 public:
     RenderEngine(double sr, int bs);
@@ -37,12 +37,21 @@ public:
 
     void render (const double renderLength);
 
+    void setBPM(double bpm);
+
     const std::vector<std::vector<float>> getAudioFrames();
+
+    bool getCurrentPosition(CurrentPositionInfo& result) override;
+    bool canControlTransport() override;
+    void transportPlay(bool shouldStartPlaying) override;
+    void transportRecord(bool shouldStartRecording) override;
+    void transportRewind() override;
 
 protected:
 
     double mySampleRate;
     int myBufferSize;
+    double myBPM = 120.;
 
 private:
                            
@@ -54,5 +63,7 @@ private:
 
     int myNumInputAudioChans = 2;
     int myNumOutputAudioChans = 2;
+
+    CurrentPositionInfo myCurrentPositionInfo;
 
 };

@@ -11,3 +11,4 @@
 #include "RecorderProcessor.h"
 #include "ReverbProcessor.h"
 #include "PannerProcessor.h"
+#include "SamplerProcessor.h"
