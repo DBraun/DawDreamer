@@ -108,6 +108,14 @@ RenderEngineWrapper::makeSamplerProcessor(const std::string& name, py::array dat
     return std::shared_ptr<SamplerProcessor>{new SamplerProcessor{ name, data, mySampleRate, myBufferSize }};
 }
 
+#ifdef BUILD_DAWDREAMER_FAUST
+std::shared_ptr<FaustProcessor>
+RenderEngineWrapper::makeFaustProcessor(const std::string& name, const std::string& path)
+{
+    return std::shared_ptr<FaustProcessor>{new FaustProcessor{ name, mySampleRate, myBufferSize, path }};
+}
+#endif
+
 bool
 RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans = 2, int numOutputAudioChans = 2) {
 

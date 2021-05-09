@@ -511,6 +511,9 @@
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.cpp">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\FaustProcessor.cpp">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\FilterProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>
@@ -2842,6 +2845,9 @@
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\AllProcessors.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\FaustProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\FilterProcessor.h">

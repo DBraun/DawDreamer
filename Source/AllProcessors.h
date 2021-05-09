@@ -4,6 +4,7 @@
 #include "AddProcessor.h"
 #include "CompressorProcessor.h"
 #include "DelayProcessor.h"
+#include "FaustProcessor.h"
 #include "FilterProcessor.h"
 #include "OscillatorProcessor.h"
 #include "PlaybackProcessor.h"

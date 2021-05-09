@@ -72,6 +72,16 @@ PYBIND11_MODULE(dawdreamer, m)
         .def("clear_midi", &SamplerProcessor::clearMidi)
         .def("add_midi_note", &SamplerProcessor::addMidiNote);
 
+#ifdef BUILD_DAWDREAMER_FAUST
+    py::class_<FaustProcessor, std::shared_ptr<FaustProcessor>, ProcessorBase>(m, "FaustProcessor")
+        .def("set_dsp", &FaustProcessor::compileFromFile)
+        .def("get_parameters_description", &FaustProcessor::getPluginParametersDescription)
+        .def("get_parameter", &FaustProcessor::getParamWithIndex)
+        .def("get_parameter", &FaustProcessor::getParamWithPath)
+        .def("set_parameter", &FaustProcessor::setParamWithIndex)
+        .def("set_parameter", &FaustProcessor::setParamWithPath);
+#endif
+
     std::vector<float> defaultGain;
 
     py::return_value_policy returnPolicy = py::return_value_policy::take_ownership;
@@ -86,6 +96,9 @@ PYBIND11_MODULE(dawdreamer, m)
         .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, returnPolicy)
         .def("make_plugin_processor", &RenderEngineWrapper::makePluginProcessor, returnPolicy)
         .def("make_sampler_processor", &RenderEngineWrapper::makeSamplerProcessor, returnPolicy)
+#ifdef BUILD_DAWDREAMER_FAUST
+        .def("make_faust_processor", &RenderEngineWrapper::makeFaustProcessor, returnPolicy)
+#endif
         .def("make_playback_processor", &RenderEngineWrapper::makePlaybackProcessor, returnPolicy)
         .def("make_filter_processor", &RenderEngineWrapper::makeFilterProcessor, returnPolicy,
             arg("name"), arg("mode") = "high", arg("freq") = 1000.f, arg("q") = .707107f, arg("gain") = 1.f)
