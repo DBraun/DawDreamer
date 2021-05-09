@@ -33,11 +33,18 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
+        int i = 0;
+
         // todo:  buffer.getWritePointer would probably be faster.
-        for (int i = 0; i < buffer.getNumSamples() && posInfo.timeInSamples < myLength; i++)
+        for (i = 0; i < buffer.getNumSamples() && posInfo.timeInSamples < myLength; i++)
         {
             for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
                 buffer.setSample(chan, i, myPlaybackData[chan][posInfo.timeInSamples+i]);
+            }
+        }
+        for (; i < buffer.getNumSamples(); i++) {
+            for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
+                buffer.setSample(chan, i, 0.);
             }
         }
     }

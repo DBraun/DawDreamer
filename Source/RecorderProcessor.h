@@ -22,7 +22,9 @@ public:
 
         const int numberChannels = buffer.getNumChannels();
 
-        for (int i = 0; i < buffer.getNumSamples(); i++)
+        int recorderSize = myEngineBuffer->at(0).size();
+
+        for (int i = 0; i < buffer.getNumSamples() && posInfo.timeInSamples+i < recorderSize; i++)
         {
             for (int chan = 0; chan < numberChannels; chan++) {
                 // Write the sample to the engine's history for the correct channel.                

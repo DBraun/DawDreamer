@@ -130,14 +130,21 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
 
 void
 RenderEngine::render(const double renderLength) {
-    int numberOfBuffers = int(std::ceil(renderLength * mySampleRate / myBufferSize));
+
+    int numRenderedSamples = renderLength * mySampleRate;
+    if (numRenderedSamples <= 0) {
+        std::cerr << "Render length must be greater than zero.";
+        return;
+    }
+
+    int numberOfBuffers = int(std::ceil((numRenderedSamples -1.) / myBufferSize));
 
     const long long int numSamples = numberOfBuffers * myBufferSize;
     AudioSampleBuffer audioBuffer(myNumOutputAudioChans, myBufferSize);
 
     // Clear main buffer and prepare to record samples over multiple buffer passes.
     myRecordedSamples.clear();
-    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numSamples, 0.f));
+    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numRenderedSamples, 0.f));
 
     myMainProcessorGraph->reset();
     myMainProcessorGraph->setPlayHead(this);
