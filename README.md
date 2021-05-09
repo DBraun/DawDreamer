@@ -1,3 +1,4 @@
+
 ```
   _____                       _____                                                  
  |  __ \                     |  __ \                                                 
@@ -15,7 +16,7 @@
 
 # DawDreamer
 
-DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, VST effects, and parameter automation. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
+DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, VST effects, [FAUST](http://faust.grame.fr/), and parameter automation. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Basic Example
 ```python
@@ -412,6 +413,75 @@ graph = [
 engine.load_graph(graph)
 engine.render(10.)
 
+```
+
+## FAUST (Windows only)
+
+**This pipeline is inconvenient, so please suggest ways to improve it, or make it OSX/Linux compatible.**
+
+In the Projucer, a configuration exists for Visual Studio 2019 with FAUST. However, this configuration assumes you've followed all the compilation instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) to `C:/tools/TD-Faust`. Although TD-FAUST is primarily meant to be used for TouchDesigner, you can still follow its instructions to build `faust.dll` and `faust.lib`. It will also compile LLVM, which is necessary for FAUST to be able to dynamically compile `.dsp` code.
+
+Next, run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust` files. On OSX (untested), copy them to either `/usr/local/share/faust` or `/usr/share/faust`.
+
+### Using FAUST processors
+
+Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, you don't need to `import("stdfaust.lib");` All code must result in processors with 2 outputs and an even number of inputs. Polyphony is not yet supported. Here's an example using a demo stereo reverb:
+
+**faust_reverb.dsp:**
+```dsp
+process = dm.zita_light;
+```
+
+**faust_test.py:**
+```python
+DSP_PATH = "C:/path/to/faust_reverb.dsp"  # Must be absolute path
+faust_processor = engine.make_faust_processor("faust", DSP_PATH)
+# faust_processor.set_dsp(DSP_PATH)  # You can do this anytime.
+
+print(faust_processor.get_parameters_description())
+
+# You can set parameters by index or by address.
+faust_processor.set_parameter("/Zita_Light/Dry/Wet_Mix", 1.)
+faust_processor.set_parameter(0, 1.)
+
+# Unlike VSTs, these parameters aren't necessarily 0-1 values.
+# For example, if you program your FAUST code to have a 15000 kHz cutoff
+# you can set it naturally:
+#     faust_processor.set_parameter(7, 15000)
+
+print('val: ', faust_processor.get_parameter("/Zita_Light/Dry/Wet_Mix"))
+print('val: ', faust_processor.get_parameter(0))
+
+graph = [
+  (engine.make_playback_processor("piano", load_audio_file("piano.wav")), []),
+  (faust_processor, ["piano"])
+]
+
+assert(engine.load_graph(graph))
+engine.render(DURATION)
+```
+
+Here's an example that mixes two stereo inputs into one stereo output and applies a low-pass filter.
+
+**dsp_4_channels.dsp:**
+```dsp
+myFilter= fi.lowpass(10, hslider("cutoff",  15000.,  20,  20000,  .01));
+process = _,  _,  _,  _  :>  _,  _  :  myFilter,  myFilter;
+```
+
+**faust_test_stereo_mixdown.py**
+```python
+DSP_PATH = "C:/path/to/dsp_4_channels.dsp"  # Must be absolute path
+faust_processor = engine.make_faust_processor("faust", DSP_PATH)
+faust_processor.set_parameter("cutoff", 7000.0)  # Change the cutoff frequency.
+graph = [
+  (engine.make_playback_processor("piano", load_audio_file("piano.wav")), []),
+  (engine.make_playback_processor("vocals", load_audio_file("vocals.wav")), []),
+  (faust_processor, ["piano", "vocals"])
+]
+
+assert(engine.load_graph(graph))
+engine.render(DURATION)
 ```
 
 ## License

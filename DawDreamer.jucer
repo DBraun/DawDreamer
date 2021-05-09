@@ -4,7 +4,8 @@
               bundleIdentifier="com.yourcompany.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="14" companyCopyright="" jucerFormatVersion="1"
-              defines="PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==">
+              defines="PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw=="
+              addUsingNamespaceToJuceHeader="0">
   <MAINGROUP id="tONOKg" name="DawDreamer">
     <GROUP id="{7CC9F263-A7AC-3CCC-E658-863D58B298DA}" name="Processors">
       <GROUP id="{D5318407-55AB-D493-B9CC-88A8BBA22E03}" name="Sampler">
@@ -76,6 +77,10 @@
       <FILE id="WFptFr" name="CompressorProcessor.h" compile="0" resource="0"
             file="Source/CompressorProcessor.h"/>
       <FILE id="VdWCsf" name="AllProcessors.h" compile="0" resource="0" file="Source/AllProcessors.h"/>
+      <FILE id="wA54Bg" name="FaustProcessor.h" compile="0" resource="0"
+            file="Source/FaustProcessor.h"/>
+      <FILE id="TwJEHz" name="FaustProcessor.cpp" compile="1" resource="0"
+            file="Source/FaustProcessor.cpp"/>
       <FILE id="QYs4bq" name="FilterProcessor.cpp" compile="1" resource="0"
             file="Source/FilterProcessor.cpp"/>
       <FILE id="eNraDK" name="FilterProcessor.h" compile="0" resource="0"
@@ -208,6 +213,33 @@
         <MODULEPATH id="juce_audio_basics" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_dsp" path="JuceLibraryCode/modules"/>
         <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
+      </MODULEPATHS>
+    </VS2019>
+    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST"
+            vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
+            externalLibraries="C:\tools\TD-Faust\thirdparty\faust\build\lib\Release\faust.lib">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;C:\tools\TD-Faust\thirdparty\faust\architecture;&#10;C:\tools\TD-Faust\thirdparty\faust\compiler;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\include;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\build\include;"
+                       targetName="dawdreamer" libraryPath="C:\Python38\libs" postbuildCommand="move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;C:\tools\TD-Faust\thirdparty\faust\architecture;&#10;C:\tools\TD-Faust\thirdparty\faust\compiler;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\include;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\build\include;"
+                       targetName="dawdreamer" libraryPath="C:\Python38\libs" postbuildCommand="move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video"/>
+        <MODULEPATH id="juce_opengl"/>
+        <MODULEPATH id="juce_gui_extra"/>
+        <MODULEPATH id="juce_gui_basics"/>
+        <MODULEPATH id="juce_graphics"/>
+        <MODULEPATH id="juce_events"/>
+        <MODULEPATH id="juce_dsp"/>
+        <MODULEPATH id="juce_data_structures"/>
+        <MODULEPATH id="juce_cryptography"/>
+        <MODULEPATH id="juce_core"/>
+        <MODULEPATH id="juce_audio_utils"/>
+        <MODULEPATH id="juce_audio_processors"/>
+        <MODULEPATH id="juce_audio_formats"/>
+        <MODULEPATH id="juce_audio_devices"/>
+        <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </VS2019>
     <VS2017 targetFolder="Builds/VisualStudio2017" vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK">

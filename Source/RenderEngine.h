@@ -8,8 +8,6 @@
 
 #include "AllProcessors.h"
 
-using namespace juce;
-
 class DAGNode {
 public:
     ProcessorBase* processorBase;

@@ -154,6 +154,7 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.cpp"/>
+    <ClCompile Include="..\..\Source\FaustProcessor.cpp"/>
     <ClCompile Include="..\..\Source\FilterProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\ProcessorBase.cpp"/>
@@ -2248,6 +2249,7 @@
     <ClInclude Include="..\..\Source\AddProcessor.h"/>
     <ClInclude Include="..\..\Source\CompressorProcessor.h"/>
     <ClInclude Include="..\..\Source\AllProcessors.h"/>
+    <ClInclude Include="..\..\Source\FaustProcessor.h"/>
     <ClInclude Include="..\..\Source\FilterProcessor.h"/>
     <ClInclude Include="..\..\Source\OscillatorProcessor.h"/>
     <ClInclude Include="..\..\Source\PlaybackProcessor.h"/>
