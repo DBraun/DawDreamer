@@ -217,12 +217,11 @@
     </VS2019>
     <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST"
             vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
-            externalLibraries="C:\tools\TD-Faust\thirdparty\faust\build\lib\Release\faust.lib">
+            externalLibraries="faust.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;C:\tools\TD-Faust\thirdparty\faust\architecture;&#10;C:\tools\TD-Faust\thirdparty\faust\compiler;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\include;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\build\include;"
-                       targetName="dawdreamer" libraryPath="C:\Python38\libs" postbuildCommand="move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;C:\tools\TD-Faust\thirdparty\faust\architecture;&#10;C:\tools\TD-Faust\thirdparty\faust\compiler;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\include;&#10;C:\tools\TD-Faust\thirdparty\llvm-project\llvm\build\include;"
-                       targetName="dawdreamer" libraryPath="C:\Python38\libs" postbuildCommand="move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;"
+                       targetName="dawdreamer" libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;"
+                       postbuildCommand="move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video"/>

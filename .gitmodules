@@ -7,3 +7,6 @@
 [submodule "Source/Sampler"]
 	path = Source/Sampler
 	url = https://github.com/DBraun/Sampler
+[submodule "thirdparty/faust"]
+	path = thirdparty/faust
+	url = https://github.com/grame-cncm/faust

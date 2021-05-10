@@ -75,6 +75,7 @@ PYBIND11_MODULE(dawdreamer, m)
 #ifdef BUILD_DAWDREAMER_FAUST
     py::class_<FaustProcessor, std::shared_ptr<FaustProcessor>, ProcessorBase>(m, "FaustProcessor")
         .def("set_dsp", &FaustProcessor::compileFromFile)
+        .def("set_dsp_string", &FaustProcessor::compileFromString)
         .def("get_parameters_description", &FaustProcessor::getPluginParametersDescription)
         .def("get_parameter", &FaustProcessor::getParamWithIndex)
         .def("get_parameter", &FaustProcessor::getParamWithPath)

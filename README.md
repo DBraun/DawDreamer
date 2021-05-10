@@ -1,4 +1,3 @@
-
 ```
   _____                       _____                                                  
  |  __ \                     |  __ \                                                 
@@ -415,24 +414,24 @@ engine.render(10.)
 
 ```
 
-## FAUST (Windows only)
+## FAUST
 
-**This pipeline is inconvenient, so please suggest ways to improve it, or make it OSX/Linux compatible.**
+**This pipeline is inconvenient and for Windows only, so please suggest ways to improve it, or make it OSX/Linux compatible.**
 
-In the Projucer, a configuration exists for Visual Studio 2019 with FAUST. However, this configuration assumes you've followed all the compilation instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) to `C:/tools/TD-Faust`. Although TD-FAUST is primarily meant to be used for TouchDesigner, you can still follow its instructions to build `faust.dll` and `faust.lib`. It will also compile LLVM, which is necessary for FAUST to be able to dynamically compile `.dsp` code.
+In the Projucer, an extra configuration exists for Visual Studio 2019 **with FAUST**. This configuration relies on a precompiled `faust.dll` and `faust.lib` in `thirdparty/libfaust/win-x64`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
 
-Next, run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust` files. On OSX (untested), copy them to either `/usr/local/share/faust` or `/usr/share/faust`.
+Run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38dawdreamer/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust/*.lib` files. On OSX (untested), copy them to either `/usr/local/share/faust/*.lib` or `/usr/share/faust/*.lib`.
 
 ### Using FAUST processors
 
-Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, you don't need to `import("stdfaust.lib");` All code must result in processors with 2 outputs and an even number of inputs. Polyphony is not yet supported. Here's an example using a demo stereo reverb:
+Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in processors with 2 outputs and an even number of inputs. Polyphony is not yet supported. Here's an example using a demo stereo reverb:
 
-**faust_reverb.dsp:**
+#### **faust_reverb.dsp:**
 ```dsp
 process = dm.zita_light;
 ```
 
-**faust_test.py:**
+#### **faust_test.py:**
 ```python
 DSP_PATH = "C:/path/to/faust_reverb.dsp"  # Must be absolute path
 faust_processor = engine.make_faust_processor("faust", DSP_PATH)
@@ -445,7 +444,7 @@ faust_processor.set_parameter("/Zita_Light/Dry/Wet_Mix", 1.)
 faust_processor.set_parameter(0, 1.)
 
 # Unlike VSTs, these parameters aren't necessarily 0-1 values.
-# For example, if you program your FAUST code to have a 15000 kHz cutoff
+# For example, if you program your FAUST code to have a 15000 kHz filter cutoff
 # you can set it naturally:
 #     faust_processor.set_parameter(7, 15000)
 
@@ -457,20 +456,20 @@ graph = [
   (faust_processor, ["piano"])
 ]
 
-assert(engine.load_graph(graph))
+engine.load_graph(graph)
 engine.render(DURATION)
 ```
 
 Here's an example that mixes two stereo inputs into one stereo output and applies a low-pass filter.
 
-**dsp_4_channels.dsp:**
+#### **dsp_4_channels.dsp:**
 ```dsp
 declare name "MyEffect";
 myFilter= fi.lowpass(10, hslider("cutoff",  15000.,  20,  20000,  .01));
-process = _,  _,  _,  _  :>  _,  _  :  myFilter,  myFilter;
+process = _, _, _, _ :> myFilter, myFilter;
 ```
 
-**faust_test_stereo_mixdown.py**
+#### **faust_test_stereo_mixdown.py:**
 ```python
 DSP_PATH = "C:/path/to/dsp_4_channels.dsp"  # Must be absolute path
 faust_processor = engine.make_faust_processor("faust", DSP_PATH)
@@ -484,13 +483,13 @@ graph = [
   (faust_processor, ["piano", "vocals"])
 ]
 
-assert(engine.load_graph(graph))
+engine.load_graph(graph)
 engine.render(DURATION)
 ```
 
 ## License
 
-If you use DawDreamer, you must obey the licenses of JUCE, pybind11, and Steinberg VST2/3, and Maximillian.
+If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Steinberg VST2/3, FAUST, and Maximillian.
 
 ## Release Notes
 

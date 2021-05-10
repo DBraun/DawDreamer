@@ -129,7 +129,7 @@ FaustProcessor::clear()
 }
 
 bool
-FaustProcessor::eval(const std::string& code)
+FaustProcessor::compileFromString(const std::string& code)
 {
 	// clean up
 	clear();
@@ -231,7 +231,7 @@ FaustProcessor::eval(const std::string& code)
 		theUI = m_midi_ui;
 	}
 	else {
-		m_ui = new FaustCHOPUI();
+		m_ui = new APIUI();
 		theUI = m_ui;
 	}
 
@@ -270,13 +270,7 @@ FaustProcessor::compileFromFile(const std::string& path)
 		m_code += line + '\n';
 	}
 	// eval it
-	return eval(m_code);
-}
-
-bool
-FaustProcessor::compile()
-{
-	return eval(m_code);
+	return compileFromString(m_code);
 }
 
 float
