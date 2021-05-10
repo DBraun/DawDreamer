@@ -465,6 +465,7 @@ Here's an example that mixes two stereo inputs into one stereo output and applie
 
 **dsp_4_channels.dsp:**
 ```dsp
+declare name "MyEffect";
 myFilter= fi.lowpass(10, hslider("cutoff",  15000.,  20,  20000,  .01));
 process = _,  _,  _,  _  :>  _,  _  :  myFilter,  myFilter;
 ```
@@ -473,7 +474,10 @@ process = _,  _,  _,  _  :>  _,  _  :  myFilter,  myFilter;
 ```python
 DSP_PATH = "C:/path/to/dsp_4_channels.dsp"  # Must be absolute path
 faust_processor = engine.make_faust_processor("faust", DSP_PATH)
-faust_processor.set_parameter("cutoff", 7000.0)  # Change the cutoff frequency.
+print(faust_processor.get_parameters_description())
+faust_processor.set_parameter("/MyEffect/cutoff", 7000.0)  # Change the cutoff frequency.
+# or set automation like this
+faust_processor.set_automation("/MyEffect/cutoff", 15000+5000*make_sine(2, DURATION))
 graph = [
   (engine.make_playback_processor("piano", load_audio_file("piano.wav")), []),
   (engine.make_playback_processor("vocals", load_audio_file("vocals.wav")), []),

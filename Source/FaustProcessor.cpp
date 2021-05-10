@@ -76,6 +76,22 @@ FaustProcessor::automateParameters() {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
+	if (m_dsp) {
+
+		for (int i = 0; i < this->getNumParameters(); i++) {
+
+			auto theName = this->getParameterName(i);
+
+			auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
+			if (theParameter) {
+				m_ui->setParamValue(theName.toStdString().c_str(), theParameter->sample(posInfo.timeInSamples));
+			}
+			else {
+				std::cout << "Error automateParameters: " << theName << std::endl;
+			}
+		}
+	}
+
 }
 
 void
@@ -320,8 +336,8 @@ FaustProcessor::createParameterLayout()
 	{
 		auto parameterName = m_ui->getParamAddress(i);
 		auto parameterLabel = m_ui->getParamLabel(i);
-		myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterLabel,
-			NormalisableRange<float>(m_ui->getParamMin(i), m_ui->getParamMax(i)), m_ui->getParamInit(i)));
+		myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName,
+			NormalisableRange<float>(m_ui->getParamMin(i), m_ui->getParamMax(i)), m_ui->getParamInit(i), parameterLabel));
 		// give it a valid single sample of automation.
 		ProcessorBase::setAutomationVal(parameterName, m_ui->getParamValue(i));
 	}
