@@ -22,6 +22,9 @@ public:
     std::shared_ptr<PlaybackProcessor> makePlaybackProcessor(const std::string& name, py::array input);
 
     /// @brief
+    std::shared_ptr<PlaybackWarpProcessor> makePlaybackWarpProcessor(const std::string& name, py::array input);
+
+    /// @brief
     std::shared_ptr<FilterProcessor> makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain);
 
     /// @brief
