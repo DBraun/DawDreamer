@@ -8,25 +8,38 @@
 class PlaybackWarpProcessor : public ProcessorBase
 {
 public:
-    PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData) : ProcessorBase{ newUniqueName }
+    PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr) : ProcessorBase{ newUniqueName }
     {
         myPlaybackData.setSize(inputData.size(), inputData.at(0).size(), false, false, false);
         for (int chan = 0; chan < channels; chan++) {
             myPlaybackData.copyFrom(chan, 0, inputData.at(0).data(), inputData.at(0).size());
         }
+        setupRubberband(sr);
     }
 
-    PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input) : ProcessorBase{ newUniqueName }
+    PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr) : ProcessorBase{ newUniqueName }
     {
         setData(input);
+        setupRubberband(sr);
     }
 
     void
     prepareToPlay(double sr, int blocksize) {
-        setupRubberband(sr);
+        
         reset();
         //m_rbstretcher->setTimeRatio(1.2);
         //m_rbstretcher->setPitchScale(1.2);
+    }
+    
+    void setTranspose(double transpose) {
+
+        float scale = std::pow(2., transpose / 12.);
+
+        m_rbstretcher->setPitchScale(scale);
+    }
+
+    void setTimeRatio(double ratio) {
+        m_rbstretcher->setTimeRatio(ratio);
     }
 
     void
@@ -37,12 +50,12 @@ public:
 
         int numAvailable = m_rbstretcher->available();
         while (numAvailable < buffer.getNumSamples()) {
-            int count = std::min(ibs, myPlaybackData.getNumSamples() - sampleReadIndex);
+            int count = std::min(buffer.getNumSamples(), myPlaybackData.getNumSamples() - sampleReadIndex);
             if (count == 0) {
                 break;
             }
 
-            bool isFinal = sampleReadIndex + ibs >= myPlaybackData.getNumSamples();
+            bool isFinal = sampleReadIndex + count >= myPlaybackData.getNumSamples();
 
             m_nonInterleavedBuffer.setSize(channels, count);
             
@@ -59,12 +72,14 @@ public:
         }
 
         int numToRetrieve = std::min(numAvailable, buffer.getNumSamples());
-        m_nonInterleavedBuffer.setSize(channels, numToRetrieve);
-        m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
+        if (numToRetrieve > 0) {
+            m_nonInterleavedBuffer.setSize(channels, numToRetrieve);
+            m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
 
-        for (int chan = 0; chan < channels; chan++) {
-            auto chanPtr = m_nonInterleavedBuffer.getReadPointer(chan);
-            buffer.copyFrom(chan, 0, chanPtr, numToRetrieve);
+            for (int chan = 0; chan < channels; chan++) {
+                auto chanPtr = m_nonInterleavedBuffer.getReadPointer(chan);
+                buffer.copyFrom(chan, 0, chanPtr, numToRetrieve);
+            }
         }
     }
 
@@ -92,7 +107,7 @@ private:
     std::unique_ptr<RubberBand::RubberBandStretcher> m_rbstretcher;
 
     const int channels = 2;
-    int ibs = 1024;
+
     juce::AudioSampleBuffer m_nonInterleavedBuffer;
     int sampleReadIndex = 0;
 

@@ -15,6 +15,8 @@ PYBIND11_MODULE(dawdreamer, m)
         .def("set_data", &PlaybackProcessor::setData);
 
     py::class_<PlaybackWarpProcessor, std::shared_ptr<PlaybackWarpProcessor>, ProcessorBase>(m, "PlaybackWarpProcessor")
+        .def("set_time_ratio", &PlaybackWarpProcessor::setTimeRatio)
+        .def("set_transpose", &PlaybackWarpProcessor::setTranspose)
         .def("set_data", &PlaybackWarpProcessor::setData);
 
     py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>, ProcessorBase>(m, "PannerProcessor")

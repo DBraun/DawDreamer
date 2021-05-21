@@ -53,7 +53,7 @@ RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array da
 std::shared_ptr<PlaybackWarpProcessor>
 RenderEngineWrapper::makePlaybackWarpProcessor(const std::string& name, py::array data)
 {
-    return std::shared_ptr<PlaybackWarpProcessor>{new PlaybackWarpProcessor{ name, data }};
+    return std::shared_ptr<PlaybackWarpProcessor>{new PlaybackWarpProcessor{ name, data, mySampleRate }};
 }
 
 std::shared_ptr<FilterProcessor>
