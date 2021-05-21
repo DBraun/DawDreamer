@@ -35,7 +35,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\Dynamic Library\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">dawdreamer</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -47,8 +47,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;C:\Python38\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;..\..\thirdparty\faust\compiler;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;JUCER_VS2019_2AD0C182=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;C:\Python38\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;..\..\thirdparty\faust\compiler;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src\kissfft;..\..\thirdparty\rubberband\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;NOMINMAX;HAVE_LIBSAMPLERATE;HAVE_KISSFFT;JUCER_VS2019_2AD0C182=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -72,18 +72,18 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>faust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalDependencies>faust.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;
@@ -91,6 +91,38 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\CompoundAudioCurve.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\ConstantAudioCurve.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\HighFrequencyAudioCurve.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\PercussiveAudioCurve.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\SilentAudioCurve.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\SpectralDifferenceAudioCurve.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\base\Profiler.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\AudioCurveCalculator.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\FFT.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\Resampler.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\getopt\getopt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\getopt\getopt_long.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\jni\RubberBandStretcherJNI.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft.c"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fftr.c"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\speex\resample.c"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\Allocators.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\sysutils.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\Thread.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\VectorOpsComplex.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\rubberband-c.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\RubberBandStretcher.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretchCalculator.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherChannelData.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherImpl.cpp"/>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherProcess.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\DataModels\DataModel.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\DataModels\MPESettingsDataModel.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\Main.cpp">
@@ -102,10 +134,6 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     <ClCompile Include="..\..\Source\FilterProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\ProcessorBase.cpp"/>
-    <ClCompile Include="..\..\Source\Maximilian\libs\fft.cpp"/>
-    <ClCompile Include="..\..\Source\Maximilian\libs\maxiFFT.cpp"/>
-    <ClCompile Include="..\..\Source\Maximilian\libs\maxiMFCC.cpp"/>
-    <ClCompile Include="..\..\Source\Maximilian\maximilian.cpp"/>
     <ClCompile Include="..\..\Source\custom_pybind_wrappers.cpp"/>
     <ClCompile Include="..\..\Source\RenderEngine.cpp"/>
     <ClCompile Include="..\..\Source\RenderEngineWrapper.cpp"/>
@@ -2144,6 +2172,7 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
@@ -2161,6 +2190,42 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\thirdparty\libsamplerate\include\samplerate.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\CompoundAudioCurve.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\ConstantAudioCurve.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\HighFrequencyAudioCurve.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\PercussiveAudioCurve.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\SilentAudioCurve.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\SpectralDifferenceAudioCurve.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\base\Profiler.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\base\RingBuffer.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\base\Scavenger.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\AudioCurveCalculator.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\FFT.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\MovingMedian.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\Resampler.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\SampleFilter.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\SincWindow.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\Window.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\float_cast\float_cast.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\getopt\getopt.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\getopt\unistd.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\_kiss_fft_guts.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft_log.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fftr.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\pommier\neon_mathfun.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\pommier\sse_mathfun.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\speex\speex_resampler.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\Allocators.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\sysutils.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\Thread.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\VectorOps.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\VectorOpsComplex.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\StretchCalculator.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherChannelData.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherImpl.h"/>
+    <ClInclude Include="..\..\thirdparty\rubberband\rubberband\RubberBandStretcher.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointsOverlay.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\MainSamplerView.h"/>
@@ -2196,15 +2261,11 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     <ClInclude Include="..\..\Source\FaustProcessor.h"/>
     <ClInclude Include="..\..\Source\FilterProcessor.h"/>
     <ClInclude Include="..\..\Source\OscillatorProcessor.h"/>
+    <ClInclude Include="..\..\Source\PlaybackWarpProcessor.h"/>
     <ClInclude Include="..\..\Source\PlaybackProcessor.h"/>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\ProcessorBase.h"/>
     <ClInclude Include="..\..\Source\RecorderProcessor.h"/>
-    <ClInclude Include="..\..\Source\Maximilian\libs\fft.h"/>
-    <ClInclude Include="..\..\Source\Maximilian\libs\maxiFFT.h"/>
-    <ClInclude Include="..\..\Source\Maximilian\libs\maxiMFCC.h"/>
-    <ClInclude Include="..\..\Source\Maximilian\libs\sineTable.h"/>
-    <ClInclude Include="..\..\Source\Maximilian\maximilian.h"/>
     <ClInclude Include="..\..\Source\CustomParameters.h"/>
     <ClInclude Include="..\..\Source\custom_pybind_wrappers.h"/>
     <ClInclude Include="..\..\Source\RenderEngine.h"/>
@@ -3018,9 +3079,12 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_video\playback\juce_VideoComponent.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\thirdparty\rubberband\src\kissfft\COPYING"/>
+    <None Include="..\..\thirdparty\rubberband\src\speex\COPYING"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\readme.md"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>

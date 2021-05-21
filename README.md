@@ -489,7 +489,7 @@ engine.render(DURATION)
 
 ## License
 
-If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Steinberg VST2/3, FAUST, and Maximillian.
+If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Libsamplerate, Rubberband, Steinberg VST2/3, FAUST.
 
 ## Release Notes
 

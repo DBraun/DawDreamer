@@ -2,6 +2,45 @@
 
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="DawDreamer\Libsamplerate">
+      <UniqueIdentifier>{6BF69267-4884-665C-588C-D4A2C0B247FD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\audiocurves">
+      <UniqueIdentifier>{6DE9F43C-83E0-8339-6D42-0FEE31E7A1FD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\base">
+      <UniqueIdentifier>{4DF37143-0504-D826-961A-A448FFCF9348}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\dsp">
+      <UniqueIdentifier>{6881613A-707E-0D80-32F0-5F4FA916B337}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\float_cast">
+      <UniqueIdentifier>{3E274EB9-EECE-72DE-FE4D-E84EE169445B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\getopt">
+      <UniqueIdentifier>{4B20BB29-FE41-3162-3B4F-9B1F9D074EB1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\jni">
+      <UniqueIdentifier>{66C5ED7B-1544-BD12-DF91-CF31B1745F4E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\kissfft">
+      <UniqueIdentifier>{134F773F-F828-0710-5E7B-076B8A5A9480}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\pommier">
+      <UniqueIdentifier>{342183C5-CDAD-2DB7-B34B-4098F36BEEE8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\speex">
+      <UniqueIdentifier>{082A58A8-CDFD-D304-CE09-6077AD6A5992}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src\system">
+      <UniqueIdentifier>{312E80D9-0604-0102-1742-C2DC1935EA98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband\src">
+      <UniqueIdentifier>{8F14DE60-D7CB-4211-D7C0-2445AA6AA819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DawDreamer\Rubberband">
+      <UniqueIdentifier>{12ABF8D8-FC2F-648B-5916-82F8D47363B2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="DawDreamer\Processors\Sampler\Components">
       <UniqueIdentifier>{D17DFF5D-2619-ECB8-42FF-86E5223B4C51}</UniqueIdentifier>
     </Filter>
@@ -13,12 +52,6 @@
     </Filter>
     <Filter Include="DawDreamer\Processors">
       <UniqueIdentifier>{F0591685-F411-EF72-1CD6-1B2E276D13BD}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DawDreamer\Maximilian\libs">
-      <UniqueIdentifier>{61D406CA-2031-CB07-6AC8-1C8BCAA59E81}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DawDreamer\Maximilian">
-      <UniqueIdentifier>{CBB05A16-53A9-D7B4-2158-A0A6154282F1}</UniqueIdentifier>
     </Filter>
     <Filter Include="DawDreamer">
       <UniqueIdentifier>{49382758-79F8-A1D3-59E7-4A7C26ED2E0D}</UniqueIdentifier>
@@ -496,6 +529,84 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\CompoundAudioCurve.cpp">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\ConstantAudioCurve.cpp">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\HighFrequencyAudioCurve.cpp">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\PercussiveAudioCurve.cpp">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\SilentAudioCurve.cpp">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\SpectralDifferenceAudioCurve.cpp">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\base\Profiler.cpp">
+      <Filter>DawDreamer\Rubberband\src\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\AudioCurveCalculator.cpp">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\FFT.cpp">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\Resampler.cpp">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\getopt\getopt.c">
+      <Filter>DawDreamer\Rubberband\src\getopt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\getopt\getopt_long.c">
+      <Filter>DawDreamer\Rubberband\src\getopt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\jni\RubberBandStretcherJNI.cpp">
+      <Filter>DawDreamer\Rubberband\src\jni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft.c">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fftr.c">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\speex\resample.c">
+      <Filter>DawDreamer\Rubberband\src\speex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\Allocators.cpp">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\sysutils.cpp">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\Thread.cpp">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\system\VectorOpsComplex.cpp">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\rubberband-c.cpp">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\RubberBandStretcher.cpp">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretchCalculator.cpp">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherChannelData.cpp">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherImpl.cpp">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherProcess.cpp">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Sampler\Source\DataModels\DataModel.cpp">
       <Filter>DawDreamer\Processors\Sampler\DataModels</Filter>
     </ClCompile>
@@ -522,18 +633,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\ProcessorBase.cpp">
       <Filter>DawDreamer\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Maximilian\libs\fft.cpp">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Maximilian\libs\maxiFFT.cpp">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Maximilian\libs\maxiMFCC.cpp">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Maximilian\maximilian.cpp">
-      <Filter>DawDreamer\Maximilian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\custom_pybind_wrappers.cpp">
       <Filter>DawDreamer</Filter>
@@ -2704,6 +2803,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.mm">
       <Filter>JUCE Modules\juce_video</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -2751,6 +2853,114 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\thirdparty\libsamplerate\include\samplerate.h">
+      <Filter>DawDreamer\Libsamplerate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\CompoundAudioCurve.h">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\ConstantAudioCurve.h">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\HighFrequencyAudioCurve.h">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\PercussiveAudioCurve.h">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\SilentAudioCurve.h">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\SpectralDifferenceAudioCurve.h">
+      <Filter>DawDreamer\Rubberband\src\audiocurves</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\base\Profiler.h">
+      <Filter>DawDreamer\Rubberband\src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\base\RingBuffer.h">
+      <Filter>DawDreamer\Rubberband\src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\base\Scavenger.h">
+      <Filter>DawDreamer\Rubberband\src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\AudioCurveCalculator.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\FFT.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\MovingMedian.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\Resampler.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\SampleFilter.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\SincWindow.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\Window.h">
+      <Filter>DawDreamer\Rubberband\src\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\float_cast\float_cast.h">
+      <Filter>DawDreamer\Rubberband\src\float_cast</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\getopt\getopt.h">
+      <Filter>DawDreamer\Rubberband\src\getopt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\getopt\unistd.h">
+      <Filter>DawDreamer\Rubberband\src\getopt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\_kiss_fft_guts.h">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft.h">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft_log.h">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fftr.h">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\pommier\neon_mathfun.h">
+      <Filter>DawDreamer\Rubberband\src\pommier</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\pommier\sse_mathfun.h">
+      <Filter>DawDreamer\Rubberband\src\pommier</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\speex\speex_resampler.h">
+      <Filter>DawDreamer\Rubberband\src\speex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\Allocators.h">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\sysutils.h">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\Thread.h">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\VectorOps.h">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\system\VectorOpsComplex.h">
+      <Filter>DawDreamer\Rubberband\src\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\StretchCalculator.h">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherChannelData.h">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherImpl.h">
+      <Filter>DawDreamer\Rubberband\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\rubberband\rubberband\RubberBandStretcher.h">
+      <Filter>DawDreamer\Rubberband</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h">
       <Filter>DawDreamer\Processors\Sampler\Components</Filter>
     </ClInclude>
@@ -2856,6 +3066,9 @@
     <ClInclude Include="..\..\Source\OscillatorProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\PlaybackWarpProcessor.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\PlaybackProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
@@ -2867,21 +3080,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\RecorderProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Maximilian\libs\fft.h">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Maximilian\libs\maxiFFT.h">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Maximilian\libs\maxiMFCC.h">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Maximilian\libs\sineTable.h">
-      <Filter>DawDreamer\Maximilian\libs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Maximilian\maximilian.h">
-      <Filter>DawDreamer\Maximilian</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\CustomParameters.h">
       <Filter>DawDreamer</Filter>
@@ -5322,11 +5520,20 @@
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
+      <Filter>JUCE Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\thirdparty\rubberband\src\kissfft\COPYING">
+      <Filter>DawDreamer\Rubberband\src\kissfft</Filter>
+    </None>
+    <None Include="..\..\thirdparty\rubberband\src\speex\COPYING">
+      <Filter>DawDreamer\Rubberband\src\speex</Filter>
+    </None>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\CMakeLists.txt">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
