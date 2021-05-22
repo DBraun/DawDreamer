@@ -487,6 +487,45 @@ engine.load_graph(graph)
 engine.render(DURATION)
 ```
 
+## Time-stretching and Pitch-stretching
+
+Time-stretching and pitch-stretching are currently available on Windows thanks to [Rubberband](https://github.com/breakfastquay/rubberband/). 
+
+```python
+
+# Pretend that the input audio is actually 120 BPM,
+# but we want to play it back at 130 BPM and 2 semitones higher.
+
+SAMPLE_PATH = "drums.wav"
+ASD_PATH = SAMPLE_PATH + ".asd"
+
+engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+engine.set_bpm(130.)
+
+playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file(SAMPLE_PATH))
+assert(playback_processor.set_clip_file(ASD_PATH))
+playback_processor.transpose = 2.
+
+graph = [
+  (playback_processor1, []),
+]
+
+assert(engine.load_graph(graph))
+```
+
+If you don't have an `.asd` file, you can set time ratio of the clip:
+```python
+playback_processor.set_time_ratio(2.)  # Play back in twice the amount of time (i.e., slowed down).
+```
+
+Loading a `.asd` file will automatically turn on warping. If you wish to disable warping afterwards and rely on `set_time_ratio` instead, then you may call `disable_warp()`.
+
+You can also set the audio data and reload a new clip any time:
+```python
+playback_processor.set_data(load_audio_file("synth_loop.wav"))
+playback_processor.set_clip_file("synth_loop.wav.asd")
+```
+
 ## License
 
 If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Libsamplerate, Rubberband, Steinberg VST2/3, FAUST.

@@ -14,10 +14,14 @@ PYBIND11_MODULE(dawdreamer, m)
     py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>, ProcessorBase>(m, "PlaybackProcessor")
         .def("set_data", &PlaybackProcessor::setData);
 
+#ifdef BUILD_DAWDREAMER_RUBBERBAND
     py::class_<PlaybackWarpProcessor, std::shared_ptr<PlaybackWarpProcessor>, ProcessorBase>(m, "PlaybackWarpProcessor")
         .def("set_time_ratio", &PlaybackWarpProcessor::setTimeRatio)
-        .def("set_transpose", &PlaybackWarpProcessor::setTranspose)
+        .def_property("transpose", &PlaybackWarpProcessor::getTranspose, &PlaybackWarpProcessor::setTranspose)
+        .def("disable_warp", &PlaybackWarpProcessor::disableWarp)
+        .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo)
         .def("set_data", &PlaybackWarpProcessor::setData);
+#endif
 
     py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>, ProcessorBase>(m, "PannerProcessor")
         .def_property("rule", &PannerProcessor::getRule, &PannerProcessor::setRule)
@@ -106,7 +110,9 @@ PYBIND11_MODULE(dawdreamer, m)
         .def("make_faust_processor", &RenderEngineWrapper::makeFaustProcessor, returnPolicy)
 #endif
         .def("make_playback_processor", &RenderEngineWrapper::makePlaybackProcessor, returnPolicy)
+#ifdef BUILD_DAWDREAMER_RUBBERBAND
         .def("make_playbackwarp_processor", &RenderEngineWrapper::makePlaybackWarpProcessor, returnPolicy)
+#endif
         .def("make_filter_processor", &RenderEngineWrapper::makeFilterProcessor, returnPolicy,
             arg("name"), arg("mode") = "high", arg("freq") = 1000.f, arg("q") = .707107f, arg("gain") = 1.f)
         .def("make_reverb_processor", &RenderEngineWrapper::makeReverbProcessor, returnPolicy,

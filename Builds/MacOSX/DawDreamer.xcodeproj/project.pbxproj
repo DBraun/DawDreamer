@@ -133,6 +133,7 @@
 		551403951D49BE1C7B54347E /* ../../Source/Sampler/Source/DemoUtilities.h */ /* DemoUtilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DemoUtilities.h; path = ../../Source/Sampler/Source/DemoUtilities.h; sourceTree = SOURCE_ROOT; };
 		553C0A3501582EE95328719B /* System/Library/Frameworks/Accelerate.framework */ /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		5558FF156E977213C6DE9C14 /* ../../thirdparty/rubberband/src/StretcherChannelData.cpp */ /* StretcherChannelData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StretcherChannelData.cpp; path = ../../thirdparty/rubberband/src/StretcherChannelData.cpp; sourceTree = SOURCE_ROOT; };
+		55A7EED856ACF66C119C1D8F /* ../../thirdparty/portable_endian/include/portable_endian.h */ /* portable_endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = portable_endian.h; path = ../../thirdparty/portable_endian/include/portable_endian.h; sourceTree = SOURCE_ROOT; };
 		5691FDBCADAAE7C01869F756 /* ../../Source/Sampler/Source/DataModels/DataModel.cpp */ /* DataModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DataModel.cpp; path = ../../Source/Sampler/Source/DataModels/DataModel.cpp; sourceTree = SOURCE_ROOT; };
 		58E5949DCB62BE84406F882C /* ../../Source/RenderEngine.cpp */ /* RenderEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderEngine.cpp; path = ../../Source/RenderEngine.cpp; sourceTree = SOURCE_ROOT; };
 		5DD65D1D0C56ACE8A5EBCB9B /* ../../JuceLibraryCode/modules/juce_audio_utils */ /* juce_audio_utils */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_utils; path = ../../JuceLibraryCode/modules/juce_audio_utils; sourceTree = SOURCE_ROOT; };
@@ -211,6 +212,7 @@
 		C519012CDDE2CA92FF58903A /* ../../JuceLibraryCode/include_juce_video.mm */ /* include_juce_video.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_video.mm; path = ../../JuceLibraryCode/include_juce_video.mm; sourceTree = SOURCE_ROOT; };
 		C5E04D72E37F04C0663E5EA6 /* System/Library/Frameworks/CoreMIDI.framework */ /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		C6695EB398FC46133B7FAC70 /* ../../Source/Sampler/Source/Components/PlaybackPositionOverlay.h */ /* PlaybackPositionOverlay.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PlaybackPositionOverlay.h; path = ../../Source/Sampler/Source/Components/PlaybackPositionOverlay.h; sourceTree = SOURCE_ROOT; };
+		C713F7F77E549E8C08771E49 /* ../../Source/AbletonClipInfo.h */ /* AbletonClipInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AbletonClipInfo.h; path = ../../Source/AbletonClipInfo.h; sourceTree = SOURCE_ROOT; };
 		CA11143047AE83B873CC74E8 /* ../../thirdparty/rubberband/src/audiocurves/HighFrequencyAudioCurve.cpp */ /* HighFrequencyAudioCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HighFrequencyAudioCurve.cpp; path = ../../thirdparty/rubberband/src/audiocurves/HighFrequencyAudioCurve.cpp; sourceTree = SOURCE_ROOT; };
 		CB1AA38CEDE7438D7F365590 /* ../../thirdparty/rubberband/src/base/Profiler.cpp */ /* Profiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Profiler.cpp; path = ../../thirdparty/rubberband/src/base/Profiler.cpp; sourceTree = SOURCE_ROOT; };
 		CF40530FC23B166C749C7CD4 /* ../../thirdparty/rubberband/src/StretcherImpl.cpp */ /* StretcherImpl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StretcherImpl.cpp; path = ../../thirdparty/rubberband/src/StretcherImpl.cpp; sourceTree = SOURCE_ROOT; };
@@ -416,6 +418,7 @@
 				58E5949DCB62BE84406F882C,
 				FE91AC31132D9AC2CC3B0A20,
 				1E1EB37C807FB1C249A9F414,
+				55A7EED856ACF66C119C1D8F,
 				4B4337E31892157AAFCBD879,
 			);
 			name = DawDreamer;
@@ -563,6 +566,7 @@
 			isa = PBXGroup;
 			children = (
 				D5EBA3BB8BAA3B120AB80BBF,
+				C713F7F77E549E8C08771E49,
 				70B722073FC3FB8EC6C4E41D,
 				78374C29A67C0EFF6E21ED37,
 				E650A1CEFBCEA41ACC720536,

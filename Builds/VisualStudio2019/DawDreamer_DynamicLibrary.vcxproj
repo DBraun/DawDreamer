@@ -2313,6 +2313,7 @@
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerPluginDemo.h"/>
+    <ClInclude Include="..\..\Source\AbletonClipInfo.h"/>
     <ClInclude Include="..\..\Source\SamplerProcessor.h"/>
     <ClInclude Include="..\..\Source\DelayProcessor.h"/>
     <ClInclude Include="..\..\Source\PannerProcessor.h"/>
@@ -2332,6 +2333,7 @@
     <ClInclude Include="..\..\Source\custom_pybind_wrappers.h"/>
     <ClInclude Include="..\..\Source\RenderEngine.h"/>
     <ClInclude Include="..\..\Source\RenderEngineWrapper.h"/>
+    <ClInclude Include="..\..\thirdparty\portable_endian\include\portable_endian.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>

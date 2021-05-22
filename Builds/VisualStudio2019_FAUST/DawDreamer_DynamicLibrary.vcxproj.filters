@@ -3036,6 +3036,9 @@
     <ClInclude Include="..\..\Source\Sampler\Source\SamplerPluginDemo.h">
       <Filter>DawDreamer\Processors\Sampler</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\AbletonClipInfo.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\SamplerProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
@@ -3091,6 +3094,9 @@
       <Filter>DawDreamer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\RenderEngineWrapper.h">
+      <Filter>DawDreamer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\thirdparty\portable_endian\include\portable_endian.h">
       <Filter>DawDreamer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">

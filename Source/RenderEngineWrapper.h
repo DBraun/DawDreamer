@@ -21,8 +21,10 @@ public:
     /// @brief
     std::shared_ptr<PlaybackProcessor> makePlaybackProcessor(const std::string& name, py::array input);
 
+#ifdef BUILD_DAWDREAMER_RUBBERBAND
     /// @brief
     std::shared_ptr<PlaybackWarpProcessor> makePlaybackWarpProcessor(const std::string& name, py::array input);
+#endif
 
     /// @brief
     std::shared_ptr<FilterProcessor> makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain);

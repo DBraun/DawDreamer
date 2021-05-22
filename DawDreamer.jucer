@@ -183,6 +183,8 @@
         <FILE id="xMOxP3" name="SamplerPluginDemo.h" compile="0" resource="0"
               file="Source/Sampler/Source/SamplerPluginDemo.h"/>
       </GROUP>
+      <FILE id="kmJESh" name="AbletonClipInfo.h" compile="0" resource="0"
+            file="Source/AbletonClipInfo.h"/>
       <FILE id="VCI1MC" name="SamplerProcessor.h" compile="0" resource="0"
             file="Source/SamplerProcessor.h"/>
       <FILE id="DzAh2I" name="DelayProcessor.h" compile="0" resource="0"
@@ -233,6 +235,8 @@
           file="Source/RenderEngineWrapper.h"/>
     <FILE id="nW1a1A" name="RenderEngineWrapper.cpp" compile="1" resource="0"
           file="Source/RenderEngineWrapper.cpp"/>
+    <FILE id="LnjjS9" name="portable_endian.h" compile="0" resource="0"
+          file="thirdparty/portable_endian/include/portable_endian.h"/>
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -322,11 +326,11 @@
         <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2019>
-    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
+    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
             vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
             externalLibraries="faust.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;"
+        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
                        targetName="dawdreamer" libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate_build\win-x64\Release;"
                        postbuildCommand="move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;"/>
       </CONFIGURATIONS>
