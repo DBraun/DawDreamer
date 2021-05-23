@@ -38,7 +38,7 @@ public:
     prepareToPlay(double, int) {
         reset();
 
-        if (m_warpOn) {
+        if (m_clipInfo.warp_on) {
             sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker, m_sample_rate);
         }
         else {
@@ -56,14 +56,27 @@ public:
         getPlayHead()->getCurrentPosition(posInfo);
 
         *myTranspose = getAutomationVal("transpose", posInfo.timeInSamples);
-        float scale = std::pow(2., *myTranspose / 12.);
+        double scale = std::pow(2., *myTranspose / 12.);
         m_rbstretcher->setPitchScale(scale);
     }
 
     void setTranspose(float newVal) { setAutomationVal("transpose", newVal); }
     float getTranspose() { return getAutomationVal("transpose", 0); }
 
-    void disableWarp() { m_warpOn = false; }
+    bool getWarpOn() { return m_clipInfo.warp_on; }
+    void setWarpOn(bool warpOn) { m_clipInfo.warp_on = warpOn; }
+
+    bool getLoopOn() { return m_clipInfo.loop_on; }
+    void setLoopOn(bool loopOn) { m_clipInfo.loop_on = loopOn; }
+    double getLoopStart() { return m_clipInfo.loop_start; }
+    void setLoopStart(double loopStart) { m_clipInfo.loop_start = loopStart; }
+    double getLoopEnd() { return m_clipInfo.loop_end; }
+    void setLoopEnd(double loopEnd) { m_clipInfo.loop_end = loopEnd; }
+    double getStartMarker() { return m_clipInfo.start_marker; }
+    void setStartMarker(double startMarker) { m_clipInfo.start_marker = startMarker; }
+    double getEndMarker() { return m_clipInfo.end_marker; }
+    void setEndMarker(double endMarker) { m_clipInfo.end_marker = endMarker;}
+    
 
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
@@ -81,7 +94,7 @@ public:
         }
 
         int loop_start_sample, loop_end_sample, end_marker_sample;
-        if (m_warpOn) {
+        if (m_clipInfo.warp_on) {
             loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, m_sample_rate);
             loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, m_sample_rate);
             end_marker_sample = m_clipInfo.beat_to_sample(m_clipInfo.end_marker, m_sample_rate);
@@ -92,7 +105,7 @@ public:
             end_marker_sample = myPlaybackData.getNumSamples() - 1;
         }
 
-        if (m_warpOn) {
+        if (m_clipInfo.warp_on) {
             // todo: consider differences in sample rate here
 
             double instant_bpm = -1.;
@@ -103,8 +116,6 @@ public:
         else {
             m_rbstretcher->setTimeRatio(m_time_ratio_if_warp_off);
         }
-
-        double ppqPosition = posInfo.ppqPosition;
         
         int numAvailable = m_rbstretcher->available();
         while (numAvailable < buffer.getNumSamples()) {
@@ -172,8 +183,7 @@ public:
     }
 
     bool loadAbletonClipInfo(const char* filepath) {
-        m_warpOn = m_clipInfo.readWarpFile(filepath);
-        return m_warpOn;
+        return m_clipInfo.readWarpFile(filepath);;
     }
 
 private:
@@ -192,8 +202,6 @@ private:
 
     double m_time_ratio_if_warp_off = 1.;
     std::atomic<float>* myTranspose;
-
-    bool m_warpOn = false;
 
     void setupRubberband(float sr) {
         using namespace RubberBand;

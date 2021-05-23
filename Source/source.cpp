@@ -18,7 +18,12 @@ PYBIND11_MODULE(dawdreamer, m)
     py::class_<PlaybackWarpProcessor, std::shared_ptr<PlaybackWarpProcessor>, ProcessorBase>(m, "PlaybackWarpProcessor")
         .def("set_time_ratio", &PlaybackWarpProcessor::setTimeRatio)
         .def_property("transpose", &PlaybackWarpProcessor::getTranspose, &PlaybackWarpProcessor::setTranspose)
-        .def("disable_warp", &PlaybackWarpProcessor::disableWarp)
+        .def_property("warp_on", &PlaybackWarpProcessor::getWarpOn, &PlaybackWarpProcessor::setWarpOn)
+        .def_property("loop_on", &PlaybackWarpProcessor::getLoopOn, &PlaybackWarpProcessor::setLoopOn)
+        .def_property("loop_start", &PlaybackWarpProcessor::getLoopStart, &PlaybackWarpProcessor::setLoopStart)
+        .def_property("loop_end", &PlaybackWarpProcessor::getLoopEnd, &PlaybackWarpProcessor::setLoopEnd)
+        .def_property("start_marker", &PlaybackWarpProcessor::getStartMarker, &PlaybackWarpProcessor::setStartMarker)
+        .def_property("end_marker", &PlaybackWarpProcessor::getEndMarker, &PlaybackWarpProcessor::setEndMarker)
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo)
         .def("set_data", &PlaybackWarpProcessor::setData);
 #endif

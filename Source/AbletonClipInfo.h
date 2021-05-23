@@ -126,9 +126,6 @@ class AbletonClipInfo {
                 return false;
             }
 
-            // todo(DBraun): actually find warp_on inside the asd file.
-            warp_on = true;
-
             return true;
         }
     private:
@@ -157,7 +154,9 @@ class AbletonClipInfo {
                 read_double(f, &sample_offset) &&
                 read_double(f, &hidden_loop_start) &&
                 read_double(f, &hidden_loop_end) &&
-                read_double(f, &end_marker)
+                read_double(f, &end_marker) &&
+                !fseek(f, 3, SEEK_CUR) &&
+                read_bool(f, &warp_on)
                 ) {
                 start_marker = loop_start + sample_offset;
                 return 1;

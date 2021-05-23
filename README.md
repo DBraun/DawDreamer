@@ -513,12 +513,22 @@ graph = [
 assert(engine.load_graph(graph))
 ```
 
-If you don't have an `.asd` file, you can set time ratio of the clip:
+You can set the time ratio of the clip:
 ```python
 playback_processor.set_time_ratio(2.)  # Play back in twice the amount of time (i.e., slowed down).
 ```
 
-Loading a `.asd` file will automatically turn on warping. If you wish to disable warping afterwards and rely on `set_time_ratio` instead, then you may call `disable_warp()`.
+If you set an `.asd` file, it will set several properties:
+* `.start_marker` (float) : Start marker position in beats relative to 1.1.1
+* `.end_marker` (float) : End marker position in beats relative to 1.1.1
+* `.loop_start` (float) : Loop start position in beats relative to 1.1.1
+* `.loop_end` (float) : Loop end position in beats relative to 1.1.1
+* `.warp_on` (bool) : Whether warping is enabled
+* `.loop_on` (bool) : Whether looping is enabled
+
+Any of these properties can be changed after an `.asd` file is loaded.
+
+If `.warp_on` is True, then any value set by `.set_time_ratio()` will be ignored. If `.warp_on` is False, then the start_marker and loop_start are the first sample of the audio, and the end_marker and loop_end are the last sample.
 
 You can also set the audio data and reload a new clip any time:
 ```python
