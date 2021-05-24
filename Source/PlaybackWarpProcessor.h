@@ -71,7 +71,9 @@ public:
     void setEndMarker(double endMarker) { m_clipInfo.end_marker = endMarker;}
 
     double getClipStart() { return m_clipStartPos; }
-    void setClipStart(double beatsOffset) { m_clipStartPos = beatsOffset; }
+    void setClipStart(double clipStartPos) { m_clipStartPos = clipStartPos; }
+    double getClipEnd() { return m_clipEndPos; }
+    void setClipEnd(double clipEndPos) { m_clipEndPos = clipEndPos; }
     
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
@@ -123,7 +125,7 @@ public:
         }
         else {
             loop_start_sample = 0;
-            loop_end_sample = myPlaybackData.getNumSamples()-1;
+            loop_end_sample = myPlaybackData.getNumSamples() - 1;
             end_marker_sample = myPlaybackData.getNumSamples() - 1;
         }
 
@@ -141,7 +143,9 @@ public:
         }
         
         int numAvailable = m_rbstretcher->available();
-        while (numAvailable < buffer.getNumSamples()) {
+        int numSamplesNeeded = std::min(buffer.getNumSamples(), (int)((m_clipEndPos - posInfo.ppqPosition)/posInfo.bpm*60.*m_sample_rate));
+
+        while (numAvailable < numSamplesNeeded) {
 
             int count = 0;
             if (m_clipInfo.loop_on) {
@@ -181,7 +185,7 @@ public:
             deadspace = 0;  // NB: this is an important line. Next time through the while loop, deadspace should be zero.
         }
 
-        int numToRetrieve = std::min(numAvailable, buffer.getNumSamples());
+        int numToRetrieve = std::min(numAvailable, numSamplesNeeded);
         if (numToRetrieve > 0) {
             m_nonInterleavedBuffer.setSize(channels, numToRetrieve, false, true);
             m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
@@ -231,6 +235,7 @@ private:
     std::atomic<float>* myTranspose;
 
     double m_clipStartPos = 0.;
+    double m_clipEndPos = 99999.;
 
     void setupRubberband(float sr) {
         using namespace RubberBand;
