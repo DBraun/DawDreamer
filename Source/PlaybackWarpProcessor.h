@@ -37,13 +37,6 @@ public:
     void
     prepareToPlay(double, int) {
         reset();
-
-        if (m_clipInfo.warp_on) {
-            sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker, m_sample_rate);
-        }
-        else {
-            sampleReadIndex = 0;
-        }
     }
 
     void setTimeRatio(double ratio) {
@@ -76,8 +69,10 @@ public:
     void setStartMarker(double startMarker) { m_clipInfo.start_marker = startMarker; }
     double getEndMarker() { return m_clipInfo.end_marker; }
     void setEndMarker(double endMarker) { m_clipInfo.end_marker = endMarker;}
-    
 
+    double getClipStart() { return m_clipStartPos; }
+    void setClipStart(double beatsOffset) { m_clipStartPos = beatsOffset; }
+    
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
     {
@@ -86,10 +81,37 @@ public:
 
         automateParameters();
 
-        bool past_end_marker_and_loop_off = posInfo.ppqPosition > m_clipInfo.end_marker && !m_clipInfo.loop_on;
+        double nextPPQ = posInfo.ppqPosition + (buffer.getNumSamples() / m_sample_rate) * posInfo.bpm / 60.;
+
+        if (nextPPQ < m_clipStartPos) {
+            buffer.clear();
+            return;
+        }
+
+        int deadspace = 0;
+        if (m_clipStartPos >= posInfo.ppqPosition && m_clipStartPos < nextPPQ) {
+            // We will play from the playback buffer for the first time.
+
+            // deadspace is the number of zeros we'll insert before using the playback buffer.
+            deadspace = (m_clipStartPos  - posInfo.ppqPosition) / posInfo.bpm * 60. * m_sample_rate;
+
+            if (m_clipInfo.warp_on) {
+                sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker, m_sample_rate);
+            }
+            else {
+                sampleReadIndex = 0;
+            }
+        }
+        else {
+            deadspace = 0;
+        }
+
+        double ppqPosition = posInfo.ppqPosition - m_clipStartPos;
+
+        bool past_end_marker_and_loop_off = ppqPosition > m_clipInfo.end_marker && !m_clipInfo.loop_on;
         if (past_end_marker_and_loop_off) {
             // write zeros
-            buffer.applyGain(0.);
+            buffer.clear();
             return;
         }
 
@@ -106,11 +128,12 @@ public:
         }
 
         if (m_clipInfo.warp_on) {
-            // todo: consider differences in sample rate here
+            // todo: if the playback data sample rate is different than the engine's sr
+            // then that would affect the call to setTimeRatio.
 
             double instant_bpm = -1.;
             double _;
-            m_clipInfo.beat_to_seconds(posInfo.ppqPosition, _, instant_bpm);
+            m_clipInfo.beat_to_seconds(ppqPosition, _, instant_bpm);
             m_rbstretcher->setTimeRatio(instant_bpm / posInfo.bpm);
         }
         else {
@@ -128,7 +151,7 @@ public:
                 count = std::min(buffer.getNumSamples(), end_marker_sample - sampleReadIndex);
             }
 
-            if (count == 0) {
+            if (count <= 0) {
                 if (m_clipInfo.loop_on) {
                     sampleReadIndex = loop_start_sample;
                     continue;
@@ -138,25 +161,29 @@ public:
                 }
             }
 
-            bool isFinal = (sampleReadIndex + count >= end_marker_sample) && !m_clipInfo.loop_on;
+            bool isFinal = (sampleReadIndex + count - deadspace >= end_marker_sample) && !m_clipInfo.loop_on;
 
-            m_nonInterleavedBuffer.setSize(channels, count);
+            // m_nonInterleavedBuffer will be set to have "count" number of samples,
+            // but we will only start writing after the deadspace-th sample.
+            m_nonInterleavedBuffer.setSize(channels, count, false, true);
+            m_nonInterleavedBuffer.clear();
             
             for (int chan=0; chan < channels; chan++) {
                 auto readPtr = myPlaybackData.getReadPointer(chan);
                 readPtr += sampleReadIndex;
-                m_nonInterleavedBuffer.copyFrom(chan, 0, readPtr, count);
+                m_nonInterleavedBuffer.copyFrom(chan, deadspace, readPtr, count - deadspace);
             }
             
-            m_rbstretcher->process(m_nonInterleavedBuffer.getArrayOfReadPointers(), count, isFinal);
+            m_rbstretcher->process(m_nonInterleavedBuffer.getArrayOfReadPointers(), m_nonInterleavedBuffer.getNumSamples(), isFinal);
             numAvailable = m_rbstretcher->available();
 
-            sampleReadIndex += count;
+            sampleReadIndex += count - deadspace;
+            deadspace = 0;  // NB: this is an important line. Next time through the while loop, deadspace should be zero.
         }
 
         int numToRetrieve = std::min(numAvailable, buffer.getNumSamples());
         if (numToRetrieve > 0) {
-            m_nonInterleavedBuffer.setSize(channels, numToRetrieve);
+            m_nonInterleavedBuffer.setSize(channels, numToRetrieve, false, true);
             m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
 
             for (int chan = 0; chan < channels; chan++) {
@@ -202,6 +229,8 @@ private:
 
     double m_time_ratio_if_warp_off = 1.;
     std::atomic<float>* myTranspose;
+
+    double m_clipStartPos = 0.;
 
     void setupRubberband(float sr) {
         using namespace RubberBand;
