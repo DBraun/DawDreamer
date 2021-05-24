@@ -74,6 +74,38 @@ public:
     void setClipStart(double clipStartPos) { m_clipStartPos = clipStartPos; }
     double getClipEnd() { return m_clipEndPos; }
     void setClipEnd(double clipEndPos) { m_clipEndPos = clipEndPos; }
+
+private:
+    class Clip {
+    public:
+        double start_pos = 0.;
+        double end_pos = 4.;
+        double start_marker_offset = 0.;
+    };
+public:
+
+    void setClipPositions(std::vector<std::tuple<float, float, float>> positions) {
+
+        // a position is a (clip start, clip end, clip offset)
+        // clip start: The position in beats relative to the engine's timeline where the clip starts
+        // clip end: The position in beats relative to the engine's timeline where the clip ends
+        // clip offset: A clip's first sample is determined by the "start marker" in the ASD file.
+        //              This is an offset to that start marker.
+
+        m_clips.clear();
+
+        for (auto& position : positions) {
+
+            Clip clip;
+            clip.start_pos = (double)std::get<0>(position);
+            clip.end_pos = (double)std::get<1>(position);
+            clip.start_marker_offset = (double)std::get<2>(position);
+
+            std::cout << "start_pos: " << clip.start_pos << " end_pos: " << clip.end_pos << " offset: " << clip.start_marker_offset << std::endl;
+
+            m_clips.push_back(clip);
+        }
+    }
     
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
@@ -234,6 +266,7 @@ private:
     double m_time_ratio_if_warp_off = 1.;
     std::atomic<float>* myTranspose;
 
+    std::vector<Clip> m_clips;
     double m_clipStartPos = 0.;
     double m_clipEndPos = 99999.;
 
@@ -281,6 +314,8 @@ private:
         params.add(std::make_unique<AutomateParameterFloat>("transpose", "transpose", NormalisableRange<float>(-96.f, 96.f), 0.f));
         return params;
     }
+
+
 
 };
 

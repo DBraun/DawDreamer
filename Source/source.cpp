@@ -27,7 +27,8 @@ PYBIND11_MODULE(dawdreamer, m)
         .def_property("clip_start", &PlaybackWarpProcessor::getClipStart, &PlaybackWarpProcessor::setClipStart)
         .def_property("clip_end", &PlaybackWarpProcessor::getClipEnd, &PlaybackWarpProcessor::setClipEnd)
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo)
-        .def("set_data", &PlaybackWarpProcessor::setData);
+        .def("set_data", &PlaybackWarpProcessor::setData)
+        .def("set_clip_positions", &PlaybackWarpProcessor::setClipPositions);
 #endif
 
     py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>, ProcessorBase>(m, "PannerProcessor")
