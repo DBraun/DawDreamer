@@ -24,8 +24,6 @@ PYBIND11_MODULE(dawdreamer, m)
         .def_property("loop_end", &PlaybackWarpProcessor::getLoopEnd, &PlaybackWarpProcessor::setLoopEnd)
         .def_property("start_marker", &PlaybackWarpProcessor::getStartMarker, &PlaybackWarpProcessor::setStartMarker)
         .def_property("end_marker", &PlaybackWarpProcessor::getEndMarker, &PlaybackWarpProcessor::setEndMarker)
-        .def_property("clip_start", &PlaybackWarpProcessor::getClipStart, &PlaybackWarpProcessor::setClipStart)
-        .def_property("clip_end", &PlaybackWarpProcessor::getClipEnd, &PlaybackWarpProcessor::setClipEnd)
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo)
         .def("set_data", &PlaybackWarpProcessor::setData)
         .def("set_clip_positions", &PlaybackWarpProcessor::setClipPositions);

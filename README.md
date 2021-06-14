@@ -497,28 +497,29 @@ Time-stretching and pitch-stretching are currently available on Windows thanks t
 # but we want to play it back at 130 BPM and 2 semitones higher.
 
 SAMPLE_PATH = "drums.wav"
-ASD_PATH = SAMPLE_PATH + ".asd"
 
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 engine.set_bpm(130.)
 
 playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file(SAMPLE_PATH))
-assert(playback_processor.set_clip_file(ASD_PATH))
-playback_processor.transpose = 2.
+playback_processor.set_time_ratio(2.)  # Play back in twice the amount of time (i.e., slowed down).
+playback_processor.transpose = 2.  # Up 2 semitones.
 
 graph = [
-  (playback_processor1, []),
+  (playback_processor, []),
 ]
 
 assert(engine.load_graph(graph))
 ```
 
-You can set the time ratio of the clip:
+You can set an `.asd` file:
+
 ```python
-playback_processor.set_time_ratio(2.)  # Play back in twice the amount of time (i.e., slowed down).
+playback_processor.set_data(load_audio_file("synth_loop.wav"))
+assert(playback_processor.set_clip_file("synth_loop.wav.asd"))
 ```
 
-If you set an `.asd` file, it will set several properties:
+This will set several properties:
 * `.start_marker` (float) : Start marker position in beats relative to 1.1.1
 * `.end_marker` (float) : End marker position in beats relative to 1.1.1
 * `.loop_start` (float) : Loop start position in beats relative to 1.1.1
@@ -528,13 +529,15 @@ If you set an `.asd` file, it will set several properties:
 
 Any of these properties can be changed after an `.asd` file is loaded.
 
-If `.warp_on` is True, then any value set by `.set_time_ratio()` will be ignored. If `.warp_on` is False, then the start_marker and loop_start are the first sample of the audio, and the end_marker and loop_end are the last sample.
+If `.warp_on` is True, then any value set by `.set_time_ratio()` will be ignored. If `.warp_on` is False, then the `start_marker` and `loop_start` are the first sample of the audio, and the `end_marker` and `loop_end` are the last sample.
 
-You can also set the audio data and reload a new clip any time:
+With `set_clip_positions`, you can use the same audio clip at multiple places along the timeline.
+
 ```python
-playback_processor.set_data(load_audio_file("synth_loop.wav"))
-playback_processor.set_clip_file("synth_loop.wav.asd")
+playback_processor.set_clip_positions([[0., 4., 0.], [5., 9., 1.]])
 ```
+
+Each tuple of three numbers is the (global timeline clip start, global timeline clip end, local clip offset). Imagine dragging a clip onto an arrangement view. The clip start and clip end are the bounds of the clip on the global timeline. The local clip offset is an offset to the start marker set by the ASD file. In the example above, the first clip starts at 0 beats, ends at 4 beats, and has no offset. The second clip starts at 5 beats, ends at 9 beats, and has a 1 beat clip offset.
 
 ## License
 
