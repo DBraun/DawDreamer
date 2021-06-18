@@ -10,3 +10,9 @@
 [submodule "thirdparty/faust"]
 	path = thirdparty/faust
 	url = https://github.com/grame-cncm/faust
+[submodule "thirdparty/rubberband"]
+	path = thirdparty/rubberband
+	url = https://github.com/breakfastquay/rubberband/
+[submodule "thirdparty/libsamplerate"]
+	path = thirdparty/libsamplerate
+	url = https://github.com/libsndfile/libsamplerate

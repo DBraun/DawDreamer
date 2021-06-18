@@ -72,6 +72,29 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_DYNAMIC_LIBRARY := \
+  $(JUCE_OBJDIR)/CompoundAudioCurve_16236773.o \
+  $(JUCE_OBJDIR)/ConstantAudioCurve_8e0f19ac.o \
+  $(JUCE_OBJDIR)/HighFrequencyAudioCurve_5ffd79ae.o \
+  $(JUCE_OBJDIR)/PercussiveAudioCurve_32850851.o \
+  $(JUCE_OBJDIR)/SilentAudioCurve_9b84f71d.o \
+  $(JUCE_OBJDIR)/SpectralDifferenceAudioCurve_f0b7c889.o \
+  $(JUCE_OBJDIR)/Profiler_f8fb8f37.o \
+  $(JUCE_OBJDIR)/AudioCurveCalculator_d95b8b23.o \
+  $(JUCE_OBJDIR)/FFT_b52ef4b6.o \
+  $(JUCE_OBJDIR)/Resampler_1f9a5937.o \
+  $(JUCE_OBJDIR)/kiss_fft_bedea746.o \
+  $(JUCE_OBJDIR)/kiss_fftr_1cf73ab6.o \
+  $(JUCE_OBJDIR)/resample_b2fa08ab.o \
+  $(JUCE_OBJDIR)/Allocators_560b78.o \
+  $(JUCE_OBJDIR)/sysutils_a5ab5e54.o \
+  $(JUCE_OBJDIR)/Thread_7ea7763a.o \
+  $(JUCE_OBJDIR)/VectorOpsComplex_448d5e31.o \
+  $(JUCE_OBJDIR)/rubberband-c_1ad4cbd5.o \
+  $(JUCE_OBJDIR)/RubberBandStretcher_a9e723d.o \
+  $(JUCE_OBJDIR)/StretchCalculator_e40c5ff7.o \
+  $(JUCE_OBJDIR)/StretcherChannelData_dda6dbf5.o \
+  $(JUCE_OBJDIR)/StretcherImpl_6118cfc2.o \
+  $(JUCE_OBJDIR)/StretcherProcess_5bac2397.o \
   $(JUCE_OBJDIR)/DataModel_e101b2.o \
   $(JUCE_OBJDIR)/MPESettingsDataModel_aeb1f3d1.o \
   $(JUCE_OBJDIR)/SamplerAudioProcessor_298eea40.o \
@@ -80,14 +103,11 @@ OBJECTS_DYNAMIC_LIBRARY := \
   $(JUCE_OBJDIR)/FilterProcessor_8755f5b.o \
   $(JUCE_OBJDIR)/PluginProcessor_a059e380.o \
   $(JUCE_OBJDIR)/ProcessorBase_65bf9464.o \
-  $(JUCE_OBJDIR)/fft_7b305358.o \
-  $(JUCE_OBJDIR)/maxiFFT_413b4093.o \
-  $(JUCE_OBJDIR)/maxiMFCC_a1624ee4.o \
-  $(JUCE_OBJDIR)/maximilian_1e00e870.o \
   $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o \
   $(JUCE_OBJDIR)/RenderEngine_d1c4d401.o \
   $(JUCE_OBJDIR)/RenderEngineWrapper_9b21dedc.o \
   $(JUCE_OBJDIR)/source_704c2604.o \
+  $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
   $(JUCE_OBJDIR)/include_juce_audio_basics_8a4e984a.o \
   $(JUCE_OBJDIR)/include_juce_audio_devices_63111d02.o \
   $(JUCE_OBJDIR)/include_juce_audio_formats_15f82001.o \
@@ -116,6 +136,121 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) : $(OBJECTS_DYNAMIC_LIBRARY) $(RES
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) $(OBJECTS_DYNAMIC_LIBRARY) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_DYNAMIC_LIBRARY) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/CompoundAudioCurve_16236773.o: ../../thirdparty/rubberband/src/audiocurves/CompoundAudioCurve.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling CompoundAudioCurve.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/ConstantAudioCurve_8e0f19ac.o: ../../thirdparty/rubberband/src/audiocurves/ConstantAudioCurve.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling ConstantAudioCurve.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/HighFrequencyAudioCurve_5ffd79ae.o: ../../thirdparty/rubberband/src/audiocurves/HighFrequencyAudioCurve.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling HighFrequencyAudioCurve.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/PercussiveAudioCurve_32850851.o: ../../thirdparty/rubberband/src/audiocurves/PercussiveAudioCurve.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling PercussiveAudioCurve.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/SilentAudioCurve_9b84f71d.o: ../../thirdparty/rubberband/src/audiocurves/SilentAudioCurve.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling SilentAudioCurve.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/SpectralDifferenceAudioCurve_f0b7c889.o: ../../thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling SpectralDifferenceAudioCurve.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/Profiler_f8fb8f37.o: ../../thirdparty/rubberband/src/base/Profiler.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling Profiler.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/AudioCurveCalculator_d95b8b23.o: ../../thirdparty/rubberband/src/dsp/AudioCurveCalculator.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling AudioCurveCalculator.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/FFT_b52ef4b6.o: ../../thirdparty/rubberband/src/dsp/FFT.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling FFT.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/Resampler_1f9a5937.o: ../../thirdparty/rubberband/src/dsp/Resampler.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling Resampler.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/kiss_fft_bedea746.o: ../../thirdparty/rubberband/src/kissfft/kiss_fft.c
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling kiss_fft.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/kiss_fftr_1cf73ab6.o: ../../thirdparty/rubberband/src/kissfft/kiss_fftr.c
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling kiss_fftr.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/resample_b2fa08ab.o: ../../thirdparty/rubberband/src/speex/resample.c
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling resample.c"
+	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/Allocators_560b78.o: ../../thirdparty/rubberband/src/system/Allocators.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling Allocators.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/sysutils_a5ab5e54.o: ../../thirdparty/rubberband/src/system/sysutils.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling sysutils.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/Thread_7ea7763a.o: ../../thirdparty/rubberband/src/system/Thread.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling Thread.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/VectorOpsComplex_448d5e31.o: ../../thirdparty/rubberband/src/system/VectorOpsComplex.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling VectorOpsComplex.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/rubberband-c_1ad4cbd5.o: ../../thirdparty/rubberband/src/rubberband-c.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling rubberband-c.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/RubberBandStretcher_a9e723d.o: ../../thirdparty/rubberband/src/RubberBandStretcher.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling RubberBandStretcher.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/StretchCalculator_e40c5ff7.o: ../../thirdparty/rubberband/src/StretchCalculator.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling StretchCalculator.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/StretcherChannelData_dda6dbf5.o: ../../thirdparty/rubberband/src/StretcherChannelData.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling StretcherChannelData.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/StretcherImpl_6118cfc2.o: ../../thirdparty/rubberband/src/StretcherImpl.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling StretcherImpl.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/StretcherProcess_5bac2397.o: ../../thirdparty/rubberband/src/StretcherProcess.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling StretcherProcess.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/DataModel_e101b2.o: ../../Source/Sampler/Source/DataModels/DataModel.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
@@ -157,26 +292,6 @@ $(JUCE_OBJDIR)/ProcessorBase_65bf9464.o: ../../Source/ProcessorBase.cpp
 	@echo "Compiling ProcessorBase.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/fft_7b305358.o: ../../Source/Maximilian/libs/fft.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling fft.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/maxiFFT_413b4093.o: ../../Source/Maximilian/libs/maxiFFT.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling maxiFFT.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/maxiMFCC_a1624ee4.o: ../../Source/Maximilian/libs/maxiMFCC.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling maxiMFCC.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/maximilian_1e00e870.o: ../../Source/Maximilian/maximilian.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling maximilian.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
 $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o: ../../Source/custom_pybind_wrappers.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling custom_pybind_wrappers.cpp"
@@ -195,6 +310,11 @@ $(JUCE_OBJDIR)/RenderEngineWrapper_9b21dedc.o: ../../Source/RenderEngineWrapper.
 $(JUCE_OBJDIR)/source_704c2604.o: ../../Source/source.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling source.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling BinaryData.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_audio_basics_8a4e984a.o: ../../JuceLibraryCode/include_juce_audio_basics.cpp

@@ -7,6 +7,124 @@
               defines="PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw=="
               addUsingNamespaceToJuceHeader="0">
   <MAINGROUP id="tONOKg" name="DawDreamer">
+    <GROUP id="{0E83F486-B7F5-9380-D835-6FDD219C6256}" name="Libsamplerate">
+      <FILE id="rIpQBw" name="samplerate.h" compile="0" resource="0" file="thirdparty/libsamplerate/include/samplerate.h"/>
+    </GROUP>
+    <GROUP id="{7DCB3B6A-075D-3A4A-5906-58DB9E4776CA}" name="Rubberband">
+      <GROUP id="{82CBFB0A-FF1B-B1BB-C41E-B0D85D6E1567}" name="src">
+        <GROUP id="{ADC995F9-BD9B-3CBA-A524-4828F3C3AA8E}" name="audiocurves">
+          <FILE id="hhrHqC" name="CompoundAudioCurve.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/CompoundAudioCurve.cpp"/>
+          <FILE id="ZbSCxM" name="CompoundAudioCurve.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/CompoundAudioCurve.h"/>
+          <FILE id="ajVJ1k" name="ConstantAudioCurve.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/ConstantAudioCurve.cpp"/>
+          <FILE id="SyLszS" name="ConstantAudioCurve.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/ConstantAudioCurve.h"/>
+          <FILE id="b1n8Pf" name="HighFrequencyAudioCurve.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/HighFrequencyAudioCurve.cpp"/>
+          <FILE id="GF3rBf" name="HighFrequencyAudioCurve.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/HighFrequencyAudioCurve.h"/>
+          <FILE id="SWV6uZ" name="PercussiveAudioCurve.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/PercussiveAudioCurve.cpp"/>
+          <FILE id="U14sJs" name="PercussiveAudioCurve.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/PercussiveAudioCurve.h"/>
+          <FILE id="KRlEgw" name="SilentAudioCurve.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/SilentAudioCurve.cpp"/>
+          <FILE id="lqeOXh" name="SilentAudioCurve.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/audiocurves/SilentAudioCurve.h"/>
+          <FILE id="zlGDTS" name="SpectralDifferenceAudioCurve.cpp" compile="1"
+                resource="0" file="thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.cpp"/>
+          <FILE id="gwZIpo" name="SpectralDifferenceAudioCurve.h" compile="0"
+                resource="0" file="thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.h"/>
+        </GROUP>
+        <GROUP id="{EF86004B-26F8-2A72-99E1-284371B984BD}" name="base">
+          <FILE id="XOvKLE" name="Profiler.cpp" compile="1" resource="0" file="thirdparty/rubberband/src/base/Profiler.cpp"/>
+          <FILE id="R4nPLj" name="Profiler.h" compile="0" resource="0" file="thirdparty/rubberband/src/base/Profiler.h"/>
+          <FILE id="Fn4dZV" name="RingBuffer.h" compile="0" resource="0" file="thirdparty/rubberband/src/base/RingBuffer.h"/>
+          <FILE id="blLull" name="Scavenger.h" compile="0" resource="0" file="thirdparty/rubberband/src/base/Scavenger.h"/>
+        </GROUP>
+        <GROUP id="{D83CD48C-8EC2-69FD-B73E-FD78B240A6ED}" name="dsp">
+          <FILE id="c8y2qh" name="AudioCurveCalculator.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/dsp/AudioCurveCalculator.cpp"/>
+          <FILE id="gXSeFw" name="AudioCurveCalculator.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/dsp/AudioCurveCalculator.h"/>
+          <FILE id="jXvJFf" name="FFT.cpp" compile="1" resource="0" file="thirdparty/rubberband/src/dsp/FFT.cpp"/>
+          <FILE id="Ocblks" name="FFT.h" compile="0" resource="0" file="thirdparty/rubberband/src/dsp/FFT.h"/>
+          <FILE id="gCE21z" name="MovingMedian.h" compile="0" resource="0" file="thirdparty/rubberband/src/dsp/MovingMedian.h"/>
+          <FILE id="HO1W62" name="Resampler.cpp" compile="1" resource="0" file="thirdparty/rubberband/src/dsp/Resampler.cpp"/>
+          <FILE id="H8rRw9" name="Resampler.h" compile="0" resource="0" file="thirdparty/rubberband/src/dsp/Resampler.h"/>
+          <FILE id="Lmvg1E" name="SampleFilter.h" compile="0" resource="0" file="thirdparty/rubberband/src/dsp/SampleFilter.h"/>
+          <FILE id="b0pPWZ" name="SincWindow.h" compile="0" resource="0" file="thirdparty/rubberband/src/dsp/SincWindow.h"/>
+          <FILE id="pkYVYI" name="Window.h" compile="0" resource="0" file="thirdparty/rubberband/src/dsp/Window.h"/>
+        </GROUP>
+        <GROUP id="{52EDBBE7-E26B-7600-94B6-A8B6ACC40715}" name="float_cast">
+          <FILE id="TUr0D0" name="float_cast.h" compile="0" resource="0" file="thirdparty/rubberband/src/float_cast/float_cast.h"/>
+        </GROUP>
+        <GROUP id="{1D13C82B-FCF9-8CAF-6499-44AC07D6C3A6}" name="getopt">
+          <FILE id="dnZaXD" name="getopt.c" compile="0" resource="0" file="thirdparty/rubberband/src/getopt/getopt.c"/>
+          <FILE id="lxCs5n" name="getopt.h" compile="0" resource="0" file="thirdparty/rubberband/src/getopt/getopt.h"/>
+          <FILE id="pVUBWB" name="getopt_long.c" compile="0" resource="0" file="thirdparty/rubberband/src/getopt/getopt_long.c"/>
+          <FILE id="WB3Xem" name="unistd.h" compile="0" resource="0" file="thirdparty/rubberband/src/getopt/unistd.h"/>
+        </GROUP>
+        <GROUP id="{41666F74-AE69-69EC-1AAE-02338F4CAEF4}" name="jni">
+          <FILE id="T0YU6b" name="RubberBandStretcherJNI.cpp" compile="0" resource="0"
+                file="thirdparty/rubberband/src/jni/RubberBandStretcherJNI.cpp"/>
+        </GROUP>
+        <GROUP id="{4E1ECA8D-68E6-806F-BD95-C6A6CB2984E0}" name="kissfft">
+          <FILE id="VxcROb" name="_kiss_fft_guts.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/kissfft/_kiss_fft_guts.h"/>
+          <FILE id="Rqpwtv" name="COPYING" compile="0" resource="1" file="thirdparty/rubberband/src/kissfft/COPYING"/>
+          <FILE id="l0yZex" name="kiss_fft.c" compile="1" resource="0" file="thirdparty/rubberband/src/kissfft/kiss_fft.c"/>
+          <FILE id="aB5uLF" name="kiss_fft.h" compile="0" resource="0" file="thirdparty/rubberband/src/kissfft/kiss_fft.h"/>
+          <FILE id="MOCxBI" name="kiss_fft_log.h" compile="0" resource="0" file="thirdparty/rubberband/src/kissfft/kiss_fft_log.h"/>
+          <FILE id="HPMtgV" name="kiss_fftr.c" compile="1" resource="0" file="thirdparty/rubberband/src/kissfft/kiss_fftr.c"/>
+          <FILE id="x6L2Hm" name="kiss_fftr.h" compile="0" resource="0" file="thirdparty/rubberband/src/kissfft/kiss_fftr.h"/>
+        </GROUP>
+        <GROUP id="{5FAE6CD0-5C9A-48E6-77EB-57F6E0D9876E}" name="pommier">
+          <FILE id="Lh7MxD" name="neon_mathfun.h" compile="0" resource="0" file="thirdparty/rubberband/src/pommier/neon_mathfun.h"/>
+          <FILE id="bdY8Lb" name="sse_mathfun.h" compile="0" resource="0" file="thirdparty/rubberband/src/pommier/sse_mathfun.h"/>
+        </GROUP>
+        <GROUP id="{1357056A-3E2C-72AA-F233-843D5B85515A}" name="speex">
+          <FILE id="xWZYfh" name="COPYING" compile="0" resource="1" file="thirdparty/rubberband/src/speex/COPYING"/>
+          <FILE id="QrHTgr" name="resample.c" compile="1" resource="0" file="thirdparty/rubberband/src/speex/resample.c"/>
+          <FILE id="NpFkQr" name="speex_resampler.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/speex/speex_resampler.h"/>
+        </GROUP>
+        <GROUP id="{19D52F85-319D-EB5E-994F-23370FA44B02}" name="system">
+          <FILE id="GAs3EM" name="Allocators.cpp" compile="1" resource="0" file="thirdparty/rubberband/src/system/Allocators.cpp"/>
+          <FILE id="qah6tP" name="Allocators.h" compile="0" resource="0" file="thirdparty/rubberband/src/system/Allocators.h"/>
+          <FILE id="I0d2qW" name="sysutils.cpp" compile="1" resource="0" file="thirdparty/rubberband/src/system/sysutils.cpp"/>
+          <FILE id="pln9AT" name="sysutils.h" compile="0" resource="0" file="thirdparty/rubberband/src/system/sysutils.h"/>
+          <FILE id="HwqIEe" name="Thread.cpp" compile="1" resource="0" file="thirdparty/rubberband/src/system/Thread.cpp"/>
+          <FILE id="S5PK1N" name="Thread.h" compile="0" resource="0" file="thirdparty/rubberband/src/system/Thread.h"/>
+          <FILE id="Cv3kXE" name="VectorOps.h" compile="0" resource="0" file="thirdparty/rubberband/src/system/VectorOps.h"/>
+          <FILE id="SiR4pN" name="VectorOpsComplex.cpp" compile="1" resource="0"
+                file="thirdparty/rubberband/src/system/VectorOpsComplex.cpp"/>
+          <FILE id="PKEsDO" name="VectorOpsComplex.h" compile="0" resource="0"
+                file="thirdparty/rubberband/src/system/VectorOpsComplex.h"/>
+        </GROUP>
+        <FILE id="zQgigi" name="rubberband-c.cpp" compile="1" resource="0"
+              file="thirdparty/rubberband/src/rubberband-c.cpp"/>
+        <FILE id="T3qpS9" name="RubberBandStretcher.cpp" compile="1" resource="0"
+              file="thirdparty/rubberband/src/RubberBandStretcher.cpp"/>
+        <FILE id="mdxrrZ" name="StretchCalculator.cpp" compile="1" resource="0"
+              file="thirdparty/rubberband/src/StretchCalculator.cpp"/>
+        <FILE id="ecoMI1" name="StretchCalculator.h" compile="0" resource="0"
+              file="thirdparty/rubberband/src/StretchCalculator.h"/>
+        <FILE id="Iktw28" name="StretcherChannelData.cpp" compile="1" resource="0"
+              file="thirdparty/rubberband/src/StretcherChannelData.cpp"/>
+        <FILE id="ZqrnJl" name="StretcherChannelData.h" compile="0" resource="0"
+              file="thirdparty/rubberband/src/StretcherChannelData.h"/>
+        <FILE id="qeGDUd" name="StretcherImpl.cpp" compile="1" resource="0"
+              file="thirdparty/rubberband/src/StretcherImpl.cpp"/>
+        <FILE id="p10lFc" name="StretcherImpl.h" compile="0" resource="0" file="thirdparty/rubberband/src/StretcherImpl.h"/>
+        <FILE id="oXzqaV" name="StretcherProcess.cpp" compile="1" resource="0"
+              file="thirdparty/rubberband/src/StretcherProcess.cpp"/>
+      </GROUP>
+      <FILE id="oYRdfY" name="RubberBandStretcher.h" compile="0" resource="0"
+            file="thirdparty/rubberband/rubberband/RubberBandStretcher.h"/>
+    </GROUP>
     <GROUP id="{7CC9F263-A7AC-3CCC-E658-863D58B298DA}" name="Processors">
       <GROUP id="{D5318407-55AB-D493-B9CC-88A8BBA22E03}" name="Sampler">
         <GROUP id="{8E8661E0-FBB6-10E7-B37B-8807571601AE}" name="Components">
@@ -65,6 +183,8 @@
         <FILE id="xMOxP3" name="SamplerPluginDemo.h" compile="0" resource="0"
               file="Source/Sampler/Source/SamplerPluginDemo.h"/>
       </GROUP>
+      <FILE id="kmJESh" name="AbletonClipInfo.h" compile="0" resource="0"
+            file="Source/AbletonClipInfo.h"/>
       <FILE id="VCI1MC" name="SamplerProcessor.h" compile="0" resource="0"
             file="Source/SamplerProcessor.h"/>
       <FILE id="DzAh2I" name="DelayProcessor.h" compile="0" resource="0"
@@ -87,6 +207,8 @@
             file="Source/FilterProcessor.h"/>
       <FILE id="KHE9J6" name="OscillatorProcessor.h" compile="0" resource="0"
             file="Source/OscillatorProcessor.h"/>
+      <FILE id="tlHHTL" name="PlaybackWarpProcessor.h" compile="0" resource="0"
+            file="Source/PlaybackWarpProcessor.h"/>
       <FILE id="D0T0n5" name="PlaybackProcessor.h" compile="0" resource="0"
             file="Source/PlaybackProcessor.h"/>
       <FILE id="sHn6tW" name="PluginProcessor.h" compile="0" resource="0"
@@ -98,19 +220,6 @@
             file="Source/ProcessorBase.cpp"/>
       <FILE id="djnb4p" name="RecorderProcessor.h" compile="0" resource="0"
             file="Source/RecorderProcessor.h"/>
-    </GROUP>
-    <GROUP id="{4A809F36-0B47-21E3-7688-8CF65B68EF74}" name="Maximilian">
-      <GROUP id="{581DA4A2-AF43-FE18-47C2-CA1585A8F30E}" name="libs">
-        <FILE id="WJArWJ" name="fft.cpp" compile="1" resource="0" file="Source/Maximilian/libs/fft.cpp"/>
-        <FILE id="PNwhtj" name="fft.h" compile="0" resource="0" file="Source/Maximilian/libs/fft.h"/>
-        <FILE id="DMQKGv" name="maxiFFT.cpp" compile="1" resource="0" file="Source/Maximilian/libs/maxiFFT.cpp"/>
-        <FILE id="wtlBbE" name="maxiFFT.h" compile="0" resource="0" file="Source/Maximilian/libs/maxiFFT.h"/>
-        <FILE id="j3GCgR" name="maxiMFCC.cpp" compile="1" resource="0" file="Source/Maximilian/libs/maxiMFCC.cpp"/>
-        <FILE id="iOVBDy" name="maxiMFCC.h" compile="0" resource="0" file="Source/Maximilian/libs/maxiMFCC.h"/>
-        <FILE id="aoJm4P" name="sineTable.h" compile="0" resource="0" file="Source/Maximilian/libs/sineTable.h"/>
-      </GROUP>
-      <FILE id="rye4Hq" name="maximilian.cpp" compile="1" resource="0" file="Source/Maximilian/maximilian.cpp"/>
-      <FILE id="ducH0M" name="maximilian.h" compile="0" resource="0" file="Source/Maximilian/maximilian.h"/>
     </GROUP>
     <GROUP id="{6A50F3BF-C55C-AF7D-5BA6-E62FF469B8C4}" name="Source"/>
     <FILE id="ejbgC9" name="CustomParameters.h" compile="0" resource="0"
@@ -126,6 +235,8 @@
           file="Source/RenderEngineWrapper.h"/>
     <FILE id="nW1a1A" name="RenderEngineWrapper.cpp" compile="1" resource="0"
           file="Source/RenderEngineWrapper.cpp"/>
+    <FILE id="LnjjS9" name="portable_endian.h" compile="0" resource="0"
+          file="thirdparty/portable_endian/include/portable_endian.h"/>
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -215,12 +326,12 @@
         <MODULEPATH id="juce_audio_utils" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2019>
-    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST"
+    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
             vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
-            externalLibraries="faust.lib">
+            externalLibraries="faust.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;"
-                       targetName="dawdreamer" libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;"
+        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
+                       targetName="dawdreamer" libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate_build\win-x64\Release;"
                        postbuildCommand="move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
