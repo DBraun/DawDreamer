@@ -487,7 +487,7 @@ engine.load_graph(graph)
 engine.render(DURATION)
 ```
 
-## Time-stretching and Pitch-stretching
+## Pitch-stretching and Time-stretching with Warp Markers
 
 Time-stretching and pitch-stretching are currently available on Windows thanks to [Rubberband](https://github.com/breakfastquay/rubberband/). 
 
@@ -512,7 +512,7 @@ graph = [
 assert(engine.load_graph(graph))
 ```
 
-You can set an `.asd` file:
+You can set an Ableton Live `.asd` file containing warp markers to do beat-matching:
 
 ```python
 playback_processor.set_data(load_audio_file("synth_loop.wav"))
