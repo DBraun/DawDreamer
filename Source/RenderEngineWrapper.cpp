@@ -49,6 +49,15 @@ RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array da
     return std::shared_ptr<PlaybackProcessor>{new PlaybackProcessor{ name, data }};
 }
 
+#ifdef BUILD_DAWDREAMER_RUBBERBAND
+/// @brief
+std::shared_ptr<PlaybackWarpProcessor>
+RenderEngineWrapper::makePlaybackWarpProcessor(const std::string& name, py::array data)
+{
+    return std::shared_ptr<PlaybackWarpProcessor>{new PlaybackWarpProcessor{ name, data, mySampleRate }};
+}
+#endif
+
 std::shared_ptr<FilterProcessor>
 RenderEngineWrapper::makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain) {
 

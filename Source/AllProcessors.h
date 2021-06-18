@@ -8,6 +8,7 @@
 #include "FilterProcessor.h"
 #include "OscillatorProcessor.h"
 #include "PlaybackProcessor.h"
+#include "PlaybackWarpProcessor.h"
 #include "PluginProcessor.h"
 #include "RecorderProcessor.h"
 #include "ReverbProcessor.h"
