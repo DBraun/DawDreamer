@@ -242,17 +242,17 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
                vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
-               extraLinkerFlags="-shared -lpython3.8" externalLibraries="samplerate"
-               extraDefs="HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS&#10;SAMPLER_SKIP_UI&#10;BUILD_DAWDREAMER_RUBBERBAND">
+               extraLinkerFlags="-shared -lpython3.8" externalLibraries="samplerate&#10;faust"
+               extraDefs="SAMPLER_SKIP_UI&#10;HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer.so"
-                       osxArchitecture="Native" headerPath="~/.pyenv/versions/3.8.5/include/python3.8;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
-                       libraryPath="/Users/davidbraun/.pyenv/versions/3.8.5/Library/Frameworks/Python.framework/Versions/3.8/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug/lib;&#10;../../thirdparty/libsamplerate_build/darwin-x64/Debug;"
-                       enablePluginBinaryCopyStep="1"/>
+                       osxArchitecture="Native" headerPath="~/.pyenv/versions/3.8.5/include/python3.8;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
+                       libraryPath="/Users/davidbraun/.pyenv/versions/3.8.5/Library/Frameworks/Python.framework/Versions/3.8/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release&#10;../../thirdparty/libsamplerate_build/darwin-x64/Debug"
+                       enablePluginBinaryCopyStep="1" osxCompatibility="11.1 SDK"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer.so"
-                       osxArchitecture="Native" headerPath="~/.pyenv/versions/3.8.5/include/python3.8;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
-                       libraryPath="/Users/davidbraun/.pyenv/versions/3.8.5/Library/Frameworks/Python.framework/Versions/3.8/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib;&#10;../../thirdparty/libsamplerate_build/darwin-x64/Release;"
-                       enablePluginBinaryCopyStep="1"/>
+                       osxArchitecture="Native" headerPath="~/.pyenv/versions/3.8.5/include/python3.8;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
+                       libraryPath="/Users/davidbraun/.pyenv/versions/3.8.5/Library/Frameworks/Python.framework/Versions/3.8/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release&#10;../../thirdparty/libsamplerate_build/darwin-x64/Release"
+                       enablePluginBinaryCopyStep="1" osxCompatibility="11.1 SDK"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../JUCE/modules"/>
@@ -273,7 +273,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
                 extraLinkerFlags="-shared -lpython3.8" cppLanguageStandard="-std=c++11"
-                vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK">
+                vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
+                extraDefs="SAMPLER_SKIP_UI&#10;HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
                        headerPath="/usr/include/python3.8;&#10;../../thirdparty/pybind11/include;"/>
@@ -298,7 +299,8 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <VS2019 targetFolder="Builds/VisualStudio2019" vst3Folder="VST3_SDK"
-            vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK">
+            vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
+            extraDefs="SAMPLER_SKIP_UI">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;"
                        postbuildCommand="move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;"
@@ -324,7 +326,7 @@
         <MODULEPATH id="juce_dsp" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2019>
-    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
+    <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="SAMPLER_SKIP_UI&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
             vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
             externalLibraries="faust.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
@@ -349,7 +351,8 @@
         <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </VS2019>
-    <VS2017 targetFolder="Builds/VisualStudio2017" vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK">
+    <VS2017 targetFolder="Builds/VisualStudio2017" vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
+            extraDefs="SAMPLER_SKIP_UI">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;"
                        libraryPath="C:\Python38\libs"/>

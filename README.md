@@ -163,6 +163,8 @@ Each time you want to use `DawDreamer`, come to this directory and activate the 
 ```bash
 pyenv activate myVenv
 ```
+Move `libfaust.2.dylib` to `/usr/local/lib/`.
+
 Then try `DawDreamer`:
     
     python

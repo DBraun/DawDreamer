@@ -1,5 +1,10 @@
 #include "FaustProcessor.h"
 
+#ifndef WIN32
+std::list<GUI*> GUI::fGuiList;
+ztimedmap GUI::gTimedZoneMap;
+#endif
+
 #ifdef BUILD_DAWDREAMER_FAUST
 
 #ifndef SAFE_DELETE

@@ -778,10 +778,11 @@
 					"_DEBUG=1",
 					"DEBUG=1",
 					"PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==",
+					"SAMPLER_SKIP_UI",
 					"HAVE_LIBSAMPLERATE",
 					"HAVE_VDSP",
 					"USE_PTHREADS",
-					"SAMPLER_SKIP_UI",
+					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=1.0.0",
@@ -819,13 +820,13 @@
 					"$(inherited)",
 					"\"/Users/davidbraun/.pyenv/versions/3.8.5/Library/Frameworks/Python.framework/Versions/3.8/lib\"",
 					"\"/usr/local/lib\"",
-					"\"../../thirdparty/libfaust/darwin-x64/Debug/lib\"",
+					"\"../../thirdparty/libfaust/darwin-x64/Release\"",
 					"\"../../thirdparty/libsamplerate_build/darwin-x64/Debug\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(HOME)/.pyenv/versions/3.8.5/include/python3.8 $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -shared -lpython3.8";
+				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython3.8";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
@@ -899,10 +900,11 @@
 					"_NDEBUG=1",
 					"NDEBUG=1",
 					"PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==",
+					"SAMPLER_SKIP_UI",
 					"HAVE_LIBSAMPLERATE",
 					"HAVE_VDSP",
 					"USE_PTHREADS",
-					"SAMPLER_SKIP_UI",
+					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=1.0.0",
@@ -940,14 +942,14 @@
 					"$(inherited)",
 					"\"/Users/davidbraun/.pyenv/versions/3.8.5/Library/Frameworks/Python.framework/Versions/3.8/lib\"",
 					"\"/usr/local/lib\"",
-					"\"../../thirdparty/libfaust/darwin-x64/Release/lib\"",
+					"\"../../thirdparty/libfaust/darwin-x64/Release\"",
 					"\"../../thirdparty/libsamplerate_build/darwin-x64/Release\"",
 				);
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(HOME)/.pyenv/versions/3.8.5/include/python3.8 $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -shared -lpython3.8";
+				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython3.8";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
