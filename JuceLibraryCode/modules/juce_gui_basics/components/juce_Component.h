@@ -369,6 +369,19 @@ public:
     Rectangle<int> getLocalArea (const Component* sourceComponent,
                                  Rectangle<int> areaRelativeToSourceComponent) const;
 
+    /** Converts a rectangle to be relative to this component's coordinate space.
+
+        This takes a rectangle that is relative to a different component, and returns its position relative
+        to this component. If the sourceComponent parameter is null, the source rectangle is assumed to be
+        a screen coordinate.
+
+        If you've used setTransform() to apply one or more transforms to components, then the source rectangle
+        may not actually be rectangular when converted to the target space, so in that situation this will return
+        the smallest rectangle that fully contains the transformed area.
+    */
+    Rectangle<float> getLocalArea (const Component* sourceComponent,
+                                   Rectangle<float> areaRelativeToSourceComponent) const;
+
     /** Converts a point relative to this component's top-left into a screen coordinate.
         @see getLocalPoint, localAreaToGlobal
     */
@@ -387,6 +400,15 @@ public:
         @see getLocalPoint, localPointToGlobal
     */
     Rectangle<int> localAreaToGlobal (Rectangle<int> localArea) const;
+
+    /** Converts a rectangle from this component's coordinate space to a screen coordinate.
+
+        If you've used setTransform() to apply one or more transforms to components, then the source rectangle
+        may not actually be rectangular when converted to the target space, so in that situation this will return
+        the smallest rectangle that fully contains the transformed area.
+        @see getLocalPoint, localPointToGlobal
+    */
+    Rectangle<float> localAreaToGlobal (Rectangle<float> localArea) const;
 
     //==============================================================================
     /** Moves the component to a new position.
@@ -1920,7 +1942,7 @@ public:
     virtual void handleCommandMessage (int commandId);
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Runs a component modally, waiting until the loop terminates.
 
         This method first makes the component visible, brings it to the front and
@@ -2157,10 +2179,7 @@ public:
         operator ComponentType*() const noexcept              { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* operator->() noexcept                  { return getComponent(); }
-
-        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        const ComponentType* operator->() const noexcept      { return getComponent(); }
+        ComponentType* operator->() const noexcept            { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
         void deleteAndZero()                                  { delete getComponent(); }

@@ -139,7 +139,6 @@ RenderEngine::render(const double renderLength) {
 
     int numberOfBuffers = int(std::ceil((numRenderedSamples -1.) / myBufferSize));
 
-    const long long int numSamples = numberOfBuffers * myBufferSize;
     AudioSampleBuffer audioBuffer(myNumOutputAudioChans, myBufferSize);
 
     // Clear main buffer and prepare to record samples over multiple buffer passes.

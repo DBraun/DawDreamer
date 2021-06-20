@@ -207,9 +207,7 @@ namespace CoreTextTypeLayout
     //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
-       #if JUCE_IOS
-        auto rgbColourSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
-       #endif
+        const detail::ColorSpacePtr rgbColourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
 
         auto attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
         auto cfText = text.getText().toCFString();
@@ -234,6 +232,15 @@ namespace CoreTextTypeLayout
                 ctFontRef = getFontWithPointSize (ctFontRef, attr.font.getHeight() * getHeightToPointsFactor (ctFontRef));
                 CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
 
+                if (attr.font.isUnderlined())
+                {
+                    auto underline = kCTUnderlineStyleSingle;
+
+                    auto numberRef = CFNumberCreate (nullptr, kCFNumberIntType, &underline);
+                    CFAttributedStringSetAttribute (attribString, range, kCTUnderlineStyleAttributeName, numberRef);
+                    CFRelease (numberRef);
+                }
+
                 auto extraKerning = attr.font.getExtraKerningFactor();
 
                 if (extraKerning != 0)
@@ -251,18 +258,11 @@ namespace CoreTextTypeLayout
             {
                 auto col = attr.colour;
 
-               #if JUCE_IOS
                 const CGFloat components[] = { col.getFloatRed(),
                                                col.getFloatGreen(),
                                                col.getFloatBlue(),
                                                col.getFloatAlpha() };
-                auto colour = CGColorCreate (rgbColourSpace, components);
-               #else
-                auto colour = CGColorCreateGenericRGB (col.getFloatRed(),
-                                                       col.getFloatGreen(),
-                                                       col.getFloatBlue(),
-                                                       col.getFloatAlpha());
-               #endif
+                auto colour = CGColorCreate (rgbColourSpace.get(), components);
 
                 CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
                 CGColorRelease (colour);
@@ -287,9 +287,6 @@ namespace CoreTextTypeLayout
         CFAttributedStringSetAttribute (attribString, CFRangeMake (0, CFAttributedStringGetLength (attribString)),
                                         kCTParagraphStyleAttributeName, ctParagraphStyleRef);
         CFRelease (ctParagraphStyleRef);
-       #if JUCE_IOS
-        CGColorSpaceRelease (rgbColourSpace);
-       #endif
         return attribString;
     }
 
@@ -462,6 +459,26 @@ namespace CoreTextTypeLayout
                     glyphRun->font = Font (String::fromCFString (cfsFontFamily),
                                            String::fromCFString (cfsFontStyle),
                                            (float) (CTFontGetSize (ctRunFont) / fontHeightToPointsFactor));
+
+                    auto isUnderlined = [&]
+                    {
+                        CFNumberRef underlineStyle;
+
+                        if (CFDictionaryGetValueIfPresent (runAttributes, kCTUnderlineStyleAttributeName, (const void**) &underlineStyle))
+                        {
+                            if (CFGetTypeID (underlineStyle) == CFNumberGetTypeID())
+                            {
+                                int value = 0;
+                                CFNumberGetValue (underlineStyle, kCFNumberLongType, (void*) &value);
+
+                                return value != 0;
+                            }
+                        }
+
+                        return false;
+                    }();
+
+                    glyphRun->font.setUnderline (isUnderlined);
 
                     CFRelease (cfsFontStyle);
                     CFRelease (cfsFontFamily);

@@ -201,7 +201,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
             case invokedExecutableFile:
                 if (juce_argv != nullptr && juce_argc > 0)
-                    return File::getCurrentWorkingDirectory().getChildFile (String (juce_argv[0]));
+                    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (juce_argv[0]));
                 // deliberate fall-through...
                 JUCE_FALLTHROUGH
 
@@ -425,12 +425,22 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
             StringArray params;
             params.addTokens (parameters, true);
 
-            NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
-
             NSMutableArray* paramArray = [[NSMutableArray new] autorelease];
 
             for (int i = 0; i < params.size(); ++i)
                 [paramArray addObject: juceStringToNS (params[i])];
+
+           #if (defined MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+            auto config = [NSWorkspaceOpenConfiguration configuration];
+            [config setCreatesNewApplicationInstance: YES];
+            config.arguments = paramArray;
+
+            [workspace openApplicationAtURL: filenameAsURL
+                              configuration: config
+                          completionHandler: nil];
+            return true;
+           #else
+            NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
 
             [dict setObject: paramArray
                      forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
@@ -439,6 +449,7 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
                                              options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
                                        configuration: dict
                                                error: nil];
+           #endif
         }
 
         if (file.exists())

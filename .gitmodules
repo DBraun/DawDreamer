@@ -16,3 +16,6 @@
 [submodule "thirdparty/libsamplerate"]
 	path = thirdparty/libsamplerate
 	url = https://github.com/libsndfile/libsamplerate
+[submodule "JUCE_6"]
+	path = thirdparty/JUCE_6
+	url = https://github.com/juce-framework/JUCE
