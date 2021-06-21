@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
+from utils import *
 import dawdreamer as daw
 
-SAMPLE_RATE = 44100
 BUFFER_SIZE = 16
 
 def make_impulse(duration):

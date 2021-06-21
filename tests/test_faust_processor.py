@@ -7,7 +7,6 @@ from os.path import abspath
 from utils import *
 import dawdreamer as daw
 
-SAMPLE_RATE = 44100
 BUFFER_SIZE = 1
 
 def test_faust_zita_rev1(set_data=False):
@@ -55,7 +54,7 @@ def test_faust_automation():
 
 	faust_processor.set_parameter("/MyEffect/cutoff", 7000.0)  # Change the cutoff frequency.
 	# or set automation like this
-	faust_processor.set_automation("/MyEffect/cutoff", 5000+4000*make_sine(2, DURATION))
+	faust_processor.set_automation("/MyEffect/cutoff", 10000+9000*make_sine(2, DURATION))
 
 	graph = [
 	    (drums, []),

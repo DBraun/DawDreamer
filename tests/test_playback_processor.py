@@ -5,7 +5,6 @@ from scipy.io import wavfile
 from utils import *
 import dawdreamer as daw
 
-SAMPLE_RATE = 44100
 BUFFER_SIZE = 16
 
 def test_playback(set_data=False):

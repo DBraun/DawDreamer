@@ -7,7 +7,6 @@ from os.path import abspath
 from utils import *
 import dawdreamer as daw
 
-SAMPLE_RATE = 44100
 BUFFER_SIZE = 16
 
 def test_faust_automation():
