@@ -11,7 +11,6 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         sampler.setSample(inputData, mySampleRate);
-        
     }
 
     SamplerProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, int blocksize) : ProcessorBase{ newUniqueName }, mySampleRate{ sr }
@@ -26,40 +25,67 @@ public:
     bool acceptsMidi() const { return true; }
     bool producesMidi() const { return true; }
 
+    float
+    wrapperGetParameter(int parameterIndex)
+    {
+        if (parameterIndex >= sampler.getNumParameters()) {
+            std::cout << "Parameter not found for index: " << parameterIndex << std::endl;
+            return 0.;
+        }
+
+        auto parameterName = sampler.getParameterName(parameterIndex);
+
+        return ProcessorBase::getAutomationVal(parameterName.toStdString(), 0);
+    }
+
     void
     wrapperSetParameter(const int paramIndex, const float value)
     {
-        sampler.setParameterNotifyingHost(paramIndex, value);
+        auto parameterName = sampler.getParameterName(paramIndex);
+
+        if (parameterName == "Param") {
+            return;
+        }
+
+        ProcessorBase::setAutomationVal(parameterName.toStdString(), value);
     }
 
-    void setPlayHead(AudioPlayHead* newPlayHead)
+    void
+    setPlayHead(AudioPlayHead* newPlayHead)
     {
         AudioProcessor::setPlayHead(newPlayHead);
         sampler.setPlayHead(newPlayHead);
     }
    
     void
-        prepareToPlay(double sampleRate, int samplesPerBlock)
+    prepareToPlay(double sampleRate, int samplesPerBlock)
     {
         sampler.prepareToPlay(sampleRate, samplesPerBlock);
-        
+    }
+
+    void reset() {
+        sampler.reset();
+
         if (myMidiIterator) {
             delete myMidiIterator;
         }
 
         myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
         myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
-        myWriteIndex = 0;
         myRenderMidiBuffer.clear();
     }
 
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
     {
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+
         automateParameters();
 
-        long long int start = myWriteIndex;
-        long long int end = myWriteIndex + buffer.getNumSamples();
+        long long int start = posInfo.timeInSamples;
+        long long int end = start + buffer.getNumSamples();
+
         myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
         do {
             if (myIsMessageBetween) {
@@ -72,21 +98,12 @@ public:
         sampler.processBlock(buffer, myRenderMidiBuffer);
 
         myRenderMidiBuffer.clear();
-
-        myWriteIndex = end;
-    }
-
-    void
-    reset()
-    {
-        sampler.reset();
-
-        myWriteIndex = 0;
     }
 
     const juce::String getName() const { return "SamplerProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
+    void
+    setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
         float* input_ptr = (float*)input.data();
 
         std::vector<std::vector<float>> data = std::vector<std::vector<float>>(input.shape(0), std::vector<float>(input.shape(1)));
@@ -165,22 +182,26 @@ public:
         return true;
     }
 
-    std::string wrapperGetParameterName(int parameter)
+    std::string
+    wrapperGetParameterName(int parameter)
     {
         return sampler.getParameterName(parameter).toStdString();
     }
 
-    std::string wrapperGetParameterAsText(const int parameter)
+    std::string
+    wrapperGetParameterAsText(const int parameter)
     {
         return sampler.getParameterText(parameter).toStdString();
     }
 
-    int wrapperGetPluginParameterSize()
+    int
+    wrapperGetPluginParameterSize()
     {
         return sampler.getNumParameters();
     }
 
-    py::list getParametersDescription()
+    py::list
+    getParametersDescription()
     {
         py::list myList;
 
@@ -243,13 +264,9 @@ public:
 
             auto theName = sampler.getParameterName(i);
 
-            if (theName == "Param") {
-                continue;
-            }
-
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                sampler.setParameter(i, theParameter->sample(posInfo.timeInSamples));
+                sampler.setParameterNotifyingHost(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
                 std::cout << "Error automateParameters: " << theName << std::endl;
@@ -261,7 +278,6 @@ public:
 
 private:
 
-    uint32_t myPlaybackIndex = 0;
     double mySampleRate;
 
     SamplerAudioProcessor sampler;
@@ -269,7 +285,6 @@ private:
     MidiBuffer myMidiBuffer;
     MidiBuffer myRenderMidiBuffer;
     MidiMessage myMidiMessage;
-    long long int myWriteIndex = 0;
     int myMidiMessagePosition = -1;
     MidiBuffer::Iterator* myMidiIterator = nullptr;
     bool myIsMessageBetween = false;

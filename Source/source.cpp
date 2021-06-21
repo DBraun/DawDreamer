@@ -77,7 +77,7 @@ PYBIND11_MODULE(dawdreamer, m)
 
     py::class_<SamplerProcessor, std::shared_ptr<SamplerProcessor>, ProcessorBase>(m, "SamplerProcessor")
         .def("set_data", &SamplerProcessor::setData)
-        .def("get_parameter", &SamplerProcessor::getParameter)
+        .def("get_parameter", &SamplerProcessor::wrapperGetParameter)
         .def("get_parameter_name", &SamplerProcessor::wrapperGetParameterName)
         .def("get_parameter_text", &SamplerProcessor::wrapperGetParameterAsText)
         .def("set_parameter", &SamplerProcessor::wrapperSetParameter)
