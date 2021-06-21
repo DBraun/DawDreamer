@@ -2,17 +2,13 @@ import pytest
 import librosa
 from scipy.io import wavfile
 
+from utils import *
 import dawdreamer as daw
 
 SAMPLE_RATE = 44100
 BUFFER_SIZE = 16
 
-def load_audio_file(file_path, duration=None):
-	sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE)
-	assert(rate == SAMPLE_RATE)
-	return sig
-
-def test_playback1(set_data=False):
+def test_playback(set_data=False):
 
 	DURATION = 5.
 
