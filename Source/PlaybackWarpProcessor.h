@@ -13,9 +13,13 @@ class PlaybackWarpProcessor : public ProcessorBase
 public:
     PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr) : ProcessorBase{ createParameterLayout, newUniqueName }
     {
-        myPlaybackData.setSize(inputData.size(), inputData.at(0).size(), false, false, false);
+        const int numChannels = (int) inputData.size();
+        const int numSamples = (int)inputData.at(0).size();
+        
+        // set to stereo
+        myPlaybackData.setSize(channels, numSamples, false, false, false);
         for (int chan = 0; chan < channels; chan++) {
-            myPlaybackData.copyFrom(chan, 0, inputData.at(0).data(), inputData.at(0).size());
+            myPlaybackData.copyFrom(chan, 0, inputData.at(std::min(chan, numChannels)).data(), numSamples);
         }
 
         init(sr);
@@ -234,6 +238,12 @@ public:
                 loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, m_sample_rate);
                 loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, m_sample_rate);
                 end_marker_sample = m_clipInfo.beat_to_sample(m_clipInfo.end_marker, m_sample_rate);
+                
+                const int last_sample = myPlaybackData.getNumSamples()-1;
+                loop_start_sample = std::min(loop_start_sample, last_sample);
+                loop_end_sample = std::min(loop_end_sample, last_sample);
+                end_marker_sample = std::min(end_marker_sample, last_sample);
+                
             }
             else {
                 loop_start_sample = 0;
@@ -256,10 +266,10 @@ public:
 
             int count = 0;
             if (m_clipInfo.loop_on) {
-                count = std::min(1, 1 + loop_end_sample - sampleReadIndex);
+                count = std::min(1, loop_end_sample - sampleReadIndex);
             }
             else {
-                count = std::min(1, 1 + end_marker_sample - sampleReadIndex);
+                count = std::min(1, end_marker_sample - sampleReadIndex);
             }
 
             if (count <= 0) {
@@ -292,11 +302,14 @@ public:
 
     void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
         float* input_ptr = (float*)input.data();
+        
+        const int numChannels = (int) input.shape(0);
+        const int numSamples = (int) input.shape(1);
 
-        myPlaybackData.setSize(input.shape(0), input.shape(1), false, false, false);
+        myPlaybackData.setSize(numChannels, numSamples, false, false, false);
         for (int chan = 0; chan < channels; chan++) {
-            myPlaybackData.copyFrom(chan, 0, input_ptr, input.shape(1));
-            input_ptr += input.shape(1);
+            myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
+            input_ptr += numSamples;
         }
     }
 
