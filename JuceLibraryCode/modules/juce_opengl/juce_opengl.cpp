@@ -37,6 +37,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
+#define JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER 1
 
 #include "juce_opengl.h"
 
@@ -263,15 +264,11 @@ private:
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-
  #if JUCE_MAC
   #include "native/juce_OpenGL_osx.h"
  #else
   #include "native/juce_OpenGL_ios.h"
  #endif
-
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #elif JUCE_WINDOWS
  #include "native/juce_OpenGL_win32.h"

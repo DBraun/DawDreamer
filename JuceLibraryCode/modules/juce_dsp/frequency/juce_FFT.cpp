@@ -140,7 +140,7 @@ struct FFTFallback  : public FFT::Instance
         else
         {
             HeapBlock<char> heapSpace (scratchSize);
-            performRealOnlyForwardTransform (reinterpret_cast<Complex<float>*> (heapSpace.getData()), d);
+            performRealOnlyForwardTransform (unalignedPointerCast<Complex<float>*> (heapSpace.getData()), d);
         }
     }
 
@@ -158,7 +158,7 @@ struct FFTFallback  : public FFT::Instance
         else
         {
             HeapBlock<char> heapSpace (scratchSize);
-            performRealOnlyInverseTransform (reinterpret_cast<Complex<float>*> (heapSpace.getData()), d);
+            performRealOnlyInverseTransform (unalignedPointerCast<Complex<float>*> (heapSpace.getData()), d);
         }
     }
 
@@ -950,7 +950,11 @@ FFT::FFT (int order)
 {
 }
 
-FFT::~FFT() {}
+FFT::FFT (FFT&&) noexcept = default;
+
+FFT& FFT::operator= (FFT&&) noexcept = default;
+
+FFT::~FFT() = default;
 
 void FFT::perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept
 {

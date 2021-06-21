@@ -26,10 +26,13 @@
 namespace juce
 {
 
-#if (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11) \
-   || (defined (__IPHONE_8_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0)
+#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
 
  #define JUCE_USE_WKWEBVIEW 1
+
+ #if (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
+  #define WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED 1
+ #endif
 
  #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
   #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
@@ -37,15 +40,14 @@ namespace juce
 
 #endif
 
-NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
+static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
 {
     NSString* urlString = juceStringToNS (url);
 
-    #if (JUCE_MAC && (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)) \
-      || (JUCE_IOS && (defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_7_0))
-     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
     #else
-     urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+     urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
     #endif
 
      if (NSURL* nsURL = [NSURL URLWithString: urlString])
@@ -80,6 +82,63 @@ NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* hea
     return nullptr;
 }
 
+#if JUCE_MAC
+
+#if JUCE_USE_WKWEBVIEW
+ using WebViewBase = ObjCClass<WKWebView>;
+#else
+ using WebViewBase = ObjCClass<WebView>;
+#endif
+
+struct WebViewKeyEquivalentResponder : public WebViewBase
+{
+    WebViewKeyEquivalentResponder()
+        : WebViewBase ("WebViewKeyEquivalentResponder_")
+    {
+        addIvar<WebViewKeyEquivalentResponder*> ("owner");
+        addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
+        registerClass();
+    }
+
+private:
+    static WebViewKeyEquivalentResponder* getOwner (id self)
+    {
+        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
+    }
+
+    static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
+    {
+        NSResponder* first = [[self window] firstResponder];
+
+       #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
+        constexpr auto mask = NSEventModifierFlagDeviceIndependentFlagsMask;
+        constexpr auto key  = NSEventModifierFlagCommand;
+       #else
+        constexpr auto mask = NSDeviceIndependentModifierFlagsMask;
+        constexpr auto key  = NSCommandKeyMask;
+       #endif
+
+        if (([event modifierFlags] & mask) == key)
+        {
+            auto sendAction = [&] (SEL actionSelector) -> BOOL
+            {
+                return [NSApp sendAction: actionSelector
+                                      to: first
+                                    from: self];
+            };
+
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"x"])  return sendAction (@selector (cut:));
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"c"])  return sendAction (@selector (copy:));
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"v"])  return sendAction (@selector (paste:));
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"a"])  return sendAction (@selector (selectAll:));
+        }
+
+        return sendSuperclassMessage<BOOL> (self, selector, event);
+    }
+};
+
+#endif
+
 #if JUCE_USE_WKWEBVIEW
 
 struct WebViewDelegateClass  : public ObjCClass<NSObject>
@@ -93,13 +152,15 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation,               "v@:@@@");
         addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
 
-        addMethod (@selector (webView:webViewDidClose:),                                  webViewDidClose,                 "v@:@");
+       #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
+        addMethod (@selector (webViewDidClose:),                                          webViewDidClose,                 "v@:@");
+       #endif
+
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
                               windowFeatures:),                                           createWebView,                   "@@:@@@@");
 
        #if WKWEBVIEW_OPENPANEL_SUPPORTED
-        addMethod (@selector (webView:runOpenPanelWithParameters:
-                              initiatedByFrame:completionHandler:),                      runOpenPanel,                    "v@:@@@@");
+        addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:), runOpenPanel, "v@:@@@@");
        #endif
 
         registerClass();
@@ -146,10 +207,12 @@ private:
         displayError (getOwner (self), error);
     }
 
+   #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
     static void webViewDidClose (id self, SEL, WKWebView*)
     {
         getOwner (self)->windowCloseRequest();
     }
+   #endif
 
     static WKWebView* createWebView (id self, SEL, WKWebView*, WKWebViewConfiguration*,
                                      WKNavigationAction* navigationAction, WKWindowFeatures*)
@@ -213,12 +276,17 @@ public:
 
        #if JUCE_MAC
         auto frame = NSMakeRect (0, 0, 100.0f, 100.0f);
+
+        static WebViewKeyEquivalentResponder webviewClass;
+        webView = (WKWebView*) webviewClass.createInstance();
+
+        webView = [webView initWithFrame: frame
+                           configuration: config];
        #else
         auto frame = CGRectMake (0, 0, 100.0f, 100.0f);
-       #endif
-
         webView = [[WKWebView alloc] initWithFrame: frame
                                      configuration: config];
+       #endif
 
         static WebViewDelegateClass cls;
         webViewDelegate = [cls.createInstance() init];
@@ -244,12 +312,24 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
+        auto trimmed = url.trimStart();
 
-        if (url.trimStart().startsWithIgnoreCase ("javascript:"))
+        if (trimmed.startsWithIgnoreCase ("javascript:"))
         {
             [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
                      completionHandler: nil];
+
+            return;
+        }
+
+        stop();
+
+        if (trimmed.startsWithIgnoreCase ("file:"))
+        {
+            auto file = URL (url).getLocalFile();
+
+            if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
+                [webView loadFileURL: nsUrl allowingReadAccessToURL: nsUrl];
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
@@ -271,32 +351,6 @@ private:
 #else
 
 #if JUCE_MAC
-
-struct WebViewKeyEquivalentResponder : public ObjCClass<WebView>
-{
-    WebViewKeyEquivalentResponder() : ObjCClass<WebView> ("WebViewKeyEquivalentResponder_")
-    {
-        addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
-        registerClass();
-    }
-
-private:
-    static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
-    {
-        NSResponder* first = [[self window] firstResponder];
-
-        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask)
-        {
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"x"]) return [NSApp sendAction:@selector(cut:)       to:first from:self];
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"c"]) return [NSApp sendAction:@selector(copy:)      to:first from:self];
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"v"]) return [NSApp sendAction:@selector(paste:)     to:first from:self];
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"a"]) return [NSApp sendAction:@selector(selectAll:) to:first from:self];
-        }
-
-        objc_super s = { self, [WebView class] };
-        return ObjCMsgSendSuper<BOOL, NSEvent*> (&s, selector, event);
-    }
-};
 
 struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
 {
@@ -489,14 +543,32 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
-
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
-            [webView stringByEvaluatingJavaScriptFromString:
-                juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            [webView stringByEvaluatingJavaScriptFromString: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            return;
         }
-        else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
+
+        stop();
+
+        auto getRequest = [&]() -> NSMutableURLRequest*
+        {
+            if (url.trimStart().startsWithIgnoreCase ("file:"))
+            {
+                auto file = URL (url).getLocalFile();
+
+                if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
+                    return [NSMutableURLRequest requestWithURL: nsUrl
+                                                   cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                               timeoutInterval: 30.0];
+
+                return nullptr;
+            }
+
+            return getRequestForURL (url, headers, postData);
+        };
+
+        if (NSMutableURLRequest* request = getRequest())
         {
            #if JUCE_MAC
             [[webView mainFrame] loadRequest: request];
@@ -523,10 +595,12 @@ public:
 
     void mouseMove (const MouseEvent&)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
         // them work is to push them via this non-public method..
         if ([webView respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
             [webView performSelector:    @selector (_updateMouseoverWithFakeEvent)];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
 private:

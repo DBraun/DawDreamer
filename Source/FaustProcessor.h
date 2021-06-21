@@ -12,10 +12,11 @@
 
 #include <iostream>
 
-//std::list<GUI*> GUI::fGuiList;
-//ztimedmap GUI::gTimedZoneMap;
+#ifdef WIN32
 __declspec(selectany) std::list<GUI*> GUI::fGuiList;
 __declspec(selectany) ztimedmap GUI::gTimedZoneMap;
+#endif
+
 
 class FaustProcessor : public ProcessorBase
 {

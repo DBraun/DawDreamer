@@ -129,10 +129,9 @@ On Windows, the JUCE project makes several assumptions about having a Python 3.8
 Install [Python 3.8.x Windows x86-64](https://www.python.org/downloads/release/python-385/) to `C:/Python38`. Use [virtualenv](https://docs.python-guide.org/dev/virtualenvs/) to create a virtual environment: 
 `python -m venv C:/Python38dawdreamer`
 
-In this repo, use `env.bat` to activate the virtual environment. In this window, install the python module requirements:
-`pip install -r requirements.txt`
+In this repo, use `env.bat` to activate the virtual environment.
 
-With the Projucer, open `DawDreamer.jucer`. Use it to create a Visual Studio solution and then build in Release mode. Note the post-build command, which moves the recently built `dawdreamer.dll` to `C:/Python38dawdreamer`.
+With the Projucer, open `DawDreamer.jucer`. Use it to create a Visual Studio solution and then build in Release mode. Note the post-build command, which moves the recently built `dawdreamer.dll` to `C:/Python38dawdreamer`. Also copy `thirdparty/libfaust/win-x64/Release/bin/faust.dll` to this directory.
 
 Now you can activate the virtual environment and import dawdreamer:
 
@@ -143,29 +142,20 @@ Now you can activate the virtual environment and import dawdreamer:
 
 ### MacOS
 
-First, get [brew.sh](https://brew.sh/). In a Mac OS Terminal, place the following and hit enter.
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-```
-Use pyenv to install Python 3.8.5:
-```bash
-brew update && brew upgrade pyenv && env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.8.5
-```
+Install [Python 3.9](https://www.python.org/downloads/release/python-395/) with the universal installer.
+
 Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python won't be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
 ```bash
 mv dawdreamer.so.dylib dawdreamer.so
+otool -L dawdreamer.so
+install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib dawdreamer.so
+otool -L dawdreamer.so
 ```
-Move `dawdreamer.so` to a directory of your choice. Open a terminal window to this directory and type the follow to create a reusable virtual environment titled `myVenv` or your choice.
-```bash
-pyenv virtualenv 3.8.5 myVenv
-```
-Each time you want to use `DawDreamer`, come to this directory and activate the environment:
-```bash
-pyenv activate myVenv
-```
+Move `dawdreamer.so` to a directory of your choice. Then find `thirdparty/libfaust/darwin-x64/Release/libfaust.a`, rename it to `libfaust.2.dylib` and place it next to `dawdreamer.so`.
+
 Then try `DawDreamer`:
     
-    python
+    python3
     >> import dawdreamer as daw
     >> engine = daw.RenderEngine(44100,512)
 
@@ -416,11 +406,19 @@ engine.render(10.)
 
 ## FAUST
 
-**This pipeline is inconvenient and for Windows only, so please suggest ways to improve it, or make it OSX/Linux compatible.**
+**FAUST has only been tested for Windows and macOS, so please suggest ways to make it Linux compatible.**
 
-In the Projucer, an extra configuration exists for Visual Studio 2019 **with FAUST**. This configuration relies on a precompiled `faust.dll` and `faust.lib` in `thirdparty/libfaust/win-x64`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
+FAUST features depend on a precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
 
-Run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38dawdreamer/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust/*.lib` files. On OSX (untested), copy them to either `/usr/local/share/faust/*.lib` or `/usr/share/faust/*.lib`.
+### Windows
+
+In the Projucer, an extra configuration exists for Visual Studio 2019 **with FAUST**. 
+
+Run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38dawdreamer/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust/*.lib` files.
+
+### macOS
+
+Open the latest `.dmg` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). Copy the `.lib` files from `Faust-2.X.X/share/faust/` to either `/usr/local/share/faust/*.lib` or `/usr/share/faust/*.lib`.
 
 ### Using FAUST processors
 

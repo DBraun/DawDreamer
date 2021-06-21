@@ -41,6 +41,7 @@
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
+#define JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER 1
 
 #include "juce_gui_basics.h"
 
@@ -229,8 +230,6 @@ namespace juce
 #endif
 
 #if JUCE_MAC || JUCE_IOS
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
@@ -246,8 +245,6 @@ namespace juce
   #include "native/juce_mac_MainMenu.mm"
   #include "native/juce_mac_FileChooser.mm"
  #endif
-
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
  #include "native/juce_mac_MouseCursor.mm"
 
