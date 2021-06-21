@@ -52,19 +52,7 @@ private:
 public:
     void
     prepareToPlay(double, int) {
-        m_clipIndex = 0;
-        if (m_clipIndex < m_clips.size()) {
-            m_currentClip = m_clips.at(0);
-            m_rbstretcher->reset();
-            if (m_clipInfo.warp_on) {
-                sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
-            }
-            else {
-                sampleReadIndex = 0;
-            }
-        }
 
-        reset();
     }
 
     void setTimeRatio(double ratio) {
@@ -296,6 +284,17 @@ public:
 
     void
     reset() {
+        m_clipIndex = 0;
+        if (m_clipIndex < m_clips.size()) {
+            m_currentClip = m_clips.at(0);
+            m_rbstretcher->reset();
+            if (m_clipInfo.warp_on) {
+                sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
+            }
+            else {
+                sampleReadIndex = 0;
+            }
+        }
     }
 
     const juce::String getName() const { return "PlaybackWarpProcessor"; }

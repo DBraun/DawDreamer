@@ -60,6 +60,8 @@ def test_plugin_instrument(set_data=False):
 	synth.add_midi_note(64, 80, 0.5, .5)
 	synth.add_midi_note(67, 127, 0.75, .5)
 
+	assert(synth.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
+
 	graph = [
 	    (synth, []),
 	]

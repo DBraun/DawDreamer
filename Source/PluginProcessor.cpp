@@ -254,15 +254,12 @@ PluginProcessor::createParameterLayout()
     ValueTree blankState;
     myParameters.replaceState(blankState);
 
-    int usedParameterAmount = 0;
     for (int i = 0; i < myPlugin->getNumParameters(); ++i)
     {
         auto parameterName = myPlugin->getParameterName(i);
         // Ensure the parameter is not unused.
         if (parameterName != "Param")
         {
-            ++usedParameterAmount;
-
             myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
             // give it a valid single sample of automation.
             ProcessorBase::setAutomationVal(parameterName.toStdString(), myPlugin->getParameter(i));
