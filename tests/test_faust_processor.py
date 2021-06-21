@@ -30,7 +30,7 @@ def test_faust_zita_rev1(set_data=False):
 	    (faust_processor, ["playback"])
 	]
 
-	engine.load_graph(graph)
+	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_faust_dm.zita_rev1.wav')
 
@@ -59,9 +59,9 @@ def test_faust_automation():
 	graph = [
 	    (drums, []),
 	    (other, []),
-	    (faust_processor, ["drums", "other"])
+	    (faust_processor, [drums.get_name(), other.get_name()])
 	]
 
-	engine.load_graph(graph)
+	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_faust_automation.wav')

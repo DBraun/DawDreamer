@@ -40,6 +40,6 @@ def test_faust_automation():
 	    (engine.make_add_processor("add", [1., 1.]), ["drums", "other"])
 	]
 
-	engine.load_graph(graph)
+	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_playbackwarp_processor.wav')

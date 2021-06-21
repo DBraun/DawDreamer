@@ -38,7 +38,7 @@ def _test_impulse(set_data=False):
 	    (playback_processor, []),
 	]
 
-	engine.load_graph(graph)
+	assert(engine.load_graph(graph))
 
 	engine.render(DURATION)
 

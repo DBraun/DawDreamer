@@ -19,6 +19,8 @@ RenderEngine::~RenderEngine()
 bool
 RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputAudioChans=2) {
 
+    bool success = true;
+
     std::vector<DAGNode>* dagNodes = (std::vector<DAGNode>*) &inDagNodes;
 
     myMainProcessorGraph->clear();
@@ -68,6 +70,7 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
             {
                 std::cout << "Error connecting " << inputName << " to " << processorBase->getUniqueName() << ";" << std::endl;
                 std::cout << "You might need to place " << inputName << " earlier in the graph." << std::endl;
+                success = false;
                 continue;
             }
 
@@ -80,6 +83,7 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
                                                 { slots.getUnchecked(nodeInt)->nodeID, chanDest } });
                 if (!result) {
                     std::cout << "Error connecting " << inputName << " " << chanSource << " to " << processorBase->getUniqueName() << " " << chanDest << std::endl;
+                    success = false;
                 }
             }
 
@@ -107,6 +111,7 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
                     { recorderNodeID, channel } });
             if (!result) {
                 std::cout << "unable to connect to recorderNode" << std::endl;
+                success = false;
             }
         }
     }
@@ -125,7 +130,7 @@ RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputA
         node->getProcessor()->setPlayHead(this);
     }
 
-    return true;
+    return success;
 }
 
 void

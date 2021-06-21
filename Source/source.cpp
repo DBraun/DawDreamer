@@ -7,7 +7,8 @@ PYBIND11_MODULE(dawdreamer, m)
 
     py::class_<ProcessorBase, std::shared_ptr<ProcessorBase>>(m, "ProcessorBase")
         .def("set_automation", &ProcessorBase::setAutomation)
-        .def("get_automation", &ProcessorBase::getAutomationNumpy);
+        .def("get_automation", &ProcessorBase::getAutomationNumpy)
+        .def("get_name", &ProcessorBase::getUniqueName);
 
     py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>, ProcessorBase>(m, "OscillatorProcessor");
 

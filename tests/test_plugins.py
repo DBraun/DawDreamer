@@ -37,7 +37,7 @@ def test_plugin_effect(set_data=False):
 	    (effect, ["playback"])
 	]
 
-	engine.load_graph(graph)
+	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_plugin_effect.wav', duration=DURATION)
 
@@ -64,6 +64,6 @@ def test_plugin_instrument(set_data=False):
 	    (synth, []),
 	]
 
-	engine.load_graph(graph)
+	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_plugin_instrument.wav', duration=DURATION)
