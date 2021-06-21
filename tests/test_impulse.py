@@ -46,6 +46,7 @@ def _test_impulse(set_data=False):
 
 	assert(np.allclose(impulse_input, output, atol=1e-07))
 
+
 def test_impulse1():
 	_test_impulse(False)
 
