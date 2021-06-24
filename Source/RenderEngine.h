@@ -28,11 +28,6 @@ public:
 
     bool loadGraph(DAG dagNodes, int numInputAudioChans, int numOutputAudioChans);
     
-    int hello () {
-        DBG("hello");
-        return 1;
-    }
-
     void render (const double renderLength);
 
     void setBPM(double bpm);
