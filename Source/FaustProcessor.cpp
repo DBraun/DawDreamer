@@ -1,11 +1,11 @@
 #include "FaustProcessor.h"
 
+#ifdef BUILD_DAWDREAMER_FAUST
+
 #ifndef WIN32
 std::list<GUI*> GUI::fGuiList;
 ztimedmap GUI::gTimedZoneMap;
 #endif
-
-#ifdef BUILD_DAWDREAMER_FAUST
 
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(x)              do { if(x){ delete x; x = NULL; } } while(0)

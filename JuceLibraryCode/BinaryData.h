@@ -9,10 +9,10 @@
 namespace BinaryData
 {
     extern const char*   COPYING;
-    const int            COPYINGSize = 257;
+    const int            COPYINGSize = 246;
 
     extern const char*   COPYING2;
-    const int            COPYING2Size = 1809;
+    const int            COPYING2Size = 1774;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
     const int namedResourceListSize = 2;
