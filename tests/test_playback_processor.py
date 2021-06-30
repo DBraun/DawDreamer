@@ -1,5 +1,4 @@
 import pytest
-import librosa
 from scipy.io import wavfile
 
 from utils import *

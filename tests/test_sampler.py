@@ -1,6 +1,4 @@
 import pytest
-import librosa
-from scipy.io import wavfile
 from os.path import abspath
 import platform
 
