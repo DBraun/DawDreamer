@@ -30,31 +30,29 @@ RUN apt-get update -yq \
 && update-ca-certificates \
 && apt-get clean -y
 
-# Copy DawDreamer repo
-#RUN git clone --recursive https://github.com/DBraun/DawDreamer.git
-#COPY . /DawDreamer/
-#WORKDIR /DawDreamer
-COPY . .
-#RUN mkdir /DawDreamer/
-#ADD ./* /DawDreamer/
-#RUN ls
+# clone repo
+RUN git clone --recursive https://github.com/DBraun/DawDreamer.git
+## or copy:
+# /WORKDIR /DawDreamer
+# COPY . .
 
 # Make symlinks to use during building DawDreamer
 RUN ln -s /usr/bin/llvm-config-12 /usr/bin/llvm-config
 RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
 
 # Build DawDreamer
-WORKDIR /Builds/LinuxMakefile
+WORKDIR /DawDreamer/Builds/LinuxMakefile
+ENV CPLUS_INCLUDE_PATH=/usr/include/python3.9/
 RUN ldconfig
 RUN make CONFIG=Release
-RUN cp /Builds/LinuxMakefile/build/libdawdreamer.so /tests/dawdreamer.so
+RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/tests/dawdreamer.so
 
 # Basic Import Test
-WORKDIR /tests
+WORKDIR /DawDreamer/tests
 RUN python3.9 -c "import dawdreamer; print('DawDreamer was successfully imported in python3.')"
 
 # Pytest Full Test
 #RUN apt install python3-pip
 #RUN python3.9 -m pip install librosa scipy numpy pytest
-#WORKDIR /tests
+#WORKDIR /DawDreamer/tests
 #RUN python3.9 -m pytest .
