@@ -162,66 +162,11 @@ Then try `DawDreamer`:
 
 ### Linux
 
-To build `DawDreamer` on Linux, you first need to install a few packages for JUCE.
-JUCE itself has a list of dependencies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out!
-Depending on your distribution and setup you may already have some / all of the following libraries.
-If you are on Ubuntu, the following commands will install your dependencies:
-
-```bash
-sudo apt-get -y install ca-certificates
-sudo apt-get -y install build-essential
-sudo apt-get -y install clang
-sudo apt-get -y install pkg-config
-sudo apt-get -y install libboost-all-dev
-sudo apt-get -y install libboost-python-dev
-sudo apt-get -y install libfreetype6-dev
-sudo apt-get -y install libx11-dev
-sudo apt-get -y install libxinerama-dev
-sudo apt-get -y install libxrandr-dev
-sudo apt-get -y install libxcursor-dev
-sudo apt-get -y install mesa-common-dev
-sudo apt-get -y install libasound2-dev
-sudo apt-get -y install freeglut3-dev
-sudo apt-get -y install libxcomposite-dev
-sudo apt-get -y install libcurl4-gnutls-dev
-sudo apt-get -y install git
-sudo apt-get -y install python3
-sudo apt-get -y install python3-dev
-```
-
-Should you still have problems, which is always a possibility with Linux, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121).
-
-A Linux Makefile (for dawdreamer with python3) is provided in `Builds/LinuxMakefile/`.
-
-To build the library for Linux, change to the right directory and run make. You also need to rename the library in order to use it in Python.
-
-```bash
-cd Builds/LinuxMakefile/
-make
-
-cd build
-mv libdawdreamer.so dawdreamer.so
-```
-
-That's almost it! To install `dawdreamer` globally, run:
-
-```bash
-sudo cp dawdreamer.so `python -c "import site; print(site.getsitepackages()[-1])"`
-```
-
-That's it! In python3 you can now import dawdreamer:
-
-```python
-import dawdreamer as daw
-# ...
-# (see API section below)
-```
-
-Note: for troubleshooting, you can look at the `Dockerfile` file.
+To build `DawDreamer` on Linux, refer to the steps inside the `Dockerfile`.
 
 ### Docker
 
-A `Dockerfile` is provided. To build it, run:
+To build an image with the `Dockerfile`, run:
 
 ```bash
 docker build -t dawdreamer .
