@@ -32,8 +32,7 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	m_numInputChannels = 0;
 	m_numOutputChannels = 0;
 	// auto import
-	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\n \
-        import(\"stdfaust.lib\");\n";
+	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\nimport(\"stdfaust.lib\");\n";
 
 	this->compileFromFile(path);
 }
@@ -136,6 +135,8 @@ FaustProcessor::clear()
 bool
 FaustProcessor::compileFromString(const std::string& code)
 {
+    m_isCompiled = false;
+    
 	// clean up
 	clear();
 
@@ -146,20 +147,17 @@ FaustProcessor::compileFromString(const std::string& code)
 	const int optimize = -1;
 
 	// save
-	m_code = code;
-
-	// auto import
-	std::string theCode = m_autoImport + "\n" + code;
+    m_code = m_autoImport + "\n" + code;
 
 	std::string m_errorString;
 
 	// create new factory
 	if (m_polyphony_enable) {
-		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", theCode,
+		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", m_code,
 			argc, argv, "", m_errorString, optimize);
 	}
 	else {
-		m_factory = createDSPFactoryFromString("DawDreamer", theCode,
+		m_factory = createDSPFactoryFromString("DawDreamer", m_code,
 			argc, argv, "", m_errorString, optimize);
 	}
 
@@ -219,11 +217,6 @@ FaustProcessor::compileFromString(const std::string& code)
 		clear();
 		return false;
 	}
-	if ((inputs % 2) != 0) {
-		std::cerr << "FaustProcessor must have DSP code with an even number of input channels but was compiled for " << m_numOutputChannels << "." << std::endl;
-		clear();
-		return false;
-	}
 
 	m_numInputChannels = inputs;
 	m_numOutputChannels = outputs;
@@ -252,12 +245,17 @@ FaustProcessor::compileFromString(const std::string& code)
 
 	createParameterLayout();
 
+    m_isCompiled = true;
 	return true;
 }
 
 bool
 FaustProcessor::compileFromFile(const std::string& path)
 {
+    if (path.compare("") == 0) {
+        return false;
+    }
+    
 	// open file
 	std::ifstream fin(path.c_str());
 	// check

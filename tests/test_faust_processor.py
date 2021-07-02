@@ -7,6 +7,28 @@ import dawdreamer as daw
 
 BUFFER_SIZE = 1
 
+def test_passthrough():
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav")
+	playback_processor = engine.make_playback_processor("playback", data)
+
+	faust_processor = engine.make_faust_processor("faust", "")
+	assert(faust_processor.set_dsp_string('process = _, _;'))
+	assert(faust_processor.compiled)
+
+	print(faust_processor.get_parameters_description())
+
+	graph = [
+	    (playback_processor, []),
+	    (faust_processor, ["playback"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	render(engine, file_path='output/test_passthrough.wav')
+
 def test_faust_zita_rev1(set_data=False):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -20,6 +42,7 @@ def test_faust_zita_rev1(set_data=False):
 	dsp_path = abspath("faust_dsp/dm.zita_rev1.dsp")
 	faust_processor = engine.make_faust_processor("faust", dsp_path)
 	assert(faust_processor.set_dsp(dsp_path))
+	assert(faust_processor.compiled)
 
 	print(faust_processor.get_parameters_description())
 
@@ -47,6 +70,7 @@ def test_faust_automation():
 	dsp_path = abspath("faust_dsp/two_stereo_inputs_filter.dsp")
 	faust_processor = engine.make_faust_processor("faust", dsp_path)
 	assert(faust_processor.set_dsp(dsp_path))
+	assert(faust_processor.compiled)
 
 	print(faust_processor.get_parameters_description())
 

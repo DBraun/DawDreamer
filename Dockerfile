@@ -26,18 +26,19 @@ RUN apt-get update -yq \
     python3.9-dev \
     faust \
     libsamplerate0 \
-    llvm-12 \
+    llvm-11 \
+    llvm-11-dev \
 && update-ca-certificates \
 && apt-get clean -y
 
 # clone repo
 RUN git clone --recursive https://github.com/DBraun/DawDreamer.git
 ## or copy:
-# /WORKDIR /DawDreamer
+# WORKDIR /DawDreamer
 # COPY . .
 
 # Make symlinks to use during building DawDreamer
-RUN ln -s /usr/bin/llvm-config-12 /usr/bin/llvm-config
+RUN ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
 RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
 
 # Build DawDreamer
