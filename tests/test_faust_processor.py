@@ -9,9 +9,11 @@ BUFFER_SIZE = 1
 
 def test_passthrough():
 
+	DURATION = 5.1
+
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav")
+	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
 	playback_processor = engine.make_playback_processor("playback", data)
 
 	faust_processor = engine.make_faust_processor("faust", "")
@@ -28,6 +30,56 @@ def test_passthrough():
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_passthrough.wav')
+
+	audio = engine.get_audio()
+
+	# Todo: the last sample is inaccurate by a little bit
+	# So we trim the last sample and compare
+	data = data[:,:audio.shape[1]-1]
+	audio = audio[:,:audio.shape[1]-1]
+
+	assert(np.allclose(data, audio, atol=1e-07))
+
+def test_sidechain():
+
+	"""Have the volume of the drums attenuate the volume of the bass."""
+
+	DURATION = 5.1
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	drums = engine.make_playback_processor("drums",
+		load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+
+	bass = engine.make_playback_processor("bass",
+		load_audio_file("assets/Music Delta - Disco/bass.wav", duration=DURATION))
+
+	dsp_path = abspath("faust_dsp/sidechain.dsp")
+	faust_processor = engine.make_faust_processor("faust", dsp_path)
+	assert(faust_processor.compiled)
+
+	print(faust_processor.get_parameters_description())
+
+	graph = [
+	    (drums, []),
+	    (bass, []),
+	    (faust_processor, [bass.get_name(), drums.get_name()]),
+	    (engine.make_add_processor("add", [1., 1.]), ["faust", "drums"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	render(engine, file_path='output/test_sidechain.wav')
+
+	graph = [
+	    (drums, []),
+	    (bass, []),
+	    (engine.make_add_processor("add", [1., 1.]), ["bass", "drums"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	render(engine, file_path='output/test_sidechain_none.wav')
 
 def test_faust_zita_rev1(set_data=False):
 

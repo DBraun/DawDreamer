@@ -34,7 +34,9 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	// auto import
 	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\nimport(\"stdfaust.lib\");\n";
 
-	this->compileFromFile(path);
+	if (std::strcmp(path.c_str(), "") != 0) {
+		this->compileFromFile(path);
+	}
 }
 
 FaustProcessor::~FaustProcessor() {
@@ -252,7 +254,7 @@ FaustProcessor::compileFromString(const std::string& code)
 bool
 FaustProcessor::compileFromFile(const std::string& path)
 {
-    if (path.compare("") == 0) {
+	if (std::strcmp(path.c_str(), "") == 0) {
         return false;
     }
     
