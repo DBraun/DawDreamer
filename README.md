@@ -15,7 +15,7 @@
 
 # DawDreamer
 
-DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, VST effects, [FAUST](http://faust.grame.fr/), and parameter automation. DawDreamer is written with [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer draws from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
+DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, VST effects, [FAUST](http://faust.grame.fr/), and parameter automation. DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Basic Example
 ```python
@@ -151,6 +151,9 @@ otool -L dawdreamer.so
 install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib dawdreamer.so
 otool -L dawdreamer.so
 ```
+
+Note that the `otool` commands above don't serve a functional purpose. They just display the before and after of the change made with the `install_name_tool` command.
+
 Move `dawdreamer.so` to a directory of your choice. Then find `thirdparty/libfaust/darwin-x64/Release/libfaust.a`, rename it to `libfaust.2.dylib` and place it next to `dawdreamer.so`.
 
 Then try `DawDreamer`:
@@ -174,7 +177,7 @@ docker build -t dawdreamer .
 
 ## API
 
-Proper documentation will be created eventually, but in the meantime look at more examples:
+API documentation is in active development [here](https://ccrma.stanford.edu/~braun/dawdreamer), but in the meantime look at more examples:
 
 ```python
 import dawdreamer as daw
@@ -351,9 +354,7 @@ engine.render(10.)
 
 ## FAUST
 
-**FAUST has only been tested for Windows and macOS, so please suggest ways to make it Linux compatible.**
-
-FAUST features depend on a precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
+Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfile, no extra steps are necessary. For Windows and macOS, Faust features depend on a precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
 
 ### Windows
 
@@ -481,6 +482,10 @@ playback_processor.set_clip_positions([[0., 4., 0.], [5., 9., 1.]])
 ```
 
 Each tuple of three numbers is the (global timeline clip start, global timeline clip end, local clip offset). Imagine dragging a clip onto an arrangement view. The clip start and clip end are the bounds of the clip on the global timeline. The local clip offset is an offset to the start marker set by the ASD file. In the example above, the first clip starts at 0 beats, ends at 4 beats, and has no offset. The second clip starts at 5 beats, ends at 9 beats, and has a 1 beat clip offset.
+
+## Tests
+
+Go to the `tests` directory and run `pytest .`
 
 ## License
 
