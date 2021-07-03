@@ -43,7 +43,8 @@ ifeq ($(CONFIG),Debug)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -g -ggdb -O0 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++14 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-12/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-12 $(LDFLAGS)
+  
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-11/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-11 $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
@@ -66,8 +67,7 @@ ifeq ($(CONFIG),Release)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++14 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-12/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-12 $(LDFLAGS)
-
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-11/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-11 $(LDFLAGS)
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
 

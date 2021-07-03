@@ -46,6 +46,7 @@ public:
     float setParamWithIndex(const int index, float p);
     float getParamWithIndex(const int index);
     std::string code();
+    bool isCompiled() { return m_isCompiled; };
 
     py::list getPluginParametersDescription();
 
@@ -74,6 +75,8 @@ protected:
     int m_nvoices = 0;
     bool m_polyphony_enable = false;
     bool m_midi_enable = false;
+    
+    bool m_isCompiled = false;
 
 };
 
