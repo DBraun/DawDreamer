@@ -283,7 +283,6 @@
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
                        headerPath="/usr/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="/usr/lib/llvm-11/lib&#10;/usr/local/lib&#10;../../thirdparty/libsamplerate/build/src"/>
-
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
@@ -332,7 +331,7 @@
     </VS2019>
     <VS2019 targetFolder="Builds/VisualStudio2019_FAUST" extraDefs="SAMPLER_SKIP_UI&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
             vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
-            externalLibraries="faust.lib&#10;samplerate.lib">
+            externalLibraries="faust.lib&#10;samplerate.lib&#10;winmm.lib">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
                        targetName="dawdreamer" libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate_build\win-x64\Release;"

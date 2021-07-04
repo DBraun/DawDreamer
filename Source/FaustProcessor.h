@@ -10,12 +10,11 @@
 #include "faust/gui/APIUI.h"
 #include "faust/gui/MidiUI.h"
 
+#include "faust/midi/rt-midi.h"
+
 #include <iostream>
 
-#ifdef WIN32
-__declspec(selectany) std::list<GUI*> GUI::fGuiList;
-__declspec(selectany) ztimedmap GUI::gTimedZoneMap;
-#endif
+
 
 
 class FaustProcessor : public ProcessorBase
@@ -50,6 +49,20 @@ public:
 
     py::list getPluginParametersDescription();
 
+    bool setNumVoices(int numVoices);
+    int getNumVoices(int numVoices);
+
+    bool loadMidi(const std::string& path);
+
+    void clearMidi();
+
+    int getNumMidiEvents();
+
+    bool addMidiNote(const uint8  midiNote,
+        const uint8  midiVelocity,
+        const double noteStart,
+        const double noteLength);
+
 private:
 
     double mySampleRate;
@@ -66,18 +79,26 @@ protected:
     llvm_dsp_poly_factory* m_poly_factory;
     dsp_poly* m_dsp_poly;
 
+    rt_midi m_midi_handler;
+
     int m_numInputChannels = 0;
     int m_numOutputChannels = 0;
 
     std::string m_autoImport;
     std::string m_code;
 
-    int m_nvoices = 0;
-    bool m_polyphony_enable = false;
-    bool m_midi_enable = false;
-    
+    int m_nvoices = 0;    
     bool m_isCompiled = false;
 
+    MidiBuffer myMidiBuffer;
+    MidiMessage myMidiMessage;
+    int myMidiMessagePosition = -1;
+    MidiBuffer::Iterator* myMidiIterator = nullptr;
+    bool myIsMessageBetween = false;
+    bool myMidiEventsDoRemain = false;
+
+    AudioSampleBuffer oneSampleInBuffer;
+    AudioSampleBuffer oneSampleOutBuffer;
 };
 
 #endif

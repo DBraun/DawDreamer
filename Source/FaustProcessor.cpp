@@ -2,9 +2,14 @@
 
 #ifdef BUILD_DAWDREAMER_FAUST
 
+#include "faust/midi/RtMidi.cpp"
+
 #ifndef WIN32
 std::list<GUI*> GUI::fGuiList;
 ztimedmap GUI::gTimedZoneMap;
+#else
+__declspec(selectany) std::list<GUI*> GUI::fGuiList;
+__declspec(selectany) ztimedmap GUI::gTimedZoneMap;
 #endif
 
 #ifndef SAFE_DELETE
@@ -20,15 +25,11 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	mySampleRate = sampleRate;
 
 	m_factory = NULL;
-	//m_poly_factory = NULL;
+	m_poly_factory = NULL;
 	m_dsp = NULL;
-	//m_dsp_poly = NULL;
+	m_dsp_poly = NULL;
 	m_ui = NULL;
-	//m_midi_ui = NULL;
-	// zero
-	//m_input = NULL;
-	//m_output = NULL;
-	// default
+	m_midi_ui = NULL;
 	m_numInputChannels = 0;
 	m_numOutputChannels = 0;
 	// auto import
@@ -56,23 +57,49 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 	AudioPlayHead::CurrentPositionInfo posInfo;
 	getPlayHead()->getCurrentPosition(posInfo);
 
-	if (buffer.getNumChannels() != m_numInputChannels) {
-		if (posInfo.timeInSamples == 0) {
-			std::cerr << "FaustProcessor compiled DSP code for " << m_numInputChannels << " input channels but received " << buffer.getNumChannels() << "." << std::endl;;
+	if (m_nvoices < 1) {
+		if (m_dsp != NULL) {
+			m_dsp->compute(buffer.getNumSamples(), (float**)buffer.getArrayOfReadPointers(), buffer.getArrayOfWritePointers());
 		}
-		return;
 	}
-	if (m_numOutputChannels != 2) {
-		if (posInfo.timeInSamples == 0) {
-			std::cerr << "FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
+	else {
+		long long int start = posInfo.timeInSamples;
+
+		// render one sample at a time
+
+		for (size_t i = 0; i < buffer.getNumSamples(); i++)
+		{
+			myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < start + 1;
+			do {
+				if (myIsMessageBetween) {
+
+					int midiChannel = 0;
+					if (myMidiMessage.isNoteOn()) {
+						m_dsp_poly->keyOn(midiChannel, myMidiMessage.getNoteNumber(), myMidiMessage.getVelocity());
+					}
+					else {
+						m_dsp_poly->keyOff(midiChannel, myMidiMessage.getNoteNumber(), myMidiMessage.getVelocity());
+					}
+					
+					myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+					myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < start + 1;
+				}
+			} while (myIsMessageBetween && myMidiEventsDoRemain);
+
+			for (size_t chan = 0; chan < m_numInputChannels; chan++)
+			{
+				oneSampleInBuffer.setSample(chan, 0, buffer.getSample(chan, i));
+			}
+
+			m_dsp_poly->compute(1, (float**) oneSampleInBuffer.getArrayOfReadPointers(), (float**) oneSampleOutBuffer.getArrayOfWritePointers());
+
+			for (size_t chan = 0; chan < m_numOutputChannels; chan++)
+			{
+				buffer.setSample(chan, i, oneSampleOutBuffer.getSample(chan, 0));
+			}
+
+			start += 1;
 		}
-		return;
-	}
-
-	dsp* theDsp = m_polyphony_enable ? m_dsp_poly : m_dsp;
-
-	if (theDsp != NULL) {
-		theDsp->compute(buffer.getNumSamples(), (float**)buffer.getArrayOfReadPointers(), buffer.getArrayOfWritePointers());
 	}
 }
 
@@ -106,6 +133,13 @@ FaustProcessor::reset()
 	if (m_dsp) {
 		m_dsp->instanceClear();
 	}
+
+	if (myMidiIterator) {
+		delete myMidiIterator;
+	}
+
+	myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
+	myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
 }
 
 void
@@ -116,22 +150,34 @@ FaustProcessor::clear()
 
 	// todo: do something with m_midi_handler
 	if (m_dsp_poly) {
-		//m_midi_handler.removeMidiIn(m_dsp_poly);
-		//m_midi_handler.stopMidi();
+		m_midi_handler.removeMidiIn(m_dsp_poly);
+		m_midi_handler.stopMidi();
 	}
-	//if (m_midi_ui) {
-	//	m_midi_ui->removeMidiIn(m_dsp_poly);
-	//	m_midi_ui->stop();
-	//}
+	if (m_midi_ui) {
+		m_midi_ui->removeMidiIn(m_dsp_poly);
+		m_midi_ui->stop();
+	}
 
 	SAFE_DELETE(m_dsp);
 	SAFE_DELETE(m_ui);
-	//SAFE_DELETE(m_dsp_poly);
-	//SAFE_DELETE(m_midi_ui);
+	SAFE_DELETE(m_dsp_poly);
+	SAFE_DELETE(m_midi_ui);
 
 	deleteAllDSPFactories();
 	m_factory = NULL;
-	//m_poly_factory = NULL;
+	m_poly_factory = NULL;
+}
+
+bool
+FaustProcessor::setNumVoices(int numVoices) {
+	m_nvoices = std::max(0, numVoices);
+	// recompile
+	return compileFromString(m_code);
+}
+
+int
+FaustProcessor::getNumVoices(int numVoices) {
+	return m_nvoices;
 }
 
 bool
@@ -142,6 +188,10 @@ FaustProcessor::compileFromString(const std::string& code)
 	// clean up
 	clear();
 
+	if (std::strcmp(code.c_str(), "") == 0) {
+		return false;
+	}
+
 	// arguments
 	const int argc = 0;
 	const char** argv = NULL;
@@ -149,17 +199,19 @@ FaustProcessor::compileFromString(const std::string& code)
 	const int optimize = -1;
 
 	// save
-    m_code = m_autoImport + "\n" + code;
+	m_code = code;
+    auto theCode = m_autoImport + "\n" + code;
 
 	std::string m_errorString;
 
 	// create new factory
-	if (m_polyphony_enable) {
-		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", m_code,
+	bool is_polyphonic = m_nvoices > 0;
+	if (is_polyphonic) {
+		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", theCode,
 			argc, argv, "", m_errorString, optimize);
 	}
 	else {
-		m_factory = createDSPFactoryFromString("DawDreamer", m_code,
+		m_factory = createDSPFactoryFromString("DawDreamer", theCode,
 			argc, argv, "", m_errorString, optimize);
 	}
 
@@ -185,11 +237,7 @@ FaustProcessor::compileFromString(const std::string& code)
 	//	std::cout << name << "\n" << std::endl;
 	//}
 
-	//if (m_midi_enable) {
-	//	m_midi_handler = rt_midi("my_midi");
-	//}
-
-	if (m_polyphony_enable) {
+	if (is_polyphonic) {
 		// (false, true) works
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, false, false);
 		if (!m_dsp_poly) {
@@ -208,7 +256,7 @@ FaustProcessor::compileFromString(const std::string& code)
 		}
 	}
 
-	dsp* theDsp = m_polyphony_enable ? m_dsp_poly : m_dsp;
+	dsp* theDsp = is_polyphonic ? m_dsp_poly : m_dsp;
 
 	// get channels
 	int inputs = theDsp->getNumInputs();
@@ -225,10 +273,16 @@ FaustProcessor::compileFromString(const std::string& code)
 
 	// make new UI
 	UI* theUI = nullptr;
-	if (m_polyphony_enable && m_midi_enable)
+	if (is_polyphonic)
 	{
-		m_midi_ui = new MidiUI(nullptr);
+		m_midi_handler = rt_midi("my_midi");
+		m_midi_handler.addMidiIn(m_dsp_poly);
+
+		m_midi_ui = new MidiUI(&m_midi_handler);
 		theUI = m_midi_ui;
+
+		oneSampleInBuffer.setSize(m_numInputChannels, 1);
+		oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
 	}
 	else {
 		m_ui = new APIUI();
@@ -241,7 +295,7 @@ FaustProcessor::compileFromString(const std::string& code)
 	// init
 	theDsp->init((int)(mySampleRate + .5));
 
-	if (m_polyphony_enable && m_midi_enable) {
+	if (is_polyphonic) {
 		m_midi_ui->run();
 	}
 
@@ -331,6 +385,10 @@ FaustProcessor::createParameterLayout()
 	ValueTree blankState;
 	myParameters.replaceState(blankState);
 
+	if (m_nvoices != 0) {
+		return;
+	}
+
 	for (int i = 0; i < m_ui->getParamsCount(); ++i)
 	{
 		auto parameterName = m_ui->getParamAddress(i);
@@ -369,6 +427,71 @@ FaustProcessor::getPluginParametersDescription()
 	}
 
 	return myList;
+}
+
+int
+FaustProcessor::getNumMidiEvents()
+{
+	return myMidiBuffer.getNumEvents();
+};
+
+bool
+FaustProcessor::loadMidi(const std::string& path)
+{
+	File file = File(path);
+	FileInputStream fileStream(file);
+	MidiFile midiFile;
+	midiFile.readFrom(fileStream);
+	midiFile.convertTimestampTicksToSeconds();
+	myMidiBuffer.clear();
+
+	for (int t = 0; t < midiFile.getNumTracks(); t++) {
+		const MidiMessageSequence* track = midiFile.getTrack(t);
+		for (int i = 0; i < track->getNumEvents(); i++) {
+			MidiMessage& m = track->getEventPointer(i)->message;
+			int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
+			myMidiBuffer.addEvent(m, sampleOffset);
+		}
+	}
+
+	return true;
+}
+
+void
+FaustProcessor::clearMidi() {
+	myMidiBuffer.clear();
+}
+
+bool
+FaustProcessor::addMidiNote(uint8  midiNote,
+	uint8  midiVelocity,
+	const double noteStart,
+	const double noteLength) {
+
+	if (midiNote > 255) midiNote = 255;
+	if (midiNote < 0) midiNote = 0;
+	if (midiVelocity > 255) midiVelocity = 255;
+	if (midiVelocity < 0) midiVelocity = 0;
+	if (noteLength <= 0) {
+		return false;
+	}
+
+	// Get the note on midiBuffer.
+	MidiMessage onMessage = MidiMessage::noteOn(1,
+		midiNote,
+		midiVelocity);
+
+	MidiMessage offMessage = MidiMessage::noteOff(1,
+		midiNote,
+		midiVelocity);
+
+	auto startTime = noteStart * mySampleRate;
+	onMessage.setTimeStamp(startTime);
+	offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
+	myMidiBuffer.addEvent(onMessage, (int)onMessage.getTimeStamp());
+	myMidiBuffer.addEvent(offMessage, (int)offMessage.getTimeStamp());
+
+	return true;
 }
 
 #endif

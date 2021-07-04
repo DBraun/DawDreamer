@@ -204,6 +204,13 @@ at different pitches and speeds. It has parameters for an ADSR envelope controll
         .def("set_parameter", &FaustProcessor::setParamWithPath, arg("parameter_path"), arg("value"))
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
+        .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
+        .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
+Note that note-ons and note-offs are counted separately.")
+        .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")
+        .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
+        .def("add_midi_note", &FaustProcessor::addMidiNote, arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
+    "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 #endif
 
