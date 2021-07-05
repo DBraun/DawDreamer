@@ -147,6 +147,8 @@ Now you can activate the virtual environment and import dawdreamer:
 
 ### MacOS
 
+The macOS Deployment Target is 10.15. This can be changed from either the Projucer or in Xcode.
+
 Install [Python 3.9](https://www.python.org/downloads/release/python-395/) with the universal installer.
 
 Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python won't be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
