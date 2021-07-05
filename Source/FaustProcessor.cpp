@@ -103,13 +103,24 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 	}
 }
 
+#include <iostream>
+
+bool hasEnding(std::string const& fullString, std::string const& ending) {
+	if (fullString.length() >= ending.length()) {
+		return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+	}
+	else {
+		return false;
+	}
+}
+
 void
 FaustProcessor::automateParameters() {
 
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
-	if (m_dsp) {
+	if (m_ui) {
 
 		for (int i = 0; i < this->getNumParameters(); i++) {
 
@@ -124,7 +135,6 @@ FaustProcessor::automateParameters() {
 			}
 		}
 	}
-
 }
 
 void
@@ -272,25 +282,20 @@ FaustProcessor::compileFromString(const std::string& code)
 	m_numOutputChannels = outputs;
 
 	// make new UI
-	UI* theUI = nullptr;
 	if (is_polyphonic)
 	{
 		m_midi_handler = rt_midi("my_midi");
 		m_midi_handler.addMidiIn(m_dsp_poly);
 
 		m_midi_ui = new MidiUI(&m_midi_handler);
-		theUI = m_midi_ui;
+		theDsp->buildUserInterface(m_midi_ui);
 
 		oneSampleInBuffer.setSize(m_numInputChannels, 1);
 		oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
 	}
-	else {
-		m_ui = new APIUI();
-		theUI = m_ui;
-	}
 
-	// build ui
-	theDsp->buildUserInterface(theUI);
+	m_ui = new APIUI();
+	theDsp->buildUserInterface(m_ui);
 
 	// init
 	theDsp->init((int)(mySampleRate + .5));
@@ -332,42 +337,45 @@ FaustProcessor::compileFromFile(const std::string& path)
 	return compileFromString(m_code);
 }
 
-float
-FaustProcessor::setParamWithPath(const std::string& n, float p)
-{
-	// sanity check
-	if (!m_ui) return 0;
-
-	// set the value
-	m_ui->setParamValue(n.c_str(), p);
-
-	return p;
-}
-
-float
-FaustProcessor::getParamWithPath(const std::string& n)
-{
-	if (!m_ui) return 0; // todo: better handling
-	return m_ui->getParamValue(n.c_str());
-}
-
-float
+bool
 FaustProcessor::setParamWithIndex(const int index, float p)
 {
 	// sanity check
-	if (!m_ui) return 0;
+	if (!m_ui) return false;
 
-	// set the value
-	m_ui->setParamValue(index, p);
+	auto it = m_map_juceIndex_to_parAddress.find(index);
+	if (it == m_map_juceIndex_to_parAddress.end())
+	{
+		return false;
+	}
 
-	return p;
+	auto& parAddress = it->second;
+
+	return this->setAutomationVal(parAddress, p);
 }
 
 float
 FaustProcessor::getParamWithIndex(const int index)
 {
 	if (!m_ui) return 0; // todo: better handling
-	return m_ui->getParamValue(index);
+
+	auto it = m_map_juceIndex_to_parAddress.find(index);
+	if (it == m_map_juceIndex_to_parAddress.end())
+	{
+		return 0.; // todo: better handling
+	}
+
+	auto& parAddress = it->second;
+
+	return this->getAutomationVal(parAddress, 0);
+}
+
+float
+FaustProcessor::getParamWithPath(const std::string& n)
+{
+	if (!m_ui) return 0; // todo: better handling
+
+	return this->getAutomationVal(n, 0);
 }
 
 std::string
@@ -385,18 +393,45 @@ FaustProcessor::createParameterLayout()
 	ValueTree blankState;
 	myParameters.replaceState(blankState);
 
-	if (m_nvoices != 0) {
-		return;
-	}
+	m_map_juceIndex_to_faustIndex.clear();
+	m_map_juceIndex_to_parAddress.clear();
+
+	int numParamsAdded = 0;
 
 	for (int i = 0; i < m_ui->getParamsCount(); ++i)
 	{
 		auto parameterName = m_ui->getParamAddress(i);
+
+		auto parnameString = std::string(parameterName);
+
+		// Ignore the Panic button.
+		if (hasEnding(parnameString, std::string("/Panic"))) {
+			continue;
+		}
+
+		// ignore the names of parameters which are reserved for controlling polyphony:
+		// https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters
+		// Note that an advanced user might want to not do this in order to
+		// have much more control over the frequencies of individual voices,
+		// like how MPE works.
+		if (hasEnding(parnameString, std::string("/freq")) ||
+			hasEnding(parnameString, std::string("/note")) ||
+			hasEnding(parnameString, std::string("/gain")) ||
+			hasEnding(parnameString, std::string("/gate"))
+			) {
+			continue;
+		}
+
+		m_map_juceIndex_to_faustIndex[numParamsAdded] = i;
+		m_map_juceIndex_to_parAddress[numParamsAdded] = parnameString;
+
 		auto parameterLabel = m_ui->getParamLabel(i);
 		myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName,
 			NormalisableRange<float>(m_ui->getParamMin(i), m_ui->getParamMax(i)), m_ui->getParamInit(i), parameterLabel));
 		// give it a valid single sample of automation.
 		ProcessorBase::setAutomationVal(parameterName, m_ui->getParamValue(i));
+
+		numParamsAdded += 1;
 	}
 }
 
@@ -405,25 +440,47 @@ FaustProcessor::getPluginParametersDescription()
 {
 	py::list myList;
 
-	if (m_dsp != nullptr) {
+	if (m_isCompiled) {
 
-		for (int i = 0; i < m_ui->getParamsCount(); i++) {
+		//get the parameters as an AudioProcessorParameter array
+		const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
+		for (int i = 0; i < this->AudioProcessor::getNumParameters(); i++) {
+
+			int maximumStringLength = 64;
+
+			std::string theName = (processorParams[i])->getName(maximumStringLength).toStdString();
+			std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), maximumStringLength).toStdString();
+			std::string label = processorParams[i]->getLabel().toStdString();
+
+
+			auto it = m_map_juceIndex_to_faustIndex.find(i);
+			if (it == m_map_juceIndex_to_faustIndex.end())
+			{
+				continue;
+			}
+
+			int faustIndex = it->second;
 
 			py::dict myDictionary;
 			myDictionary["index"] = i;
-			myDictionary["name"] = m_ui->getParamAddress(i);;
-			myDictionary["min"] = m_ui->getParamMin(i);
-			myDictionary["max"] = m_ui->getParamMax(i);
-			myDictionary["label"] = m_ui->getParamLabel(i);
-			myDictionary["step"] = m_ui->getParamStep(i);
-			myDictionary["value"] = m_ui->getParamValue(i);
+			myDictionary["name"] = theName;
+			myDictionary["numSteps"] = processorParams[i]->getNumSteps();
+			myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
+			myDictionary["label"] = label;
+			myDictionary["text"] = currentText;
+
+			myDictionary["min"] = m_ui->getParamMin(faustIndex);
+			myDictionary["max"] = m_ui->getParamMax(faustIndex);
+			//myDictionary["label"] = m_ui->getParamLabel(i);
+			myDictionary["step"] = m_ui->getParamStep(faustIndex);
+			myDictionary["value"] = m_ui->getParamValue(faustIndex);
 
 			myList.append(myDictionary);
 		}
 	}
 	else
 	{
-		std::cout << "[FaustProcessor] Please compile DSP code first!" << std::endl;
+		std::cout << "Please load the plugin first!" << std::endl;
 	}
 
 	return myList;

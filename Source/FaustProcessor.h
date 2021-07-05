@@ -13,9 +13,7 @@
 #include "faust/midi/rt-midi.h"
 
 #include <iostream>
-
-
-
+#include <map>
 
 class FaustProcessor : public ProcessorBase
 {
@@ -40,10 +38,9 @@ public:
     void clear();
     bool compileFromString(const std::string& code);
     bool compileFromFile(const std::string& path);
-    float setParamWithPath(const std::string& n, float p);
-    float getParamWithPath(const std::string& n);
-    float setParamWithIndex(const int index, float p);
+    bool setParamWithIndex(const int index, float p);
     float getParamWithIndex(const int index);
+    float getParamWithPath(const std::string& n);
     std::string code();
     bool isCompiled() { return m_isCompiled; };
 
@@ -99,6 +96,9 @@ protected:
 
     AudioSampleBuffer oneSampleInBuffer;
     AudioSampleBuffer oneSampleOutBuffer;
+
+    std::map<int, int> m_map_juceIndex_to_faustIndex;
+    std::map<int, std::string> m_map_juceIndex_to_parAddress;
 };
 
 #endif

@@ -201,7 +201,7 @@ at different pitches and speeds. It has parameters for an ADSR envelope controll
         .def("get_parameter", &FaustProcessor::getParamWithIndex, arg("param_index"))
         .def("get_parameter", &FaustProcessor::getParamWithPath, arg("parameter_path"))
         .def("set_parameter", &FaustProcessor::setParamWithIndex, arg("parameter_index"), arg("value"))
-        .def("set_parameter", &FaustProcessor::setParamWithPath, arg("parameter_path"), arg("value"))
+        .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"), arg("value"))
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")

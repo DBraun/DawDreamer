@@ -75,14 +75,14 @@
       <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>faust.lib;samplerate.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalDependencies>faust.lib;samplerate.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
