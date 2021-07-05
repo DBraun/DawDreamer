@@ -248,11 +248,11 @@
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer.so"
                        osxArchitecture="Native" headerPath="/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
                        libraryPath="/Library/Frameworks/Python.framework/Versions/3.9/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug&#10;../../thirdparty/libsamplerate_build/darwin-x64/Debug"
-                       enablePluginBinaryCopyStep="1" osxCompatibility="11.1 SDK"/>
+                       enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        osxArchitecture="Native" headerPath="/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
                        libraryPath="/Library/Frameworks/Python.framework/Versions/3.9/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release&#10;../../thirdparty/libsamplerate_build/darwin-x64/Release"
-                       enablePluginBinaryCopyStep="1" osxCompatibility="11.1 SDK"/>
+                       enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../JUCE/modules"/>

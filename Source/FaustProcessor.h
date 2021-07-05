@@ -94,8 +94,8 @@ protected:
     bool myIsMessageBetween = false;
     bool myMidiEventsDoRemain = false;
 
-    AudioSampleBuffer oneSampleInBuffer;
-    AudioSampleBuffer oneSampleOutBuffer;
+    juce::AudioSampleBuffer oneSampleInBuffer;
+    juce::AudioSampleBuffer oneSampleOutBuffer;
 
     std::map<int, int> m_map_juceIndex_to_faustIndex;
     std::map<int, std::string> m_map_juceIndex_to_parAddress;
