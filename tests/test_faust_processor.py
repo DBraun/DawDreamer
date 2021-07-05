@@ -7,7 +7,7 @@ import dawdreamer as daw
 
 BUFFER_SIZE = 1
 
-def test_passthrough():
+def test_faust_passthrough():
 
 	DURATION = 5.1
 
@@ -29,7 +29,7 @@ def test_passthrough():
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_passthrough.wav')
+	render(engine, file_path='output/test_faust_passthrough.wav')
 
 	audio = engine.get_audio()
 
@@ -40,7 +40,7 @@ def test_passthrough():
 
 	assert(np.allclose(data, audio, atol=1e-07))
 
-def test_sidechain():
+def test_faust_sidechain():
 
 	"""Have the volume of the drums attenuate the volume of the bass."""
 
@@ -69,7 +69,7 @@ def test_sidechain():
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_sidechain.wav')
+	render(engine, file_path='output/test_faust_sidechain.wav')
 
 	graph = [
 	    (drums, []),
@@ -127,6 +127,7 @@ def test_faust_automation():
 	print(faust_processor.get_parameters_description())
 
 	faust_processor.set_parameter("/MyEffect/cutoff", 7000.0)  # Change the cutoff frequency.
+	assert(faust_processor.get_parameter("/MyEffect/cutoff") == 7000.)
 	# or set automation like this
 	faust_processor.set_automation("/MyEffect/cutoff", 10000+9000*make_sine(2, DURATION))
 

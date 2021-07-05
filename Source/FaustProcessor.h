@@ -10,13 +10,10 @@
 #include "faust/gui/APIUI.h"
 #include "faust/gui/MidiUI.h"
 
+#include "faust/midi/rt-midi.h"
+
 #include <iostream>
-
-#ifdef WIN32
-__declspec(selectany) std::list<GUI*> GUI::fGuiList;
-__declspec(selectany) ztimedmap GUI::gTimedZoneMap;
-#endif
-
+#include <map>
 
 class FaustProcessor : public ProcessorBase
 {
@@ -41,14 +38,27 @@ public:
     void clear();
     bool compileFromString(const std::string& code);
     bool compileFromFile(const std::string& path);
-    float setParamWithPath(const std::string& n, float p);
-    float getParamWithPath(const std::string& n);
-    float setParamWithIndex(const int index, float p);
+    bool setParamWithIndex(const int index, float p);
     float getParamWithIndex(const int index);
+    float getParamWithPath(const std::string& n);
     std::string code();
     bool isCompiled() { return m_isCompiled; };
 
     py::list getPluginParametersDescription();
+
+    bool setNumVoices(int numVoices);
+    int getNumVoices(int numVoices);
+
+    bool loadMidi(const std::string& path);
+
+    void clearMidi();
+
+    int getNumMidiEvents();
+
+    bool addMidiNote(const uint8  midiNote,
+        const uint8  midiVelocity,
+        const double noteStart,
+        const double noteLength);
 
 private:
 
@@ -66,18 +76,29 @@ protected:
     llvm_dsp_poly_factory* m_poly_factory;
     dsp_poly* m_dsp_poly;
 
+    rt_midi m_midi_handler;
+
     int m_numInputChannels = 0;
     int m_numOutputChannels = 0;
 
     std::string m_autoImport;
     std::string m_code;
 
-    int m_nvoices = 0;
-    bool m_polyphony_enable = false;
-    bool m_midi_enable = false;
-    
+    int m_nvoices = 0;    
     bool m_isCompiled = false;
 
+    MidiBuffer myMidiBuffer;
+    MidiMessage myMidiMessage;
+    int myMidiMessagePosition = -1;
+    MidiBuffer::Iterator* myMidiIterator = nullptr;
+    bool myIsMessageBetween = false;
+    bool myMidiEventsDoRemain = false;
+
+    juce::AudioSampleBuffer oneSampleInBuffer;
+    juce::AudioSampleBuffer oneSampleOutBuffer;
+
+    std::map<int, int> m_map_juceIndex_to_faustIndex;
+    std::map<int, std::string> m_map_juceIndex_to_parAddress;
 };
 
 #endif

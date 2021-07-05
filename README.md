@@ -9,13 +9,18 @@
 * * VST Instruments and Effects with Python * *
 ```
 
-| `build` |
-|:-------:|
-| [![Build Status](https://travis-ci.com/DBraun/DawDreamer.svg?token=K9QCyFBiJjeEFq8GLsFx&branch=master)](https://travis-ci.com/DBraun/DawDreamer) |
-
 # DawDreamer
 
-DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features such as audio playback, VST MIDI instruments, VST effects, [FAUST](http://faust.grame.fr/), and parameter automation. DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
+DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
+* audio playback
+* VST MIDI instruments
+* VST effects
+* [FAUST](http://faust.grame.fr/)
+* Time-stretching and looping according to warp markers
+* Pitch-warping
+* Parameter automation
+
+DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Basic Example
 ```python
@@ -141,6 +146,8 @@ Now you can activate the virtual environment and import dawdreamer:
     >> engine = daw.RenderEngine(44100,512)
 
 ### MacOS
+
+The macOS Deployment Target is 10.15. This can be changed from either the Projucer or in Xcode.
 
 Install [Python 3.9](https://www.python.org/downloads/release/python-395/) with the universal installer.
 
@@ -354,7 +361,7 @@ engine.render(10.)
 
 ## FAUST
 
-Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfile, no extra steps are necessary. For Windows and macOS, Faust features depend on a precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
+Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfile, no extra steps are necessary. For Windows and macOS, Faust features depend on precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
 
 ### Windows
 
@@ -368,7 +375,7 @@ Open the latest `.dmg` installer from FAUST's [releases](https://github.com/gram
 
 ### Using FAUST processors
 
-Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in processors with 2 outputs and an even number of inputs. Polyphony is not yet supported. Here's an example using a demo stereo reverb:
+Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in processors with 2 outputs and an even number of inputs. Here's an example using a demo stereo reverb:
 
 #### **faust_reverb.dsp:**
 ```dsp
@@ -431,9 +438,11 @@ engine.load_graph(graph)
 engine.render(DURATION)
 ```
 
+Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. 0 disables polyphony. Refer to `tests/test_faust_poly.py`.
+
 ## Pitch-stretching and Time-stretching with Warp Markers
 
-Time-stretching and pitch-stretching are currently available on Windows thanks to [Rubberband](https://github.com/breakfastquay/rubberband/). 
+Time-stretching and pitch-stretching are currently available on Windows thanks to [Rubberband](https://github.com/breakfastquay/rubberband/).
 
 ```python
 
