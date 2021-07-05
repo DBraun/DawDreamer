@@ -361,7 +361,7 @@ engine.render(10.)
 
 ## FAUST
 
-Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfile, no extra steps are necessary. For Windows and macOS, Faust features depend on a precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
+Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfile, no extra steps are necessary. For Windows and macOS, Faust features depend on precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
 
 ### Windows
 
