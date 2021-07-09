@@ -76,7 +76,7 @@ public:
     }
 
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
     {
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
@@ -98,6 +98,8 @@ public:
         sampler.processBlock(buffer, myRenderMidiBuffer);
 
         myRenderMidiBuffer.clear();
+
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     const juce::String getName() const { return "SamplerProcessor"; }

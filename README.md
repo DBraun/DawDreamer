@@ -12,13 +12,14 @@
 # DawDreamer
 
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
-* audio playback
+* Audio playback
 * VST MIDI instruments
 * VST effects
 * [FAUST](http://faust.grame.fr/)
-* Time-stretching and looping according to warp markers
+* Time-stretching and looping according to Ableton Live warp markers
 * Pitch-warping
 * Parameter automation
+* Rendering multiple processors simultaneously
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
@@ -90,6 +91,7 @@ filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.
 freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 with amp 5000.
 filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
 freq_automation = filter_processor.get_automation("freq")  # You can get the automation of most processor parameters.
+filter_processor.record = True  # This will allow us to access the filter processor's audio after a render.
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
@@ -111,8 +113,16 @@ graph = [
 engine.load_graph(graph)
 
 engine.render(DURATION)  # Render 10 seconds audio.
-audio = engine.get_audio()  # Returns numpy.ndarray shaped (2, NUM_SAMPLES)
+
+# Return the audio from the graph's last processor, even if its recording wasn't enabled.
+# The shape will be numpy.ndarray shaped (2, NUM_SAMPLES)
+audio = engine.get_audio()  
 wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose()) # don't forget to transpose!
+
+# You can get the audio of any node whose recording was enabled.
+filtered_audio = filter_processor.get_audio()
+# Or get it by name
+filtered_audio = engine.get_audio("filter")
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")

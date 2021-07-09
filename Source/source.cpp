@@ -63,6 +63,8 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 
 )pbdoc")
+        .def_property("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable, "Whether recording of this processor is enabled." )
+        .def("get_audio", &ProcessorBase::getAudioFrames, "Get the audio data of the processor after a render, assuming recording was enabled.")
         .def("get_name", &ProcessorBase::getUniqueName, "Get the user-defined name of a processor instance.").doc() = R"pbdoc(
     The abstract Processor Base class, which all processors subclass.
 )pbdoc";
@@ -222,7 +224,8 @@ Note that note-ons and note-offs are counted separately.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngineWrapper::render, arg("seconds"), "Render the most recently loaded graph.")
         .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine.")
-        .def("get_audio", &RenderEngineWrapper::wrapperGetAudioFrames, "Get the most recently rendered audio as a numpy array.")
+        .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
+        .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
         .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), arg("num_input_audio_chans") = 2, arg("num_out_audio_chans") = 2,
             "Load a directed acyclic graph of processors.")
         .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, arg("name"), arg("frequency"),

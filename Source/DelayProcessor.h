@@ -27,7 +27,7 @@ public:
         myDelay.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
 
         automateParameters();
 
@@ -42,6 +42,7 @@ public:
         {
             buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), *myWetLevel);
         }
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void automateParameters() {

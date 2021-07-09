@@ -28,11 +28,12 @@ public:
     }
 
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
     {
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myOscillator.process(context);
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void

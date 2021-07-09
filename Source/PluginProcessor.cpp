@@ -97,7 +97,7 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 }
 
 void
-PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
@@ -148,6 +148,8 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         }
 
     }
+
+    ProcessorBase::processBlock(buffer, midiBuffer);
 }
 
 void

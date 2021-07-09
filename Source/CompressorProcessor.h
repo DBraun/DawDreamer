@@ -26,14 +26,14 @@ public:
         myCompressor.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
 
         automateParameters();
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myCompressor.process(context);
-
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void automateParameters() {

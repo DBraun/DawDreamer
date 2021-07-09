@@ -20,7 +20,7 @@ public:
     prepareToPlay(double, int) {}
 
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
     {
         size_t myLength;
         if (myPlaybackData.size()) {
@@ -47,6 +47,8 @@ public:
                 buffer.setSample(chan, i, 0.);
             }
         }
+
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void

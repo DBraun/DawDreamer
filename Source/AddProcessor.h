@@ -12,7 +12,7 @@ public:
 
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
         // Buffer will be an even number of channels, assuming we're doing stereo audio.
         // Speaking in terms of zero index channels, we need to read from channels 2, 4, 6... etc
         // and add them to write channel 0.
@@ -42,6 +42,8 @@ public:
             buffer.addFrom(0, 0, readptrs[2 + sumIndex * 2], buffer.getNumSamples(), getSafeGainLevel(sumIndex + 1));
             buffer.addFrom(1, 0, readptrs[3 + sumIndex * 2], buffer.getNumSamples(), getSafeGainLevel(sumIndex + 1));
         }
+
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void reset() {

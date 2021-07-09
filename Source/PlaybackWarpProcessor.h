@@ -119,7 +119,7 @@ public:
     }
    
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
     {
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
@@ -127,11 +127,13 @@ public:
         automateParameters();
 
         if (m_clips.size() == 0) {
+            ProcessorBase::processBlock(buffer, midiBuffer);
             return;
         }
 
         if (m_clipIndex >= m_clips.size()) {
             // we've already passed the last clip.
+            ProcessorBase::processBlock(buffer, midiBuffer);
             return;
         }
 
@@ -178,6 +180,7 @@ public:
                     }
                 }
                 else {
+                    ProcessorBase::processBlock(buffer, midiBuffer);
                     return;
                 }
             }
@@ -280,6 +283,8 @@ public:
             
             sampleReadIndex += count;
         }
+
+        ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void

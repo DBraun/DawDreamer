@@ -31,13 +31,14 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 }
 
 void
-FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
     automateParameters();
 
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     myFilter.process(context);
+    ProcessorBase::processBlock(buffer, midiBuffer);
 }
 
 

@@ -163,10 +163,12 @@ RenderEngine::render(const double renderLength) {
     myCurrentPositionInfo.timeSigDenominator = 4;
     myCurrentPositionInfo.isLooping = false;
 
-    RecorderProcessor* recorder = (RecorderProcessor*)(myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes() - 1)->getProcessor());
-
-    // the Recorder holds a pointer to the engine's recorded samples buffer.
-    recorder->setRecorderBuffer(&myRecordedSamples);
+    for (int i = 0; i < myMainProcessorGraph->getNumNodes(); i++) {
+        auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
+        if (processor) {
+            processor->setRecorderLength(numRenderedSamples);
+        }
+    }
 
     MidiBuffer renderMidiBuffer;
 
@@ -191,10 +193,47 @@ void RenderEngine::setBPM(double bpm) {
     myBPM = bpm;
 }
 
-const std::vector<std::vector<float>>
+py::array_t<float>
 RenderEngine::getAudioFrames()
 {
-    return myRecordedSamples;
+
+    auto nodes = myMainProcessorGraph->getNodes();
+    for (auto& node: nodes) {
+
+        auto processor = dynamic_cast<RecorderProcessor*>(node->getProcessor());
+        if (processor) {
+            return processor->getAudioFrames();
+        }
+
+    }
+
+    // NB: For some reason we can't initialize the array as shape (2, 0)
+    py::array_t<float, py::array::c_style> arr({ 2, 1 });
+    arr.resize({ 2, 0 });
+
+    return arr;
+}
+
+py::array_t<float>
+RenderEngine::getAudioFramesForName(std::string& name)
+{
+
+    auto nodes = myMainProcessorGraph->getNodes();
+    for (auto& node : nodes) {
+
+        auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
+        if (processor) {
+            if (std::strcmp(processor->getUniqueName().c_str(), name.c_str()) == 0) {
+                return processor->getAudioFrames();
+            }
+        }
+    }
+
+    // NB: For some reason we can't initialize the array as shape (2, 0)
+    py::array_t<float, py::array::c_style> arr({ 2, 1 });
+    arr.resize({ 2, 0 });
+
+    return arr;
 }
 
 

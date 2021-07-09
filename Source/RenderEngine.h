@@ -32,7 +32,9 @@ public:
 
     void setBPM(double bpm);
 
-    const std::vector<std::vector<float>> getAudioFrames();
+    py::array_t<float> getAudioFrames();
+
+    py::array_t<float> getAudioFramesForName(std::string& name);
 
     bool getCurrentPosition(CurrentPositionInfo& result) override;
     bool canControlTransport() override;

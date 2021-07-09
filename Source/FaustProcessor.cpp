@@ -50,7 +50,7 @@ FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 }
 
 void
-FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
+FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
 	automateParameters();
 
@@ -101,6 +101,8 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&)
 			start += 1;
 		}
 	}
+
+	ProcessorBase::processBlock(buffer, midiBuffer);
 }
 
 #include <iostream>

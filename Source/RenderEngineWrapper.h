@@ -10,8 +10,6 @@ public:
     RenderEngineWrapper(double sr, int bs);
     //RenderEngineWrapper(const RenderEngineWrapper&) = delete;
 
-    py::array_t<float> wrapperGetAudioFrames();
-
     /// @brief
     std::shared_ptr<OscillatorProcessor> makeOscillatorProcessor(const std::string& name, float freq);
 

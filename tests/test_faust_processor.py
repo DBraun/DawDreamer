@@ -69,7 +69,7 @@ def test_faust_sidechain():
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_faust_sidechain.wav')
+	render(engine, file_path='output/test_sidechain_on.wav')
 
 	graph = [
 	    (drums, []),
@@ -79,7 +79,7 @@ def test_faust_sidechain():
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_sidechain_none.wav')
+	render(engine, file_path='output/test_sidechain_off.wav')
 
 def test_faust_zita_rev1(set_data=False):
 
