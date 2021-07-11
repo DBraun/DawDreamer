@@ -15,7 +15,7 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * Audio playback
 * VST MIDI instruments
 * VST effects
-* [FAUST](http://faust.grame.fr/)
+* [FAUST](http://faust.grame.fr/) effects and polyphonic instruments
 * Time-stretching and looping according to Ableton Live warp markers
 * Pitch-warping
 * Parameter automation
@@ -80,17 +80,17 @@ synth.set_automation("A Pan", make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 sampler = engine.make_sampler_processor("my_sampler", load_audio_file(SAMPLE_PATH))
 # sampler.set_data(load_audio_file(SAMPLE_PATH_2))  # this is allowed too at any time.
 print(sampler.get_parameters_description())
-sampler.set_parameter(0, 60./127.)  # set the center frequency to middle C (60)
-sampler.set_parameter(3, 0.1234) # override some other parameter.
+sampler.set_parameter(0, 60.)  # set the center frequency to middle C (60)
+sampler.set_parameter(5, 100.) # set the volume envelope's release to 100 milliseconds.
 sampler.load_midi("C:/path/to/sampler_rhythm.mid")
 # We can also add notes one at a time.
 sampler.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
 
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
-freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 with amp 5000.
+freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 w/ amp 5000.
 filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
-freq_automation = filter_processor.get_automation("freq")  # You can get the automation of most processor parameters.
+freq_automation = filter_processor.get_automation("freq") # You can get automation of most processor parameters.
 filter_processor.record = True  # This will allow us to access the filter processor's audio after a render.
 
 # Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
@@ -119,9 +119,9 @@ engine.render(DURATION)  # Render 10 seconds audio.
 audio = engine.get_audio()  
 wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose()) # don't forget to transpose!
 
-# You can get the audio of any node whose recording was enabled.
+# You can get the audio of any processor whose recording was enabled.
 filtered_audio = filter_processor.get_audio()
-# Or get it by name
+# Or get audio according to the processor's unique name
 filtered_audio = engine.get_audio("filter")
 
 # You can modify processors without recreating the graph.
@@ -316,7 +316,8 @@ reverb_processor.q = q
 reverb_processor.gain = gain
 
 panner_processor = engine.make_panner_processor("my_panner", "linear", 0.)
-panner_processor.rule = "balanced" # "linear", "balanced", "sin3dB", "sin4p5dB", "sin6dB", "squareRoot3dB", "squareRoot4p5dB"
+# the rules: "linear", "balanced", "sin3dB", "sin4p5dB", "sin6dB", "squareRoot3dB", "squareRoot4p5dB"
+panner_processor.rule = "balanced" 
 panner_processor.pan = -.5 # -1. is fully left and 1. is fully right
 
 delay_rule = "linear" # only linear is supported right now

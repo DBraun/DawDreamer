@@ -191,7 +191,8 @@ Note that note-ons and note-offs are counted separately.")
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
             "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
         .doc() = "The Sampler Processor works like a basic Sampler instrument. It takes a typically short audio sample and can play it back \
-at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff.";
+at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff. \
+Unlike a VST, the parameters don't need to be between 0 and 1. For example, you can set an envelope attack parameter to 50 to represent 50 milliseconds.";
 
 #ifdef BUILD_DAWDREAMER_FAUST
     py::class_<FaustProcessor, std::shared_ptr<FaustProcessor>, ProcessorBase>(m, "FaustProcessor")

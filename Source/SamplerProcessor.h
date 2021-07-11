@@ -268,7 +268,7 @@ public:
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                sampler.setParameterNotifyingHost(i, theParameter->sample(posInfo.timeInSamples));
+                sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
                 std::cout << "Error automateParameters: " << theName << std::endl;

@@ -9,6 +9,12 @@ BUFFER_SIZE = 4096*4
 
 def test_sampler(set_data=False):
 
+	def get_par_index(desc, par_name):
+		for parDict in desc:
+			if parDict['name'] == par_name:
+				return parDict['index']
+		raise ValueError(f"Parameter '{par_name}' not found.")
+
 	DURATION = 1.5
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -19,14 +25,23 @@ def test_sampler(set_data=False):
 	if set_data:
 		sampler_processor.set_data(data)
 
+	desc = sampler_processor.get_parameters_description()
+	# print(desc)
+
+	sampler_processor.set_parameter(get_par_index(desc, 'Center Note'), 60.)  # set the center frequency to middle C (60)
+
 	# (MIDI note, velocity, start sec, duration sec)
 	sampler_processor.add_midi_note(60, 60, 0.0, .25)
 	sampler_processor.add_midi_note(64, 80, 0.5, .5)
 	sampler_processor.add_midi_note(67, 127, 0.75, .1)
 
-	desc = sampler_processor.get_parameters_description()
-	# print(desc)
-	amp_index = [parDict['index'] for parDict in desc if parDict['name'] == 'Amp Active'][0]
+	sampler_processor.set_parameter(get_par_index(desc, 'Amp Env Attack'), 1.)  # set attack in milliseconds
+	sampler_processor.set_parameter(get_par_index(desc, 'Amp Env Decay'), 0.)  # set decay in milliseconds
+	sampler_processor.set_parameter(get_par_index(desc, 'Amp Env Sustain'), 1.)  # set sustain
+	sampler_processor.set_parameter(get_par_index(desc, 'Amp Env Release'), 100.)  # set release in milliseconds
+
+
+	amp_index = get_par_index(desc, 'Amp Active')
 	sampler_processor.set_parameter(amp_index, 1.)
 
 	assert(sampler_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
