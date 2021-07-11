@@ -17,7 +17,7 @@ public:
         const int numSamples = (int)inputData.at(0).size();
         
         // set to stereo
-        myPlaybackData.setSize(channels, numSamples, false, false, false);
+        myPlaybackData.setSize(channels, numSamples);
         for (int chan = 0; chan < channels; chan++) {
             myPlaybackData.copyFrom(chan, 0, inputData.at(std::min(chan, numChannels)).data(), numSamples);
         }
@@ -89,6 +89,8 @@ public:
 private:
     class Clip {
     public:
+        Clip(double startPos, double endPos, double startMarkerOffset) : start_pos{ startPos }, end_pos{ endPos }, start_marker_offset{ startMarkerOffset } {};
+        Clip() : start_pos { 0. }, end_pos{ 4. }, start_marker_offset{ 0. } {};
         double start_pos = 0.;
         double end_pos = 4.;
         double start_marker_offset = 0.;
@@ -107,11 +109,7 @@ public:
 
         for (auto& position : positions) {
 
-            Clip clip;
-            clip.start_pos = (double)std::get<0>(position);
-            clip.end_pos = (double)std::get<1>(position);
-            clip.start_marker_offset = (double)std::get<2>(position);
-
+            Clip clip = Clip((double)std::get<0>(position), (double)std::get<1>(position), (double)std::get<2>(position));
             m_clips.push_back(clip);
         }
 
@@ -147,6 +145,12 @@ public:
         int numWritten = 0;
 
         while (numWritten < numSamplesNeeded) {
+            // In this loop, figure out just one sample at a time.
+            // There are a lot of things to juggle including:
+            // The rubberband stretcher: does it have samples available? what samples should we tell it to process?
+            // The global clip position: are we inside a region that should be producing any kind of audio at all or silence?
+            // The local clip position: Do we have samples for the requested sample index, or do we need to loop to another position, or fake zeros?
+            // The clip info: is warping enabled, is looping enabled.
 
             numAvailable = m_rbstretcher->available();
 
@@ -154,8 +158,8 @@ public:
             numToRetrieve = std::min(numToRetrieve,int(std::ceil( (m_currentClip.end_pos-movingPPQ)/(posInfo.bpm)*60.*m_sample_rate)));
 
             if (numToRetrieve > 0) {
-                m_nonInterleavedBuffer.setSize(channels, numToRetrieve, false, true);
-                m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
+                m_nonInterleavedBuffer.setSize(channels, numToRetrieve);
+                numToRetrieve = m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
 
                 for (int chan = 0; chan < channels; chan++) {
                     auto chanPtr = m_nonInterleavedBuffer.getReadPointer(chan);
@@ -171,7 +175,7 @@ public:
                 m_clipIndex += 1;
                 if (m_clipIndex < m_clips.size()) {
                     m_currentClip = m_clips.at(m_clipIndex);
-                    m_rbstretcher->reset();
+                    setupRubberband(m_sample_rate);
                     if (m_clipInfo.warp_on) {
                         sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
                     }
@@ -196,7 +200,7 @@ public:
                 continue;
             }
 
-            double ppqPosition = movingPPQ - m_currentClip.start_pos;
+            double ppqPosition = movingPPQ - m_currentClip.start_pos + m_currentClip.start_marker_offset;
 
             bool past_end_marker_and_loop_off = ppqPosition > m_clipInfo.end_marker && !m_clipInfo.loop_on;
             if (past_end_marker_and_loop_off || movingPPQ > m_currentClip.end_pos) {
@@ -204,9 +208,9 @@ public:
                 if (m_clipIndex < m_clips.size()) {
                     // Use the next clip position.
                     m_currentClip = m_clips.at(m_clipIndex);
-                    m_rbstretcher->reset();
+                    setupRubberband(m_sample_rate);
                     if (m_clipInfo.warp_on) {
-                        sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker, m_sample_rate);
+                        sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
                     }
                     else {
                         sampleReadIndex = 0;
@@ -224,29 +228,11 @@ public:
                 }
             }
 
-            int loop_start_sample, loop_end_sample, end_marker_sample;
-            if (m_clipInfo.warp_on) {
-                loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, m_sample_rate);
-                loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, m_sample_rate);
-                end_marker_sample = m_clipInfo.beat_to_sample(m_clipInfo.end_marker, m_sample_rate);
-                
-                const int last_sample = myPlaybackData.getNumSamples()-1;
-                loop_start_sample = std::min(loop_start_sample, last_sample);
-                loop_end_sample = std::min(loop_end_sample, last_sample);
-                end_marker_sample = std::min(end_marker_sample, last_sample);
-                
-            }
-            else {
-                loop_start_sample = 0;
-                loop_end_sample = myPlaybackData.getNumSamples() - 1;
-                end_marker_sample = myPlaybackData.getNumSamples() - 1;
-            }
-
             if (m_clipInfo.warp_on) {
                 // todo: if the playback data sample rate is different than the engine's sr
                 // then that would affect the call to setTimeRatio.
 
-                double instant_bpm = -1.;
+                double instant_bpm;
                 double _;
                 m_clipInfo.beat_to_seconds(ppqPosition, _, instant_bpm);
                 m_rbstretcher->setTimeRatio(instant_bpm / posInfo.bpm);
@@ -255,44 +241,51 @@ public:
                 m_rbstretcher->setTimeRatio(m_time_ratio_if_warp_off);
             }
 
-            int count = 0;
             if (m_clipInfo.loop_on) {
-                count = std::min(1, loop_end_sample - sampleReadIndex);
+                int loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, m_sample_rate);
+                if (sampleReadIndex > loop_end_sample) {
+                    int loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, m_sample_rate);
+                    sampleReadIndex = loop_start_sample;
+                }
             }
             else {
-                count = std::min(1, end_marker_sample - sampleReadIndex);
-            }
-
-            if (count <= 0) {
-                if (m_clipInfo.loop_on) {
-                    sampleReadIndex = loop_start_sample;
-                    count = 1;
-                }
-                else {
+                int end_marker_sample = myPlaybackData.getNumSamples() - 1;
+                if (sampleReadIndex > end_marker_sample) {
                     continue;
                 }
             }
 
-            m_nonInterleavedBuffer.setSize(channels, count, false, true);
-            
-            for (int chan=0; chan < channels; chan++) {
-                m_nonInterleavedBuffer.copyFrom(chan, 0, myPlaybackData, chan, sampleReadIndex, count);
+            m_nonInterleavedBuffer.setSize(channels, 1);
+
+            // can we read from the playback data or are we out of bounds and we need to pass zeros to rubberband?
+            const int last_sample = myPlaybackData.getNumSamples() - 1;
+            if (sampleReadIndex > -1 && sampleReadIndex <= last_sample) {
+                for (int chan = 0; chan < channels; chan++) {
+                    m_nonInterleavedBuffer.copyFrom(chan, 0, myPlaybackData, chan, sampleReadIndex, 1);
+                }
             }
-            
+            else {
+                // pass zeros because the requested clip loop parameters are asking for out of bounds samples.
+                m_nonInterleavedBuffer.clear();
+            }
+
             m_rbstretcher->process(m_nonInterleavedBuffer.getArrayOfReadPointers(), m_nonInterleavedBuffer.getNumSamples(), false);
             
-            sampleReadIndex += count;
+            sampleReadIndex += 1;
         }
 
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
-
+    
     void
     reset() {
+        
+        setupRubberband(m_sample_rate);
+
         m_clipIndex = 0;
+
         if (m_clipIndex < m_clips.size()) {
             m_currentClip = m_clips.at(0);
-            m_rbstretcher->reset();
             if (m_clipInfo.warp_on) {
                 sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
             }
@@ -310,7 +303,7 @@ public:
         const int numChannels = (int) input.shape(0);
         const int numSamples = (int) input.shape(1);
 
-        myPlaybackData.setSize(numChannels, numSamples, false, false, false);
+        myPlaybackData.setSize(numChannels, numSamples);
         for (int chan = 0; chan < channels; chan++) {
             myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
             input_ptr += numSamples;
@@ -342,6 +335,9 @@ private:
     int m_clipIndex = 0;
     Clip m_currentClip;
 
+    // Note that we call this instead of calling m_rbstretcher->reset() because
+    // that method doesn't seem to work correctly.
+    // It's better to just create a whole new stretcher object.
     void setupRubberband(float sr) {
         using namespace RubberBand;
 
@@ -354,7 +350,7 @@ private:
         //options |= RubberBandStretcher::OptionSmoothingOn;
         //options |= RubberBandStretcher::OptionFormantPreserved;
         options |= RubberBandStretcher::OptionPitchHighQuality;
-        //options |= RubberBandStretcher::OptionChannelsTogether;
+        options |= RubberBandStretcher::OptionChannelsTogether;  // enabling this is NOT the default
 
         // Pick one of these:
         options |= RubberBandStretcher::OptionThreadingAuto;

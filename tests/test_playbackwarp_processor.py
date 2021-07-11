@@ -4,9 +4,9 @@ from os.path import abspath
 from utils import *
 import dawdreamer as daw
 
-BUFFER_SIZE = 16
+BUFFER_SIZE = 1
 
-def test_faust_automation():
+def test_playbackwarp_processor1():
 
 	DURATION = 10.
 
@@ -39,4 +39,55 @@ def test_faust_automation():
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_playbackwarp_processor.wav')
+	render(engine, file_path='output/test_playbackwarp_processor1a.wav')
+
+	other.transpose = 2.
+
+	render(engine, file_path='output/test_playbackwarp_processor1b.wav')
+
+	other.set_automation('transpose', make_sine(1., DURATION))
+
+	render(engine, file_path='output/test_playbackwarp_processor1c.wav')
+
+def test_playbackwarp_processor2():
+
+	DURATION = 10.
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	# Pick 120 because it's easy to analyze for timing in Audacity.
+	# 1 second is two quarter notes.
+	engine.set_bpm(120.)
+
+	drums = engine.make_playbackwarp_processor("drums",
+		load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+
+	assert(drums.set_clip_file(abspath("assets/Music Delta - Disco/drums.wav.asd")))
+
+	drums.start_marker = 0.
+	drums.loop_on = True
+	assert(drums.loop_on)
+
+	graph = [
+	    (drums, []),
+	]
+
+	assert(engine.load_graph(graph))
+
+	drums.set_clip_positions([[0., 4., 0.], [5., 9., 0.]])
+
+	render(engine, file_path='output/test_playbackwarp_processor2a.wav')
+
+	drums.set_clip_positions([[0., 4., 0.]])
+	drums.start_marker = 0.
+	drums.loop_start = 1.
+	drums.loop_end = 2.
+
+	render(engine, file_path='output/test_playbackwarp_processor2b.wav')
+
+	drums.start_marker = 0.
+	drums.loop_start = 3.
+	drums.loop_end = 4.
+	drums.set_clip_positions([[0., 2., 0.], [3., 9., 3.]])
+
+	render(engine, file_path='output/test_playbackwarp_processor2c.wav')
