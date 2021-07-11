@@ -47,12 +47,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\Dynamic Library\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">dawdreamer</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(LibraryPath);C:\Python38\libs</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(LibraryPath);C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate_build\win-x64\Debug</LibraryPath>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\Dynamic Library\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\Dynamic Library\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">dawdreamer</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);C:\Python38\libs</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -65,8 +65,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;C:\Python38\include;..\..\thirdparty\pybind11\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;C:\Python38\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;..\..\thirdparty\faust\compiler;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src\kissfft;..\..\thirdparty\rubberband\src;..\..\thirdparty\portable_endian\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;NOMINMAX;HAVE_LIBSAMPLERATE;HAVE_KISSFFT;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -88,18 +88,21 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)\dawdreamer.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>C:\Python38\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate_build\win-x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalLibraryDirectories>C:\Python38\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate_build\win-x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;</Command>
+      <Command>move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;
+copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -112,8 +115,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;C:\Python38\include;..\..\thirdparty\pybind11\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;C:\Python38\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;..\..\thirdparty\faust\compiler;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src\kissfft;..\..\thirdparty\rubberband\src;..\..\thirdparty\portable_endian\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;NOMINMAX;HAVE_LIBSAMPLERATE;HAVE_KISSFFT;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -137,19 +140,22 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>C:\Python38\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalLibraryDirectories>C:\Python38\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>faust.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Python38\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;</Command>
+      <Command>move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;
+copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

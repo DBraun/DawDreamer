@@ -155,6 +155,8 @@ Now you can activate the virtual environment and import dawdreamer:
     >> import dawdreamer as daw
     >> engine = daw.RenderEngine(44100,512)
 
+In order to build in Debug, you must unzip `thirdparty/libfaust/win-x64/Debug/bin/faust.zip` into `faust.dll` in the same folder.
+
 ### MacOS
 
 The macOS Deployment Target is 10.15. This can be changed from either the Projucer or in Xcode.
@@ -374,8 +376,6 @@ engine.render(10.)
 Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfile, no extra steps are necessary. For Windows and macOS, Faust features depend on precompiled libraries in `thirdparty/libfaust`. If you'd like to compile these yourself, please follow the instructions for [TD-FAUST](https://github.com/DBraun/TD-Faust/) (Downloading TouchDesigner is not necessary).
 
 ### Windows
-
-In the Projucer, an extra configuration exists for Visual Studio 2019 **with FAUST**. 
 
 Run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38dawdreamer/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust/*.lib` files.
 
