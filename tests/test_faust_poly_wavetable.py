@@ -54,15 +54,18 @@ CYCLE_LENGTH = {CYCLE_LENGTH};
 
 def test_faust_poly_wavetable_sine():
 
+	"""First make a very low resolution sine wave and use Lagrange interpolation in Faust.
+	Then use a very high resolution sine wave which will sound perfect."""
+
 	waveform_length = 4
 	wavecycle = np.sin(np.pi*2.*np.arange(waveform_length)/float(waveform_length))
 	output_path = 'test_faust_poly_wavetable_sine_4.wav'
 	# this won't sound like a perfect sine wave, but it only used 4 samples!
 	_test_faust_poly_wavetable(wavecycle, output_path)
 
-	waveform_length = 2048
+	waveform_length = 4096
 	wavecycle = np.sin(np.pi*2.*np.arange(waveform_length)/float(waveform_length))
-	output_path = 'test_faust_poly_wavetable_sine_2048.wav'
+	output_path = 'test_faust_poly_wavetable_sine_4096.wav'
 	# this should sound perfect.
 	_test_faust_poly_wavetable(wavecycle, output_path)
 
