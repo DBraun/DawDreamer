@@ -3,17 +3,15 @@ declare name "MyInstrument";
 declare options "[nvoices:8]"; // FaustProcessor has a property which will override this.
 import("stdfaust.lib");
 
-// This example demonstrates using lagrange interpolation to improve
-// the sampling of a short waveform.
-// Specifically, we simulate only having 4 samples of a sine wave,
-// so the values are {0, 1, 0, -1}.
-// However, with Lagrange interpolation, we can turn these into a smooth sine wave!
+// This example demonstrates a "sampler" in Faust, and it happens to use
+// Lagrange interpolation. The interpolation probably only matters
+// when the sampler is played at a MIDI note other than the "center_note".
 
 // The following variables are excluded from this file because they come
 // from substitution with Python.
 // LAGRANGE_ORDER = 4; // lagrange order. [2-4] are good choices.
-// SAMPLE_L_SEQ = waveform{0.0, 1.0, 0.0, -1.0} : !, _;
-// SAMPLE_R_SEQ = waveform{0.0, 1.0, 0.0, -1.0} : !, _;
+// SAMPLE_L_SEQ = waveform{0.0, 0.0} : !, _;
+// SAMPLE_R_SEQ = waveform{0.0, 0.0} : !, _;
 // SAMPLE_LENGTH = 4; // the length of SAMPLE_L_SEQ and SAMPLE_R_SEQ
 
 // The following functions (lagrange_h, lagrangeN, frdtable)
