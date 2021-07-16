@@ -67,3 +67,5 @@ def test_plugin_instrument(set_data=False):
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_plugin_instrument.wav', duration=DURATION)
+
+	assert(not synth.load_preset('bogus_path.fxp'))
