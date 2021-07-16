@@ -196,7 +196,7 @@ PluginProcessor::reset()
 #include <pluginterfaces/vst/ivstcomponent.h>
 #include <public.sdk/source/common/memorystream.h>
 
-void setVST3PluginStateDirect(AudioPluginInstance* instance, const MemoryBlock& rawData)
+bool setVST3PluginStateDirect(AudioPluginInstance* instance, const MemoryBlock& rawData)
 {
     auto funknown = static_cast<Steinberg::FUnknown*> (instance->getPlatformSpecificData());
     Steinberg::Vst::IComponent* vstcomponent = nullptr;
@@ -211,7 +211,12 @@ void setVST3PluginStateDirect(AudioPluginInstance* instance, const MemoryBlock& 
         vstcomponent->setState(memoryStream);
         memoryStream->release();
         vstcomponent->release();
+
+        return true;
     }
+
+    return false;
+    
 }
 
 bool
@@ -222,13 +227,15 @@ PluginProcessor::loadPreset(const std::string& path)
         File file = File(path);
         file.loadFileAsData(mb);
 
+        bool result = false;
+
 #if JUCE_PLUGINHOST_VST
         // The VST2 way of loading preset. You need the entire VST2 SDK source, which is not public.
-        VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
+        result = VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
 
 #else
 
-        setVST3PluginStateDirect(myPlugin.get(), mb);
+        result = setVST3PluginStateDirect(myPlugin.get(), mb);
 
 #endif
 
@@ -237,7 +244,7 @@ PluginProcessor::loadPreset(const std::string& path)
             setParameter(i, myPlugin.get()->getParameter(i));
         }
 
-        return true;
+        return result;
     }
     catch (std::exception& e) {
         std::cout << "PluginProcessor::loadPreset " << e.what() << std::endl;
