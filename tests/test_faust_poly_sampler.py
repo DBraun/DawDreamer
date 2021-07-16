@@ -19,8 +19,8 @@ def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 	dsp_code = open(dsp_path).read()
 
 	waveform_length = sample_seq.shape[1]
-	sample_l_seq = ", ".join([str(num) for num in sample_seq[0].tolist()])
-	sample_r_seq = ", ".join([str(num) for num in sample_seq[1].tolist()])
+	sample_l_seq = ",".join([str(num) for num in sample_seq[0].tolist()])
+	sample_r_seq = ",".join([str(num) for num in sample_seq[1].tolist()])
 
 	dsp_code = """
 LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.

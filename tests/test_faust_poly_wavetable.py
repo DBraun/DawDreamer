@@ -19,7 +19,7 @@ def _test_faust_poly_wavetable(wavecycle, output_path, lagrange_order=4):
 	dsp_code = open(dsp_path).read()
 
 	waveform_length = wavecycle.shape[0]
-	wavecycle = ", ".join([str(num) for num in wavecycle.tolist()])
+	wavecycle = ",".join([str(num) for num in wavecycle.tolist()])
 	# print(wavecycle)
 
 	dsp_code = """
