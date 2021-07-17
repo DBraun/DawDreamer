@@ -80,17 +80,17 @@ class AbletonClipInfo {
             FILE* f = fopen(path, "rb");
             if (!f) {
                 // Return because no warp file was found.
-                // std::cerr << "Error: Couldn't open file at path: " << path.c_str() << std::endl;
+                std::cerr << "Error: Couldn't open file at path: " << path << std::endl;
                 return false;
             }
 
             if (!read_loop_info(f)) {
-                printf("Error: Couldn't find loop markers.\n");
+                std::cerr << "Error: Couldn't find loop info." << std::endl;
                 return false;
             }
             else {
-                //printf("loop_start: %.17g loop_end: %.17g sample_offset: %.17g hidden_loop_start: %.17g hidden_loop_end: %.17g end_marker: %.17g\n",
-                //    loop_start, loop_end, sample_offset, hidden_loop_start, hidden_loop_end, end_marker);
+                //printf("loop_start: %.17g loop_end: %.17g start_marker: %.17g hidden_loop_start: %.17g hidden_loop_end: %.17g end_marker: %.17g\n",
+                //    loop_start, loop_end, start_marker, hidden_loop_start, hidden_loop_end, end_marker);
             }
             rewind(f);
 
@@ -123,6 +123,7 @@ class AbletonClipInfo {
             }
             else {
                 // Then we couldn't get to the byte for loop_on
+                std::cerr << "Error: Couldn't find loop on." << std::endl;
                 return false;
             }
 
@@ -135,17 +136,10 @@ class AbletonClipInfo {
             warp_markers.clear();
         }
 
-        int read_warp_marker(FILE* f, double* pos, double* beat) {
-            return
-                find_str(f, "WarpMarker") &&
-                !fseek(f, 4, SEEK_CUR) &&
-                read_double(f, pos) &&
-                read_double(f, beat);
-        }
-
         int read_loop_info(FILE* f) {
             double sample_offset;
 
+            // Assume it was saved with Ableton Live 10
             if (find_str(f, "SampleOverViewLevel") &&
                 find_str(f, "SampleOverViewLevel") &&
                 !fseek(f, 71, SEEK_CUR) &&
@@ -160,6 +154,25 @@ class AbletonClipInfo {
                 ) {
                 start_marker = loop_start + sample_offset;
                 return 1;
+            }
+            else {
+                // Ableton Live 9?
+                rewind(f);
+                if (find_str(f, "SampleData") &&
+                    find_str(f, "SampleData") &&
+                    !fseek(f, 2702, SEEK_CUR) &&
+                    read_double(f, &loop_start) &&
+                    read_double(f, &loop_end) &&
+                    read_double(f, &sample_offset) &&
+                    read_double(f, &hidden_loop_start) &&
+                    read_double(f, &hidden_loop_end) &&
+                    read_double(f, &end_marker) &&
+                    !fseek(f, 3, SEEK_CUR) &&
+                    read_bool(f, &warp_on)
+                    ) {
+                    start_marker = loop_start + sample_offset;
+                    return 1;
+                }                
             }
             return 0;
         }
