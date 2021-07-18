@@ -86,6 +86,22 @@ public:
     double getEndMarker() { return m_clipInfo.end_marker; }
     void setEndMarker(double endMarker) { m_clipInfo.end_marker = endMarker;}
 
+    py::array_t<float> getWarpMarkers() {
+
+        py::array_t<float, py::array::c_style> arr({ (int)m_clipInfo.warp_markers.size(), 2 });
+
+        auto ra = arr.mutable_unchecked();
+
+        int i = 0;
+        for (auto& warp_marker : m_clipInfo.warp_markers) {
+            ra(i, 0) = warp_marker.first; // time in seconds in the audio
+            ra(i, 1) = warp_marker.second; // time in beats in the audio, relative to 1.1.1
+            i++;
+        }
+
+        return arr;
+    }
+
 private:
     class Clip {
     public:
