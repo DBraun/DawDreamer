@@ -3,6 +3,8 @@ message: "If you use this software, please cite it as below."
 authors:
 - family-names: "Braun"
   given-names: "David"
+  orcid: "https://orcid.org/0000-0001-8866-0756"
 title: "DawDreamer"
-date-released: 2020-08-14
+version: 0.5.1
+date-released: 2021-07-27
 url: "https://github.com/DBraun/DawDreamer/"
