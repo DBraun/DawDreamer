@@ -3,8 +3,6 @@ message: "If you use this software, please cite it as below."
 authors:
 - family-names: "Braun"
   given-names: "David"
-  affiliation: "Center for Computer Research in Music and Acoustics, Stanford University"
 title: "DawDreamer"
-license: MIT
 date-released: 2020-08-14
 url: "https://github.com/DBraun/DawDreamer/"
