@@ -13,7 +13,7 @@
 
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
 * Audio playback
-* VST MIDI instruments
+* VST instruments
 * VST effects
 * [FAUST](http://faust.grame.fr/) effects and polyphonic instruments
 * Time-stretching and looping according to Ableton Live warp markers
@@ -142,7 +142,7 @@ DawDreamer has been tested with Visual Studio 2019 and VS2019 Build Tools (v142)
 
 On Windows, the JUCE project makes several assumptions about having a Python 3.8 virtual environment located at `C:/Python38dawdreamer`.  You can use a different virtual environment as long as you modify all references in `DawDreamer.jucer`, which is actually a text file.
 
-Install [Python 3.8.x Windows x86-64](https://www.python.org/downloads/release/python-385/) to `C:/Python38`. Use [virtualenv](https://docs.python-guide.org/dev/virtualenvs/) to create a virtual environment: 
+Install [Python 3.8.x Windows x86-64](https://www.python.org/downloads/release/python-3810/) to `C:/Python38`. Use [virtualenv](https://docs.python-guide.org/dev/virtualenvs/) to create a virtual environment: 
 `python -m venv C:/Python38dawdreamer`
 
 In this repo, use `env.bat` to activate the virtual environment.
@@ -454,7 +454,7 @@ Polyphony is supported too. You simply need to provide DSP code that refers to c
 
 ## Pitch-stretching and Time-stretching with Warp Markers
 
-Time-stretching and pitch-stretching are currently available thanks to [Rubberband](https://github.com/breakfastquay/rubberband/).
+Time-stretching and pitch-stretching are currently available thanks to [Rubber Band Library](https://github.com/breakfastquay/rubberband/).
 
 ```python
 
@@ -510,30 +510,14 @@ Go to the `tests` directory and run `pytest .`
 
 ## License
 
-If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Libsamplerate, Rubberband, Steinberg VST2/3, FAUST.
+If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Libsamplerate, Rubber Band Library, Steinberg VST2/3, FAUST.
 
 ## Release Notes
 
 [Release Notes](https://github.com/DBraun/DawDreamer/wiki/Release-Notes)
 
-## Contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
+## Thanks to contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
 * [fedden](https://github.com/fedden), RenderMan creator
 * [jgefele](https://github.com/jgefele)
 * [harritaylor](https://github.com/harritaylor)
 * [cannoneyed](https://github.com/cannoneyed/)
-
-If you use this code academically, please consider citing the DawDreamer repo:
-```
-@misc{DawDreamer2020,
-    author = {Braun, David},
-    title = {DawDreamer: VST Instruments and Effects with Python},
-    year = {2020},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\url{https://github.com/DBraun/DawDreamer}},
-    commit = {1cc9681caee26d963299d316ef6cf3a65ee47ad3}
-}
-```
-
-and RenderMan's DOI:
-[![DOI](https://zenodo.org/badge/82790125.svg)](https://zenodo.org/badge/latestdoi/82790125)
