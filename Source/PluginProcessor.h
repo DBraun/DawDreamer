@@ -23,6 +23,7 @@ public:
     void reset();
 
     bool loadPreset(const std::string& path);
+    bool loadVST3Preset(const std::string& path);
 
     void createParameterLayout();  // NB: this is different from other processors because it's called after a VST is loaded.
 

@@ -42,7 +42,7 @@ ifeq ($(CONFIG),Debug)
   JUCE_TARGET_DYNAMIC_LIBRARY := libdawdreamer.so
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -g -ggdb -O0 -fPIC $(CFLAGS)
-  JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++14 $(CXXFLAGS)
+  JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
   JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-11/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-11 $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
@@ -65,7 +65,7 @@ ifeq ($(CONFIG),Release)
   JUCE_TARGET_DYNAMIC_LIBRARY := libdawdreamer.so
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
-  JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++14 $(CXXFLAGS)
+  JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
   JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-11/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-11 $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)

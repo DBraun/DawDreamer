@@ -1,0 +1,17 @@
+# YAML 1.2
+---
+authors: 
+  -
+    affiliation: "Center for Computer Research in Music and Acoustics, Stanford University"
+    family-names: Braun
+    given-names: David
+cff-version: "1.1.0"
+keywords: 
+  - audio
+  - plugins
+  - software
+  - python
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/DBraun/DawDreamer/"
+...

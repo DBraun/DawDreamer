@@ -20,6 +20,7 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * Pitch-warping
 * Parameter automation
 * Rendering multiple processors simultaneously
+* Full support on Linux (Dockerfile), macOS, and Windows
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
@@ -133,7 +134,7 @@ engine.render(DURATION)  # render audio again!
 
 ### All Platforms
 
-You can find a working Linux Make file, Visual Studio Solution, and Xcode Project in the `Builds/` folder. If the build for your platform isn't working, you should use [JUCE's Projucer](https://juce.com/get-juce) to open `DawDreamer.jucer` and create it.
+You can find a working Linux Makefile, Visual Studio Solution, and Xcode Project in the `Builds/` folder. If you want to make changes, the best way is to get [JUCE's Projucer](https://juce.com/get-juce) and open `DawDreamer.jucer`.
 
 ### Windows
 
@@ -453,7 +454,7 @@ Polyphony is supported too. You simply need to provide DSP code that refers to c
 
 ## Pitch-stretching and Time-stretching with Warp Markers
 
-Time-stretching and pitch-stretching are currently available on Windows thanks to [Rubberband](https://github.com/breakfastquay/rubberband/).
+Time-stretching and pitch-stretching are currently available thanks to [Rubberband](https://github.com/breakfastquay/rubberband/).
 
 ```python
 

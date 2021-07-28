@@ -154,6 +154,7 @@ but the filter mode cannot under automation.";
 
     py::class_<PluginProcessorWrapper, std::shared_ptr<PluginProcessorWrapper>, ProcessorBase>(m, "PluginProcessor")
         .def("load_preset", &PluginProcessorWrapper::loadPreset, arg("filepath"), "Load an FXP preset.")
+        .def("load_vst3_preset", &PluginProcessorWrapper::loadVST3Preset, arg("filepath"), "Load a VST3 preset.")
         .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
         .def("set_patch", &PluginProcessorWrapper::wrapperSetPatch, arg("patch"))
         .def("get_parameter", &PluginProcessorWrapper::wrapperGetParameter, arg("index"), "Get a parameter's value.")

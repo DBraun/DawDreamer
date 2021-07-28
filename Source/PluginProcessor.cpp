@@ -2,6 +2,8 @@
 
 #include "PluginProcessor.h"
 
+#include <filesystem>
+
 PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path) : ProcessorBase{ newUniqueName }
 {
     myPluginPath = path;
@@ -204,7 +206,6 @@ bool setVST3PluginStateDirect(AudioPluginInstance* instance, const MemoryBlock& 
     if (funknown->queryInterface(Steinberg::Vst::IComponent_iid, (void**)&vstcomponent) == 0
         && vstcomponent != nullptr)
     {
-
         void* data = (void*)rawData.getData();
 
         auto* memoryStream = new Steinberg::MemoryStream(data, (Steinberg::TSize)rawData.getSize());
@@ -222,22 +223,23 @@ bool setVST3PluginStateDirect(AudioPluginInstance* instance, const MemoryBlock& 
 bool
 PluginProcessor::loadPreset(const std::string& path)
 {
+    if (!myPlugin.get()) {
+        std::cout << "You must load a plugin before loading a preset." << std::endl;
+        return false;
+    }
+
     try {
+        if (!std::filesystem::exists(path.c_str())) {
+            std::cout << "File not found: " << path.c_str() << std::endl;
+            return false;
+        }
+
         MemoryBlock mb;
         File file = File(path);
         file.loadFileAsData(mb);
 
-        bool result = false;
-
-#if JUCE_PLUGINHOST_VST
-        // The VST2 way of loading preset. You need the entire VST2 SDK source, which is not public.
-        result = VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
-
-#else
-
-        result = setVST3PluginStateDirect(myPlugin.get(), mb);
-
-#endif
+        // The VST2 way of loading preset.
+        bool result = VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
 
         for (int i = 0; i < myPlugin->getNumParameters(); i++) {
             // set the values on the layout.
@@ -247,7 +249,40 @@ PluginProcessor::loadPreset(const std::string& path)
         return result;
     }
     catch (std::exception& e) {
-        std::cout << "PluginProcessor::loadPreset " << e.what() << std::endl;
+        std::cout << "Error: (PluginProcessor::loadPreset) " << e.what() << std::endl;
+        return false;
+    }
+
+}
+
+bool
+PluginProcessor::loadVST3Preset(const std::string& path)
+{
+    if (!myPlugin.get()) {
+        std::cout << "You must load a plugin before loading a preset." << std::endl;
+        return false;
+    }
+
+    try {
+        if (!std::filesystem::exists(path.c_str())) {
+            std::cout << "File not found: " << path.c_str() << std::endl;
+            return false;
+        }
+
+        MemoryBlock mb;
+        File file = File(path);
+        file.loadFileAsData(mb);
+        bool result = setVST3PluginStateDirect(myPlugin.get(), mb);
+
+        for (int i = 0; i < myPlugin->getNumParameters(); i++) {
+            // set the values on the layout.
+            setParameter(i, myPlugin.get()->getParameter(i));
+        }
+
+        return result;
+    }
+    catch (std::exception& e) {
+        std::cout << "Error: (PluginProcessor::loadVST3Preset) " << e.what() << std::endl;
         return false;
     }
 
