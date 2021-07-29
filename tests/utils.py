@@ -3,6 +3,7 @@ import librosa
 from scipy.io import wavfile
 from os.path import abspath
 import numpy as np
+import pathlib
 
 import dawdreamer as daw
 

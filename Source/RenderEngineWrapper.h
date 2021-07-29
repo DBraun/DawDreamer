@@ -47,7 +47,7 @@ public:
 
     ///
 #ifdef BUILD_DAWDREAMER_FAUST
-    std::shared_ptr<FaustProcessor> makeFaustProcessor(const std::string& name, const std::string& path);
+    std::shared_ptr<FaustProcessor> makeFaustProcessor(const std::string& name);
 #endif
 
     bool loadGraphWrapper(py::object dagObj, int numInputAudioChans, int numOutputAudioChans);

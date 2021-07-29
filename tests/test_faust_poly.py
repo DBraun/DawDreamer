@@ -1,21 +1,20 @@
-import pytest
-from scipy.io import wavfile
-from os.path import abspath
-
 from utils import *
-import dawdreamer as daw
 
-BUFFER_SIZE = 1
+def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1):
 
-def test_faust_poly(set_data=False):
-
-	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
 	dsp_path = abspath("faust_dsp/polyphonic.dsp")
-	faust_processor = engine.make_faust_processor("faust", "")
-	faust_processor.num_voices = 8
+	faust_processor = engine.make_faust_processor("faust")
 	assert(faust_processor.set_dsp(dsp_path))
-	assert(faust_processor.compiled)
+	
+	# Group voices will affect the number of parameters.
+	# True will result in fewer parameters because all voices will
+	# share the same parameters.
+	faust_processor.group_voices = group_voices
+	faust_processor.num_voices = num_voices
+	
+	assert(faust_processor.compile())
 
 	desc = faust_processor.get_parameters_description()
 	for par in desc:
@@ -36,4 +35,12 @@ def test_faust_poly(set_data=False):
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_faust_poly.wav', duration=3.)
+	render(engine, file_path=file_path, duration=3.)
+
+	return engine.get_audio()
+
+def test_faust_poly():
+	audio1 = _test_faust_poly('output/test_faust_poly_grouped.wav', group_voices=True)
+	audio2 = _test_faust_poly('output/test_faust_poly_ungrouped.wav', group_voices=False)
+
+	assert(np.allclose(audio1, audio2))

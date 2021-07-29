@@ -1,8 +1,4 @@
-import numpy as np
-import pytest
-
 from utils import *
-import dawdreamer as daw
 
 BUFFER_SIZE = 16
 

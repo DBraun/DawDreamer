@@ -77,8 +77,8 @@ PYBIND11_MODULE(dawdreamer, m)
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
     py::class_<PlaybackWarpProcessor, std::shared_ptr<PlaybackWarpProcessor>, ProcessorBase>(m, "PlaybackWarpProcessor")
-        .def("set_time_ratio", &PlaybackWarpProcessor::setTimeRatio, arg("time_ratio"), 
-            "Set the time ratio, which will have an effect if an Ableton ASD file hasn't been loaded. A value of 2.0 for the time ratio will \
+        .def_property("time_ratio", &PlaybackWarpProcessor::getTimeRatio, &PlaybackWarpProcessor::setTimeRatio,
+            "The time ratio has an effect if an Ableton ASD file hasn't been loaded or if `warp_on` is false. A value of 2.0 for the time ratio will \
 play the audio in double the amount of time, so it will sound slowed down.")
         .def_property("transpose", &PlaybackWarpProcessor::getTranspose, &PlaybackWarpProcessor::setTranspose, "The pitch transposition in semitones")
         .def_property("warp_on", &PlaybackWarpProcessor::getWarpOn, &PlaybackWarpProcessor::setWarpOn, "Whether warping is enabled.")
@@ -198,9 +198,11 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
 
 #ifdef BUILD_DAWDREAMER_FAUST
     py::class_<FaustProcessor, std::shared_ptr<FaustProcessor>, ProcessorBase>(m, "FaustProcessor")
-        .def("set_dsp", &FaustProcessor::compileFromFile, arg("filepath"), "Set the FAUST signal process with a file.")
-        .def("set_dsp_string", &FaustProcessor::compileFromString, arg("faust_code"), 
+        .def("set_dsp", &FaustProcessor::setDSPFile, arg("filepath"), "Set the FAUST signal process with a file.")
+        .def("set_dsp_string", &FaustProcessor::setDSPString, arg("faust_code"), 
             "Set the FAUST signal process with a string containing FAUST code.")
+        .def("compile", &FaustProcessor::compile, "Compile the FAUST object. You must have already set a dsp file path or dsp string.")
+        .def_property("auto_import", &FaustProcessor::getAutoImport, &FaustProcessor::setAutoImport, "The auto import string. Default is `import(\"stdfaust.lib\");`")
         .def("get_parameters_description", &FaustProcessor::getPluginParametersDescription,
             "Get a list of dictionaries describing the parameters of the most recently compiled FAUST code.")
         .def("get_parameter", &FaustProcessor::getParamWithIndex, arg("param_index"))
@@ -210,6 +212,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
+        .def_property("group_voices", &FaustProcessor::getGroupVoices, &FaustProcessor::setGroupVoices, "If grouped, all polyphonic voices will share the same parameters. This parameter only matters if polyphony is enabled.")
         .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")
@@ -238,7 +241,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("make_sampler_processor", &RenderEngineWrapper::makeSamplerProcessor, arg("name"), arg("data"),
             "Make a Sampler Processor with audio data to be used as the sample.", returnPolicy)
 #ifdef BUILD_DAWDREAMER_FAUST
-        .def("make_faust_processor", &RenderEngineWrapper::makeFaustProcessor, arg("name"), arg("dsp_path"), "Make a FAUST Processor", returnPolicy)
+        .def("make_faust_processor", &RenderEngineWrapper::makeFaustProcessor, arg("name"), "Make a FAUST Processor", returnPolicy)
 #endif
         .def("make_playback_processor", &RenderEngineWrapper::makePlaybackProcessor, arg("name"), arg("data"), returnPolicy, "Make a Playback Processor")
 #ifdef BUILD_DAWDREAMER_RUBBERBAND

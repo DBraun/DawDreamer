@@ -20,7 +20,7 @@ __declspec(selectany) ztimedmap GUI::gTimedZoneMap;
 #define SAFE_REF_ASSIGN(lhs,rhs)    do { SAFE_RELEASE(lhs); (lhs) = (rhs); SAFE_ADD_REF(lhs); } while(0)
 #endif
 
-FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path) : ProcessorBase{ newUniqueName }
+FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock) : ProcessorBase{ newUniqueName }
 {
 	mySampleRate = sampleRate;
 
@@ -34,10 +34,6 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	m_numOutputChannels = 0;
 	// auto import
 	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\nimport(\"stdfaust.lib\");\n";
-
-	if (std::strcmp(path.c_str(), "") != 0) {
-		this->compileFromFile(path);
-	}
 }
 
 FaustProcessor::~FaustProcessor() {
@@ -56,6 +52,11 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 
 	AudioPlayHead::CurrentPositionInfo posInfo;
 	getPlayHead()->getCurrentPosition(posInfo);
+
+	if (!m_isCompiled) {
+		ProcessorBase::processBlock(buffer, midiBuffer);
+		return;
+	}
 
 	if (m_nvoices < 1) {
 		if (m_dsp != NULL) {
@@ -116,6 +117,10 @@ bool hasEnding(std::string const& fullString, std::string const& ending) {
 	}
 }
 
+bool hasStart(std::string const& fullString, std::string const& start) {
+	return fullString.rfind(start, 0) == 0;
+}
+
 void
 FaustProcessor::automateParameters() {
 
@@ -152,11 +157,16 @@ FaustProcessor::reset()
 
 	myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
 	myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+
+	if (!m_isCompiled) {
+		this->compile();
+	}
 }
 
 void
 FaustProcessor::clear()
 {
+	m_isCompiled = false;
 	m_numInputChannels = 0;
 	m_numOutputChannels = 0;
 
@@ -180,23 +190,34 @@ FaustProcessor::clear()
 	m_poly_factory = NULL;
 }
 
-bool
+void
 FaustProcessor::setNumVoices(int numVoices) {
+	m_isCompiled = false;
 	m_nvoices = std::max(0, numVoices);
-	// recompile
-	return compileFromString(m_code);
 }
 
 int
-FaustProcessor::getNumVoices(int numVoices) {
+FaustProcessor::getNumVoices() {
 	return m_nvoices;
 }
 
-bool
-FaustProcessor::compileFromString(const std::string& code)
+void
+FaustProcessor::setGroupVoices(bool groupVoices) 
 {
-    m_isCompiled = false;
-    
+	m_isCompiled = false;
+	m_groupVoices = groupVoices;
+};
+
+int
+FaustProcessor::getGroupVoices() {
+	return m_groupVoices;
+};
+
+bool
+FaustProcessor::setDSPString(const std::string& code)
+{
+	m_isCompiled = false;
+
 	// clean up
 	clear();
 
@@ -204,15 +225,24 @@ FaustProcessor::compileFromString(const std::string& code)
 		return false;
 	}
 
+	// save
+	m_code = code;
+
+	return true;
+}
+
+bool
+FaustProcessor::compile()
+{
+	m_isCompiled = false;
+
 	// arguments
 	const int argc = 0;
 	const char** argv = NULL;
 	// optimization level
 	const int optimize = -1;
 
-	// save
-	m_code = code;
-    auto theCode = m_autoImport + "\n" + code;
+	auto theCode = m_autoImport + "\n" + m_code;
 
 	std::string m_errorString;
 
@@ -230,7 +260,7 @@ FaustProcessor::compileFromString(const std::string& code)
 	// check for error
 	if (m_errorString != "") {
 		// output error
-		std::cerr << "[Faust]: " << m_errorString << std::endl;
+		std::cerr << "FaustProcessor::compile(): " << m_errorString << std::endl;
 		// clear
 		clear();
 		// done
@@ -251,9 +281,9 @@ FaustProcessor::compileFromString(const std::string& code)
 
 	if (is_polyphonic) {
 		// (false, true) works
-		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, false, false);
+		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, false, m_groupVoices);
 		if (!m_dsp_poly) {
-			std::cerr << "Cannot create instance " << std::endl;
+			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
 			clear();
 			return false;
 		}
@@ -262,7 +292,7 @@ FaustProcessor::compileFromString(const std::string& code)
 		// create DSP instance
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
-			std::cerr << "Cannot create instance " << std::endl;
+			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
 			clear();
 			return false;
 		}
@@ -275,7 +305,7 @@ FaustProcessor::compileFromString(const std::string& code)
 	int outputs = theDsp->getNumOutputs();
 
 	if (outputs != 2) {
-		std::cerr << "FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
+		std::cerr << "FaustProcessor::compile(): FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
 		clear();
 		return false;
 	}
@@ -313,8 +343,9 @@ FaustProcessor::compileFromString(const std::string& code)
 }
 
 bool
-FaustProcessor::compileFromFile(const std::string& path)
+FaustProcessor::setDSPFile(const std::string& path)
 {
+	m_isCompiled = false;
 	if (std::strcmp(path.c_str(), "") == 0) {
         return false;
     }
@@ -335,14 +366,16 @@ FaustProcessor::compileFromFile(const std::string& path)
 	for (std::string line; std::getline(fin, line); ) {
 		m_code += line + '\n';
 	}
-	// eval it
-	return compileFromString(m_code);
+
+	return true;
 }
 
 bool
 FaustProcessor::setParamWithIndex(const int index, float p)
 {
-	// sanity check
+	if (!m_isCompiled) {
+		this->compile();
+	}
 	if (!m_ui) return false;
 
 	auto it = m_map_juceIndex_to_parAddress.find(index);
@@ -359,6 +392,9 @@ FaustProcessor::setParamWithIndex(const int index, float p)
 float
 FaustProcessor::getParamWithIndex(const int index)
 {
+	if (!m_isCompiled) {
+		this->compile();
+	}
 	if (!m_ui) return 0; // todo: better handling
 
 	auto it = m_map_juceIndex_to_parAddress.find(index);
@@ -375,6 +411,10 @@ FaustProcessor::getParamWithIndex(const int index)
 float
 FaustProcessor::getParamWithPath(const std::string& n)
 {
+
+	if (!m_isCompiled) {
+		this->compile();
+	}
 	if (!m_ui) return 0; // todo: better handling
 
 	return this->getAutomationVal(n, 0);
@@ -416,12 +456,20 @@ FaustProcessor::createParameterLayout()
 		// Note that an advanced user might want to not do this in order to
 		// have much more control over the frequencies of individual voices,
 		// like how MPE works.
-		if (hasEnding(parnameString, std::string("/freq")) ||
-			hasEnding(parnameString, std::string("/note")) ||
-			hasEnding(parnameString, std::string("/gain")) ||
-			hasEnding(parnameString, std::string("/gate"))
-			) {
-			continue;
+		if (m_nvoices > 1) {
+			if (hasEnding(parnameString, std::string("/freq")) ||
+				hasEnding(parnameString, std::string("/note")) ||
+				hasEnding(parnameString, std::string("/gain")) ||
+				hasEnding(parnameString, std::string("/gate"))
+				) {
+				continue;
+			}
+
+			if (!m_groupVoices && hasStart(parnameString, std::string("/Sequencer/DSP1/Polyphonic/Voices/"))) {
+				// If we aren't grouping voices, FAUST for some reason is still adding the "grouped" parameters
+				// to the UI, so we have to ignore them. The per-voice "ungrouped" parameters won't be skipped.
+				continue;
+			}
 		}
 
 		m_map_juceIndex_to_faustIndex[numParamsAdded] = i;
@@ -441,6 +489,10 @@ py::list
 FaustProcessor::getPluginParametersDescription()
 {
 	py::list myList;
+
+	if (!m_isCompiled) {
+		this->compile();
+	}
 
 	if (m_isCompiled) {
 
@@ -463,11 +515,21 @@ FaustProcessor::getPluginParametersDescription()
 
 			int faustIndex = it->second;
 
+			auto paramItemType = m_ui->getParamItemType(faustIndex);
+
+			bool isDiscrete = (paramItemType == APIUI::kButton) || (paramItemType == APIUI::kCheckButton) || (paramItemType == APIUI::kNumEntry);
+			int numSteps = (m_ui->getParamMax(faustIndex) - m_ui->getParamMin(faustIndex)) / m_ui->getParamStep(faustIndex) + 1;
+
+			// todo: It would be better for DawDreamer to store the discrete parameters correctly,
+			// but we're still saving them all as AutomateParameterFloat.
+			//bool isDiscrete = processorParams[i]->isDiscrete();
+			//int numSteps = processorParams[i]->getNumSteps();
+
 			py::dict myDictionary;
 			myDictionary["index"] = i;
 			myDictionary["name"] = theName;
-			myDictionary["numSteps"] = processorParams[i]->getNumSteps();
-			myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
+			myDictionary["numSteps"] = numSteps;
+			myDictionary["isDiscrete"] = isDiscrete;
 			myDictionary["label"] = label;
 			myDictionary["text"] = currentText;
 
@@ -482,7 +544,7 @@ FaustProcessor::getPluginParametersDescription()
 	}
 	else
 	{
-		std::cout << "Please load the plugin first!" << std::endl;
+		std::cout << "The " << std::endl;
 	}
 
 	return myList;

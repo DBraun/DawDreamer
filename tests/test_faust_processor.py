@@ -1,9 +1,4 @@
-import pytest
-from scipy.io import wavfile
-from os.path import abspath
-
 from utils import *
-import dawdreamer as daw
 
 BUFFER_SIZE = 1
 
@@ -16,9 +11,9 @@ def test_faust_passthrough():
 	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
 	playback_processor = engine.make_playback_processor("playback", data)
 
-	faust_processor = engine.make_faust_processor("faust", "")
+	faust_processor = engine.make_faust_processor("faust")
 	assert(faust_processor.set_dsp_string('process = _, _;'))
-	assert(faust_processor.compiled)
+	assert(faust_processor.compile())
 
 	print(faust_processor.get_parameters_description())
 
@@ -55,8 +50,9 @@ def test_faust_sidechain():
 		load_audio_file("assets/Music Delta - Disco/bass.wav", duration=DURATION))
 
 	dsp_path = abspath("faust_dsp/sidechain.dsp")
-	faust_processor = engine.make_faust_processor("faust", dsp_path)
-	assert(faust_processor.compiled)
+	faust_processor = engine.make_faust_processor("faust")
+	faust_processor.set_dsp(dsp_path)
+	assert(faust_processor.compile())
 
 	print(faust_processor.get_parameters_description())
 
@@ -92,9 +88,10 @@ def test_faust_zita_rev1(set_data=False):
 		playback_processor.set_data(data)
 
 	dsp_path = abspath("faust_dsp/dm.zita_rev1.dsp")
-	faust_processor = engine.make_faust_processor("faust", dsp_path)
+	faust_processor = engine.make_faust_processor("faust")
+	faust_processor.set_dsp(dsp_path)
 	assert(faust_processor.set_dsp(dsp_path))
-	assert(faust_processor.compiled)
+	assert(faust_processor.compile())
 
 	print(faust_processor.get_parameters_description())
 
@@ -120,9 +117,10 @@ def test_faust_automation():
 		load_audio_file("assets/Music Delta - Disco/other.wav", duration=DURATION))
 
 	dsp_path = abspath("faust_dsp/two_stereo_inputs_filter.dsp")
-	faust_processor = engine.make_faust_processor("faust", dsp_path)
+	faust_processor = engine.make_faust_processor("faust")
+	faust_processor.set_dsp(dsp_path)
 	assert(faust_processor.set_dsp(dsp_path))
-	assert(faust_processor.compiled)
+	assert(faust_processor.compile())
 
 	print(faust_processor.get_parameters_description())
 

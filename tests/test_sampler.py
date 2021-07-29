@@ -1,9 +1,4 @@
-import pytest
-from os.path import abspath
-import platform
-
 from utils import *
-import dawdreamer as daw
 
 BUFFER_SIZE = 4096*4
 
@@ -19,7 +14,9 @@ def test_sampler(set_data=False):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	data = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav")
+	thisdir = str(pathlib.Path(__file__).parent.resolve()) + '/'
+
+	data = load_audio_file(thisdir+"assets/60988__folktelemetry__crash-fast-14.wav")
 	sampler_processor = engine.make_sampler_processor("playback", data)
 
 	if set_data:
@@ -52,10 +49,10 @@ def test_sampler(set_data=False):
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_sampler_with_amp.wav', duration=DURATION)
+	render(engine, file_path=thisdir+'output/test_sampler_with_amp.wav', duration=DURATION)
 
 	sampler_processor.set_parameter(amp_index, 0.)
 
 	assert(sampler_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
-	render(engine, file_path='output/test_sampler_without_amp.wav', duration=DURATION)
+	render(engine, file_path=thisdir+'output/test_sampler_without_amp.wav', duration=DURATION)

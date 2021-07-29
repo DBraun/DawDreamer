@@ -96,9 +96,9 @@ RenderEngineWrapper::makeSamplerProcessor(const std::string& name, py::array dat
 
 #ifdef BUILD_DAWDREAMER_FAUST
 std::shared_ptr<FaustProcessor>
-RenderEngineWrapper::makeFaustProcessor(const std::string& name, const std::string& path)
+RenderEngineWrapper::makeFaustProcessor(const std::string& name)
 {
-    return std::shared_ptr<FaustProcessor>{new FaustProcessor{ name, mySampleRate, myBufferSize, path }};
+    return std::shared_ptr<FaustProcessor>{new FaustProcessor{ name, mySampleRate, myBufferSize }};
 }
 #endif
 

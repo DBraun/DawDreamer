@@ -1,8 +1,4 @@
-import pytest
-from scipy.io import wavfile
-
 from utils import *
-import dawdreamer as daw
 
 BUFFER_SIZE = 16
 

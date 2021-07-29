@@ -1,21 +1,15 @@
-import pytest
-import numpy as np
-from scipy.io import wavfile
-from os.path import abspath
-
 from utils import *
-import dawdreamer as daw
 
-BUFFER_SIZE = 1
+BUFFER_SIZE = 1024
 
 def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	dsp_path = abspath("faust_dsp/polyphonic_sampler.dsp")
-	faust_processor = engine.make_faust_processor("faust", "")
+	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = 8
 
+	dsp_path = abspath("faust_dsp/polyphonic_sampler.dsp")
 	dsp_code = open(dsp_path).read()
 
 	waveform_length = sample_seq.shape[1]
@@ -35,9 +29,11 @@ SAMPLE_LENGTH = {SAMPLE_LENGTH};
 	# print(dsp_code)
 
 	assert(faust_processor.set_dsp_string(dsp_code))
-	assert(faust_processor.compiled)
+	assert(faust_processor.compile())
 
 	desc = faust_processor.get_parameters_description()
+	# for par in desc:
+	# 	print(par)
 
 	 # (MIDI note, velocity, start sec, duration sec)
 	faust_processor.add_midi_note(60, 60, 0.0, .25)

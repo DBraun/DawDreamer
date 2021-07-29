@@ -1,14 +1,10 @@
-import pytest
-from os.path import abspath
-import platform
-
 from utils import *
-import dawdreamer as daw
-
-BUFFER_SIZE = 16
+import platform
 
 MY_SYSTEM = platform.system()
 # "Darwin" is macOS. "Windows" is Windows.
+
+BUFFER_SIZE = 16
 
 def test_plugin_effect(set_data=False):
 
@@ -29,6 +25,8 @@ def test_plugin_effect(set_data=False):
 	plugin_name = "DimensionExpander.vst" if MY_SYSTEM == "Darwin" else "Dimension Expander_x64.dll"
 
 	effect = engine.make_plugin_processor("effect", abspath("plugins/"+plugin_name))
+
+	# print(effect.get_plugin_parameters_description())
 
 	graph = [
 	    (playback_processor, []),
@@ -52,6 +50,8 @@ def test_plugin_instrument(set_data=False):
 	plugin_name = "TAL-NoiseMaker.vst" if MY_SYSTEM == "Darwin" else "TAL-NoiseMaker-64.dll"
 
 	synth = engine.make_plugin_processor("synth", abspath("plugins/"+plugin_name))
+
+	# print(synth.get_plugin_parameters_description())
 
 	 # (MIDI note, velocity, start sec, duration sec)
 	synth.add_midi_note(60, 60, 0.0, .25)

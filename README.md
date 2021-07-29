@@ -387,7 +387,7 @@ Open the latest `.dmg` installer from FAUST's [releases](https://github.com/gram
 
 ### Using FAUST processors
 
-Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in processors with 2 outputs and an even number of inputs. Here's an example using a demo stereo reverb:
+Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in a `process` with 2 outputs and an even number of inputs. Here's an example using a demo stereo reverb:
 
 #### **faust_reverb.dsp:**
 ```dsp
@@ -397,8 +397,11 @@ process = dm.zita_light;
 #### **faust_test.py:**
 ```python
 DSP_PATH = "C:/path/to/faust_reverb.dsp"  # Must be absolute path
-faust_processor = engine.make_faust_processor("faust", DSP_PATH)
-# faust_processor.set_dsp(DSP_PATH)  # You can do this anytime.
+faust_processor = engine.make_faust_processor("faust")
+faust_processor.set_dsp(DSP_PATH)  # You can do this anytime.
+
+# Using compile() isn't necessary, but it's an early warning check.
+assert(faust_processor.compile())
 
 print(faust_processor.get_parameters_description())
 
@@ -434,8 +437,8 @@ process = _, _, _, _ :> myFilter, myFilter;
 
 #### **faust_test_stereo_mixdown.py:**
 ```python
-DSP_PATH = "C:/path/to/dsp_4_channels.dsp"  # Must be absolute path
-faust_processor = engine.make_faust_processor("faust", DSP_PATH)
+faust_processor = engine.make_faust_processor("faust")
+faust_processor.set_dsp("C:/path/to/dsp_4_channels.dsp")  # Must be absolute path
 print(faust_processor.get_parameters_description())
 faust_processor.set_parameter("/MyEffect/cutoff", 7000.0)  # Change the cutoff frequency.
 # or set automation like this
@@ -467,8 +470,8 @@ engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 engine.set_bpm(130.)
 
 playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file(SAMPLE_PATH))
-playback_processor.set_time_ratio(2.)  # Play back in twice the amount of time (i.e., slowed down).
-playback_processor.transpose = 2.  # Up 2 semitones.
+playback_processor.time_ratio = 2.  # Play back in twice the amount of time (i.e., slowed down).
+playback_processor.transpose = 3.  # Up 3 semitones.
 
 graph = [
   (playback_processor, []),
@@ -494,7 +497,7 @@ This will set several properties:
 
 Any of these properties can be changed after an `.asd` file is loaded.
 
-If `.warp_on` is True, then any value set by `.set_time_ratio()` will be ignored. If `.warp_on` is False, then the `start_marker` and `loop_start` are the first sample of the audio, and the `end_marker` and `loop_end` are the last sample.
+If `.warp_on` is True, then any value set by `.time_ratio` will be ignored. If `.warp_on` is False, then the `start_marker` and `loop_start` are the first sample of the audio, and the `end_marker` and `loop_end` are the last sample.
 
 With `set_clip_positions`, you can use the same audio clip at multiple places along the timeline.
 

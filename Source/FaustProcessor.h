@@ -18,7 +18,7 @@
 class FaustProcessor : public ProcessorBase
 {
 public:
-    FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path);
+    FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock);
     ~FaustProcessor();
 
     void prepareToPlay(double sampleRate, int samplesPerBlock);
@@ -36,8 +36,9 @@ public:
 
     // faust stuff
     void clear();
-    bool compileFromString(const std::string& code);
-    bool compileFromFile(const std::string& path);
+    bool compile();
+    bool setDSPString(const std::string& code);
+    bool setDSPFile(const std::string& path);
     bool setParamWithIndex(const int index, float p);
     float getParamWithIndex(const int index);
     float getParamWithPath(const std::string& n);
@@ -46,8 +47,14 @@ public:
 
     py::list getPluginParametersDescription();
 
-    bool setNumVoices(int numVoices);
-    int getNumVoices(int numVoices);
+    void setNumVoices(int numVoices);
+    int getNumVoices();
+
+    void setGroupVoices(bool groupVoices);
+    int getGroupVoices();
+
+    void setAutoImport(const std::string& s) { m_autoImport = s; }
+    std::string getAutoImport() { return m_autoImport; }
 
     bool loadMidi(const std::string& path);
 
@@ -85,6 +92,7 @@ protected:
     std::string m_code;
 
     int m_nvoices = 0;    
+    bool m_groupVoices = true;
     bool m_isCompiled = false;
 
     MidiBuffer myMidiBuffer;

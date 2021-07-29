@@ -1,10 +1,4 @@
-import pytest
-import numpy as np
-from scipy.io import wavfile
-from os.path import abspath
-
 from utils import *
-import dawdreamer as daw
 
 BUFFER_SIZE = 1
 
@@ -13,7 +7,7 @@ def _test_faust_poly_wavetable(wavecycle, output_path, lagrange_order=4):
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
 	dsp_path = abspath("faust_dsp/polyphonic_wavetable.dsp")
-	faust_processor = engine.make_faust_processor("faust", "")
+	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = 8
 
 	dsp_code = open(dsp_path).read()
@@ -33,7 +27,7 @@ CYCLE_LENGTH = {CYCLE_LENGTH};
 	# print(dsp_code)
 
 	assert(faust_processor.set_dsp_string(dsp_code))
-	assert(faust_processor.compiled)
+	assert(faust_processor.compile())
 
 	desc = faust_processor.get_parameters_description()
 

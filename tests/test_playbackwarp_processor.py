@@ -1,8 +1,4 @@
-import pytest
-from os.path import abspath
-
 from utils import *
-import dawdreamer as daw
 
 BUFFER_SIZE = 1
 
