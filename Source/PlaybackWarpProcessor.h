@@ -58,6 +58,9 @@ public:
     void setTimeRatio(double ratio) {
         m_time_ratio_if_warp_off = ratio;
     }
+    bool getTimeRatio() {
+        return m_time_ratio_if_warp_off;
+    }
 
     void automateParameters() {
 
