@@ -21,6 +21,13 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 		for par in desc:
 			print(par)
 
+	for par in desc:
+		par_min = par['min']
+		par_max = par['max']
+		value = par_min + (par_max-par_min)*random.random()
+		# assert(faust_processor.set_automation(par['name'], np.array([value])))
+		assert(faust_processor.set_parameter(par['index'], value))
+
 	 # (MIDI note, velocity, start sec, duration sec)
 	faust_processor.add_midi_note(60, 60, 0.0, .25)
 	faust_processor.add_midi_note(64, 80, 0.5, .5)
@@ -40,3 +47,7 @@ def test_faust_dx7():
 
 	for i in range(32):
 		_test_faust_dx7(algorithm=i, num_voices=8, buffer_size=2048)
+
+
+if __name__ == '__main__':
+	_test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048)

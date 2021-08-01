@@ -4,6 +4,7 @@ from scipy.io import wavfile
 from os.path import abspath
 import numpy as np
 import pathlib
+import random
 
 import dawdreamer as daw
 
