@@ -38,6 +38,7 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 FaustProcessor::~FaustProcessor() {
 	clear();
+	deleteAllDSPFactories();
 }
 
 void
@@ -63,7 +64,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			m_dsp->compute(buffer.getNumSamples(), (float**)buffer.getArrayOfReadPointers(), buffer.getArrayOfWritePointers());
 		}
 	}
-	else {
+	else if (m_dsp_poly != NULL) {
 		long long int start = posInfo.timeInSamples;
 
 		// render one sample at a time
@@ -127,19 +128,22 @@ FaustProcessor::automateParameters() {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
-	if (m_ui) {
+	if (!m_ui) return;
 
-		for (int i = 0; i < this->getNumParameters(); i++) {
+	const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
 
+	for (int i = 0; i < this->getNumParameters(); i++) {
+
+		auto theParameter = (AutomateParameterFloat*)processorParams[i];
+
+		int faustIndex = m_map_juceIndex_to_faustIndex[i];
+
+		if (theParameter) {
+			m_ui->setParamValue(faustIndex, theParameter->sample(posInfo.timeInSamples));
+		}
+		else {
 			auto theName = this->getParameterName(i);
-
-			auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
-			if (theParameter) {
-				m_ui->setParamValue(theName.toStdString().c_str(), theParameter->sample(posInfo.timeInSamples));
-			}
-			else {
-				std::cout << "Error automateParameters: " << theName << std::endl;
-			}
+			std::cerr << "Error FaustProcessor::automateParameters: " << theName << std::endl;
 		}
 	}
 }
@@ -149,6 +153,10 @@ FaustProcessor::reset()
 {
 	if (m_dsp) {
 		m_dsp->instanceClear();
+	}
+
+	if (m_dsp_poly) {
+		m_dsp_poly->instanceClear();
 	}
 
 	if (myMidiIterator) {
@@ -185,7 +193,6 @@ FaustProcessor::clear()
 	SAFE_DELETE(m_dsp_poly);
 	SAFE_DELETE(m_midi_ui);
 
-	deleteAllDSPFactories();
 	m_factory = NULL;
 	m_poly_factory = NULL;
 }
@@ -218,9 +225,6 @@ FaustProcessor::setDSPString(const std::string& code)
 {
 	m_isCompiled = false;
 
-	// clean up
-	clear();
-
 	if (std::strcmp(code.c_str(), "") == 0) {
 		return false;
 	}
@@ -235,6 +239,9 @@ bool
 FaustProcessor::compile()
 {
 	m_isCompiled = false;
+
+	// clean up
+	clear();
 
 	// arguments
 	const int argc = 0;
@@ -281,7 +288,7 @@ FaustProcessor::compile()
 
 	if (is_polyphonic) {
 		// (false, true) works
-		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, false, m_groupVoices);
+		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
 			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
 			clear();
@@ -456,11 +463,13 @@ FaustProcessor::createParameterLayout()
 		// Note that an advanced user might want to not do this in order to
 		// have much more control over the frequencies of individual voices,
 		// like how MPE works.
-		if (m_nvoices > 1) {
+		if (m_nvoices > 0) {
 			if (hasEnding(parnameString, std::string("/freq")) ||
 				hasEnding(parnameString, std::string("/note")) ||
 				hasEnding(parnameString, std::string("/gain")) ||
-				hasEnding(parnameString, std::string("/gate"))
+				hasEnding(parnameString, std::string("/gate")) ||
+				hasEnding(parnameString, std::string("/vel")) ||
+				hasEnding(parnameString, std::string("/velocity"))
 				) {
 				continue;
 			}
@@ -505,7 +514,6 @@ FaustProcessor::getPluginParametersDescription()
 			std::string theName = (processorParams[i])->getName(maximumStringLength).toStdString();
 			std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), maximumStringLength).toStdString();
 			std::string label = processorParams[i]->getLabel().toStdString();
-
 
 			auto it = m_map_juceIndex_to_faustIndex.find(i);
 			if (it == m_map_juceIndex_to_faustIndex.end())
