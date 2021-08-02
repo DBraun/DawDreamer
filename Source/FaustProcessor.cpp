@@ -146,6 +146,13 @@ FaustProcessor::automateParameters() {
 			std::cerr << "Error FaustProcessor::automateParameters: " << theName << std::endl;
 		}
 	}
+
+	if (m_nvoices > 0) {
+		// When polyphony is enabled, several voices might share the same parameters in a group.
+		// Therefore we have to call updateAllGuis to update all dependent parameters.
+		GUI::updateAllGuis();
+	}
+	
 }
 
 void

@@ -66,9 +66,8 @@ def test_faust_poly():
 
 	assert(np.allclose(audio1, audio2))
 
-# todo(DBraun): this test is still failing
-# def test_faust_poly_groups():
-# 	audio1 = _test_faust_poly('output/test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
-# 	audio2 = _test_faust_poly('output/test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
+def test_faust_poly_groups():
+	audio1 = _test_faust_poly('output/test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
+	audio2 = _test_faust_poly('output/test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
 
-# 	assert(np.allclose(audio1, audio2))
+	assert(np.allclose(audio1, audio2))
