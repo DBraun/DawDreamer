@@ -4,12 +4,12 @@
 
 #include "faust/midi/RtMidi.cpp"
 
-#ifndef WIN32
-std::list<GUI*> GUI::fGuiList;
-ztimedmap GUI::gTimedZoneMap;
-#else
+#ifdef WIN32
 __declspec(selectany) std::list<GUI*> GUI::fGuiList;
 __declspec(selectany) ztimedmap GUI::gTimedZoneMap;
+#else
+std::list<GUI*> GUI::fGuiList;
+ztimedmap GUI::gTimedZoneMap;
 #endif
 
 #ifndef SAFE_DELETE
@@ -34,6 +34,11 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	m_numOutputChannels = 0;
 	// auto import
 	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\nimport(\"stdfaust.lib\");\n";
+
+#ifdef WIN32
+	// At the start of every process
+	guiUpdateMutex = CreateMutex(NULL, FALSE, "Faust gui::update Mutex");  // todo: enable mutex on linux and macOS
+#endif
 }
 
 FaustProcessor::~FaustProcessor() {
@@ -147,12 +152,33 @@ FaustProcessor::automateParameters() {
 		}
 	}
 
-	if (m_nvoices > 0) {
-		// When polyphony is enabled, several voices might share the same parameters in a group.
-		// Therefore we have to call updateAllGuis to update all dependent parameters.
-		GUI::updateAllGuis();
+	// if polyphony is enabled and we're not grouping voices
+	// several voices might share the same parameters in a group.
+	// Therefore we have to call updateAllGuis to update all dependent parameters.
+	if (m_nvoices > 0 && !m_groupVoices) {
+#ifdef WIN32
+		// When you want to access shared memory:
+		DWORD dwWaitResult = WaitForSingleObject(guiUpdateMutex, INFINITE);
+
+		if (dwWaitResult == WAIT_OBJECT_0 || dwWaitResult == WAIT_ABANDONED)
+		{
+			if (dwWaitResult == WAIT_ABANDONED)
+			{
+				// todo:
+				// Shared memory is maybe in inconsistent state because other program
+				// crashed while holding the mutex. Check the memory for consistency
+			}
+
+			// Have Faust update all GUIs.
+			GUI::updateAllGuis();
+
+			// After this line other processes can access shared memory
+			ReleaseMutex(guiUpdateMutex);
+		}
+#else
+		GUI::updateAllGuis(); // todo: enable mutex on linux and macOS
+#endif
 	}
-	
 }
 
 void
