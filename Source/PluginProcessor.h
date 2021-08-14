@@ -70,7 +70,7 @@ protected:
 
     std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> myPlugin;
     // For an explanation of myCopyBuffer, read PluginProcessor::processBlock
-    juce::AudioBuffer<float>* myCopyBuffer = nullptr;
+    juce::AudioSampleBuffer myCopyBuffer;
     int myCopyBufferNumChans = 2;
 
 };
@@ -91,7 +91,9 @@ public:
 
     std::string wrapperGetParameterName(int parameter);
 
-    void wrapperSetParameter(int parameter, float value);
+    bool wrapperSetParameter(int parameter, float value);
+
+    bool wrapperSetAutomation(int parameterIndex, py::array input);
 
     int wrapperGetPluginParameterSize();
 

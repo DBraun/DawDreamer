@@ -162,6 +162,8 @@ but the filter mode cannot under automation.";
         .def("get_parameter_text", &PluginProcessorWrapper::getParameterAsText, arg("index"), "Get a parameter's value as text.")
         .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter, arg("index"), arg("value"),
             "Set a parameter's value to a constant.")
+        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"),
+            "Set the automation based on its index.")
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize, "Get the number of parameters.")
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
             "Get a list of dictionaries describing the plugin's parameters.")

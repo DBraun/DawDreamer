@@ -15,7 +15,7 @@ def test_faust_passthrough():
 	assert(faust_processor.set_dsp_string('process = _, _;'))
 	assert(faust_processor.compile())
 
-	print(faust_processor.get_parameters_description())
+	# print(faust_processor.get_parameters_description())
 
 	graph = [
 	    (playback_processor, []),
@@ -54,7 +54,7 @@ def test_faust_sidechain():
 	faust_processor.set_dsp(dsp_path)
 	assert(faust_processor.compile())
 
-	print(faust_processor.get_parameters_description())
+	# print(faust_processor.get_parameters_description())
 
 	graph = [
 	    (drums, []),
@@ -93,7 +93,7 @@ def test_faust_zita_rev1(set_data=False):
 	assert(faust_processor.set_dsp(dsp_path))
 	assert(faust_processor.compile())
 
-	print(faust_processor.get_parameters_description())
+	# print(faust_processor.get_parameters_description())
 
 	graph = [
 	    (playback_processor, []),
@@ -122,7 +122,7 @@ def test_faust_automation():
 	assert(faust_processor.set_dsp(dsp_path))
 	assert(faust_processor.compile())
 
-	print(faust_processor.get_parameters_description())
+	# print(faust_processor.get_parameters_description())
 
 	faust_processor.set_parameter("/MyEffect/cutoff", 7000.0)  # Change the cutoff frequency.
 	assert(faust_processor.get_parameter("/MyEffect/cutoff") == 7000.)

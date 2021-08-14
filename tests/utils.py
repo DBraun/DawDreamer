@@ -1,7 +1,7 @@
 import pytest
 import librosa
 from scipy.io import wavfile
-from os.path import abspath
+from os.path import abspath, isfile
 import numpy as np
 import pathlib
 import random

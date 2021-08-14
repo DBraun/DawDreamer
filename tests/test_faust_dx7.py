@@ -8,6 +8,7 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 
 	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = num_voices
+	faust_processor.group_voices = True
 
 	dsp_path = abspath("faust_dsp/dx7.dsp")
 	dsp_code = open(dsp_path).read()
@@ -21,12 +22,14 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 		for par in desc:
 			print(par)
 
-	for par in desc:
+	for i, par in enumerate(desc):
 		par_min = par['min']
 		par_max = par['max']
 		value = par_min + (par_max-par_min)*random.random()
-		# assert(faust_processor.set_automation(par['name'], np.array([value])))
+		assert(faust_processor.set_automation(par['name'], np.array([value])))
 		assert(faust_processor.set_parameter(par['index'], value))
+		if random.random() < .5:
+			assert(faust_processor.set_parameter(par['name'], value))
 
 	 # (MIDI note, velocity, start sec, duration sec)
 	faust_processor.add_midi_note(60, 60, 0.0, .25)
@@ -47,7 +50,3 @@ def test_faust_dx7():
 
 	for i in range(32):
 		_test_faust_dx7(algorithm=i, num_voices=8, buffer_size=2048)
-
-
-if __name__ == '__main__':
-	_test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048)

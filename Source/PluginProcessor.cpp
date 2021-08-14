@@ -11,7 +11,7 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
     loadPlugin(sampleRate, samplesPerBlock);
 
     // in processBlock, the size will be set correctly.
-    myCopyBuffer = new juce::AudioBuffer<float>(myCopyBufferNumChans, 512);
+    myCopyBuffer.setSize(myCopyBufferNumChans, samplesPerBlock);
 }
 
 bool
@@ -76,10 +76,6 @@ PluginProcessor::~PluginProcessor() {
         myPlugin->releaseResources();
         myPlugin.release();
     }
-
-    if (myCopyBuffer) {
-        delete myCopyBuffer;
-    }
 }
 
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
@@ -134,19 +130,19 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 
         int numSamples = buffer.getNumSamples();
 
-        myCopyBuffer->setSize(std::max(buffer.getNumChannels(), myCopyBufferNumChans), numSamples, false, true, false);
+        myCopyBuffer.setSize(std::max(buffer.getNumChannels(), myCopyBufferNumChans), numSamples, false, true, false);
 
         for (int i = 0; i < buffer.getNumChannels(); i++)
         {
-            myCopyBuffer->copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
+            myCopyBuffer.copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
         }
 
-        myPlugin->processBlock(*myCopyBuffer, myRenderMidiBuffer);
+        myPlugin->processBlock(myCopyBuffer, myRenderMidiBuffer);
 
         // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
         for (int i = 0; i < 2; i++)
         {
-            buffer.copyFrom(i, 0, myCopyBuffer->getReadPointer(i), numSamples);
+            buffer.copyFrom(i, 0, myCopyBuffer.getReadPointer(i), numSamples);
         }
 
     }
@@ -164,18 +160,14 @@ PluginProcessor::automateParameters() {
 
         for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
-            auto theName = myPlugin->getParameterName(i);
+            auto paramID = std::to_string(i);
 
-            if (theName == "Param") {
-                continue;
-            }
-
-            auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
+            auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
             if (theParameter) {
                 myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
-                std::cout << "Error automateParameters: " << theName << std::endl;
+                std::cout << "Error automateParameters: " << myPlugin->getParameterName(i) << std::endl;
             }
         }
     }
@@ -301,13 +293,10 @@ PluginProcessor::createParameterLayout()
     for (int i = 0; i < myPlugin->getNumParameters(); ++i)
     {
         auto parameterName = myPlugin->getParameterName(i);
-        // Ensure the parameter is not unused.
-        if (parameterName != "Param")
-        {
-            myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
-            // give it a valid single sample of automation.
-            ProcessorBase::setAutomationVal(parameterName.toStdString(), myPlugin->getParameter(i));
-        }
+        std::string paramID = std::to_string(i);
+        myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(paramID, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
+        // give it a valid single sample of automation.
+        ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
     }
 }
 
@@ -348,13 +337,10 @@ PluginProcessor::setParameter(const int paramIndex, const float value)
         std::cout << "Please load the plugin first!" << std::endl;
         return;
     }
-    auto parameterName = myPlugin->getParameterName(paramIndex);
 
-    if (parameterName == "Param") {
-        return;
-    }
+    std::string paramID = std::to_string(paramIndex);
 
-    ProcessorBase::setAutomationVal(parameterName.toStdString(), value);
+    ProcessorBase::setAutomationVal(paramID, value);
 }
 
 //==============================================================================
@@ -508,9 +494,7 @@ PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
         return 0.;
     }
 
-    auto parameterName = myPlugin->getParameterName(parameterIndex);
-
-    return ProcessorBase::getAutomationVal(parameterName.toStdString(), 0);
+    return ProcessorBase::getAutomationVal(std::to_string(parameterIndex), 0);
 }
 
 std::string
@@ -519,10 +503,22 @@ PluginProcessorWrapper::wrapperGetParameterName(int parameter)
     return myPlugin->getParameterName(parameter).toStdString();
 }
 
-void
+bool
 PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 {
-    PluginProcessor::setParameter(parameter, value);
+    if (!myPlugin) {
+        std::cout << "Please load the plugin first!" << std::endl;
+        return false;
+    }
+
+    std::string paramID = std::to_string(parameter);
+
+    return ProcessorBase::setAutomationVal(paramID, value);
+}
+
+bool
+PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input) {
+    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input);
 }
 
 int

@@ -152,10 +152,10 @@ FaustProcessor::automateParameters() {
 		}
 	}
 
-	// if polyphony is enabled and we're not grouping voices
+	// If polyphony is enabled and we're grouping voices,
 	// several voices might share the same parameters in a group.
 	// Therefore we have to call updateAllGuis to update all dependent parameters.
-	if (m_nvoices > 0 && !m_groupVoices) {
+	if (m_nvoices > 0 && m_groupVoices) {
 #ifdef WIN32
 		// When you want to access shared memory:
 		DWORD dwWaitResult = WaitForSingleObject(guiUpdateMutex, INFINITE);
@@ -545,7 +545,6 @@ FaustProcessor::getPluginParametersDescription()
 			int maximumStringLength = 64;
 
 			std::string theName = (processorParams[i])->getName(maximumStringLength).toStdString();
-			std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), maximumStringLength).toStdString();
 			std::string label = processorParams[i]->getLabel().toStdString();
 
 			auto it = m_map_juceIndex_to_faustIndex.find(i);
@@ -572,13 +571,11 @@ FaustProcessor::getPluginParametersDescription()
 			myDictionary["numSteps"] = numSteps;
 			myDictionary["isDiscrete"] = isDiscrete;
 			myDictionary["label"] = label;
-			myDictionary["text"] = currentText;
 
 			myDictionary["min"] = m_ui->getParamMin(faustIndex);
 			myDictionary["max"] = m_ui->getParamMax(faustIndex);
-			//myDictionary["label"] = m_ui->getParamLabel(i);
 			myDictionary["step"] = m_ui->getParamStep(faustIndex);
-			myDictionary["value"] = m_ui->getParamValue(faustIndex);
+			myDictionary["value"] = this->getAutomationVal(theName, 0);
 
 			myList.append(myDictionary);
 		}

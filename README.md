@@ -71,7 +71,8 @@ synth.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, durati
 # Get a list of dictionaries where each dictionary describes a controllable parameter.
 print(synth.get_plugin_parameters_description()) 
 print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
-synth.set_automation("A Pan", make_sine(.5, DURATION)) # 0.5 Hz sine wave.
+# The Plugin Processor can set automation according to a parameter index.
+synth.set_automation(1, make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 
 # The sampler processor works like the plugin processor.
 # Provide audio for the sample, and then provide MIDI.

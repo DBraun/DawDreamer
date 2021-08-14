@@ -41,49 +41,53 @@
 // compiled code. In particular the resulting compiled code has no obligation
 // to be LGPL or GPL. For example you are free to choose a commercial or
 // closed source license or any other license if you decide so.
+declare name "dx7";
+declare options "[nvoices:8]"; // FaustProcessor has a property which will override this.
 
 // ALGORITHM = 0;
 dx7_ui =
 dx.dx7_algo(ALGORITHM,egR1,egR2,egR3,egR4,egL1,egL2,egL3,egL4,outLevel,keyVelSens,ampModSens,opMode,opFreq,opDetune,opRateScale,feedback,lfoDelay,lfoDepth,lfoSpeed,freq,gain,gate) :> _
 with{
-	feedback = hslider("h:dx7/v:global/[1]feedback",0,0,99,1) : dx.dx7_fdbkscalef/(2*ma.PI);
-	lfoDelay = hslider("h:dx7/v:global/[2]lfoDelay",0,0,99,1);
-	lfoDepth = hslider("h:dx7/v:global/[3]lfoDepth",0,0,99,1);
-	lfoSpeed = hslider("h:dx7/v:global/[4]lfoSpeed",0,0,99,1);
-	freq = hslider("h:dx7/v:global/[5]freq",400,50,1000,0.01);
-	gain = hslider("h:dx7/v:global/[6]gain",0.8,0,1,0.01);
-	gate = button("h:dx7/v:global/[7]gate");
-	egR1UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[0]egR1",90,0,99,1));
+	feedback = hslider("global/feedback",0,0,99,1) : dx.dx7_fdbkscalef/(2*ma.PI);
+	lfoDelay = hslider("global/lfoDelay",0,0,99,1);
+	lfoDepth = hslider("global/lfoDepth",0,0,99,1);
+	lfoSpeed = hslider("global/lfoSpeed",0,0,99,1);
+	freq = hslider("freq",400,50,1000,0.01);
+	gain = hslider("gain",0.8,0,1,0.01);
+	gate = button("gate");
+	egR1UI = par(i,6,hslider("op%i/egR1",90,0,99,1));
 	egR1(n) = ba.take(n+1,egR1UI);
-	egR2UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[1]egR2",90,0,99,1));
+	egR2UI = par(i,6,hslider("op%i/egR2",90,0,99,1));
 	egR2(n) = ba.take(n+1,egR2UI);
-	egR3UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[2]egR3",90,0,99,1));
+	egR3UI = par(i,6,hslider("op%i/egR3",90,0,99,1));
 	egR3(n) = ba.take(n+1,egR3UI);
-	egR4UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[3]egR4",90,0,99,1));
+	egR4UI = par(i,6,hslider("op%i/egR4",90,0,99,1));
 	egR4(n) = ba.take(n+1,egR4UI);
-	egL1UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[4]egL1",0,0,99,1));
+	egL1UI = par(i,6,hslider("op%i/egL1",0,0,99,1));
 	egL1(n) = ba.take(n+1,egL1UI);
-	egL2UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[5]egL2",90,0,99,1));
+	egL2UI = par(i,6,hslider("op%i/egL2",90,0,99,1));
 	egL2(n) = ba.take(n+1,egL2UI);
-	egL3UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[6]egL3",90,0,99,1));
+	egL3UI = par(i,6,hslider("op%i/egL3",90,0,99,1));
 	egL3(n) = ba.take(n+1,egL3UI);
-	egL4UI = par(i,6,hslider("h:dx7/v:[%i]op%i/[7]egL4",0,0,99,1));
+	egL4UI = par(i,6,hslider("op%i/egL4",0,0,99,1));
 	egL4(n) = ba.take(n+1,egL4UI);
-	outLevelUI = par(i,6,hslider("h:dx7/v:[%i]op%i/[8]level",95,0,99,1));
+	outLevelUI = par(i,6,hslider("op%i/level",95,0,99,1));
 	outLevel(n) = ba.take(n+1,outLevelUI);
-	keyVelSensUI = par(i,6,nentry("h:dx7/v:[%i]op%i/[9]keyVelSens",1,0,8,1));
+	keyVelSensUI = par(i,6,nentry("op%i/keyVelSens",1,0,8,1));
 	keyVelSens(n) = ba.take(n+1,keyVelSensUI);
-	ampModSensUI = par(i,6,hslider("h:dx7/v:[%i]op%i/[10]ampModSens",0,0,99,1));
+	ampModSensUI = par(i,6,hslider("op%i/ampModSens",0,0,99,1));
 	ampModSens(n) = ba.take(n+1,ampModSensUI);
-	opModeUI = par(i,6,nentry("h:dx7/v:[%i]op%i/[11]opMode",0,0,1,1));
+	opModeUI = par(i,6,nentry("op%i/opMode",0,0,1,1));
 	opMode(n) = ba.take(n+1,opModeUI);
-	opFreqUI = par(i,6,hslider("h:dx7/v:[%i]op%i/[12]opFreq",1.0,0.0,2.0,0.01));
+	opFreqUI = par(i,6,hslider("op%i/opFreq",1.0,0.0,2.0,0.01));
 	opFreq(n) = ba.take(n+1,opFreqUI);
-	opDetuneUI = par(i,6,hslider("h:dx7/v:[%i]op%i/[13]opDetune",1,-10,10,1));
+	opDetuneUI = par(i,6,hslider("op%i/opDetune",1,-10,10,1));
 	opDetune(n) = ba.take(n+1,opDetuneUI);
-	opRateScaleUI = par(i,6,hslider("h:dx7/v:[%i]op%i/[14]opRateScale",0,0,10,1));
+	opRateScaleUI = par(i,6,hslider("op%i/opRateScale",0,0,10,1));
 	opRateScale(n) = ba.take(n+1,opRateScaleUI);
 };
 
+myFilter = fi.lowpass(10, hslider("cutoff", 20000., 30., 20000., 0.1));
+
 process = dx7_ui <: _, _;
-effect = _, _;
+effect = myFilter, myFilter;

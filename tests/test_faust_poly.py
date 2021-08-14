@@ -17,8 +17,7 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 	
 	assert(faust_processor.compile())
 
-	desc = faust_processor.get_parameters_description()
-	# for par in desc:
+	# for par in faust_processor.get_parameters_description():
 	# 	print(par)
 
 	 # (MIDI note, velocity, start sec, duration sec)
@@ -39,6 +38,9 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 		else:
 			for i in range(1, num_voices+1):
 				assert(faust_processor.set_parameter(f"/Sequencer/DSP1/Polyphonic/V{i}/MyInstrument/decay", decay))
+
+	# for par in faust_processor.get_parameters_description():
+	# 	print(par)
 
 	graph = [
 	    (faust_processor, [])
@@ -66,7 +68,6 @@ def test_faust_poly():
 
 	assert(np.allclose(audio1, audio2))
 
-def test_faust_poly_groups():
 	audio1 = _test_faust_poly('output/test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
 	audio2 = _test_faust_poly('output/test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
 
