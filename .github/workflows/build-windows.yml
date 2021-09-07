@@ -47,7 +47,8 @@ jobs:
       run: |
         python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
         set /p PYTHONPATH=<tmp.txt
-        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
+        echo PYTHONPATH is %PYTHONPATH%
+        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release /p:IncludePath="C:/hostedtoolcache/windows/Python/3.8.10/x64/include" /LIBPATH:"C:/hostedtoolcache/windows/Python/3.8.10/x64/libs"
 
     - name: Test with pytest
       run: |
