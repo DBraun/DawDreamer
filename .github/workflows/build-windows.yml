@@ -42,15 +42,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel pytest numpy librosa scipy
-        python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
-        set /p PYTHONPATH=<tmp.txt
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
     - name: Build Windows (Release)
-        # python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
-        # set /p PYTHONPATH=<tmp.txt
       env:
         PYTHONPATH: C:/hostedtoolcache/windows/Python/3.8.10/x64
       run: |
@@ -67,11 +63,46 @@ jobs:
     #     python setup.py clean --all
     #     python setup.py bdist_wheel
 
-#   test:
-#     runs-on: windows-latest
-    
-#     steps:
-#     - name: Test with pytest
-#       run: |
-#         cd tests
-#         pytest .
+  build-macos-11:
+    runs-on: macos-11
+
+    strategy:
+      matrix:
+        python-version: [3.8.10]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      run: |
+        mkdir /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
+        cp faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Build MacOS (Release)
+      env:
+        PYTHONPATH: /Users/runner/hostedtoolcache/Python/3.8.10/x64
+      run: |
+        xcodebuild -project Builds/MacOSX/DawDreamer.xcodeproj/
+
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest .

@@ -9,6 +9,10 @@
 * * VST Instruments and Effects with Python * *
 ```
 
+![Supported Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-green)
+[![Test Badge](https://github.com/DBraun/DawDreamer/actions/workflows/build-windows.yml/badge.svg)](https://github.com/DBraun/DawDreamer/actions/workflows/build-windows.yml)
+![GitHub Repo stars](https://img.shields.io/github/stars/DBraun/DawDreamer?style=social)
+
 # DawDreamer
 
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
