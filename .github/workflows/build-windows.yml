@@ -22,6 +22,17 @@ jobs:
       with:
         submodules: true
 
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      run: |
+        mkdir C:/hostedtoolcache/windows/Python/3.8.10/share/faust
+        cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/3.8.10/share/faust
+
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -34,12 +45,6 @@ jobs:
         python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
         set /p PYTHONPATH=<tmp.txt
 
-    # - name: Build Python wheel
-    #   shell: bash
-    #   run: |
-    #     python setup.py clean --all
-    #     python setup.py bdist_wheel
-
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
@@ -49,13 +54,18 @@ jobs:
       env:
         PYTHONPATH: C:/hostedtoolcache/windows/Python/3.8.10/x64
       run: |
-        echo PYTHONPATH is %PYTHONPATH%
         msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
     - name: Test with pytest
       run: |
         cd tests
         pytest .
+
+    # - name: Build Python wheel
+    #   shell: bash
+    #   run: |
+    #     python setup.py clean --all
+    #     python setup.py bdist_wheel
 
 #   test:
 #     runs-on: windows-latest
