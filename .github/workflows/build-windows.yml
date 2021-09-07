@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.8.10]
 
     steps:
     - uses: actions/checkout@v2
@@ -44,11 +44,12 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.3
 
     - name: Build Windows (Release)
+        # python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
+        # set /p PYTHONPATH=<tmp.txt
       run: |
-        python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
-        set /p PYTHONPATH=<tmp.txt
+        set PYTHONPATH=C:/hostedtoolcache/windows/Python/3.8.10/x64
         echo PYTHONPATH is %PYTHONPATH%
-        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release /p:IncludePath="C:/hostedtoolcache/windows/Python/3.8.10/x64/include" /LIBPATH:"C:/hostedtoolcache/windows/Python/3.8.10/x64/libs"
+        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
     - name: Test with pytest
       run: |
