@@ -141,18 +141,12 @@ You can find a working Linux Makefile, Visual Studio Solution, and Xcode Project
 
 DawDreamer has been tested with Visual Studio 2019 and VS2019 Build Tools (v142).
 
-On Windows, the JUCE project makes several assumptions about having a Python 3.8 virtual environment located at `C:/Python38dawdreamer`.  You can use a different virtual environment as long as you modify all references in `DawDreamer.jucer`, which is actually a text file.
+Install [Python 3.8.x Windows x86-64](https://www.python.org/downloads/release/python-3810/) to `C:/Python38` and set a permanent environment variable `PYTHONPATH` equal to `C:/Python38`.
 
-Install [Python 3.8.x Windows x86-64](https://www.python.org/downloads/release/python-3810/) to `C:/Python38`. Use [virtualenv](https://docs.python-guide.org/dev/virtualenvs/) to create a virtual environment: 
-`python -m venv C:/Python38dawdreamer`
+With the Projucer, open `DawDreamer.jucer`. Use it to create a Visual Studio solution and then build in Release mode. Note the post-build command, which moves the recently built `dawdreamer.dll` to `C:/Python38`. Also copy `thirdparty/libfaust/win-x64/Release/bin/faust.dll` to this directory.
 
-In this repo, use `env.bat` to activate the virtual environment.
+Now you can import dawdreamer:
 
-With the Projucer, open `DawDreamer.jucer`. Use it to create a Visual Studio solution and then build in Release mode. Note the post-build command, which moves the recently built `dawdreamer.dll` to `C:/Python38dawdreamer`. Also copy `thirdparty/libfaust/win-x64/Release/bin/faust.dll` to this directory.
-
-Now you can activate the virtual environment and import dawdreamer:
-
-    C:/Python38dawdreamer/Scripts/activate.bat
     python
     >> import dawdreamer as daw
     >> engine = daw.RenderEngine(44100,512)
@@ -380,7 +374,7 @@ Faust on Linux relies on the Ubuntu package service, so if you used the Dockerfi
 
 ### Windows
 
-Run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38dawdreamer/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust/*.lib` files.
+Run the latest `win64.exe` installer from FAUST's [releases](https://github.com/grame-cncm/faust/releases). After installing, copy the `.lib` files from `C:/Program Files/Faust/share/faust/` to `C:/share/faust/`. The reason is that we're using `C:/Python38/python.exe`, so the sibling directory would be `C:/share/faust`. If you're running python from a different location, you can determine the different location for the `share/faust/*.lib` files.
 
 ### macOS
 
