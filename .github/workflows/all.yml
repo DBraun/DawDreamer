@@ -1,0 +1,141 @@
+name: all
+on: [push]
+jobs:
+  # check-bats-version:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '14'
+  #     - run: npm install -g bats
+  #     - run: bats -v
+  build-ubuntu-docker:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8.10]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Build Docker image
+      run: docker build -t dawdreamer .
+
+    - uses: addnab/docker-run-action@v3
+      with:
+        image: dawdreamer
+        run: |
+          echo "Running tests"
+          cd tests
+          pytest .
+
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8.10]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      run: |
+        mkdir C:/hostedtoolcache/windows/Python/3.8.10/share/faust
+        cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/3.8.10/share/faust
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Build Windows (Release)
+      env:
+        PYTHONPATH: C:/hostedtoolcache/windows/Python/3.8.10/x64
+      run: |
+        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
+
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest .
+
+    # - name: Build Python wheel
+    #   shell: bash
+    #   run: |
+    #     python setup.py clean --all
+    #     python setup.py bdist_wheel
+
+  build-macos-11:
+    runs-on: macos-11
+
+    strategy:
+      matrix:
+        python-version: [3.8.10]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      run: |
+        mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
+        cp faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
+
+    - name: Build MacOS (Release)
+      env:
+        PYTHONPATH: /Users/runner/hostedtoolcache/Python/3.8.10/x64
+      run: |
+        xcodebuild -project Builds/MacOSX/DawDreamer.xcodeproj/
+
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest .
