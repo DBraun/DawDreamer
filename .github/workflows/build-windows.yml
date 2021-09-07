@@ -45,6 +45,8 @@ jobs:
 
     - name: Build Windows (Release)
       run: |
+        python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp.txt
+        set /p PYTHONPATH=<tmp.txt
         msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
     - name: Test with pytest
