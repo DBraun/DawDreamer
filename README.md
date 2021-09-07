@@ -10,7 +10,7 @@
 ```
 
 ![Supported Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-green)
-[![Test Badge](https://github.com/DBraun/DawDreamer/actions/workflows/build-windows.yml/badge.svg)](https://github.com/DBraun/DawDreamer/actions/workflows/build-windows.yml)
+[![Test Badge](https://github.com/DBraun/DawDreamer/actions/workflows/all.yml/badge.svg)](https://github.com/DBraun/DawDreamer/actions/workflows/all.yml)
 ![GitHub Repo stars](https://img.shields.io/github/stars/DBraun/DawDreamer?style=social)
 
 # DawDreamer
