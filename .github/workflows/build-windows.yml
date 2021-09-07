@@ -49,6 +49,9 @@ jobs:
         msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
   test:
+    runs-on: windows-latest
+    
+    steps:
     - name: Test with pytest
       run: |
         cd tests
