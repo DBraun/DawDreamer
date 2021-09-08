@@ -128,9 +128,9 @@ jobs:
     - name: copy faust libraries
       run: |
         mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
-        cp faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
+        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/share/faust/
         mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust
-        cp faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust
+        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust/
 
     - name: Build MacOS (Release)
       run: |
