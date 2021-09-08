@@ -49,7 +49,7 @@ RUN make CONFIG=Release
 RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/tests/dawdreamer.so
 
 # Pytest Full Test
-RUN apt install python3-pip
+RUN apt install -y python3-pip
 RUN python3.9 -m pip install librosa scipy numpy pytest
 
 # Basic Import Test
