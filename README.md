@@ -460,14 +460,9 @@ Polyphony is supported too. You simply need to provide DSP code that refers to c
 Time-stretching and pitch-stretching are currently available thanks to [Rubber Band Library](https://github.com/breakfastquay/rubberband/).
 
 ```python
-
-# Pretend that the input audio is actually 120 BPM,
-# but we want to play it back at 130 BPM and 2 semitones higher.
-
 SAMPLE_PATH = "drums.wav"
 
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-engine.set_bpm(130.)
 
 playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file(SAMPLE_PATH))
 playback_processor.time_ratio = 2.  # Play back in twice the amount of time (i.e., slowed down).
@@ -483,8 +478,20 @@ assert(engine.load_graph(graph))
 You can set an Ableton Live `.asd` file containing warp markers to do beat-matching:
 
 ```python
+engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+# Suppose that the Ableton clip info thinks the input audio is 120 BPM,
+# but we want to play it back at 130 BPM.
+engine.set_bpm(130.)
+
 playback_processor.set_data(load_audio_file("synth_loop.wav"))
 assert(playback_processor.set_clip_file("synth_loop.wav.asd"))
+
+graph = [
+  (playback_processor, []),
+]
+
+assert(engine.load_graph(graph))
 ```
 
 This will set several properties:
