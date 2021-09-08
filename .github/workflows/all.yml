@@ -40,7 +40,7 @@ jobs:
         image: dawdreamer
         run: |
           echo "Running tests"
-          cd tests
+          cd DawDreamer/tests
           pytest .
 
   build-windows:
@@ -128,12 +128,18 @@ jobs:
       run: |
         mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
         cp faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
+        mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust
+        cp faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust
 
     - name: Build MacOS (Release)
-      env:
-        PYTHONPATH: /Users/runner/hostedtoolcache/Python/3.8.10/x64
       run: |
         xcodebuild -project Builds/MacOSX/DawDreamer.xcodeproj/
+        mv Builds/MacOSX/build/dawdreamer.so.dylib Builds/MacOSX/build/dawdreamer.so
+        otool -L Builds/MacOSX/build/dawdreamer.so
+        install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/dawdreamer.so
+        otool -L Builds/MacOSX/build/dawdreamer.so
+        copy Builds/MacOSX/build/dawdreamer.so /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/dawdreamer.so
+        copy thirdparty/libfaust/darwin-x64/Release/libfaust.a /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/libfaust.2.dylib
 
     - name: Test with pytest
       run: |
