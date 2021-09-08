@@ -802,7 +802,8 @@
 					"$(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK",
 					"$(SRCROOT)/../../JuceLibraryCode",
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
-					"$(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.9/include/python3.9",
+					"$(SRCROOT)//Users/runner/hostedtoolcache/Python/3.8.10/x64/include/python3.8/",
+					"$(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.8/include/python3.8",
 					"$(SRCROOT)/../../thirdparty/pybind11/include",
 					"$(SRCROOT)//usr/local/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
@@ -818,15 +819,16 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"/Library/Frameworks/Python.framework/Versions/3.9/lib\"",
+					"\"/Users/runner/hostedtoolcache/Python/3.8.10/x64/lib/python3.8/\"",
+					"\"/Library/Frameworks/Python.framework/Versions/3.8/lib\"",
 					"\"/usr/local/lib\"",
 					"\"../../thirdparty/libfaust/darwin-x64/Debug\"",
 					"\"../../thirdparty/libsamplerate_build/darwin-x64/Debug\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.9/include/python3.9 $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)//usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(SRCROOT)//Users/runner/hostedtoolcache/Python/3.8.10/x64/include/python3.8/ $(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.8/include/python3.8 $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)//usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython3.9";
+				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython3.8";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
@@ -924,7 +926,8 @@
 					"$(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK",
 					"$(SRCROOT)/../../JuceLibraryCode",
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
-					"$(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.9/include/python3.9",
+					"$(SRCROOT)//Users/runner/hostedtoolcache/Python/3.8.10/x64/include/python3.8/",
+					"$(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.8/include/python3.8",
 					"$(SRCROOT)/../../thirdparty/pybind11/include",
 					"$(SRCROOT)//usr/local/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
@@ -940,16 +943,17 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"/Library/Frameworks/Python.framework/Versions/3.9/lib\"",
+					"\"/Users/runner/hostedtoolcache/Python/3.8.10/x64/lib/python3.8/\"",
+					"\"/Library/Frameworks/Python.framework/Versions/3.8/lib\"",
 					"\"/usr/local/lib\"",
 					"\"../../thirdparty/libfaust/darwin-x64/Release\"",
 					"\"../../thirdparty/libsamplerate_build/darwin-x64/Release\"",
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.9/include/python3.9 $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)//usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(SRCROOT)//Users/runner/hostedtoolcache/Python/3.8.10/x64/include/python3.8/ $(SRCROOT)//Library/Frameworks/Python.framework/Versions/3.8/include/python3.8 $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)//usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython3.9";
+				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython3.8";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
