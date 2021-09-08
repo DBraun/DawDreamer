@@ -159,10 +159,9 @@ jobs:
         cd tests
         pytest .
 
-
   upload-pypi:
     needs: [build-windows]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
     # if: github.event_name == 'release' && github.event.action == 'published'
     steps:
@@ -178,7 +177,6 @@ jobs:
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          name: artifact
           user: __token__
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
