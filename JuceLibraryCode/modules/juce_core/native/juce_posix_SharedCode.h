@@ -59,7 +59,7 @@ void JUCE_CALLTYPE Process::terminate()
 }
 
 
-#if JUCE_MAC || JUCE_LINUX
+#if JUCE_MAC || JUCE_LINUX || JUCE_BSD
 bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
 {
     rlimit lim;
@@ -260,7 +260,7 @@ uint64 File::getFileIdentifier() const
 
 static bool hasEffectiveRootFilePermissions()
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return geteuid() == 0;
    #else
     return false;
@@ -576,6 +576,9 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
         {
             range = Range<int64>();
         }
+
+        close (fileHandle);
+        fileHandle = 0;
     }
 }
 
@@ -835,8 +838,6 @@ void InterProcessLock::exit()
 }
 
 //==============================================================================
-void JUCE_API juce_threadEntryPoint (void*);
-
 #if JUCE_ANDROID
 extern JavaVM* androidJNIJavaVM;
 #endif
@@ -865,11 +866,8 @@ static void* threadEntryProc (void* userData)
     return nullptr;
 }
 
-#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && \
-   ((JUCE_USE_ANDROID_OPENSLES || (! defined(JUCE_USE_ANDROID_OPENSLES) && JUCE_ANDROID_API_VERSION > 8)) \
- || (JUCE_USE_ANDROID_OBOE || (! defined(JUCE_USE_ANDROID_OBOE) && JUCE_ANDROID_API_VERSION > 15)))
-
-  #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
+#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && (JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE)
+ #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
 #endif
 
 #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
@@ -940,9 +938,10 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
     {
         [[NSThread currentThread] setName: juceStringToNS (name)];
     }
-   #elif JUCE_LINUX || JUCE_ANDROID
-    #if ((JUCE_LINUX && (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012) \
-          || JUCE_ANDROID && __ANDROID_API__ >= 9)
+   #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
+    #if (JUCE_BSD \
+          || (JUCE_LINUX && (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012) \
+          || (JUCE_ANDROID && __ANDROID_API__ >= 9))
      pthread_setname_np (pthread_self(), name.toRawUTF8());
     #else
      prctl (PR_SET_NAME, name.toRawUTF8(), 0, 0, 0);
@@ -952,9 +951,11 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 
 bool Thread::setThreadPriority (void* handle, int priority)
 {
+    constexpr auto maxInputPriority = 10;
+    constexpr auto lowestRealtimePriority = 8;
+
     struct sched_param param;
     int policy;
-    priority = jlimit (0, 10, priority);
 
     if (handle == nullptr)
         handle = (void*) pthread_self();
@@ -962,12 +963,19 @@ bool Thread::setThreadPriority (void* handle, int priority)
     if (pthread_getschedparam ((pthread_t) handle, &policy, &param) != 0)
         return false;
 
-    policy = priority == 0 ? SCHED_OTHER : SCHED_RR;
+    policy = priority < lowestRealtimePriority ? SCHED_OTHER : SCHED_RR;
 
-    const int minPriority = sched_get_priority_min (policy);
-    const int maxPriority = sched_get_priority_max (policy);
+    const auto minPriority = sched_get_priority_min (policy);
+    const auto maxPriority = sched_get_priority_max (policy);
 
-    param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
+    param.sched_priority = [&]
+    {
+        if (policy == SCHED_OTHER)
+            return 0;
+
+        return jmap (priority, lowestRealtimePriority, maxInputPriority, minPriority, maxPriority);
+    }();
+
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 
@@ -1000,7 +1008,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (uint32 affinityMask)
         if ((affinityMask & (uint32) (1 << i)) != 0)
             CPU_SET ((size_t) i, &affinity);
 
-   #if (! JUCE_ANDROID) && ((! JUCE_LINUX) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
+   #if (! JUCE_ANDROID) && ((! (JUCE_LINUX || JUCE_BSD)) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
     pthread_setaffinity_np (pthread_self(), sizeof (cpu_set_t), &affinity);
    #elif JUCE_ANDROID
     sched_setaffinity (gettid(), sizeof (cpu_set_t), &affinity);

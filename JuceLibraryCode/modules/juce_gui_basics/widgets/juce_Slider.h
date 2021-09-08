@@ -701,6 +701,9 @@ public:
     */
     void setScrollWheelEnabled (bool enabled);
 
+    /** Returns true if the scroll wheel can move the slider. */
+    bool isScrollWheelEnabled() const noexcept;
+
     /** Returns a number to indicate which thumb is currently being dragged by the mouse.
 
         This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
@@ -967,6 +970,8 @@ public:
     void mouseExit (const MouseEvent&) override;
     /** @internal */
     void mouseEnter (const MouseEvent&) override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================

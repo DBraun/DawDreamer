@@ -103,6 +103,7 @@ const char* PluginHostType::getHostDescription() const noexcept
         case AppleLogic:               return "Apple Logic";
         case AppleMainStage:           return "Apple MainStage";
         case Ardour:                   return "Ardour";
+        case AULab:                    return "AU Lab";
         case AvidProTools:             return "ProTools";
         case BitwigStudio:             return "Bitwig Studio";
         case CakewalkSonar8:           return "Cakewalk Sonar 8";
@@ -172,10 +173,12 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostPath.containsIgnoreCase       ("Live 9"))                   return AbletonLive9;
     if (hostPath.containsIgnoreCase       ("Live 10"))                  return AbletonLive10;
     if (hostFilename.containsIgnoreCase   ("Live"))                     return AbletonLiveGeneric;
+    if (hostFilename.containsIgnoreCase   ("Audition"))                 return AdobeAudition;
     if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))           return AdobePremierePro;
     if (hostFilename.containsIgnoreCase   ("GarageBand"))               return AppleGarageBand;
     if (hostFilename.containsIgnoreCase   ("Logic"))                    return AppleLogic;
     if (hostFilename.containsIgnoreCase   ("MainStage"))                return AppleMainStage;
+    if (hostFilename.containsIgnoreCase   ("AU Lab"))                   return AULab;
     if (hostFilename.containsIgnoreCase   ("Pro Tools"))                return AvidProTools;
     if (hostFilename.containsIgnoreCase   ("Nuendo 3"))                 return SteinbergNuendo3;
     if (hostFilename.containsIgnoreCase   ("Nuendo 4"))                 return SteinbergNuendo4;
@@ -290,7 +293,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))       return JUCEPluginHost;
     if (hostFilename.containsIgnoreCase   ("Vienna Ensemble Pro"))   return ViennaEnsemblePro;
 
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     if (hostFilename.containsIgnoreCase   ("Ardour"))            return Ardour;
     if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
     if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;

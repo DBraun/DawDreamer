@@ -28,8 +28,8 @@
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      6
-#define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        8
+#define JUCE_MINOR_VERSION      1
+#define JUCE_BUILDNUMBER        0
 
 /** Current JUCE version number.
 
@@ -55,11 +55,13 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <mutex>
 #include <numeric>
 #include <queue>
 #include <sstream>
+#include <typeindex>
 #include <unordered_set>
 #include <vector>
 
@@ -83,7 +85,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
  #include <signal.h>
 #endif
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #include <cstring>
  #include <signal.h>
 

@@ -35,11 +35,12 @@
 
   ID:                 juce_gui_extra
   vendor:             juce
-  version:            6.0.8
+  version:            6.1.0
   name:               JUCE extended GUI classes
   description:        Miscellaneous GUI classes for specialised tasks.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_gui_basics
   OSXFrameworks:      WebKit
