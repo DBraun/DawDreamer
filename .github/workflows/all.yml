@@ -1,15 +1,7 @@
 name: all
 on: [push]
 jobs:
-  # check-bats-version:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: '14'
-  #     - run: npm install -g bats
-  #     - run: bats -v
+
   build-ubuntu-docker:
     runs-on: ubuntu-latest
 
@@ -148,3 +140,58 @@ jobs:
       run: |
         cd tests
         pytest .
+
+  build-wheel-windows:
+    needs: [build-windows]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        python-version: ['3.8']
+        os: [windows-latest]
+    name: Build wheels on ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel>=2.0.0a4
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_TEST_REQUIRES: -r test-requirements.txt
+          # CIBW_TEST_COMMAND: "pytest {project}/tests"  # faust lib files aren't included yet.
+          CIBW_ARCHS: auto64
+          CIBW_ARCHS_MACOS: x86_64 universal2
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
+
+  upload-pypi:
+    needs: [build-wheel-windows]
+    runs-on: windows-latest
+    name: "Upload wheels to PyPI"
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifact
+          path: dist
+
+      # - uses: pypa/gh-action-pypi-publish@v1.4.2
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          name: artifact
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/

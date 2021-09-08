@@ -1,0 +1,3 @@
+include *.txt *.md
+recursive-include . dawdreamer.pyd
+recursive-include . faust.dll

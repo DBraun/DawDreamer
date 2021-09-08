@@ -101,7 +101,7 @@
       <AdditionalLibraryDirectories>$(PYTHONPATH)\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate_build\win-x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(PYTHONPATH)\\dawdreamer.pyd&quot;;
+      <Command>copy &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(PYTHONPATH)\\dawdreamer.pyd&quot;;
 copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &quot;$(PYTHONPATH)\\faust.dll&quot;;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -154,7 +154,7 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &q
       <AdditionalLibraryDirectories>$(PYTHONPATH)\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate_build\win-x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(PYTHONPATH)\\dawdreamer.pyd&quot;;
+      <Command>copy &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(PYTHONPATH)\\dawdreamer.pyd&quot;;
 copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;$(PYTHONPATH)\\faust.dll&quot;;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
