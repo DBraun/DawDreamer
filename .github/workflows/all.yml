@@ -40,7 +40,7 @@ jobs:
         image: dawdreamer
         run: |
           echo "Running tests"
-          cd DawDreamer/tests
+          cd /DawDreamer/tests
           pytest .
 
   build-windows:
