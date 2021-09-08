@@ -118,12 +118,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel pytest numpy librosa scipy
 
-    - name: List python stuff
-      run: |
-        ls -R /Users/runner/hostedtoolcache/Python/3.8.10/
-        ls -R /usr/include/python3.8
-        ls -R /usr/lib/python3.8
-
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
       with:
