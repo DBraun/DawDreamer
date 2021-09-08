@@ -16,6 +16,7 @@
 # DawDreamer
 
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
+* Composing graphs of audio processors
 * Audio playback
 * VST instruments
 * VST effects

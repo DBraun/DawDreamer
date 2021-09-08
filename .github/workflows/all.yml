@@ -35,13 +35,14 @@ jobs:
     - name: Build Docker image
       run: docker build -t dawdreamer .
 
-    - uses: addnab/docker-run-action@v3
-      with:
-        image: dawdreamer
-        run: |
-          echo "Running tests"
-          cd /DawDreamer/tests
-          pytest .
+    # todo: enable this, but note that the Dockerfile pulls the main branch!
+    # - uses: addnab/docker-run-action@v3
+    #   with:
+    #     image: dawdreamer
+    #     run: |
+    #       echo "Running tests"
+    #       cd /DawDreamer/tests
+    #       pytest .
 
   build-windows:
     runs-on: windows-latest
@@ -138,8 +139,8 @@ jobs:
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
         install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
-        copy Builds/MacOSX/build/Release/dawdreamer.so /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/dawdreamer.so
-        copy thirdparty/libfaust/darwin-x64/Release/libfaust.a /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/libfaust.2.dylib
+        cp Builds/MacOSX/build/Release/dawdreamer.so /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/dawdreamer.so
+        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/libfaust.2.dylib
 
     - name: Test with pytest
       run: |
