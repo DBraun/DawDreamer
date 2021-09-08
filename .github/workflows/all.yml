@@ -87,7 +87,9 @@ jobs:
       run: python -m pip install cibuildwheel>=2.0.0a4
 
     - name: Build wheels
-      run: CIBW_BUILD_VERBOSITY=1 python -m cibuildwheel --output-dir wheelhouse --platform windows
+      run: |
+        set CIBW_BUILD_VERBOSITY=1
+        python -m cibuildwheel --output-dir wheelhouse --platform windows
       env:
         # CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "pytest {project}/tests"
