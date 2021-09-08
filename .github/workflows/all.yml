@@ -133,8 +133,6 @@ jobs:
         cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust/
         mkdir -p /usr/local/share/faust/
         cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /usr/local/share/faust/
-        mkdir -p /usr/share/faust/
-        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /usr/share/faust/
 
     - name: Build MacOS (Release)
       run: |
