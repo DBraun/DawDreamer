@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, Extension
+from setuptools.dist import Distribution
 import os
 from pathlib import Path
 import shutil
@@ -27,6 +28,11 @@ else:
     raise NotImplementedError(
         f"setup.py hasn't been implemented for platform: {platform}."
     )
+
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True
 
 this_dir = Path(__file__).parent
 long_description = (this_dir / "README.md").read_text()
@@ -58,5 +64,6 @@ setup(
     package_data={
         "": package_data,
     },
-    zip_safe=False
+    zip_safe=False,
+    distclass=BinaryDistribution
 )

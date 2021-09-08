@@ -84,13 +84,14 @@ jobs:
         pytest .
 
     - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.0.0a4
+      run: python -m pip install cibuildwheel>=2.1.1
 
     - name: Build wheels
       run: |
-        set CIBW_BUILD_VERBOSITY=1
-        python -m cibuildwheel --output-dir wheelhouse --platform windows
+        python -m cibuildwheel --output-dir wheelhouse
       env:
+        CIBW_BUILD_VERBOSITY: 1
+        # CIBW_PLATFORM: windows
         # CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "pytest {project}/tests"
         CIBW_ARCHS: auto64
