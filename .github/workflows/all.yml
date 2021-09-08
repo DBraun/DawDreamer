@@ -133,7 +133,7 @@ jobs:
 
     - name: Build MacOS (Release)
       run: |
-        xcodebuild -project Builds/MacOSX/DawDreamer.xcodeproj/-configuration Release
+        xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
         mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
         install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
