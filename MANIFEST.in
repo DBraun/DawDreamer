@@ -1,3 +1,5 @@
 include *.txt *.md
 recursive-include . dawdreamer.pyd
+recursive-include . dawdreamer.so
 recursive-include . faust.dll
+recursive-include . libfaust.2.dylib

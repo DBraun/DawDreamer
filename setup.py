@@ -20,10 +20,28 @@ if platform.system() == "Windows":
 
     package_data = ['dawdreamer/faust.dll', 'dawdreamer/dawdreamer.pyd']
 
-# elif platform.system() == "Linux":
-#     package_data = ['dawdreamer/libfaust.2.dylib', 'dawdreamer/dawdreamer.so']
-# elif platform.system() == "Darwin":
-#     package_data = ['dawdreamer/libfaust.2.dylib', 'dawdreamer/dawdreamer.so']
+elif platform.system() == "Linux":
+
+    this_dir = os.path.abspath(os.path.dirname(__file__))
+
+    build_folder = os.path.join(this_dir, "Builds", "LinuxMakefile", "build")
+
+    shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
+
+    package_data = ['dawdreamer/dawdreamer.so']
+
+elif platform.system() == "Darwin":
+
+    this_dir = os.path.abspath(os.path.dirname(__file__))
+
+    build_folder = os.path.join(this_dir, "Builds", "MacOSX", "build", "Release")
+    libfaust_folder = os.path.join(this_dir, "thirdparty", "libfaust", "darwin-x64", "Release")
+
+    shutil.copy(os.path.join(build_folder, 'dawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
+    shutil.copy(os.path.join(libfaust_folder, 'libfaust.a'), os.path.join('dawdreamer', 'libfaust.2.dylib'))
+
+    package_data = ['dawdreamer/libfaust.2.dylib', 'dawdreamer/dawdreamer.so']
+
 else:
     raise NotImplementedError(
         f"setup.py hasn't been implemented for platform: {platform}."

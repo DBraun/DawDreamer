@@ -2,6 +2,94 @@ name: all
 on: [push]
 jobs:
 
+  build-ubuntu:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Ubuntu dependencies
+      run: |
+        sudo apt-get update -yq \
+        && apt-get install -yq --no-install-recommends \
+        ca-certificates \
+        build-essential \
+        clang \
+        pkg-config \
+        libboost-all-dev \
+        libboost-python-dev \
+        libfreetype6-dev \
+        libx11-dev \
+        libxinerama-dev \
+        libxrandr-dev \
+        libxcursor-dev \
+        mesa-common-dev \
+        libasound2-dev \
+        freeglut3-dev \
+        libxcomposite-dev \
+        libcurl4-gnutls-dev \
+        git \
+        cmake \
+        python3 \
+        python3.9-dev \
+        faust \
+        libsamplerate0 \
+        llvm-11 \
+        llvm-11-dev \
+        && update-ca-certificates \
+        && apt-get clean -y
+
+    - name: Make symantic links
+      run: |
+        ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
+        ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+
+    - name: Build DawDreamer
+      run: |
+        CPLUS_INCLUDE_PATH=/usr/include/python3.9/
+        cd Builds/LinuxMakefile
+        ldconfig
+        make CONFIG=Release
+        cp build/libdawdreamer.so ../../tests/dawdreamer.so
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    # - name: Test with pytest  # don't do this because we're not on the main branch yet
+    #   run: |
+    #     cd tests
+    #     pytest .
+
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel>=2.1.1
+
+    - name: Build wheels
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        CIBW_BUILD_VERBOSITY: 1
+        # CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # CIBW_TEST_COMMAND: "pytest {project}/tests"
+        CIBW_ARCHS: auto64
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-wheel-artifact
+        path: ./wheelhouse/*.whl
+
   build-ubuntu-docker:
     runs-on: ubuntu-latest
 
@@ -91,7 +179,6 @@ jobs:
         python -m cibuildwheel --output-dir wheelhouse
       env:
         CIBW_BUILD_VERBOSITY: 1
-        # CIBW_PLATFORM: windows
         # CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "pytest {project}/tests"
         CIBW_ARCHS: auto64
@@ -159,8 +246,27 @@ jobs:
         cd tests
         pytest .
 
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel>=2.1.1
+
+    - name: Build wheels
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        CIBW_BUILD_VERBOSITY: 1
+        # CIBW_PLATFORM: windows
+        # CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # CIBW_TEST_COMMAND: "pytest {project}/tests"
+        CIBW_ARCHS: auto64
+        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-wheel-artifact
+        path: ./wheelhouse/*.whl
+
   upload-pypi:
-    needs: [build-windows]
+    needs: [build-windows, build-ubuntu, build-macos-11]
     runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
     # if: github.event_name == 'release' && github.event.action == 'published'
