@@ -75,7 +75,7 @@ long_description = (Path(__file__).parent / "README.md").read_text()
 setup(
     name='dawdreamer',
     url='https://github.com/DBraun/DawDreamer/',
-    version='0.5.1',
+    version='0.5.2',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
     description='An audio-processing Python library supporting core DAW features',

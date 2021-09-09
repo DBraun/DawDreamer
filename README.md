@@ -29,6 +29,10 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
+## Installation
+
+`pip install dawdreamer`
+
 ## Basic Example
 ```python
 import dawdreamer as daw
@@ -136,7 +140,7 @@ synth.load("C:/path/to/other_preset.fxp")
 engine.render(DURATION)  # render audio again!
 ```
 
-## Building / Installation
+## Building
 
 ### All Platforms
 
@@ -144,11 +148,9 @@ You can find a working Linux Makefile, Visual Studio Solution, and Xcode Project
 
 ### Windows
 
-DawDreamer has been tested with Visual Studio 2019 and VS2019 Build Tools (v142).
-
 Install [Python 3.8.x Windows x86-64](https://www.python.org/downloads/release/python-3810/) to `C:/Python38` and set a permanent environment variable `PYTHONPATH` equal to `C:/Python38`.
 
-With the Projucer, open `DawDreamer.jucer`. Use it to create a Visual Studio solution and then build in Release mode. Note the post-build command, which moves the recently built `dawdreamer.dll` to `C:/Python38`. Also copy `thirdparty/libfaust/win-x64/Release/bin/faust.dll` to this directory.
+With the Projucer, open `DawDreamer.jucer`. Use it to create a Visual Studio solution and then build in Release mode. Note the post-build command, which moves the recently built `dawdreamer.dll` to `C:/Python38`. This command should also move `thirdparty/libfaust/win-x64/Release/bin/faust.dll` to this directory.
 
 Now you can import dawdreamer:
 
