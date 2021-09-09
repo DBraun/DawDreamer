@@ -20,6 +20,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install Ubuntu dependencies
+      # todo: need to run this? update-ca-certificates \
       run: |
         sudo apt-get update -yq \
         && sudo apt-get install -yq --no-install-recommends \
@@ -47,7 +48,6 @@ jobs:
         libsamplerate0 \
         llvm-11 \
         llvm-11-dev \
-        && update-ca-certificates \
         && sudo apt-get clean -y
 
     - name: Make symantic links
