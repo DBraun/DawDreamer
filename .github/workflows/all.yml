@@ -59,7 +59,7 @@ jobs:
       run: |
         CPLUS_INCLUDE_PATH=/usr/include/python3.9/
         cd Builds/LinuxMakefile
-        ldconfig
+        sudo ldconfig
         make CONFIG=Release
         cp build/libdawdreamer.so ../../tests/dawdreamer.so
 
