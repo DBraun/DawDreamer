@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 from setuptools import setup, Extension
-from setuptools.dist import Distribution
 import os
 from pathlib import Path
 import shutil
@@ -52,11 +51,6 @@ if not faustlibraries:
 
 package_data += faustlibraries
 
-class BinaryDistribution(Distribution):
-    """Distribution which always forces a binary package with platform name"""
-    def has_ext_modules(foo):
-        return True
-
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
@@ -87,5 +81,11 @@ setup(
         "": package_data,
     },
     zip_safe=False,
-    distclass=BinaryDistribution
+    ext_modules = [
+        Extension(
+            'dawdreamer',
+            ['dawdreamer/null.c'],
+            language='c++'
+        ),
+    ]
 )

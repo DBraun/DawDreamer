@@ -96,7 +96,7 @@ jobs:
 
     - name: Build wheels
       run: |
-        python -m cibuildwheel --output-dir wheelhouse --platform linux
+        python -m cibuildwheel --output-dir wheelhouse
       env:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
