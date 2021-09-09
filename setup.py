@@ -20,7 +20,10 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 ext_modules = []
 package_data = []
 
-shutil.copytree('licenses', os.path.join('dawdreamer', 'licenses'), dirs_exist_ok=True)
+try:
+    shutil.copytree('licenses', os.path.join('dawdreamer', 'licenses'))
+except Exception as e:
+    pass
 
 if platform.system() == "Windows":
 
