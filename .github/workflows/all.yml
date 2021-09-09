@@ -81,10 +81,7 @@ jobs:
         python -m cibuildwheel --output-dir wheelhouse
       env:
         CIBW_BUILD_VERBOSITY: 1
-        # Because of our unusual build process which creates the `dawdreamer.so` before setup.py,
-        # our wheel doesn't think it contains any compiled code. Therefore attempts to audit it, and ask
-        # "What is your platform?" will fail. We know it's meant for Linux, but the file doesn't know...?
-        CIBW_REPAIR_WHEEL_COMMAND_LINUX: echo "WARNING intentionally skipping auditwheel to avoid an error."
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair --plat manylinux2010_x86_64 -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
         # CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "pytest {project}/tests"
         CIBW_ARCHS: auto64
