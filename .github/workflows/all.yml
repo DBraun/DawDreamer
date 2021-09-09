@@ -78,8 +78,8 @@ jobs:
       shell: bash
       run: |
         python setup.py clean --all
-        py -m build --wheel --outdir wheelhouse
-        
+        python -m build --wheel --outdir wheelhouse
+
     # - name: Install cibuildwheel
     #   run: python -m pip install cibuildwheel>=2.1.1
 
