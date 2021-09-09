@@ -17,7 +17,6 @@ class BinaryDistribution(Distribution):
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
 
-distclass = Distribution
 ext_modules = []
 
 if platform.system() == "Windows":
@@ -40,7 +39,6 @@ elif platform.system() == "Linux":
 
     # For Linux, we do a hacky thing where we force a compilation of an empty file
     # in order for auditwheel to work.
-    distclass = BinaryDistribution
     ext_modules = [
         Extension(
             'dawdreamer',
@@ -102,6 +100,6 @@ setup(
         "": package_data,
     },
     zip_safe=False,
-    distclass=distclass,
+    distclass=BinaryDistribution,
     ext_modules=ext_modules
 )
