@@ -8,9 +8,9 @@ import shutil
 import platform
 
 
-if platform.system() == "Windows":
+this_dir = os.path.abspath(os.path.dirname(__file__))
 
-    this_dir = os.path.abspath(os.path.dirname(__file__))
+if platform.system() == "Windows":
 
     build_folder = os.path.join(this_dir, "Builds", "VisualStudio2019", "x64", "Release", "Dynamic Library")
     libfaust_folder = os.path.join(this_dir, "thirdparty", "libfaust", "win-x64", "Release", "bin")
@@ -22,8 +22,6 @@ if platform.system() == "Windows":
 
 elif platform.system() == "Linux":
 
-    this_dir = os.path.abspath(os.path.dirname(__file__))
-
     build_folder = os.path.join(this_dir, "Builds", "LinuxMakefile", "build")
 
     shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
@@ -31,8 +29,6 @@ elif platform.system() == "Linux":
     package_data = ['dawdreamer/dawdreamer.so']
 
 elif platform.system() == "Darwin":
-
-    this_dir = os.path.abspath(os.path.dirname(__file__))
 
     build_folder = os.path.join(this_dir, "Builds", "MacOSX", "build", "Release")
     libfaust_folder = os.path.join(this_dir, "thirdparty", "libfaust", "darwin-x64", "Release")
@@ -52,8 +48,7 @@ class BinaryDistribution(Distribution):
     def has_ext_modules(foo):
         return True
 
-this_dir = Path(__file__).parent
-long_description = (this_dir / "README.md").read_text()
+long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name='dawdreamer',
