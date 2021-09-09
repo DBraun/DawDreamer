@@ -6,6 +6,7 @@ build
 dawdreamer/*.dll
 dawdreamer/*.pyd
 dawdreamer/faustlibraries/*
+dawdreamer/licenses/*
 __pycache__/*
 dawdreamer.egg-info/*
 dist/*

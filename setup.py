@@ -18,6 +18,9 @@ class BinaryDistribution(Distribution):
 this_dir = os.path.abspath(os.path.dirname(__file__))
 
 ext_modules = []
+package_data = []
+
+shutil.copytree('licenses', os.path.join('dawdreamer', 'licenses'), dirs_exist_ok=True)
 
 if platform.system() == "Windows":
 
@@ -26,8 +29,8 @@ if platform.system() == "Windows":
 
     shutil.copy(os.path.join(build_folder, 'dawdreamer.dll'), os.path.join('dawdreamer', 'dawdreamer.pyd'))
     shutil.copy(os.path.join(libfaust_folder, 'faust.dll'), os.path.join('dawdreamer', 'faust.dll'))
-
-    package_data = ['dawdreamer/faust.dll', 'dawdreamer/dawdreamer.pyd']
+    
+    package_data += ['dawdreamer/faust.dll', 'dawdreamer/dawdreamer.pyd']
 
 elif platform.system() == "Linux":
 
@@ -35,7 +38,7 @@ elif platform.system() == "Linux":
 
     shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
 
-    package_data = ['dawdreamer/dawdreamer.so']
+    package_data += ['dawdreamer/dawdreamer.so']
 
     # For Linux, we do a hacky thing where we force a compilation of an empty file
     # in order for auditwheel to work.
@@ -55,7 +58,7 @@ elif platform.system() == "Darwin":
     shutil.copy(os.path.join(build_folder, 'dawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
     shutil.copy(os.path.join(libfaust_folder, 'libfaust.a'), os.path.join('dawdreamer', 'libfaust.2.dylib'))
 
-    package_data = ['dawdreamer/libfaust.2.dylib', 'dawdreamer/dawdreamer.so']
+    package_data += ['dawdreamer/libfaust.2.dylib', 'dawdreamer/dawdreamer.so']
 
 else:
     raise NotImplementedError(
@@ -63,19 +66,23 @@ else:
     )
 
 faustlibraries = list(glob.glob('dawdreamer/faustlibraries/*', recursive=True))
-faustlibraries = [a.replace('\\', '/') for a in faustlibraries]
 
 if not faustlibraries:
     raise ValueError("You need to put the FAUST .lib files in dawdreamer/faustlibraries/")
 
 package_data += faustlibraries
 
+package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))
+
+# note: package_data must be relative paths, not absolute.
+package_data = [a.replace('\\', '/') for a in package_data]
+
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name='dawdreamer',
     url='https://github.com/DBraun/DawDreamer/',
-    version='0.5.2',
+    version='0.5.3',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
     description='An audio-processing Python library supporting core DAW features',
@@ -97,7 +104,7 @@ setup(
     packages=['dawdreamer'],
     include_package_data=True,
     package_data={
-        "": package_data,
+        "": package_data
     },
     zip_safe=False,
     distclass=BinaryDistribution,

@@ -1,4 +1,4 @@
-include *.txt *.md
+recursive-include . licenses *
 recursive-include . dawdreamer.pyd
 recursive-include . dawdreamer.so
 recursive-include . faust.dll
