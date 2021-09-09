@@ -52,8 +52,8 @@ jobs:
 
     - name: Make symantic links
       run: |
-        ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
-        ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+        sudo ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
+        sudo ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
 
     - name: Build DawDreamer
       run: |
