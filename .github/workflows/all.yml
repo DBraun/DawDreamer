@@ -267,7 +267,7 @@ jobs:
         path: ./wheelhouse/*.whl
 
   upload-pypi:
-    if: always()
+    # if: always()
     needs: [build-windows, build-ubuntu, build-macos-11]
     runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
