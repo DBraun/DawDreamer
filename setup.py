@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from setuptools import setup, Extension
+from setuptools.dist import Distribution
 import os
 from pathlib import Path
 import shutil
@@ -8,7 +9,16 @@ import platform
 import glob
 
 
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True
+
+
 this_dir = os.path.abspath(os.path.dirname(__file__))
+
+distclass = Distribution
+ext_modules = []
 
 if platform.system() == "Windows":
 
@@ -27,6 +37,17 @@ elif platform.system() == "Linux":
     shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
 
     package_data = ['dawdreamer/dawdreamer.so']
+
+    # For Linux, we do a hacky thing where we force a compilation of an empty file
+    # in order for auditwheel to work.
+    distclass = BinaryDistribution
+    ext_modules = [
+        Extension(
+            'dawdreamer',
+            ['dawdreamer/null.c'],
+            language='c++'
+        ),
+    ]
 
 elif platform.system() == "Darwin":
 
@@ -81,11 +102,6 @@ setup(
         "": package_data,
     },
     zip_safe=False,
-    ext_modules = [
-        Extension(
-            'dawdreamer',
-            ['dawdreamer/null.c'],
-            language='c++'
-        ),
-    ]
+    distclass=distclass,
+    ext_modules=ext_modules
 )
