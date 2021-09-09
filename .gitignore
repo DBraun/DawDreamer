@@ -5,6 +5,7 @@ build
 # These files are copied into this folder during setup.py
 dawdreamer/*.dll
 dawdreamer/*.pyd
+dawdreamer/faustlibraries/*
 __pycache__/*
 dawdreamer.egg-info/*
 dist/*

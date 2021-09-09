@@ -73,6 +73,8 @@ private:
 
     void automateParameters();
 
+    const char* getPathToFaustLibraries();
+
 protected:
 
     llvm_dsp_factory* m_factory;

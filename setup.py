@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import shutil
 import platform
+import glob
 
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
@@ -42,6 +43,14 @@ else:
     raise NotImplementedError(
         f"setup.py hasn't been implemented for platform: {platform}."
     )
+
+faustlibraries = list(glob.glob('dawdreamer/faustlibraries/*', recursive=True))
+faustlibraries = [a.replace('\\', '/') for a in faustlibraries]
+
+if not faustlibraries:
+    raise ValueError("You need to put the FAUST .lib files in dawdreamer/faustlibraries/")
+
+package_data += faustlibraries
 
 class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
