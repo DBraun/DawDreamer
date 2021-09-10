@@ -11,6 +11,8 @@
 
 ![Supported Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-green)
 [![Test Badge](https://github.com/DBraun/DawDreamer/actions/workflows/all.yml/badge.svg)](https://github.com/DBraun/DawDreamer/actions/workflows/all.yml)
+[![PyPI version fury.io](https://badge.fury.io/py/ansicolortags.svg)](https://pypi.python.org/pypi/dawdreamer/)
+[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/DBraun/DawDreamer/blob/main/LICENSE)
 ![GitHub Repo stars](https://img.shields.io/github/stars/DBraun/DawDreamer?style=social)
 
 # DawDreamer
@@ -164,7 +166,7 @@ In order to build in Debug, you must unzip `thirdparty/libfaust/win-x64/Debug/bi
 
 The macOS Deployment Target is 10.15. This can be changed from either the Projucer or in Xcode.
 
-Install [Python 3.9](https://www.python.org/downloads/release/python-395/) with the universal installer.
+Install [Python 3.8.10](https://www.python.org/downloads/release/python-3810/) with the universal installer.
 
 Use Projucer and DawDreamer.jucer to create an Xcode project or use `Builds/MacOSX/DawDreamer.xcodeproj`. There's a bug in the JUCE projucer app that causes the generated shared object to be suffixed with `dylib`. This means python won't be able to import the module. Until this bug is fixed, change directory into the `Builds/MacOSX/build/<Debug/Release>` (depending on your Xcode scheme) and run:
 ```bash

@@ -82,11 +82,18 @@ package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))
 # note: package_data must be relative paths, not absolute.
 package_data = [a.replace('\\', '/') for a in package_data]
 
+prefix = 'dawdreamer/'
+package_data = [a[len(prefix):] if a.startswith(prefix) else a for a in package_data]
+
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
     name='dawdreamer',
-    url='https://github.com/DBraun/DawDreamer/',
+    url='https://github.com/DBraun/DawDreamer',
+    project_urls={
+        'Documentation': 'https://ccrma.stanford.edu/~braun/dawdreamer',
+        'Source': 'https://github.com/DBraun/DawDreamer',
+    },
     version='0.5.6',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
