@@ -90,6 +90,7 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
+        rm -rf dawdreamer/faustlibraries/.git
 
     - name: Install cibuildwheel
       run: python -m pip install cibuildwheel>=2.1.1
@@ -165,8 +166,9 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
-        mkdir C:/hostedtoolcache/windows/Python/3.8.10/share/faust
-        cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/3.8.10/share/faust
+        rm -rf dawdreamer/faustlibraries/.git
+        mkdir C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/share/faust
+        cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/share/faust
 
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -183,7 +185,7 @@ jobs:
 
     - name: Build Windows (Release)
       env:
-        PYTHONPATH: C:/hostedtoolcache/windows/Python/3.8.10/x64
+        PYTHONPATH: C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/x64
       run: |
         msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
@@ -245,10 +247,10 @@ jobs:
 
     - name: copy faust libraries
       run: |
-        mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/share/faust
-        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/share/faust/
-        mkdir -p /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust
-        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/3.8.10/x64/share/faust/
+        mkdir -p /Users/runner/hostedtoolcache/Python/${{ matrix.python-version }}/share/faust
+        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/${{ matrix.python-version }}/share/faust/
+        mkdir -p /Users/runner/hostedtoolcache/Python/${{ matrix.python-version }}/x64/share/faust
+        cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /Users/runner/hostedtoolcache/Python/${{ matrix.python-version }}/x64/share/faust/
         mkdir -p /usr/local/share/faust/
         cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /usr/local/share/faust/
 
@@ -259,8 +261,8 @@ jobs:
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
         install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
-        cp Builds/MacOSX/build/Release/dawdreamer.so /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/dawdreamer.so
-        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a /Users/runner/hostedtoolcache/Python/3.8.10/x64/bin/libfaust.2.dylib
+        cp Builds/MacOSX/build/Release/dawdreamer.so /Users/runner/hostedtoolcache/Python/${{ matrix.python-version }}/x64/bin/dawdreamer.so
+        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a /Users/runner/hostedtoolcache/Python/${{ matrix.python-version }}/x64/bin/libfaust.2.dylib
 
     - name: Test with pytest
       run: |
@@ -271,6 +273,7 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
+        rm -rf dawdreamer/faustlibraries/.git
 
     - name: Install cibuildwheel
       run: python -m pip install cibuildwheel>=2.1.1
@@ -283,6 +286,8 @@ jobs:
         # CIBW_PLATFORM: windows
         # CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "pytest {project}/tests"
+        CIBW_SKIP: pp*-macosx* cp36-macosx* cp37-macosx*
+        MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
 
