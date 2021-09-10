@@ -166,7 +166,7 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
-        rm -rf dawdreamer/faustlibraries/.git
+        rmdir /s /q "dawdreamer/faustlibraries/.git"
         mkdir C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/share/faust
         cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/share/faust
 
