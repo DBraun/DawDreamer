@@ -69,6 +69,8 @@ else:
     )
 
 faustlibraries = list(glob.glob('dawdreamer/faustlibraries/*', recursive=True))
+# drop hidden files
+faustlibraries = list(filter(lambda x: '.git' not in x, faustlibraries))
 
 if not faustlibraries:
     raise ValueError("You need to put the FAUST .lib files in dawdreamer/faustlibraries/")
