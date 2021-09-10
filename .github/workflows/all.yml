@@ -89,7 +89,6 @@ jobs:
     - name: copy faust libraries
       # necessary for setup.py to work.
       run: |
-        ls faustlibraries
         cp -v -r faustlibraries dawdreamer
 
     - name: Install cibuildwheel
@@ -165,7 +164,6 @@ jobs:
     - name: copy faust libraries
       # necessary for setup.py to work.
       run: |
-        ls faustlibraries
         cp -v -r faustlibraries dawdreamer
         mkdir C:/hostedtoolcache/windows/Python/3.8.10/share/faust
         cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/3.8.10/share/faust
@@ -272,7 +270,6 @@ jobs:
     - name: copy faust libraries
       # necessary for setup.py to work.
       run: |
-        ls faustlibraries
         cp -v -r faustlibraries dawdreamer
 
     - name: Install cibuildwheel

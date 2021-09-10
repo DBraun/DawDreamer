@@ -289,7 +289,7 @@ FaustProcessor::compile()
 		argc = 2;
 		argv = new const char* [argc];
 		argv[0] = "-I";
-		argv[1] = getPathToFaustLibraries();
+		argv[1] = pathToFaustLibraries;
 	}
 
 	auto theCode = m_autoImport + "\n" + m_code;
@@ -599,7 +599,7 @@ FaustProcessor::getPluginParametersDescription()
 	}
 	else
 	{
-		std::cout << "The " << std::endl;
+		std::cerr << "ERROR: The Faust process isn't compiled." << std::endl;
 	}
 
 	return myList;
@@ -728,8 +728,7 @@ FaustProcessor::getPathToFaustLibraries() {
 	try {
 
 #ifdef WIN32
-		const std::wstring ws_shareFaustDir = MyDLLDir + L"\\Lib\\site-packages\\dawdreamer\\faustlibraries";
-		std::wcout << ws_shareFaustDir << L'\n';
+		const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
 
 		// convert const wchar_t to char
 		// https://stackoverflow.com/a/4387335
@@ -742,13 +741,10 @@ FaustProcessor::getPathToFaustLibraries() {
 		return char_shareFaustDir;
 #else
 		// this applies to __APPLE__ and LINUX
-		std::string s;
 		const char* myDLLPath = getMyDLLPath();
 		//std::cerr << "myDLLPath: " << myDLLPath << std::endl;
 		std::filesystem::path p = std::filesystem::path(myDLLPath);
-		s += p.parent_path().string();
-		s += "/lib/site-packages/dawdreamer/faustlibraries";
-		return s.c_str();
+		return p.parent_path().append("faustlibraries").string().c_str();
 #endif
 	}
 	catch (...) {
