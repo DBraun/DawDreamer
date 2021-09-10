@@ -521,7 +521,7 @@ Go to the `tests` directory and run `pytest .`
 
 ## License
 
-DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of JUCE, pybind11, Libsamplerate, Rubber Band Library, Steinberg VST2/3, FAUST.
+DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of [JUCE](https://github.com/juce-framework/JUCE/), [pybind11](https://github.com/pybind/pybind11/), [Libsamplerate](https://github.com/libsndfile/libsamplerate), [Rubber Band Library](https://github.com/breakfastquay/rubberband/), [Steinberg VST2/3](https://www.steinberg.net/vst-instruments/), [FAUST](https://github.com/grame-cncm/faust).
 
 ## Release Notes
 

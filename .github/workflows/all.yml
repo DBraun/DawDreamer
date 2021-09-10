@@ -73,13 +73,6 @@ jobs:
     #     cd tests
     #     pytest .
 
-    # - name: Build Python Wheel
-    #   # todo: use auditwheel
-    #   shell: bash
-    #   run: |
-    #     python setup.py clean --all
-    #     python -m build --wheel --outdir wheelhouse
-
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
       with:
@@ -95,22 +88,22 @@ jobs:
     - name: Install cibuildwheel
       run: python -m pip install cibuildwheel>=2.1.1
 
-    - name: Build wheels
-      #  --platform linux
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
-      env:
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd {project}/tests; pytest ."
-        CIBW_ARCHS: auto64
-        CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
+    # # I think the audit is failing because the build links against local LLVM-related things.
+    # - name: Build wheels
+    #   run: |
+    #     python -m cibuildwheel --output-dir wheelhouse --platform linux
+    #   env:
+    #     CIBW_BUILD_VERBOSITY: 1
+    #     CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
+    #     CIBW_TEST_REQUIRES: -r test-requirements.txt
+    #     CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+    #     CIBW_ARCHS: auto64
+    #     CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: my-wheel-artifact
-        path: ./wheelhouse/*.whl
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: my-wheel-artifact
+    #     path: ./wheelhouse/*.whl
 
   build-ubuntu-docker:
     runs-on: ubuntu-latest
@@ -204,7 +197,7 @@ jobs:
       env:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd {project}/tests; pytest ."
+        CIBW_TEST_COMMAND: "cd {project}\\tests && pytest ."
         CIBW_ARCHS: auto64
         CIBW_SKIP: "*pp*"
 
@@ -212,12 +205,6 @@ jobs:
       with:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
-
-    # - name: Build Python wheel
-    #   shell: bash
-    #   run: |
-    #     python setup.py clean --all
-    #     python setup.py bdist_wheel
 
   build-macos-11:
     runs-on: macos-11
@@ -286,7 +273,7 @@ jobs:
       env:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd {project}/tests; pytest ."
+        CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
         CIBW_SKIP: pp*-macosx* cp36-macosx* cp37-macosx*
         MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_ARCHS: auto64
@@ -308,11 +295,6 @@ jobs:
         with:
           name: my-wheel-artifact
           path: dist
-
-      # - uses: pypa/gh-action-pypi-publish@v1.4.2
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.PYPI_API_TOKEN }}
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
