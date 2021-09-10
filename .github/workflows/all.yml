@@ -165,7 +165,7 @@ jobs:
     - name: copy faust libraries
       # necessary for setup.py to work.
       run: |
-        cp faustlibraries dawdreamer
+        cp -v -r faustlibraries dawdreamer
         mkdir C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/share/faust
         cp faustlibraries/*.lib C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/share/faust
 
