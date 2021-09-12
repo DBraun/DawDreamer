@@ -164,8 +164,8 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
-        mkdir $pythonLocation/../share/faust
-        cp faustlibraries/*.lib $pythonLocation/../share/faust
+        mkdir %pythonLocation%/../share/faust
+        cp -v faustlibraries/*.lib %pythonLocation%/../share/faust
 
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2

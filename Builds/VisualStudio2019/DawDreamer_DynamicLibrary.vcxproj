@@ -101,8 +101,8 @@
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate\build_debug\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>copy &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(pythonLocation)\\dawdreamer.pyd&quot;;
-copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &quot;$(pythonLocation)\\faust.dll&quot;;</Command>
+      <Command>copy &quot;x64\Debug\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;
+copy &quot;..\..\thirdparty\libfaust\win-x64\Debug\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,8 +154,8 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &q
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
-      <Command>copy &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(pythonLocation)\\dawdreamer.pyd&quot;;
-copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;$(pythonLocation)\\faust.dll&quot;;</Command>
+      <Command>copy &quot;x64\Release\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;
+copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -3233,7 +3233,7 @@ copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; 
     <None Include="..\..\thirdparty\rubberband\src\kissfft\COPYING"/>
     <None Include="..\..\thirdparty\rubberband\src\speex\COPYING"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
-    <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\readme.md"/>
+    <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\README.md"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\README.md"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>

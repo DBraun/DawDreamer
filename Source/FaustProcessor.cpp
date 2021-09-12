@@ -269,6 +269,8 @@ FaustProcessor::setDSPString(const std::string& code)
 	return true;
 }
 
+#define FAUSTPROCESSOR_FAIL_COMPILE clear(); return false;
+
 bool
 FaustProcessor::compile()
 {
@@ -311,10 +313,8 @@ FaustProcessor::compile()
 	if (m_errorString != "") {
 		// output error
 		std::cerr << "FaustProcessor::compile(): " << m_errorString << std::endl;
-		// clear
-		clear();
-		// done
-		return false;
+		std::cerr << "Check the faustlibraries path: " << getPathToFaustLibraries() << std::endl;
+		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
 	//// print where faustlib is looking for stdfaust.lib and the other lib files.
@@ -341,8 +341,7 @@ FaustProcessor::compile()
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
 			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
-			clear();
-			return false;
+			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
 	else {
@@ -350,8 +349,7 @@ FaustProcessor::compile()
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
 			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
-			clear();
-			return false;
+			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
 
@@ -363,8 +361,7 @@ FaustProcessor::compile()
 
 	if (outputs != 2) {
 		std::cerr << "FaustProcessor::compile(): FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
-		clear();
-		return false;
+		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
 	m_numInputChannels = inputs;

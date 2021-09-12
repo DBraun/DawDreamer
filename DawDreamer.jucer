@@ -307,11 +307,11 @@
             externalLibraries="faust.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
-                       postbuildCommand="copy &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(pythonLocation)\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &quot;$(pythonLocation)\\faust.dll&quot;;"
+                       postbuildCommand="copy &quot;x64\Debug\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;&#10;copy &quot;..\..\thirdparty\libfaust\win-x64\Debug\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;"
                        libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win-x64\Debug\lib;&#10;..\..\thirdparty\libsamplerate\build_debug\src\Debug;"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
                        libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate\build_release\src\Release;"
-                       postbuildCommand="copy &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;$(pythonLocation)\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;$(pythonLocation)\\faust.dll&quot;;"
+                       postbuildCommand="copy &quot;x64\Release\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;&#10;copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;"
                        targetName="dawdreamer"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
