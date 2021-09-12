@@ -154,6 +154,17 @@ jobs:
       with:
         submodules: true
 
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Get CMake
+      uses: lukka/get-cmake@latest
+
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
       with:
@@ -171,17 +182,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel pytest numpy librosa scipy
-
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.3
-
-    - name: Get CMake
-      uses: lukka/get-cmake@latest
 
     - name: Build libsamplerate
       run: |
