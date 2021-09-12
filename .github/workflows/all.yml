@@ -180,8 +180,8 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
-        mkdir %pythonLocation%/../share/faust
-        cp -v faustlibraries/*.lib %pythonLocation%/../share/faust
+        mkdir ${{env.pythonLocation}}/../share/faust
+        cp -v faustlibraries/*.lib ${{env.pythonLocation}}/../share/faust
 
     - name: Build libsamplerate
       run: |
@@ -309,6 +309,7 @@ jobs:
       run: |
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
         install_name_tool -change $pythonLocation/libpython$PYTHONMAJOR.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
+        otool -L Builds/MacOSX/build/Release/dawdreamer.so
 
     - name: copy faust libraries
       # necessary for setup.py to work.
