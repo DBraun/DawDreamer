@@ -9,6 +9,10 @@ import platform
 import glob
 
 
+python_requires = "==" + os.environ['PYTHONMAJOR'] + '.*'  # set with github action
+print(f'python_requires: {python_requires}')
+
+
 class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
     def has_ext_modules(foo):
@@ -87,6 +91,7 @@ package_data = [a[len(prefix):] if a.startswith(prefix) else a for a in package_
 
 long_description = (Path(__file__).parent / "README.md").read_text()
 
+
 setup(
     name='dawdreamer',
     url='https://github.com/DBraun/DawDreamer',
@@ -115,7 +120,7 @@ setup(
         "Programming Language :: Python :: 3.10",
     ],
     keywords='audio music sound',
-    python_requires=">=3.8",
+    python_requires=python_requires,
     install_requires=[],
     packages=['dawdreamer'],
     include_package_data=True,
