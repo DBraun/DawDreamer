@@ -179,6 +179,15 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
+    - name: Build libsamplerate
+      uses: lukka/get-cmake@latest
+      run: |
+        cd thirdparty/libsamplerate
+        mkdir build_release
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        cd build_release
+        msbuild libsamplerate.sln /property:Configuration=Release
+
     - name: Build Windows (Release)
       env:
         PYTHONPATH: C:/hostedtoolcache/windows/Python/${{ matrix.python-version }}/x64
@@ -246,6 +255,14 @@ jobs:
         mkdir -p /usr/local/share/faust/
         cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /usr/local/share/faust/
 
+    - name: Build libsamplerate
+      uses: lukka/get-cmake@latest
+      run: |
+        cd thirdparty/libsamplerate
+        mkdir build_release
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        make --directory=build_release
+
     - name: Build MacOS (Release)
       run: |
         xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
@@ -299,20 +316,20 @@ jobs:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
 
-  upload-pypi:
-    # if: always()
-    needs: [build-windows, build-ubuntu, build-macos]
-    runs-on: ubuntu-latest
-    name: "Upload wheels to PyPI"
-    # if: github.event_name == 'release' && github.event.action == 'published'
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: my-wheel-artifact
-          path: dist
+  # upload-pypi:
+  #   # if: always()
+  #   needs: [build-windows, build-ubuntu, build-macos]
+  #   runs-on: ubuntu-latest
+  #   name: "Upload wheels to PyPI"
+  #   # if: github.event_name == 'release' && github.event.action == 'published'
+  #   steps:
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: my-wheel-artifact
+  #         path: dist
 
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         user: __token__
+  #         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+  #         repository_url: https://test.pypi.org/legacy/
