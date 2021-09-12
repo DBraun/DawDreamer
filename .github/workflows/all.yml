@@ -1,5 +1,11 @@
-name: all
-on: [push]
+name: Compile, Test, and Deploy
+on:
+  pull_request: {}
+  push:
+    branches:
+      - master
+  release:
+    types: [published]
 jobs:
 
   build-ubuntu:
@@ -68,10 +74,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel pytest numpy librosa scipy
 
-    # - name: Test with pytest  # don't do this because we're not on the main branch yet
-    #   run: |
-    #     cd tests
-    #     pytest .
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest .
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -133,14 +139,14 @@ jobs:
     - name: Build Docker image
       run: docker build -t dawdreamer .
 
-    # todo: enable this, but note that the Dockerfile pulls the main branch!
-    # - uses: addnab/docker-run-action@v3
-    #   with:
-    #     image: dawdreamer
-    #     run: |
-    #       echo "Running tests"
-    #       cd /DawDreamer/tests
-    #       pytest .
+    # note that the Dockerfile pulls the main branch!
+    - uses: addnab/docker-run-action@v3
+      with:
+        image: dawdreamer
+        run: |
+          echo "Running tests"
+          cd /DawDreamer/tests
+          pytest .
 
   build-windows:
     runs-on: windows-latest
@@ -328,7 +334,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # # Might need to compile libfaust and libsamplerate in Github action for tests to work
+        # # Might need to compile libfaust in Github action for tests to work
         # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
         CIBW_BUILD: "cp38*"
         MACOSX_DEPLOYMENT_TARGET: 10.15
@@ -343,7 +349,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # # Might need to compile libfaust and libsamplerate in Github action for tests to work
+        # # Might need to compile libfaust in Github action for tests to work
         # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
         CIBW_BUILD: "cp39*"
         MACOSX_DEPLOYMENT_TARGET: 10.15
@@ -356,11 +362,10 @@ jobs:
         path: ./wheelhouse/*.whl
 
   upload-pypi:
-    # if: always()
     needs: [build-windows, build-ubuntu, build-macos]
     runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
-    # if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v2
         with:
@@ -370,5 +375,4 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.PYPI_API_TOKEN }}

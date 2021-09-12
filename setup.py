@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 
+# NOTE: You can test building wheels locally with
+# `py -m build --wheel`
+# Then in the `dist` directory, `pip install dawdreamer`
+
 from setuptools import setup, Extension
 from setuptools.dist import Distribution
 import os
