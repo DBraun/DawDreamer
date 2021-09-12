@@ -308,7 +308,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
       run: |
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
-        install_name_tool -change ${{env.pythonLocation}}/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
+        install_name_tool -change ${{env.pythonLocation}}/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
 
     - name: copy faust libraries
