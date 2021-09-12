@@ -262,10 +262,10 @@ jobs:
 
     - name: copy faust libraries
       run: |
-        mkdir -p $pythonLocation/../share/faust
-        cp $GITHUB_WORKSPACE/faustlibraries/*.lib $pythonLocation/../share/faust/
-        mkdir -p $pythonLocation/share/faust
-        cp $GITHUB_WORKSPACE/faustlibraries/*.lib $pythonLocation/share/faust/
+        mkdir -p ${{env.pythonLocation}}/../share/faust
+        cp $GITHUB_WORKSPACE/faustlibraries/*.lib ${{env.pythonLocation}}/../share/faust/
+        mkdir -p ${{env.pythonLocation}}/share/faust
+        cp $GITHUB_WORKSPACE/faustlibraries/*.lib ${{env.pythonLocation}}/share/faust/
         mkdir -p /usr/local/share/faust/
         cp $GITHUB_WORKSPACE/faustlibraries/*.lib /usr/local/share/faust/
 
@@ -292,8 +292,8 @@ jobs:
 
     - name: Test with pytest
       run: |
-        cp Builds/MacOSX/build/Release/dawdreamer.so $pythonLocation/bin/dawdreamer.so
-        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a $pythonLocation/bin/libfaust.2.dylib
+        cp Builds/MacOSX/build/Release/dawdreamer.so ${{env.pythonLocation}}/bin/dawdreamer.so
+        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a ${{env.pythonLocation}}/bin/libfaust.2.dylib
         cd tests
         pytest .
 
@@ -308,7 +308,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
       run: |
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
-        install_name_tool -change $pythonLocation/libpython$PYTHONMAJOR.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
+        install_name_tool -change ${{env.pythonLocation}}/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
         otool -L Builds/MacOSX/build/Release/dawdreamer.so
 
     - name: copy faust libraries
