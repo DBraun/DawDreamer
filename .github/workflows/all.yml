@@ -154,6 +154,11 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
@@ -177,11 +182,6 @@ jobs:
         cp -v -r faustlibraries dawdreamer
         mkdir %pythonLocation%/../share/faust
         cp -v faustlibraries/*.lib %pythonLocation%/../share/faust
-
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - name: Build libsamplerate
       run: |
