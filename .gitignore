@@ -1,3 +1,13 @@
 build
 .DS_Store
 */**.so
+
+# These files are copied into this folder during setup.py
+dawdreamer/*.dll
+dawdreamer/*.pyd
+dawdreamer/faustlibraries/*
+dawdreamer/libfaust.2.dylib
+dawdreamer/licenses/*
+__pycache__/*
+dawdreamer.egg-info/*
+dist/*

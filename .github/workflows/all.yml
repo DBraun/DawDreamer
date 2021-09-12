@@ -1,0 +1,380 @@
+name: Compile, Test, and Deploy
+on:
+  pull_request: {}
+  push:
+    branches:
+      - master
+  release:
+    types: [published]
+jobs:
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Ubuntu dependencies
+      # todo: need to run this? update-ca-certificates \
+      run: |
+        sudo apt-get update -yq \
+        && sudo apt-get install -yq --no-install-recommends \
+        ca-certificates \
+        build-essential \
+        clang \
+        pkg-config \
+        libboost-all-dev \
+        libboost-python-dev \
+        libfreetype6-dev \
+        libx11-dev \
+        libxinerama-dev \
+        libxrandr-dev \
+        libxcursor-dev \
+        mesa-common-dev \
+        libasound2-dev \
+        freeglut3-dev \
+        libxcomposite-dev \
+        libcurl4-gnutls-dev \
+        git \
+        cmake \
+        python3 \
+        python${{ matrix.python-version }}-dev \
+        faust \
+        libsamplerate0 \
+        llvm-11 \
+        llvm-11-dev \
+        && sudo apt-get clean -y
+
+    - name: Make symantic links
+      run: |
+        sudo ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
+        sudo ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+
+    - name: Build DawDreamer
+      run: |
+        CPLUS_INCLUDE_PATH=/usr/include/python${{ matrix.python-version }}/
+        cd Builds/LinuxMakefile
+        sudo ldconfig
+        make CONFIG=Release
+        cp build/libdawdreamer.so ../../tests/dawdreamer.so
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    # todo: enable this
+    # - name: Test with pytest
+    #   run: |
+    #     cd tests
+    #     pytest .
+
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      # necessary for setup.py to work.
+      run: |
+        cp -v -r faustlibraries dawdreamer
+        rm -rf dawdreamer/faustlibraries/.git
+
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel>=2.1.1
+
+    # # I think the audit is failing because the build links against local LLVM-related things.
+    # #  or https://cibuildwheel.readthedocs.io/en/stable/faq/#linux-builds-on-docker
+    # - name: Build wheels
+    #   run: |
+    #     python -m cibuildwheel --output-dir wheelhouse --platform linux
+    #   env:
+    #     PYTHONMAJOR: ${{ matrix.python-version }}
+    #     CIBW_PLATFORM: linux
+    #     CIBW_BUILD_VERBOSITY: 1
+    #     CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
+    #     CIBW_TEST_REQUIRES: -r test-requirements.txt
+    #     CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+    #     CIBW_ARCHS: auto64
+    #     CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
+
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: my-wheel-artifact
+    #     path: ./wheelhouse/*.whl
+
+  build-ubuntu-docker:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Build Docker image
+      run: docker build -t dawdreamer .
+
+    # todo: enable this
+    # note that the Dockerfile pulls the main branch!
+    # - uses: addnab/docker-run-action@v3
+    #   with:
+    #     image: dawdreamer
+    #     run: |
+    #       echo "Running tests"
+    #       cd /DawDreamer/tests
+    #       pytest .
+
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.3
+
+    - name: Get CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      # necessary for setup.py to work.
+      run: |
+        cp -v -r faustlibraries dawdreamer
+        mkdir ${{env.pythonLocation}}/../share/faust
+        cp -v faustlibraries/*.lib ${{env.pythonLocation}}/../share/faust
+
+    - name: Build libsamplerate
+      run: |
+        cd thirdparty/libsamplerate
+        mkdir build_release
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        cd build_release
+        msbuild libsamplerate.sln /property:Configuration=Release
+
+    - name: Build Windows (Release)
+      run: |
+        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
+
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest .
+
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel>=2.1.1
+
+    - name: Build wheels 3.8
+      if: ${{ matrix.python-version == '3.8' }}
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }}
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_ARCHS: auto64
+        CIBW_BUILD: "cp38*"
+
+    - name: Build wheels 3.9
+      if: ${{ matrix.python-version == '3.9' }}
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }}
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_ARCHS: auto64
+        CIBW_BUILD: "cp39*"
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-wheel-artifact
+        path: ./wheelhouse/*.whl
+
+  build-macos:
+    runs-on: macos-11
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel pytest numpy librosa scipy
+
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
+
+    - name: copy faust libraries
+      run: |
+        mkdir -p ${{env.pythonLocation}}/../share/faust
+        cp $GITHUB_WORKSPACE/faustlibraries/*.lib ${{env.pythonLocation}}/../share/faust/
+        mkdir -p ${{env.pythonLocation}}/share/faust
+        cp $GITHUB_WORKSPACE/faustlibraries/*.lib ${{env.pythonLocation}}/share/faust/
+        mkdir -p /usr/local/share/faust/
+        cp $GITHUB_WORKSPACE/faustlibraries/*.lib /usr/local/share/faust/
+
+    - name: Get CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Build libsamplerate
+      run: |
+        cd thirdparty/libsamplerate
+        mkdir build_release
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        make --directory=build_release
+
+    - name: Build MacOS (Release)
+      # the Projucer refers to PYTHONMAJOR
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }} 
+      run: |
+        xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
+        mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
+        otool -L Builds/MacOSX/build/Release/dawdreamer.so
+        install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
+        otool -L Builds/MacOSX/build/Release/dawdreamer.so
+
+    - name: Test with pytest
+      run: |
+        cp Builds/MacOSX/build/Release/dawdreamer.so ${{env.pythonLocation}}/bin/dawdreamer.so
+        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a ${{env.pythonLocation}}/bin/libfaust.2.dylib
+        cd tests
+        pytest .
+
+    - name: otool shenanigans
+      # Note: on an ordinary consumer macOS system, the env var $pythonLocation should be /Library/Frameworks/Python.framework/Versions/3.8
+      # This section assumes there is a Unix Executable file at /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python
+      # making @executable_path resolve to /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/
+      # However, I was hoping @executable_path would just be /Library/Frameworks/Python.framework/Versions/3.8/bin
+      # because of the executable at /Library/Frameworks/Python.framework/Versions/3.8/bin/python3 which is itself a reference to
+      # /Library/Frameworks/Python.framework/Versions/3.8/Python
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }}
+      run: |
+        otool -L Builds/MacOSX/build/Release/dawdreamer.so
+        install_name_tool -change ${{env.pythonLocation}}/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
+        otool -L Builds/MacOSX/build/Release/dawdreamer.so
+
+    - name: copy faust libraries
+      # necessary for setup.py to work.
+      run: |
+        cp -v -r faustlibraries dawdreamer
+        rm -rf dawdreamer/faustlibraries/.git
+
+    - name: Install cibuildwheel
+      run: python -m pip install cibuildwheel>=2.1.1
+
+    - name: Build wheels 3.8
+      if: ${{ matrix.python-version == '3.8' }}
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }}
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # # Might need to compile libfaust in Github action for tests to work
+        # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+        CIBW_BUILD: "cp38*"
+        MACOSX_DEPLOYMENT_TARGET: 10.15
+        CIBW_ARCHS: auto64
+        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
+
+    - name: Build wheels 3.9
+      if: ${{ matrix.python-version == '3.9' }}
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }}
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # # Might need to compile libfaust in Github action for tests to work
+        # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+        CIBW_BUILD: "cp39*"
+        MACOSX_DEPLOYMENT_TARGET: 10.15
+        CIBW_ARCHS: auto64
+        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-wheel-artifact
+        path: ./wheelhouse/*.whl
+
+  upload-pypi:
+    needs: [build-windows, build-ubuntu, build-macos]
+    runs-on: ubuntu-latest
+    name: "Upload wheels to PyPI"
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: my-wheel-artifact
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

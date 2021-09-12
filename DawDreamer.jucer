@@ -242,33 +242,33 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
                vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
-               extraLinkerFlags="-shared -lpython3.9" externalLibraries="samplerate&#10;faust"
+               extraLinkerFlags="-shared -lpython$(PYTHONMAJOR)" externalLibraries="samplerate&#10;faust"
                extraDefs="SAMPLER_SKIP_UI&#10;HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer.so"
-                       osxArchitecture="Native" headerPath="/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
-                       libraryPath="/Library/Frameworks/Python.framework/Versions/3.9/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug&#10;../../thirdparty/libsamplerate_build/darwin-x64/Debug"
-                       enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK"/>
+                       osxArchitecture="Native" headerPath="$pythonLocation/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
+                       libraryPath="$pythonLocation/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug&#10;../../thirdparty/libsamplerate/build_debug/src"
+                       enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer.so"
-                       osxArchitecture="Native" headerPath="/Library/Frameworks/Python.framework/Versions/3.9/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
-                       libraryPath="/Library/Frameworks/Python.framework/Versions/3.9/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release&#10;../../thirdparty/libsamplerate_build/darwin-x64/Release"
-                       enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK"/>
+                       osxArchitecture="Native" headerPath="$pythonLocation/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
+                       libraryPath="$pythonLocation/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release&#10;../../thirdparty/libsamplerate/build_release/src"
+                       enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_video" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_opengl" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../JUCE/modules"/>
-        <MODULEPATH id="juce_dsp" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_events" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_graphics" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_data_structures" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_cryptography" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_video" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_opengl" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
+        <MODULEPATH id="juce_dsp" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
@@ -306,12 +306,12 @@
             extraDefs="SAMPLER_SKIP_UI&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
             externalLibraries="faust.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
-                       postbuildCommand="move &quot;x64\\Debug\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Debug\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;"
-                       libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Debug\lib;&#10;..\..\thirdparty\libsamplerate_build\win-x64\Debug;"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\Python38\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
-                       libraryPath="C:\Python38\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate_build\win-x64\Release;"
-                       postbuildCommand="move &quot;x64\\Release\\Dynamic Library\\dawdreamer.dll&quot; &quot;C:\\Python38dawdreamer\\dawdreamer.pyd&quot;;&#10;copy &quot;..\\..\\thirdparty\\libfaust\\win-x64\\Release\\bin\\faust.dll&quot; &quot;C:\\Python38dawdreamer\\faust.dll&quot;;"
+        <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
+                       postbuildCommand="copy &quot;x64\Debug\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;&#10;copy &quot;..\..\thirdparty\libfaust\win-x64\Debug\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;"
+                       libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win-x64\Debug\lib;&#10;..\..\thirdparty\libsamplerate\build_debug\src\Debug;"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
+                       libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate\build_release\src\Release;"
+                       postbuildCommand="copy &quot;x64\Release\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;&#10;copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;"
                        targetName="dawdreamer"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

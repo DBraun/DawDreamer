@@ -2,6 +2,7 @@
 
 #ifdef BUILD_DAWDREAMER_FAUST
 
+#include <filesystem>
 #include "faust/midi/RtMidi.cpp"
 
 #ifdef WIN32
@@ -268,6 +269,8 @@ FaustProcessor::setDSPString(const std::string& code)
 	return true;
 }
 
+#define FAUSTPROCESSOR_FAIL_COMPILE clear(); return false;
+
 bool
 FaustProcessor::compile()
 {
@@ -276,11 +279,20 @@ FaustProcessor::compile()
 	// clean up
 	clear();
 
-	// arguments
-	const int argc = 0;
-	const char** argv = NULL;
 	// optimization level
 	const int optimize = -1;
+	// arguments
+
+	const char* pathToFaustLibraries = getPathToFaustLibraries();
+
+	int argc = 0;
+	const char** argv = NULL;
+	if (pathToFaustLibraries != "") {
+		argc = 2;
+		argv = new const char* [argc];
+		argv[0] = "-I";
+		argv[1] = pathToFaustLibraries;
+	}
 
 	auto theCode = m_autoImport + "\n" + m_code;
 
@@ -301,10 +313,8 @@ FaustProcessor::compile()
 	if (m_errorString != "") {
 		// output error
 		std::cerr << "FaustProcessor::compile(): " << m_errorString << std::endl;
-		// clear
-		clear();
-		// done
-		return false;
+		std::cerr << "Check the faustlibraries path: " << getPathToFaustLibraries() << std::endl;
+		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
 	//// print where faustlib is looking for stdfaust.lib and the other lib files.
@@ -319,13 +329,19 @@ FaustProcessor::compile()
 	//	std::cout << name << "\n" << std::endl;
 	//}
 
+	if (argv) {
+		for (int i = 0; i < argc; i++) {
+			argv[i] = NULL;
+		}
+		argv = NULL;
+	}
+
 	if (is_polyphonic) {
 		// (false, true) works
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
 			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
-			clear();
-			return false;
+			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
 	else {
@@ -333,8 +349,7 @@ FaustProcessor::compile()
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
 			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
-			clear();
-			return false;
+			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
 
@@ -346,8 +361,7 @@ FaustProcessor::compile()
 
 	if (outputs != 2) {
 		std::cerr << "FaustProcessor::compile(): FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
-		clear();
-		return false;
+		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
 	m_numInputChannels = inputs;
@@ -582,7 +596,7 @@ FaustProcessor::getPluginParametersDescription()
 	}
 	else
 	{
-		std::cout << "The " << std::endl;
+		std::cerr << "ERROR: The Faust process isn't compiled." << std::endl;
 	}
 
 	return myList;
@@ -651,6 +665,89 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	myMidiBuffer.addEvent(offMessage, (int)offMessage.getTimeStamp());
 
 	return true;
+}
+
+#ifdef WIN32
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+// Find path to .dll */
+// https://stackoverflow.com/a/57738892/12327461
+HMODULE hMod;
+std::wstring MyDLLPathFull;
+std::wstring MyDLLDir;
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH: case DLL_THREAD_ATTACH: case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	hMod = hModule;
+	const int BUFSIZE = 4096;
+	wchar_t buffer[BUFSIZE];
+	if (::GetModuleFileNameW(hMod, buffer, BUFSIZE - 1) <= 0)
+	{
+		return TRUE;
+	}
+
+	MyDLLPathFull = buffer;
+
+	size_t found = MyDLLPathFull.find_last_of(L"/\\");
+	MyDLLDir = MyDLLPathFull.substr(0, found);
+
+	return TRUE;
+}
+
+#else
+
+// this applies to both __APPLE__ and linux?
+
+#define _GNU_SOURCE
+#include <dlfcn.h>
+
+// https://stackoverflow.com/a/51993539/911207
+const char* getMyDLLPath(void) {
+	Dl_info dl_info;
+	dladdr((void*)getMyDLLPath, &dl_info);
+	return(dl_info.dli_fname);
+}
+#endif
+
+const char*
+FaustProcessor::getPathToFaustLibraries() {
+
+	// Get the path to the directory containing basics.lib, stdfaust.lib etc.
+
+	try {
+
+#ifdef WIN32
+		const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
+
+		// convert const wchar_t to char
+		// https://stackoverflow.com/a/4387335
+		const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
+		// Count required buffer size (plus one for null-terminator).
+		size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
+		char* char_shareFaustDir = new char[size];
+		std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
+
+		return char_shareFaustDir;
+#else
+		// this applies to __APPLE__ and LINUX
+		const char* myDLLPath = getMyDLLPath();
+		//std::cerr << "myDLLPath: " << myDLLPath << std::endl;
+		std::filesystem::path p = std::filesystem::path(myDLLPath);
+		return p.parent_path().append("faustlibraries").string().c_str();
+#endif
+	}
+	catch (...) {
+		std::cerr << "Error getting path to faustlibraries." << std::endl;
+	}
+	return "";
 }
 
 #endif

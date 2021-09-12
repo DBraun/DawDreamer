@@ -45,7 +45,6 @@ public:
     /** Destructor. */
     ~ImagePreviewComponent() override;
 
-
     //==============================================================================
     /** @internal */
     void selectedFileChanged (const File& newSelectedFile) override;
@@ -53,6 +52,8 @@ public:
     void paint (Graphics&) override;
     /** @internal */
     void timerCallback() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     File fileToLoad;

@@ -128,6 +128,10 @@ public:
        #endif
     };
 
+    //==============================================================================
+    /** @internal */
+    float getDesktopScaleFactor() const override;
+
 private:
     //==============================================================================
     Point<float> lastMousePos;

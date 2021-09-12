@@ -80,6 +80,8 @@ JUCESplashScreen::JUCESplashScreen (Component& parent)
     {
         startTimer (1);
     }
+
+    setAccessible (false);
 }
 
 std::unique_ptr<Drawable> JUCESplashScreen::getSplashScreenLogo()
@@ -186,6 +188,12 @@ void JUCESplashScreen::mouseUp (const MouseEvent&)
 {
     URL juceWebsite ("https://juce.com");
     juceWebsite.launchInDefaultBrowser();
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> JUCESplashScreen::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::splashScreen);
 }
 
 // END SECTION A
