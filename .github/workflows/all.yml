@@ -179,8 +179,10 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
-    - name: Build libsamplerate
+    - name: Get CMake
       uses: lukka/get-cmake@latest
+
+    - name: Build libsamplerate
       run: |
         cd thirdparty/libsamplerate
         mkdir build_release
@@ -255,8 +257,10 @@ jobs:
         mkdir -p /usr/local/share/faust/
         cp /Users/runner/work/DawDreamer/DawDreamer/faustlibraries/*.lib /usr/local/share/faust/
 
-    - name: Build libsamplerate
+    - name: Get CMake
       uses: lukka/get-cmake@latest
+
+    - name: Build libsamplerate
       run: |
         cd thirdparty/libsamplerate
         mkdir build_release
