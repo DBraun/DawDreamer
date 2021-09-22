@@ -253,11 +253,11 @@ jobs:
         path: ./wheelhouse/*.whl
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-11
 
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -339,21 +339,6 @@ jobs:
 
     - name: Install cibuildwheel
       run: python -m pip install cibuildwheel>=2.1.1
-
-    - name: Build wheels 3.7
-      if: ${{ matrix.python-version == '3.7' }}
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # # Might need to compile libfaust in Github action for tests to work
-        # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
-        CIBW_BUILD: "cp37*"
-        MACOSX_DEPLOYMENT_TARGET: 10.15
-        CIBW_ARCHS: auto64
-        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
 
     - name: Build wheels 3.8
       if: ${{ matrix.python-version == '3.8' }}
