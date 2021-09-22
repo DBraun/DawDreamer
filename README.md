@@ -221,6 +221,8 @@ engine.load_graph(graph)
 engine.render(DURATION)
 ```
 
+### Polyphony in Faust
+
 Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. 0 disables polyphony. Refer to `tests/test_faust_poly.py`.
 
 ## Pitch-stretching and Time-stretching with Warp Markers
