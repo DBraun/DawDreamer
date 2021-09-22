@@ -283,15 +283,15 @@ FaustProcessor::compile()
 	const int optimize = -1;
 	// arguments
 
-	const char* pathToFaustLibraries = getPathToFaustLibraries();
+	auto pathToFaustLibraries = getPathToFaustLibraries();
 
 	int argc = 0;
 	const char** argv = NULL;
-	if (pathToFaustLibraries != "") {
+	if (pathToFaustLibraries.compare(std::string("")) != 0) {
 		argc = 2;
 		argv = new const char* [argc];
 		argv[0] = "-I";
-		argv[1] = pathToFaustLibraries;
+		argv[1] = pathToFaustLibraries.c_str();
 	}
 
 	auto theCode = m_autoImport + "\n" + m_code;
@@ -313,21 +313,21 @@ FaustProcessor::compile()
 	if (m_errorString != "") {
 		// output error
 		std::cerr << "FaustProcessor::compile(): " << m_errorString << std::endl;
-		std::cerr << "Check the faustlibraries path: " << getPathToFaustLibraries() << std::endl;
+		std::cerr << "Check the faustlibraries path: " << pathToFaustLibraries.c_str() << std::endl;
 		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
-	//// print where faustlib is looking for stdfaust.lib and the other lib files.
-	//auto pathnames = m_factory->getIncludePathnames();
-	//std::cout << "pathnames:\n" << std::endl;
-	//for (auto name : pathnames) {
-	//	std::cout << name << "\n" << std::endl;
-	//}
-	//std::cout << "library list:\n" << std::endl;
-	//auto librarylist = m_factory->getLibraryList();
-	//for (auto name : librarylist) {
-	//	std::cout << name << "\n" << std::endl;
-	//}
+    //// print where faustlib is looking for stdfaust.lib and the other lib files.
+    //auto pathnames = m_factory->getIncludePathnames();
+    //std::cout << "pathnames:\n" << std::endl;
+    //for (auto name : pathnames) {
+    //    std::cout << name << "\n" << std::endl;
+    //}
+    //std::cout << "library list:\n" << std::endl;
+    //auto librarylist = m_factory->getLibraryList();
+    //for (auto name : librarylist) {
+    //    std::cout << name << "\n" << std::endl;
+    //}
 
 	if (argv) {
 		for (int i = 0; i < argc; i++) {
@@ -706,7 +706,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
 // this applies to both __APPLE__ and linux?
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <dlfcn.h>
 
 // https://stackoverflow.com/a/51993539/911207
@@ -717,7 +719,7 @@ const char* getMyDLLPath(void) {
 }
 #endif
 
-const char*
+std::string
 FaustProcessor::getPathToFaustLibraries() {
 
 	// Get the path to the directory containing basics.lib, stdfaust.lib etc.
@@ -726,7 +728,8 @@ FaustProcessor::getPathToFaustLibraries() {
 
 #ifdef WIN32
 		const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
-
+		//std::cerr << "MyDLLDir: ";
+		//std::wcerr << MyDLLDir << L'\n';
 		// convert const wchar_t to char
 		// https://stackoverflow.com/a/4387335
 		const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
@@ -735,13 +738,15 @@ FaustProcessor::getPathToFaustLibraries() {
 		char* char_shareFaustDir = new char[size];
 		std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
 
-		return char_shareFaustDir;
+		std::string p(char_shareFaustDir);
+		return p;
 #else
 		// this applies to __APPLE__ and LINUX
 		const char* myDLLPath = getMyDLLPath();
-		//std::cerr << "myDLLPath: " << myDLLPath << std::endl;
+        //std::cerr << "myDLLPath: " << myDLLPath << std::endl;
 		std::filesystem::path p = std::filesystem::path(myDLLPath);
-		return p.parent_path().append("faustlibraries").string().c_str();
+        p = p.parent_path() / "faustlibraries";
+		return p.string();
 #endif
 	}
 	catch (...) {

@@ -73,7 +73,7 @@ private:
 
     void automateParameters();
 
-    const char* getPathToFaustLibraries();
+    std::string getPathToFaustLibraries();
 
 protected:
 
