@@ -221,6 +221,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &FaustProcessor::addMidiNote, arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
     "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
+        .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 #endif
 

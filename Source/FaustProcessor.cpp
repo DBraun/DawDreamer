@@ -21,6 +21,8 @@ ztimedmap GUI::gTimedZoneMap;
 #define SAFE_REF_ASSIGN(lhs,rhs)    do { SAFE_RELEASE(lhs); (lhs) = (rhs); SAFE_ADD_REF(lhs); } while(0)
 #endif
 
+
+
 FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock) : ProcessorBase{ newUniqueName }
 {
 	mySampleRate = sampleRate;
@@ -30,7 +32,7 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	m_dsp = NULL;
 	m_dsp_poly = NULL;
 	m_ui = NULL;
-	m_midi_ui = NULL;
+	m_soundUI = NULL;
 	m_numInputChannels = 0;
 	m_numOutputChannels = 0;
 	// auto import
@@ -217,15 +219,11 @@ FaustProcessor::clear()
 		m_midi_handler.removeMidiIn(m_dsp_poly);
 		m_midi_handler.stopMidi();
 	}
-	if (m_midi_ui) {
-		m_midi_ui->removeMidiIn(m_dsp_poly);
-		m_midi_ui->stop();
-	}
 
+	SAFE_DELETE(m_soundUI);
 	SAFE_DELETE(m_dsp);
 	SAFE_DELETE(m_ui);
 	SAFE_DELETE(m_dsp_poly);
-	SAFE_DELETE(m_midi_ui);
 
 	m_factory = NULL;
 	m_poly_factory = NULL;
@@ -373,9 +371,6 @@ FaustProcessor::compile()
 		m_midi_handler = rt_midi("my_midi");
 		m_midi_handler.addMidiIn(m_dsp_poly);
 
-		m_midi_ui = new MidiUI(&m_midi_handler);
-		theDsp->buildUserInterface(m_midi_ui);
-
 		oneSampleInBuffer.setSize(m_numInputChannels, 1);
 		oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
 	}
@@ -383,12 +378,15 @@ FaustProcessor::compile()
 	m_ui = new APIUI();
 	theDsp->buildUserInterface(m_ui);
 
+	// soundfile UI.
+	m_soundUI = new MySoundUI();
+	for (const auto& [label, buffers] : m_SoundfileMap) {
+		m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers, (int)(mySampleRate + .5));
+	}
+	theDsp->buildUserInterface(m_soundUI);
+
 	// init
 	theDsp->init((int)(mySampleRate + .5));
-
-	if (is_polyphonic) {
-		m_midi_ui->run();
-	}
 
 	createParameterLayout();
 
@@ -753,6 +751,62 @@ FaustProcessor::getPathToFaustLibraries() {
 		std::cerr << "Error getting path to faustlibraries." << std::endl;
 	}
 	return "";
+}
+
+using  myaudiotype = py::array_t<float, py::array::c_style | py::array::forcecast>;
+
+void
+FaustProcessor::setSoundfiles(py::dict d) {
+
+	m_isCompiled = false;
+
+	m_SoundfileMap.clear();
+
+	for (auto&& [potentialString, potentialListOfAudio] : d) {
+
+		if (!py::isinstance<py::str>(potentialString)) {
+			std::cerr << "Error with FaustProcessor::setSoundfiles. Something was wrong with the keys of the dictionary." << std::endl;
+			return;
+		}
+
+		auto soundfileName = potentialString.cast<std::string>();
+
+		if (!py::isinstance<py::list>(potentialListOfAudio)) {
+			// todo: if it's audio, it's ok. Just use it.
+			std::cerr << "Error with FaustProcessor::setSoundfiles. The values of the dictionary must be lists of audio data." << std::endl;
+			return;
+		}
+
+		py::list listOfAudio = potentialListOfAudio.cast<py::list>();
+
+		for (py::handle potentialAudio : listOfAudio) {
+
+			//if (py::isinstance<myaudiotype>(potentialAudio)) {
+
+				// todo: safer casting?
+				auto audioData = potentialAudio.cast<myaudiotype>();
+
+				float* input_ptr = (float*)audioData.data();
+
+				AudioSampleBuffer buffer;
+
+				buffer.setSize(audioData.shape(0), audioData.shape(1));
+
+				for (int y = 0; y < audioData.shape(1); y++) {
+					for (int x = 0; x < audioData.shape(0); x++) {
+						buffer.setSample(x, y, input_ptr[x * audioData.shape(1) + y]);
+					}
+				}
+
+				m_SoundfileMap[soundfileName].push_back(buffer);
+
+			//}
+			//else {
+			//	std::cerr << "key's value's list didn't contain audio data." << std::endl;
+			//}
+		}
+		
+	}
 }
 
 #endif
