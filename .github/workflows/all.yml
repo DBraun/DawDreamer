@@ -115,6 +115,19 @@ jobs:
     #     name: my-wheel-artifact
     #     path: ./wheelhouse/*.whl
 
+    - name: "Build docs for Github pages"
+      if: ${{ matrix.python-version == '3.9' }}
+      steps:
+        - run: sudo apt-get install python3-sphinx
+        - run: ./docs/make html
+
+        - name: Deploy
+          uses: peaceiris/actions-gh-pages@v3
+          if: ${{ github.ref == 'refs/heads/main' }}
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./docs/_build/html
+
   build-ubuntu-docker:
     runs-on: ubuntu-latest
 
