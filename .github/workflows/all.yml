@@ -119,8 +119,7 @@ jobs:
       if: ${{ matrix.python-version == '3.9' }}
       run: |
         sudo apt-get install python3-sphinx
-        ./docs/make html
-
+        cd $GITHUB_WORKSPACE/docs && make html
     - name: Deploy docs
       uses: peaceiris/actions-gh-pages@v3
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.9' }}
