@@ -225,6 +225,27 @@ engine.render(DURATION)
 
 Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. 0 disables polyphony. Refer to `tests/test_faust_poly.py`.
 
+### Soundfiles in Faust
+
+Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays.
+
+**soundfile_test.py**
+```python
+# suppose audio1, audio2, and audio3 are np.array shaped (2, N samples)
+soundfiles = {
+  'mySound': [audio1, audio2, audio3]
+}
+faust_processor.set_soundfiles(soundfiles)
+```
+
+**soundfile_test.dsp**
+```dsp
+soundChoice = nentry("soundChoice", 0, 0, 2, 1); // choose between 0, 1, 2
+process = soundChoice,_~+(1):soundfile("mySound",2):!,!,_,_;
+```
+
+Note that `soundfile("mySound",2)` has 2 as a hint that the audio is stereo. It's unrelated to the Python side where mySound's dictionary value has 3 numpy arrays.
+
 ## Pitch-stretching and Time-stretching with Warp Markers
 
 (For a companion project related to warp markers, see [AbletonParsing](https://github.com/DBraun/AbletonParsing).

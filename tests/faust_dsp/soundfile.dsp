@@ -15,6 +15,7 @@ with {
 gain = hslider("gain",0.1,0,1,0.01);     // note velocity
 gate = button("gate");                   // note on/off
 key = hslider("freq", 60, 1, 127, 1) : ba.hz2midikey;
+soundChoice = nentry("soundChoice", 0, 0, 2, 1);
 
 root_midi = hslider("center_note", 60., 1., 128., 0.01);
 semitones = key - root_midi;
@@ -24,6 +25,6 @@ envVol = en.adsr(.002, 0.1, 0.9, .1, gate);
 
 totalGain = gain * envVol * .5;
 
-process = 0,my_phasor(ratio, gate):soundfile("mySound[url:{'foo.wav'}]",2):!,!,_,_ : _*totalGain, _*totalGain;
+process = soundChoice,my_phasor(ratio, gate):soundfile("mySound",2):!,!,_,_ : _*totalGain, _*totalGain;
 // polyphonic DSP code must declare a stereo effect
 effect = _, _;

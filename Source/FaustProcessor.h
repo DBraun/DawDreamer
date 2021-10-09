@@ -35,19 +35,22 @@ public:
         *sf_zone = fSoundfileMap[saved_url_real];
     }
 
-    virtual void addSoundfileFromData(const char* label, AudioSampleBuffer& buffer, int sample_rate)
+    virtual void addSoundfileFromBuffers(const char* label, std::vector<AudioSampleBuffer> buffers, int sample_rate)
     {
         // Parse the possible list
         std::string saved_url_real = std::string(label);
         if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
 
-            int numSamples = buffer.getNumSamples();
-            int numChannels = buffer.getNumChannels();
+            int total_length = 0;
+            int numChannels = 1;
 
-            // Complete with empty parts
-            int total_length = numSamples;
+            for (auto& buffer : buffers) {
+                total_length += buffer.getNumSamples();
+                numChannels = std::max(numChannels, buffer.getNumChannels());
+            }
+
             // todo: used subtract path_name_list.size() instead of 1.
-            total_length += (MAX_SOUNDFILE_PARTS - 1) * BUFFER_SIZE;
+            total_length += (MAX_SOUNDFILE_PARTS - buffers.size()) * BUFFER_SIZE;
 
             Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, false); 
             
@@ -57,24 +60,31 @@ public:
 
             int offset = 0;
 
-            void* buffers = alloca(soundfile->fChannels * sizeof(float*));
-            soundfile->getBuffersOffsetReal<float>(buffers, offset);
+            int i = 0;
+            for (auto& buffer : buffers) {
 
-            // todo: don't assume float
-            for (int sample = 0; sample < numSamples; sample++) {
-                for (int chan = 0; chan < numChannels; chan++) {
-                    static_cast<float**>(soundfile->fBuffers)[chan][offset + sample] = buffer.getSample(chan, sample);
+                int numSamples = buffer.getNumSamples();
+
+                soundfile->fLength[i] = numSamples;
+                soundfile->fSR[i] = sample_rate;
+                soundfile->fOffset[i] = offset;
+
+                void* tmpBuffers = alloca(soundfile->fChannels * sizeof(float*));
+                soundfile->getBuffersOffsetReal<float>(tmpBuffers, offset);
+
+                // todo: don't assume float
+                for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
+                    for (int sample = 0; sample < numSamples; sample++) {
+                        static_cast<float**>(soundfile->fBuffers)[chan][offset + sample] = buffer.getSample(chan, sample);
+                    }
                 }
+
+                offset += soundfile->fLength[i];
+                i++;
             }
 
-            soundfile->fLength[0] = numSamples;
-            soundfile->fSR[0] = sample_rate;
-            soundfile->fOffset[0] = offset;
-
-            offset += numSamples;
-
             // Complete with empty parts
-            for (int i = 1; i < MAX_SOUNDFILE_PARTS; i++) {
+            for (int i = buffers.size(); i < MAX_SOUNDFILE_PARTS; i++) {
                 soundfile->emptyFile(i, offset);
             }
 
@@ -139,9 +149,9 @@ public:
         const double noteStart,
         const double noteLength);
 
-    void setData(std::string label, py::array_t<float, py::array::c_style | py::array::forcecast> input);
+    void setSoundfiles(py::dict);
 
-    std::map<std::string, juce::AudioSampleBuffer> myPlaybackData;
+    std::map<std::string, std::vector<juce::AudioSampleBuffer>> m_SoundfileMap;
 
 private:
 

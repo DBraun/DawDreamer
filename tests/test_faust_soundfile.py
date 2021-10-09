@@ -2,7 +2,7 @@ from utils import *
 
 BUFFER_SIZE = 1024
 
-def _test_faust_soundfile(sample_seq, output_path):
+def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -11,13 +11,21 @@ def _test_faust_soundfile(sample_seq, output_path):
 
 	dsp_path = abspath("faust_dsp/soundfile.dsp")
 
-	faust_processor.set_data('mySound', sample_seq)
+	reversed_audio = np.flip(sample_seq[:,:int(44100*.5)], axis=-1)
+
+	# set_soundfiles
+	soundfiles = {
+		'mySound': [sample_seq, reversed_audio, sample_seq]
+	}
+	faust_processor.set_soundfiles(soundfiles)
 
 	assert(faust_processor.set_dsp(dsp_path))
 	assert(faust_processor.compile())
 	# desc = faust_processor.get_parameters_description()
 	# for par in desc:
 	# 	print(par)
+
+	faust_processor.set_parameter('/Sequencer/DSP1/Polyphonic/Voices/MyInstrument/soundChoice', sound_choice)
 
 	 # (MIDI note, velocity, start sec, duration sec)
 	faust_processor.add_midi_note(60, 60, 0.0, .25)
@@ -33,7 +41,13 @@ def _test_faust_soundfile(sample_seq, output_path):
 	assert(engine.load_graph(graph))
 	render(engine, file_path='output/'+output_path, duration=3.)
 
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .01)
+
+
 def test_faust_soundfile_cymbal():
 	# Load a stereo audio sample and pass it to Faust
 	sample_seq = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav")
-	_test_faust_soundfile(sample_seq, 'test_faust_soundfile.wav')
+	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_0.wav', sound_choice=0)
+	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_1.wav', sound_choice=1)
+	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_2.wav', sound_choice=2)
