@@ -9,11 +9,83 @@
 #include "generator/libfaust.h"
 #include "faust/gui/APIUI.h"
 #include "faust/gui/MidiUI.h"
+#include "faust/gui/SoundUI.h"
 
 #include "faust/midi/rt-midi.h"
 
 #include <iostream>
 #include <map>
+
+
+class MySoundUI : public SoundUI {
+
+public:
+
+    virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) {
+        // Parse the possible list
+        std::string saved_url_real = std::string(label);
+        if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
+            // If failure, use 'defaultsound'
+            std::cerr << "addSoundfile : soundfile for " << label << " cannot be created !" << std::endl;
+            *sf_zone = defaultsound;
+            return;
+        }
+
+        // Get the soundfile
+        *sf_zone = fSoundfileMap[saved_url_real];
+    }
+
+    virtual void addSoundfileFromData(const char* label, AudioSampleBuffer& buffer, int sample_rate)
+    {
+        // Parse the possible list
+        std::string saved_url_real = std::string(label);
+        if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
+
+            int numSamples = buffer.getNumSamples();
+            int numChannels = buffer.getNumChannels();
+
+            // Complete with empty parts
+            int total_length = numSamples;
+            // todo: used subtract path_name_list.size() instead of 1.
+            total_length += (MAX_SOUNDFILE_PARTS - 1) * BUFFER_SIZE;
+
+            Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, false); 
+            
+            // manually fill in the sound_file:
+            // The following code is a modification of SoundfileReader::createSoundfile and SoundfileReader::readFile
+            // It strongly assumes that the soundfile in the faust code only has one file.
+
+            int offset = 0;
+
+            void* buffers = alloca(soundfile->fChannels * sizeof(float*));
+            soundfile->getBuffersOffsetReal<float>(buffers, offset);
+
+            // todo: don't assume float
+            for (int sample = 0; sample < numSamples; sample++) {
+                for (int chan = 0; chan < numChannels; chan++) {
+                    static_cast<float**>(soundfile->fBuffers)[chan][offset + sample] = buffer.getSample(chan, sample);
+                }
+            }
+
+            soundfile->fLength[0] = numSamples;
+            soundfile->fSR[0] = sample_rate;
+            soundfile->fOffset[0] = offset;
+
+            offset += numSamples;
+
+            // Complete with empty parts
+            for (int i = 1; i < MAX_SOUNDFILE_PARTS; i++) {
+                soundfile->emptyFile(i, offset);
+            }
+
+            // Share the same buffers for all other channels so that we have max_chan channels available
+            soundfile->shareBuffers(numChannels, MAX_CHAN);
+
+            fSoundfileMap[saved_url_real] = soundfile;
+        }
+    }
+
+};
 
 class FaustProcessor : public ProcessorBase
 {
@@ -67,6 +139,10 @@ public:
         const double noteStart,
         const double noteLength);
 
+    void setData(std::string label, py::array_t<float, py::array::c_style | py::array::forcecast> input);
+
+    std::map<std::string, juce::AudioSampleBuffer> myPlaybackData;
+
 private:
 
     double mySampleRate;
@@ -79,11 +155,11 @@ protected:
 
     llvm_dsp_factory* m_factory;
     dsp* m_dsp;
-    MidiUI* m_midi_ui;
     APIUI* m_ui;
 
-    llvm_dsp_poly_factory* m_poly_factory;
-    dsp_poly* m_dsp_poly;
+    llvm_dsp_poly_factory* m_poly_factory = nullptr;
+    dsp_poly* m_dsp_poly = nullptr;
+    MySoundUI* m_soundUI = nullptr;
 
     rt_midi m_midi_handler;
 
