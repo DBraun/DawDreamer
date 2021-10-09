@@ -256,7 +256,7 @@ jobs:
       if: ${{ matrix.python-version == '3.8' }}
       run: |
         pip install -U sphinx
-        cd $GITHUB_WORKSPACE/docs && call make.bat html
+        cd docs && call make.bat html
     - name: Deploy docs
       uses: peaceiris/actions-gh-pages@v3
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' }}
