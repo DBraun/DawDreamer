@@ -42,7 +42,7 @@ public:
         if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
 
             int total_length = 0;
-            int numChannels = 1;
+            int numChannels = 1;  // start with at least 1 channel. This may increase due to code below.
 
             for (auto& buffer : buffers) {
                 total_length += buffer.getNumSamples();
@@ -54,9 +54,8 @@ public:
 
             Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, false); 
             
-            // manually fill in the sound_file:
+            // Manually fill in the soundfile:
             // The following code is a modification of SoundfileReader::createSoundfile and SoundfileReader::readFile
-            // It strongly assumes that the soundfile in the faust code only has one file.
 
             int offset = 0;
 
@@ -72,9 +71,9 @@ public:
                 void* tmpBuffers = alloca(soundfile->fChannels * sizeof(float*));
                 soundfile->getBuffersOffsetReal<float>(tmpBuffers, offset);
 
-                // todo: don't assume float
                 for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
                     for (int sample = 0; sample < numSamples; sample++) {
+                        // todo: don't assume float
                         static_cast<float**>(soundfile->fBuffers)[chan][offset + sample] = buffer.getSample(chan, sample);
                     }
                 }
@@ -94,8 +93,8 @@ public:
             fSoundfileMap[saved_url_real] = soundfile;
         }
     }
-
 };
+
 
 class FaustProcessor : public ProcessorBase
 {
