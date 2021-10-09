@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
 jobs:
 
   build-ubuntu:
