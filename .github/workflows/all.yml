@@ -118,8 +118,11 @@ jobs:
     - name: "Build docs for Github pages"
       if: ${{ matrix.python-version == '3.9' }}
       steps:
-        - run: sudo apt-get install python3-sphinx
-        - run: ./docs/make html
+        - name: install sphinx
+          run: sudo apt-get install python3-sphinx
+
+        - name: build docs with sphinx
+          run: ./docs/make html
 
         - name: Deploy
           uses: peaceiris/actions-gh-pages@v3
