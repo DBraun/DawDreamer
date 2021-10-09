@@ -1,11 +1,11 @@
 name: Compile, Test, and Deploy
 on:
-  # pull_request: {}
+  pull_request: {}
   push:
     branches:
-      - master
-  # release:
-  #   types: [published]
+      - main
+  release:
+    types: [published]
 jobs:
 
   build-ubuntu:
