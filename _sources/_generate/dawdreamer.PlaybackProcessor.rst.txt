@@ -1,0 +1,33 @@
+﻿dawdreamer.PlaybackProcessor
+============================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: PlaybackProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PlaybackProcessor.__init__
+      ~PlaybackProcessor.get_audio
+      ~PlaybackProcessor.get_automation
+      ~PlaybackProcessor.get_name
+      ~PlaybackProcessor.set_automation
+      ~PlaybackProcessor.set_data
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PlaybackProcessor.record
+   
+   

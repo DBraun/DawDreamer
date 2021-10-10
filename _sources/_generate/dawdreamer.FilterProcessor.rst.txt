@@ -1,0 +1,36 @@
+﻿dawdreamer.FilterProcessor
+==========================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: FilterProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FilterProcessor.__init__
+      ~FilterProcessor.get_audio
+      ~FilterProcessor.get_automation
+      ~FilterProcessor.get_name
+      ~FilterProcessor.set_automation
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FilterProcessor.frequency
+      ~FilterProcessor.gain
+      ~FilterProcessor.mode
+      ~FilterProcessor.q
+      ~FilterProcessor.record
+   
+   

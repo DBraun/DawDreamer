@@ -1,0 +1,46 @@
+﻿dawdreamer.PluginProcessor
+==========================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: PluginProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PluginProcessor.__init__
+      ~PluginProcessor.add_midi_note
+      ~PluginProcessor.clear_midi
+      ~PluginProcessor.get_audio
+      ~PluginProcessor.get_automation
+      ~PluginProcessor.get_name
+      ~PluginProcessor.get_parameter
+      ~PluginProcessor.get_parameter_name
+      ~PluginProcessor.get_parameter_text
+      ~PluginProcessor.get_patch
+      ~PluginProcessor.get_plugin_parameter_size
+      ~PluginProcessor.get_plugin_parameters_description
+      ~PluginProcessor.load_midi
+      ~PluginProcessor.load_preset
+      ~PluginProcessor.load_vst3_preset
+      ~PluginProcessor.set_automation
+      ~PluginProcessor.set_parameter
+      ~PluginProcessor.set_patch
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PluginProcessor.n_midi_events
+      ~PluginProcessor.record
+   
+   

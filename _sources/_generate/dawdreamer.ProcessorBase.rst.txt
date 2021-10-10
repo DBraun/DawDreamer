@@ -1,0 +1,32 @@
+﻿dawdreamer.ProcessorBase
+========================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: ProcessorBase
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ProcessorBase.__init__
+      ~ProcessorBase.get_audio
+      ~ProcessorBase.get_automation
+      ~ProcessorBase.get_name
+      ~ProcessorBase.set_automation
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ProcessorBase.record
+   
+   

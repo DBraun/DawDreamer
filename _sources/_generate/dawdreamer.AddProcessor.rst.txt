@@ -1,0 +1,33 @@
+﻿dawdreamer.AddProcessor
+=======================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: AddProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~AddProcessor.__init__
+      ~AddProcessor.get_audio
+      ~AddProcessor.get_automation
+      ~AddProcessor.get_name
+      ~AddProcessor.set_automation
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~AddProcessor.gain_levels
+      ~AddProcessor.record
+   
+   

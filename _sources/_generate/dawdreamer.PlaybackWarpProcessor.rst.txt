@@ -1,0 +1,44 @@
+﻿dawdreamer.PlaybackWarpProcessor
+================================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: PlaybackWarpProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PlaybackWarpProcessor.__init__
+      ~PlaybackWarpProcessor.get_audio
+      ~PlaybackWarpProcessor.get_automation
+      ~PlaybackWarpProcessor.get_name
+      ~PlaybackWarpProcessor.set_automation
+      ~PlaybackWarpProcessor.set_clip_file
+      ~PlaybackWarpProcessor.set_clip_positions
+      ~PlaybackWarpProcessor.set_data
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PlaybackWarpProcessor.end_marker
+      ~PlaybackWarpProcessor.loop_end
+      ~PlaybackWarpProcessor.loop_on
+      ~PlaybackWarpProcessor.loop_start
+      ~PlaybackWarpProcessor.record
+      ~PlaybackWarpProcessor.start_marker
+      ~PlaybackWarpProcessor.time_ratio
+      ~PlaybackWarpProcessor.transpose
+      ~PlaybackWarpProcessor.warp_markers
+      ~PlaybackWarpProcessor.warp_on
+   
+   

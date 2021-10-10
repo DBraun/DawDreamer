@@ -1,0 +1,37 @@
+﻿dawdreamer.ReverbProcessor
+==========================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: ReverbProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ReverbProcessor.__init__
+      ~ReverbProcessor.get_audio
+      ~ReverbProcessor.get_automation
+      ~ReverbProcessor.get_name
+      ~ReverbProcessor.set_automation
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ReverbProcessor.damping
+      ~ReverbProcessor.dry_level
+      ~ReverbProcessor.record
+      ~ReverbProcessor.room_size
+      ~ReverbProcessor.wet_level
+      ~ReverbProcessor.width
+   
+   

@@ -1,0 +1,38 @@
+﻿dawdreamer.RenderEngine
+=======================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: RenderEngine
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RenderEngine.__init__
+      ~RenderEngine.get_audio
+      ~RenderEngine.load_graph
+      ~RenderEngine.make_add_processor
+      ~RenderEngine.make_compressor_processor
+      ~RenderEngine.make_delay_processor
+      ~RenderEngine.make_faust_processor
+      ~RenderEngine.make_filter_processor
+      ~RenderEngine.make_oscillator_processor
+      ~RenderEngine.make_panner_processor
+      ~RenderEngine.make_playback_processor
+      ~RenderEngine.make_playbackwarp_processor
+      ~RenderEngine.make_plugin_processor
+      ~RenderEngine.make_reverb_processor
+      ~RenderEngine.make_sampler_processor
+      ~RenderEngine.render
+      ~RenderEngine.set_bpm
+   
+   
+
+   
+   
+   

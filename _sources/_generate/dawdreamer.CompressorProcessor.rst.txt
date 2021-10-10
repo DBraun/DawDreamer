@@ -1,0 +1,36 @@
+﻿dawdreamer.CompressorProcessor
+==============================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: CompressorProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CompressorProcessor.__init__
+      ~CompressorProcessor.get_audio
+      ~CompressorProcessor.get_automation
+      ~CompressorProcessor.get_name
+      ~CompressorProcessor.set_automation
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CompressorProcessor.attack
+      ~CompressorProcessor.ratio
+      ~CompressorProcessor.record
+      ~CompressorProcessor.release
+      ~CompressorProcessor.threshold
+   
+   

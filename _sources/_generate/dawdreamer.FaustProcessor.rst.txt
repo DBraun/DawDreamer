@@ -1,0 +1,48 @@
+﻿dawdreamer.FaustProcessor
+=========================
+
+.. currentmodule:: dawdreamer
+
+.. autoclass:: FaustProcessor
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FaustProcessor.__init__
+      ~FaustProcessor.add_midi_note
+      ~FaustProcessor.clear_midi
+      ~FaustProcessor.compile
+      ~FaustProcessor.get_audio
+      ~FaustProcessor.get_automation
+      ~FaustProcessor.get_name
+      ~FaustProcessor.get_parameter
+      ~FaustProcessor.get_parameters_description
+      ~FaustProcessor.load_midi
+      ~FaustProcessor.set_automation
+      ~FaustProcessor.set_dsp
+      ~FaustProcessor.set_dsp_string
+      ~FaustProcessor.set_parameter
+      ~FaustProcessor.set_soundfiles
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FaustProcessor.auto_import
+      ~FaustProcessor.code
+      ~FaustProcessor.compiled
+      ~FaustProcessor.group_voices
+      ~FaustProcessor.n_midi_events
+      ~FaustProcessor.num_voices
+      ~FaustProcessor.record
+   
+   
