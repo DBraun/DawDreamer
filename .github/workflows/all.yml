@@ -254,9 +254,10 @@ jobs:
 
     - name: "Build docs for Github pages"
       if: ${{ matrix.python-version == '3.8' }}
+      shell: cmd
       run: |
         pip install -U sphinx
-        cd docs && call make.bat html
+        cd docs && make.bat html
     - name: Deploy docs
       uses: peaceiris/actions-gh-pages@v3
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' }}
