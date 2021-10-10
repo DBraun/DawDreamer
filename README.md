@@ -14,6 +14,7 @@
 [![PyPI version fury.io](https://badge.fury.io/py/ansicolortags.svg)](https://pypi.python.org/pypi/dawdreamer/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/DBraun/DawDreamer/blob/main/LICENSE)
 ![GitHub Repo stars](https://img.shields.io/github/stars/DBraun/DawDreamer?style=social)
+[![Generic badge](https://img.shields.io/badge/Documentation-passing-brightgreen.svg)](https://dirt.design/DawDreamer/)
 
 # DawDreamer
 
@@ -27,7 +28,7 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * Pitch-warping
 * Parameter automation
 * Rendering multiple processors simultaneously
-* Full support on Linux (Dockerfile), macOS, and Windows
+* Full support on macOS, Windows, Linux, and Ubuntu Dockerfile
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
@@ -309,11 +310,9 @@ Each tuple of three numbers is the (global timeline clip start, global timeline 
 
 DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of [JUCE](https://github.com/juce-framework/JUCE/), [pybind11](https://github.com/pybind/pybind11/), [Libsamplerate](https://github.com/libsndfile/libsamplerate), [Rubber Band Library](https://github.com/breakfastquay/rubberband/), [Steinberg VST2/3](https://www.steinberg.net/vst-instruments/), and [FAUST](https://github.com/grame-cncm/faust).
 
-## API and Wiki
+## Wiki
 
-API documentation is in active development [here](https://ccrma.stanford.edu/~braun/dawdreamer).
-
-Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki) for more [examples](https://github.com/DBraun/DawDreamer/wiki/Documentation) and the [Developer's Guide](https://github.com/DBraun/DawDreamer/wiki/Developer's-Guide). The [tests](https://github.com/DBraun/DawDreamer/tree/main/tests) may also be helpful.
+Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki) for more [examples](https://github.com/DBraun/DawDreamer/wiki/Documentation), the [API documentation](https://dirt.design/DawDreamer), and the [Developer's Guide](https://github.com/DBraun/DawDreamer/wiki/Developer's-Guide). The [tests](https://github.com/DBraun/DawDreamer/tree/main/tests) may also be helpful.
 
 ## Thanks to contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
 * [fedden](https://github.com/fedden), RenderMan creator
