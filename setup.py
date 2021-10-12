@@ -103,7 +103,7 @@ setup(
         'Documentation': 'https://ccrma.stanford.edu/~braun/dawdreamer',
         'Source': 'https://github.com/DBraun/DawDreamer',
     },
-    version='0.5.7.8',
+    version='0.5.7.9',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
     description='An audio-processing Python library supporting core DAW features',
