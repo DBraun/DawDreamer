@@ -53,6 +53,7 @@ jobs:
         python${{ matrix.python-version }}-dev \
         faust \
         libsamplerate0 \
+        libsndfile1 \
         llvm-11 \
         llvm-11-dev \
         && sudo apt-get clean -y
