@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'feature/linux-github-action'
   release:
     types: [published]
 jobs:
