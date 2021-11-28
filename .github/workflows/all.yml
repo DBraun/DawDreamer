@@ -74,11 +74,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel pytest numpy librosa scipy
 
-    # todo: enable this
-    # - name: Test with pytest
-    #   run: |
-    #     cd tests
-    #     pytest .
+    - name: Test with pytest
+      run: |
+        cd tests
+        pytest .
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
