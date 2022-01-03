@@ -19,7 +19,7 @@ public:
         myDryLevel = myParameters.getRawParameterValue("dry_level");
         myWetLevel = myParameters.getRawParameterValue("wet_level");
         myWidth = myParameters.getRawParameterValue("width");
-
+        setMainBusInputsAndOutputs(2, 2);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {

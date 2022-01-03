@@ -181,7 +181,6 @@
 		9ABCCF2DBAA01DE762D8BD60 /* FaustProcessor.h */ /* FaustProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FaustProcessor.h; path = ../../Source/FaustProcessor.h; sourceTree = SOURCE_ROOT; };
 		9B17E0333F55A9D2F7686E6B /* Allocators.h */ /* Allocators.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Allocators.h; path = ../../thirdparty/rubberband/src/system/Allocators.h; sourceTree = SOURCE_ROOT; };
 		9BDB3F17F6111E9FDF1761B4 /* MPESettingsDataModel.h */ /* MPESettingsDataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MPESettingsDataModel.h; path = ../../Source/Sampler/Source/DataModels/MPESettingsDataModel.h; sourceTree = SOURCE_ROOT; };
-		9BF0B18CB113A977D0117997 /* RecorderProcessor.h */ /* RecorderProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RecorderProcessor.h; path = ../../Source/RecorderProcessor.h; sourceTree = SOURCE_ROOT; };
 		9C07609F0F8527BD049E1A07 /* AudioCurveCalculator.h */ /* AudioCurveCalculator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioCurveCalculator.h; path = ../../thirdparty/rubberband/src/dsp/AudioCurveCalculator.h; sourceTree = SOURCE_ROOT; };
 		9F37A0F01B91ECF513361AD0 /* MPELegacySettingsComponent.h */ /* MPELegacySettingsComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MPELegacySettingsComponent.h; path = ../../Source/Sampler/Source/Components/MPELegacySettingsComponent.h; sourceTree = SOURCE_ROOT; };
 		9FDB1268E8AD800788F80B72 /* include_juce_gui_basics.mm */ /* include_juce_gui_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_basics.mm; path = ../../JuceLibraryCode/include_juce_gui_basics.mm; sourceTree = SOURCE_ROOT; };
@@ -580,7 +579,6 @@
 				2F962B6F6EA479E59F083A16,
 				D68C9F4F1959369550A30E40,
 				253FF1803B46DE27BAFE0B1E,
-				9BF0B18CB113A977D0117997,
 			);
 			name = Processors;
 			sourceTree = "<group>";
@@ -670,7 +668,7 @@
 		4A73310BAAAEBD94149F5709 = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1320;
 				ORGANIZATIONNAME = "";
 			};
 			buildConfigurationList = 2DB318F4D74C3E6033F2C720;
@@ -772,6 +770,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = NO;
+				EXCLUDED_ARCHS = "";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -807,6 +806,7 @@
 					"/usr/local/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
 					"$(SRCROOT)/../../thirdparty/faust/compiler",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/utils",
 					"$(SRCROOT)/../../thirdparty/libsamplerate/src",
 					"$(SRCROOT)/../../thirdparty/libsamplerate/include",
 					"$(SRCROOT)/../../thirdparty/rubberband",
@@ -824,10 +824,11 @@
 					"\"../../thirdparty/libsamplerate/build_debug/src\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython$(PYTHONMAJOR)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
+				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
 				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
@@ -894,6 +895,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				DEAD_CODE_STRIPPING = YES;
+				EXCLUDED_ARCHS = "";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -929,6 +931,7 @@
 					"/usr/local/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
 					"$(SRCROOT)/../../thirdparty/faust/compiler",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/utils",
 					"$(SRCROOT)/../../thirdparty/libsamplerate/src",
 					"$(SRCROOT)/../../thirdparty/libsamplerate/include",
 					"$(SRCROOT)/../../thirdparty/rubberband",
@@ -947,10 +950,11 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython$(PYTHONMAJOR)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.DawDreamer;
+				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
 				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;

@@ -235,8 +235,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine.")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
-        .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), arg("num_input_audio_chans") = 2, arg("num_out_audio_chans") = 2,
-            "Load a directed acyclic graph of processors.")
+        .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
         .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, arg("name"), arg("frequency"),
             "Make an Oscillator Processor", returnPolicy)
         .def("make_plugin_processor", &RenderEngineWrapper::makePluginProcessor, arg("name"), arg("plugin_path"),

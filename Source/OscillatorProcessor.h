@@ -11,6 +11,7 @@ public:
         myFreq = freq;
         myOscillator.setFrequency(freq);
         myOscillator.initialise([](float x) { return std::sin(x); });
+        setMainBusInputsAndOutputs(0, 2);
     }
 
     OscillatorProcessor():ProcessorBase( "osc1" )
@@ -18,6 +19,7 @@ public:
         myFreq = 440.f;
         myOscillator.setFrequency(myFreq);
         myOscillator.initialise([](float x) { return std::sin(x); });
+        setMainBusInputsAndOutputs(0, 2);
     }
 
     void

@@ -37,11 +37,6 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	m_numOutputChannels = 0;
 	// auto import
 	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\nimport(\"stdfaust.lib\");\n";
-
-#ifdef WIN32
-	// At the start of every process
-	guiUpdateMutex = CreateMutex(NULL, FALSE, "Faust gui::update Mutex");  // todo: enable mutex on linux and macOS
-#endif
 }
 
 FaustProcessor::~FaustProcessor() {
@@ -159,28 +154,13 @@ FaustProcessor::automateParameters() {
 	// several voices might share the same parameters in a group.
 	// Therefore we have to call updateAllGuis to update all dependent parameters.
 	if (m_nvoices > 0 && m_groupVoices) {
-#ifdef WIN32
 		// When you want to access shared memory:
-		DWORD dwWaitResult = WaitForSingleObject(guiUpdateMutex, INFINITE);
-
-		if (dwWaitResult == WAIT_OBJECT_0 || dwWaitResult == WAIT_ABANDONED)
-		{
-			if (dwWaitResult == WAIT_ABANDONED)
-			{
-				// todo:
-				// Shared memory is maybe in inconsistent state because other program
-				// crashed while holding the mutex. Check the memory for consistency
-			}
-
-			// Have Faust update all GUIs.
-			GUI::updateAllGuis();
-
-			// After this line other processes can access shared memory
-			ReleaseMutex(guiUpdateMutex);
-		}
-#else
-		GUI::updateAllGuis(); // todo: enable mutex on linux and macOS
-#endif
+        if (guiUpdateMutex.Lock()) {
+            // Have Faust update all GUIs.
+            GUI::updateAllGuis();
+                
+            guiUpdateMutex.Unlock();
+        }
 	}
 }
 
@@ -357,14 +337,11 @@ FaustProcessor::compile()
 	int inputs = theDsp->getNumInputs();
 	int outputs = theDsp->getNumOutputs();
 
-	if (outputs != 2) {
-		std::cerr << "FaustProcessor::compile(): FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
-		FAUSTPROCESSOR_FAIL_COMPILE
-	}
-
 	m_numInputChannels = inputs;
 	m_numOutputChannels = outputs;
-
+        
+    setMainBusInputsAndOutputs(inputs, outputs);
+    
 	// make new UI
 	if (is_polyphonic)
 	{

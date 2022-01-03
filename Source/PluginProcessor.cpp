@@ -30,7 +30,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
             *pluginFormatManager.getFormat(i));
     }
 
-    if (myPlugin)
+    if (myPlugin.get())
     {
         myPlugin->releaseResources();
         myPlugin.release();
@@ -50,15 +50,18 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         samplesPerBlock,
         errorMessage);
 
-    if (myPlugin != nullptr)
+    if (myPlugin.get() != nullptr)
     {
         // Success so set up plugin, then set up features and get all available
         // parameters from this given plugin.
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
         myPlugin->setNonRealtime(true);
-        myCopyBufferNumChans = std::max(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
-
+        myNumOutputChans = myPlugin->getTotalNumOutputChannels();
+        myCopyBufferNumChans = std::max(myNumOutputChans, myPlugin->getTotalNumInputChannels());
         mySampleRate = sampleRate;
+        
+        // todo: make this more dynamic
+        setMainBusInputsAndOutputs(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
 
         createParameterLayout();
 
@@ -71,7 +74,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 }
 
 PluginProcessor::~PluginProcessor() {
-    if (myPlugin)
+    if (myPlugin.get())
     {
         myPlugin->releaseResources();
         myPlugin.release();
@@ -81,7 +84,7 @@ PluginProcessor::~PluginProcessor() {
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
 {
     AudioProcessor::setPlayHead(newPlayHead);
-    if (myPlugin) {
+    if (myPlugin.get()) {
         myPlugin->setPlayHead(newPlayHead);
     }
 }
@@ -89,7 +92,7 @@ void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
 void
 PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    if (myPlugin) {
+    if (myPlugin.get()) {
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
     }
 }
@@ -97,6 +100,11 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
+    if (!myPlugin.get()) {
+        buffer.clear();
+        return;
+    }
+    
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
@@ -113,40 +121,36 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         }
     } while (myIsMessageBetween && myMidiEventsDoRemain);
 
-    if (myPlugin) {
+    /*
+    First copy from buffer to myCopyBuffer.
+    Why? Some plugins involve multiple buses (e.g., sidechain compression). You can check this with
+    `myPlugin->getBusCount()`. However, it can be difficult to add or remove buses: `myPlugin->canRemoveBus(1);`
+    That function may actually not be able to remove a secondary (optional) sidechain bus.
+    myPlugin->processBlock will expect to receive a buffer whose number of channels is the max(the total of all the input bus
+    channels, the total of all output bus channels). When users create a graph with DawDreamer, they may pass only 1 stereo input
+    to a plugin with an optional sidechain. This will cause the arg buffer to have 2 channels. However, myPlugin->processBlock would
+    expect 4 channels (2 channels for each input bus, the second bus being the unspecified sidechain input). Therefore, the solution
+    is to have myCopyBuffer be the larger size, and to copy whatever channels exist in buffer into it. In effect, the sidechain input
+    will have zeros. Then we copy the results of myCopyBuffer back to buffer so that other processors receive the result.
+    */
 
-        /*
-        First copy from buffer to myCopyBuffer.
-        Why? Some plugins involve multiple buses (e.g., sidechain compression). You can check this with
-        `myPlugin->getBusCount()`. However, it can be difficult to add or remove buses: `myPlugin->canRemoveBus(1);`
-        That function may actually not be able to remove a secondary (optional) sidechain bus.
-        myPlugin->processBlock will expect to receive a buffer whose number of channels is the max(the total of all the input bus
-        channels, the total of all output bus channels). When users create a graph with DawDreamer, they may pass only 1 stereo input
-        to a plugin with an optional sidechain. This will cause the arg buffer to have 2 channels. However, myPlugin->processBlock would
-        expect 4 channels (2 channels for each input bus, the second bus being the unspecified sidechain input). Therefore, the solution
-        is to have myCopyBuffer be the larger size, and to copy whatever channels exist in buffer into it. In effect, the sidechain input
-        will have zeros. Then we copy the results of myCopyBuffer back to buffer so that other processors receive the result.
-        */
+    int numSamples = buffer.getNumSamples();
 
-        int numSamples = buffer.getNumSamples();
+    myCopyBuffer.setSize(std::max(buffer.getNumChannels(), myCopyBufferNumChans), numSamples, false, true, false);
 
-        myCopyBuffer.setSize(std::max(buffer.getNumChannels(), myCopyBufferNumChans), numSamples, false, true, false);
-
-        for (int i = 0; i < buffer.getNumChannels(); i++)
-        {
-            myCopyBuffer.copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
-        }
-
-        myPlugin->processBlock(myCopyBuffer, myRenderMidiBuffer);
-
-        // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
-        for (int i = 0; i < 2; i++)
-        {
-            buffer.copyFrom(i, 0, myCopyBuffer.getReadPointer(i), numSamples);
-        }
-
+    for (int i = 0; i < buffer.getNumChannels(); i++)
+    {
+        myCopyBuffer.copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
     }
 
+    myPlugin->processBlock(myCopyBuffer, myRenderMidiBuffer);
+
+    // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
+    for (int i = 0; i < myNumOutputChans; i++)
+    {
+        buffer.copyFrom(i, 0, myCopyBuffer.getReadPointer(i), numSamples);
+    }
+    
     ProcessorBase::processBlock(buffer, midiBuffer);
 }
 
@@ -156,7 +160,7 @@ PluginProcessor::automateParameters() {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
-    if (myPlugin) {
+    if (myPlugin.get()) {
 
         for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
@@ -176,7 +180,9 @@ PluginProcessor::automateParameters() {
 void
 PluginProcessor::reset()
 {
-    myPlugin->reset();
+    if (myPlugin.get()) {
+        myPlugin->reset();
+    }
 
     if (myMidiIterator) {
         delete myMidiIterator;

@@ -6,6 +6,7 @@ class AddProcessor : public ProcessorBase
 {
 public:
     AddProcessor(std::string newUniqueName, std::vector<float> gainLevels) : ProcessorBase(newUniqueName), myGainLevels{ gainLevels } {
+        setMainBusInputsAndOutputs(gainLevels.size()*2, gainLevels.size()*2);
     }
 
     void prepareToPlay(double, int) {
@@ -51,7 +52,10 @@ public:
 
     const juce::String getName() { return "AddProcessor"; };
 
-    void setGainLevels(const std::vector<float> gainLevels) { myGainLevels = gainLevels; }
+    void setGainLevels(const std::vector<float> gainLevels) {
+        myGainLevels = gainLevels;
+        setMainBusInputsAndOutputs(gainLevels.size()*2, gainLevels.size()*2);
+    }
     const std::vector<float> getGainLevels() { return myGainLevels; }
 
 

@@ -44,6 +44,43 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
 	audio = engine.get_audio()
 	assert(np.mean(np.abs(audio)) > .01)
 
+def _test_faust_soundfile_multichannel(output_path):
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	faust_processor = engine.make_faust_processor("faust")
+
+	dsp_path = abspath("faust_dsp/soundfile.dsp")
+
+	numChannels = 9
+
+	sample_seq = np.sin(np.linspace(0, 4000, num=int(44100*5.0)))
+	sample_seq = np.stack([sample_seq for _ in range(numChannels)])
+
+	# set_soundfiles
+	soundfiles = {
+		'mySound': [sample_seq]
+	}
+	faust_processor.set_soundfiles(soundfiles)
+
+	underscores = ",".join('_'*numChannels)
+	dsp_string = f'process = 0,_~+(1):soundfile("mySound",{numChannels}):!,!,{underscores};'
+	assert(faust_processor.set_dsp_string(dsp_string))
+	assert(faust_processor.compile())
+	# desc = faust_processor.get_parameters_description()
+	# for par in desc:
+	# 	print(par)
+
+	graph = [
+	    (faust_processor, [])
+	]
+
+	assert(engine.load_graph(graph))
+	render(engine, file_path='output/'+output_path, duration=3.)
+
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .01)
+
 def download_grand_piano():
 
 	"""Download the dataset if it's missing"""
@@ -123,3 +160,4 @@ def test_faust_soundfile_cymbal():
 	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_0.wav', sound_choice=0)
 	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_1.wav', sound_choice=1)
 	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_2.wav', sound_choice=2)
+	_test_faust_soundfile_multichannel('test_faust_soundfile_3.wav')

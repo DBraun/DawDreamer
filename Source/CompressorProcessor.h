@@ -19,6 +19,7 @@ public:
         myRelease = myParameters.getRawParameterValue("release");
 
         updateParameters();
+        setMainBusInputsAndOutputs(2, 2);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {

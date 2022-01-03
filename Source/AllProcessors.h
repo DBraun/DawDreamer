@@ -10,7 +10,6 @@
 #include "PlaybackProcessor.h"
 #include "PlaybackWarpProcessor.h"
 #include "PluginProcessor.h"
-#include "RecorderProcessor.h"
 #include "ReverbProcessor.h"
 #include "PannerProcessor.h"
 #include "SamplerProcessor.h"

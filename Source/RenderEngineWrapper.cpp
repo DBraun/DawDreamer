@@ -103,7 +103,7 @@ RenderEngineWrapper::makeFaustProcessor(const std::string& name)
 #endif
 
 bool
-RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans = 2, int numOutputAudioChans = 2) {
+RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
 
     if (!py::isinstance<py::list>(dagObj)) {
         return false;
@@ -160,5 +160,5 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj, int numInputAudioChans 
         buildingDag->nodes.push_back(dagNode);
     }
 
-    return RenderEngine::loadGraph(*buildingDag, numInputAudioChans, numOutputAudioChans);
+    return RenderEngine::loadGraph(*buildingDag);
 }

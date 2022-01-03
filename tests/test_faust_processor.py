@@ -30,8 +30,58 @@ def test_faust_passthrough():
 
 	# Todo: the last sample is inaccurate by a little bit
 	# So we trim the last sample and compare
-	data = data[:,:audio.shape[1]-1]
-	audio = audio[:,:audio.shape[1]-1]
+	data = data[:,:audio.shape[1]]
+	audio = audio[:,:audio.shape[1]]
+
+	assert(np.allclose(data, audio, atol=1e-07))
+
+	# do the same for noise
+	data = np.random.rand(2, int(SAMPLE_RATE*(DURATION+.1)))
+	playback_processor.set_data(data)
+	render(engine)
+	audio = engine.get_audio()
+
+	data = data[:,:audio.shape[1]]
+	audio = audio[:,:audio.shape[1]]
+
+	assert(np.allclose(data, audio, atol=1e-07))
+
+
+def test_faust_multichannel_in_out():
+
+	DURATION = 5.1
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	numChannels = 9
+	underscores = ",".join('_'*numChannels)
+
+	data = np.sin(np.linspace(0, 4000, num=int(44100*(DURATION+.1))))
+	data = np.stack([data for _ in range(numChannels)])
+
+	playback_processor = engine.make_playback_processor("playback", data)
+
+	faust_processor = engine.make_faust_processor("faust")
+	assert(faust_processor.set_dsp_string(f'process = {underscores};'))
+	assert(faust_processor.compile())
+
+	# print(faust_processor.get_parameters_description())
+
+	graph = [
+	    (playback_processor, []),
+	    (faust_processor, ["playback"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	render(engine, file_path='output/test_faust_multichannel_in_out.wav')
+
+	audio = engine.get_audio()
+
+	# Todo: the last sample is inaccurate by a little bit
+	# So we trim the last sample and compare
+	data = data[:,:audio.shape[1]]
+	audio = audio[:,:audio.shape[1]]
 
 	assert(np.allclose(data, audio, atol=1e-07))
 
@@ -118,7 +168,6 @@ def test_faust_automation():
 
 	dsp_path = abspath("faust_dsp/two_stereo_inputs_filter.dsp")
 	faust_processor = engine.make_faust_processor("faust")
-	faust_processor.set_dsp(dsp_path)
 	assert(faust_processor.set_dsp(dsp_path))
 	assert(faust_processor.compile())
 

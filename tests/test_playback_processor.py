@@ -1,6 +1,6 @@
 from utils import *
 
-BUFFER_SIZE = 16
+BUFFER_SIZE = 1
 
 def test_playback(set_data=False):
 
@@ -25,3 +25,14 @@ def test_playback(set_data=False):
 	output = engine.get_audio()
 
 	wavfile.write('output/test_playback.wav', SAMPLE_RATE, output.transpose())
+
+	# do the same for noise
+	data = np.random.rand(2, int(SAMPLE_RATE*(DURATION+.1)))
+	playback_processor.set_data(data)
+	render(engine)
+	audio = engine.get_audio()
+
+	data = data[:,:audio.shape[1]]
+	audio = audio[:,:audio.shape[1]]
+
+	assert(np.allclose(data, audio, atol=1e-07))

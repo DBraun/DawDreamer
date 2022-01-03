@@ -19,10 +19,9 @@
 # DawDreamer
 
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
-* Composing graphs of audio processors
+* Composing graphs of multi-channel audio processors
 * Audio playback
-* VST instruments
-* VST effects
+* VST instruments and effects
 * [FAUST](http://faust.grame.fr/) effects and [polyphonic instruments](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters)
 * Time-stretching and looping according to Ableton Live warp markers
 * Pitch-warping
@@ -156,7 +155,7 @@ engine.render(DURATION)  # render audio again!
 
 ### Using FAUST processors
 
-Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in a `process` with 2 outputs and an even number of inputs. Here's an example using a demo stereo reverb:
+Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` Here's an example using a demo stereo reverb:
 
 #### **faust_reverb.dsp:**
 ```dsp

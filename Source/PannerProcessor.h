@@ -12,7 +12,7 @@ public:
         setPan(panVal);
 
         myPan = myParameters.getRawParameterValue("pan");
-
+        setMainBusInputsAndOutputs(2, 2);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {

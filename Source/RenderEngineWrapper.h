@@ -50,6 +50,6 @@ public:
     std::shared_ptr<FaustProcessor> makeFaustProcessor(const std::string& name);
 #endif
 
-    bool loadGraphWrapper(py::object dagObj, int numInputAudioChans, int numOutputAudioChans);
+    bool loadGraphWrapper(py::object dagObj);
 
 };

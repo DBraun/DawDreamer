@@ -8,7 +8,6 @@ RenderEngine::RenderEngine(double sr, int bs) :
     myMainProcessorGraph.reset(new juce::AudioProcessorGraph());
     myMainProcessorGraph->setNonRealtime(true);
     myMainProcessorGraph->setPlayHead(this);
-    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(0));
 }
 
 RenderEngine::~RenderEngine()
@@ -17,144 +16,151 @@ RenderEngine::~RenderEngine()
 }
 
 bool
-RenderEngine::loadGraph(DAG inDagNodes, int numInputAudioChans=2, int numOutputAudioChans=2) {
+RenderEngine::loadGraph(DAG inDagNodes) {
 
     bool success = true;
-
+    
     std::vector<DAGNode>* dagNodes = (std::vector<DAGNode>*) &inDagNodes;
 
     myMainProcessorGraph->clear();
 
-    myNumInputAudioChans = numInputAudioChans;
-    myNumOutputAudioChans = numOutputAudioChans;
-
     using AudioGraphIOProcessor = juce::AudioProcessorGraph::AudioGraphIOProcessor;
 
-    myMidiInputNode = myMainProcessorGraph->addNode(std::make_unique<AudioGraphIOProcessor>(AudioGraphIOProcessor::midiInputNode));
-
-    juce::ReferenceCountedArray<juce::AudioProcessorGraph::Node> slots;
     int nodeInt = 0;
 
-    std::unordered_map<std::string, int> uniqueNameToSlotIndex;
+    m_UniqueNameToSlotIndex.clear();
+    m_UniqueNameToInputs.clear();
+    
+    slots.clear();
 
     for (auto node : *dagNodes) {
         auto processorBase = node.processorBase;
-        std::vector<std::string> inputs = node.inputs;
 
         auto myNode = myMainProcessorGraph->addNode((std::unique_ptr<ProcessorBase>)processorBase);
 
         // todo: does incReferenceCount() cause memory leak??
-        // If we don't do it, later calls to this function to load a new graph crash at
-        // myMainProcessorGraph->clear();
+        // If we don't do it, later calls to this function to load a new graph crash at myMainProcessorGraph->clear();
         myNode.get()->incReferenceCount();
 
         slots.set(nodeInt, myNode);
-        //slots.getUnchecked(nodeInt)->getProcessor()->setNonRealtime(true); // assume processors are initialized in non-real-time mode.
-        slots.getUnchecked(nodeInt)->getProcessor()->setPlayConfigDetails(myNumOutputAudioChans *(int)(inputs.size()),
-            myNumOutputAudioChans,
-            mySampleRate, myBufferSize);
-
-        if (processorBase->acceptsMidi()) {
-            // Connect MIDI.
-            // Assume the first node is the one that needs to receive MIDI.
-            myMainProcessorGraph->addConnection({ { myMidiInputNode->nodeID,  juce::AudioProcessorGraph::midiChannelIndex },
-                                            { slots.getUnchecked(nodeInt)->nodeID, juce::AudioProcessorGraph::midiChannelIndex } });
-        }
-
-        uniqueNameToSlotIndex[processorBase->getUniqueName()] = nodeInt;
-
-        int inputIndex = 0;
-        for (const std::string inputName : inputs) {
-
-            if (uniqueNameToSlotIndex.find(inputName) == uniqueNameToSlotIndex.end())
-            {
-                std::cout << "Error connecting " << inputName << " to " << processorBase->getUniqueName() << ";" << std::endl;
-                std::cout << "You might need to place " << inputName << " earlier in the graph." << std::endl;
-                success = false;
-                continue;
-            }
-
-            int slotIndexOfInput = uniqueNameToSlotIndex[inputName];
-
-            for (int channel = 0; channel < myNumOutputAudioChans; ++channel) {
-                int chanSource = channel;
-                int chanDest = inputIndex * myNumOutputAudioChans + channel;
-                bool result = myMainProcessorGraph->addConnection({ { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
-                                                { slots.getUnchecked(nodeInt)->nodeID, chanDest } });
-                if (!result) {
-                    std::cout << "Error connecting " << inputName << " " << chanSource << " to " << processorBase->getUniqueName() << " " << chanDest << std::endl;
-                    success = false;
-                }
-            }
-
-            inputIndex++;
-        }
+        m_UniqueNameToSlotIndex[processorBase->getUniqueName()] = nodeInt;
+        m_UniqueNameToInputs[processorBase->getUniqueName()] = node.inputs;
 
         nodeInt++;
     }
+    
+    return success;
+}
 
-    if (!slots.isEmpty()) {
-
-        auto lastNodeID = slots.getLast()->nodeID;
-
-        slots.set(nodeInt, myMainProcessorGraph->addNode(std::make_unique<RecorderProcessor>("_output_recorder")));
-        slots.getUnchecked(nodeInt)->getProcessor()->setPlayConfigDetails(myNumInputAudioChans,
-            myNumOutputAudioChans,
-            mySampleRate, myBufferSize);
-        slots.getUnchecked(nodeInt)->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
-
-        auto recorderNodeID = slots.getUnchecked(nodeInt)->nodeID;
-
-        for (int channel = 0; channel < myNumOutputAudioChans; ++channel)
-        {
-            bool result = myMainProcessorGraph->addConnection({ { lastNodeID, channel },
-                    { recorderNodeID, channel } });
-            if (!result) {
-                std::cout << "unable to connect to recorderNode" << std::endl;
-                success = false;
+bool
+RenderEngine::connectGraph() {
+        
+    int numNodes = myMainProcessorGraph->getNumNodes();
+    for (int i = 0; i < numNodes; i++) {
+        auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
+        
+        int numOutputAudioChans = processor->getMainBusNumOutputChannels();
+        int numInputAudioChans = 0;
+                
+        std::string myUniqueName = processor->getUniqueName();
+        
+        auto inputs = m_UniqueNameToInputs[myUniqueName];
+                
+        for (auto otherNode : myMainProcessorGraph->getNodes()) {
+            auto otherName = ((ProcessorBase*) otherNode->getProcessor())->getUniqueName();
+            
+            if (std::find(inputs.begin(), inputs.end(), otherName) != inputs.end()) {
+                numInputAudioChans += otherNode->getProcessor()->getMainBusNumOutputChannels();
             }
         }
+
+        processor->setPlayConfigDetails(numInputAudioChans, numOutputAudioChans, mySampleRate, myBufferSize);
+        
+        int chanDest = 0;
+
+        for (const std::string inputName : m_UniqueNameToInputs[myUniqueName]) {
+
+            if (m_UniqueNameToSlotIndex.find(inputName) == m_UniqueNameToSlotIndex.end())
+            {
+                std::cout << "Error connecting " << inputName << " to " << myUniqueName << ";" << std::endl;
+                std::cout << "You might need to place " << inputName << " earlier in the graph." << std::endl;
+                return false;
+            }
+            
+            int slotIndexOfInput = m_UniqueNameToSlotIndex[inputName];
+
+            auto inputProcessor = myMainProcessorGraph->getNode(slotIndexOfInput)->getProcessor();
+            
+            for (int chanSource = 0; chanSource < inputProcessor->getMainBusNumOutputChannels(); chanSource++) {
+                bool result = myMainProcessorGraph->addConnection({ { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
+                                                { slots.getUnchecked(i)->nodeID, chanDest } });
+                if (!result) {
+                    std::cout << "Error connecting " << inputName << " " << chanSource << " to " << myUniqueName << " " << chanDest << std::endl;
+                    return false;
+                }
+                
+                chanDest++;
+            }
+        }
+
+        processor->setConnectedInGraph(true);
+        
     }
 
-    for (auto node : myMainProcessorGraph->getNodes()) {
-        node->getProcessor()->enableAllBuses();
-    }
-
-    myMainProcessorGraph->setPlayConfigDetails(myNumInputAudioChans,
-        myNumOutputAudioChans,
-        mySampleRate, myBufferSize);
-
+    myMainProcessorGraph->enableAllBuses();
+    myMainProcessorGraph->setPlayConfigDetails(0, 0, mySampleRate, myBufferSize);
     myMainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
     for (auto node : myMainProcessorGraph->getNodes()) {
         node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
         node->getProcessor()->setPlayHead(this);
     }
-
-    return success;
+    
+    return true;
 }
 
-void
+bool
 RenderEngine::render(const double renderLength) {
 
     int numRenderedSamples = renderLength * mySampleRate;
     if (numRenderedSamples <= 0) {
         std::cerr << "Render length must be greater than zero.";
-        return;
+        return false;
     }
+    
+    int numberOfBuffers = myBufferSize == 1 ? numRenderedSamples : int(std::ceil((numRenderedSamples -1.) / myBufferSize));
 
-    int numberOfBuffers = int(std::ceil((numRenderedSamples -1.) / myBufferSize));
+    bool graphIsConnected = true;
+    
+    int numNodes = myMainProcessorGraph->getNumNodes();
+    for (int i = 0; i < numNodes; i++) {
+        auto faustProcessor = dynamic_cast<FaustProcessor*> (myMainProcessorGraph->getNode(i)->getProcessor());
+        if (faustProcessor && (!faustProcessor->isCompiled())) {
+            if (!faustProcessor->compile()) {
+                std::cerr << "Faust didn't compile correctly." << std::endl;
+                return false;
+            }
+        }
+        auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
+        if (processor) {
+            graphIsConnected = graphIsConnected && processor->isConnectedInGraph();
+        }
 
-    AudioSampleBuffer audioBuffer(myNumOutputAudioChans, myBufferSize);
-
-    // Clear main buffer and prepare to record samples over multiple buffer passes.
-    myRecordedSamples.clear();
-    myRecordedSamples = std::vector<std::vector<float>>(myNumOutputAudioChans, std::vector<float>(numRenderedSamples, 0.f));
-
+    }
+    
+    if (!graphIsConnected) {
+        connectGraph();
+    }
+    
+    int numInputAudioChans = myMainProcessorGraph->getNode(0)->getProcessor()->getMainBusNumInputChannels();
+    int numOutputAudioChans = myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes()-1)->getProcessor()->getMainBusNumOutputChannels();
+    
+    int audioBufferNumChans = std::max(numOutputAudioChans, numInputAudioChans);
+    AudioSampleBuffer audioBuffer(audioBufferNumChans, myBufferSize);
+    
     myMainProcessorGraph->reset();
     myMainProcessorGraph->setPlayHead(this);
 
     myCurrentPositionInfo.resetToDefault();
-
     myCurrentPositionInfo.bpm = myBPM;
     myCurrentPositionInfo.isPlaying = true;
     myCurrentPositionInfo.isRecording = true;
@@ -163,18 +169,21 @@ RenderEngine::render(const double renderLength) {
     myCurrentPositionInfo.timeSigDenominator = 4;
     myCurrentPositionInfo.isLooping = false;
 
-    for (int i = 0; i < myMainProcessorGraph->getNumNodes(); i++) {
+    for (int i = 0; i < numNodes; i++) {
         auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
         if (processor) {
-            processor->setRecorderLength(numRenderedSamples);
+            if (i == numNodes-1) {
+                // always force the last processor to record. todo: maybe this is clumsy.
+                processor->setRecordEnable(true);
+            }
+            processor->setRecorderLength(processor->getRecordEnable() ? numRenderedSamples : 0);
         }
     }
 
     MidiBuffer renderMidiBuffer;
-
+    
     for (long long int i = 0; i < numberOfBuffers; ++i)
     {
-        // This gets RecorderProcessor to write to this RenderEngine's myRecordedSamples.
         myMainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
 
         myCurrentPositionInfo.timeInSamples += myBufferSize;
@@ -183,11 +192,13 @@ RenderEngine::render(const double renderLength) {
 
     myCurrentPositionInfo.isPlaying = false;
     myCurrentPositionInfo.isRecording = false;
+    
+    return true;
 }
 
 void RenderEngine::setBPM(double bpm) {
     if (bpm <= 0) {
-        std::cerr << "BPM must be positive.";
+        std::cerr << "BPM must be positive." << std::endl;
         return;
     }
     myBPM = bpm;
@@ -196,15 +207,22 @@ void RenderEngine::setBPM(double bpm) {
 py::array_t<float>
 RenderEngine::getAudioFrames()
 {
-
     auto nodes = myMainProcessorGraph->getNodes();
-    for (auto& node: nodes) {
+    
+    if (nodes.size() == 0) {
+        // NB: For some reason we can't initialize the array as shape (2, 0)
+        py::array_t<float, py::array::c_style> arr({ 2, 1 });
+        arr.resize({ 2, 0 });
 
-        auto processor = dynamic_cast<RecorderProcessor*>(node->getProcessor());
-        if (processor) {
-            return processor->getAudioFrames();
-        }
-
+        return arr;
+    }
+    
+    auto node = nodes.getLast();
+    
+    auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
+    if (processor) {
+        auto uniqueName = processor->getUniqueName();
+        return getAudioFramesForName(uniqueName);
     }
 
     // NB: For some reason we can't initialize the array as shape (2, 0)
@@ -217,7 +235,6 @@ RenderEngine::getAudioFrames()
 py::array_t<float>
 RenderEngine::getAudioFramesForName(std::string& name)
 {
-
     auto nodes = myMainProcessorGraph->getNodes();
     for (auto& node : nodes) {
 
@@ -235,7 +252,6 @@ RenderEngine::getAudioFramesForName(std::string& name)
 
     return arr;
 }
-
 
 bool
 RenderEngine::getCurrentPosition(CurrentPositionInfo& result) {

@@ -12,6 +12,7 @@
 #include "faust/gui/SoundUI.h"
 
 #include "faust/midi/rt-midi.h"
+#include "TMutex.h"
 
 #include <iostream>
 #include <map>
@@ -194,10 +195,8 @@ protected:
 
     std::map<int, int> m_map_juceIndex_to_faustIndex;
     std::map<int, std::string> m_map_juceIndex_to_parAddress;
-
-#ifdef WIN32
-    HANDLE guiUpdateMutex; // todo: enable mutex on linux and macOS
-#endif
+    
+    TMutex guiUpdateMutex;
 };
 
 #endif

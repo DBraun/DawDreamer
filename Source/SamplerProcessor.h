@@ -11,6 +11,7 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         sampler.setSample(inputData, mySampleRate);
+        setMainBusInputsAndOutputs(0, 2);
     }
 
     SamplerProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, int blocksize) : ProcessorBase{ newUniqueName }, mySampleRate{ sr }
@@ -18,6 +19,7 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         setData(input);
+        setMainBusInputsAndOutputs(0, 2);
     }
 
     ~SamplerProcessor() {}

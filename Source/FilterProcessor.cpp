@@ -13,6 +13,7 @@ FilterProcessor::FilterProcessor(std::string newUniqueName, std::string mode, fl
     myGain = myParameters.getRawParameterValue("gain");
 
     setMode(mode);
+    setMainBusInputsAndOutputs(2, 2);
 }
 
 const juce::String FilterProcessor::getName() { return "FilterProcessor"; }

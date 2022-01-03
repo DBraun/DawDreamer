@@ -68,10 +68,11 @@ private:
 
 protected:
 
-    std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> myPlugin;
+    std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> myPlugin = nullptr;
     // For an explanation of myCopyBuffer, read PluginProcessor::processBlock
     juce::AudioSampleBuffer myCopyBuffer;
-    int myCopyBufferNumChans = 2;
+    int myCopyBufferNumChans = 0;
+    int myNumOutputChans = 0;
 
 };
 
