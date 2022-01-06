@@ -187,3 +187,63 @@ def test_faust_automation():
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_faust_automation.wav')
+
+def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav")
+
+	data = data.mean(axis=0, keepdims=True)
+
+	assert(data.ndim == 2)
+	assert(data.shape[0] == 1)
+
+	playback_processor = engine.make_playback_processor("playback", data)
+
+	if set_data:
+		playback_processor.set_data(data)
+
+	faust_processor = engine.make_faust_processor("faust")
+
+	dsp_code = f"""
+
+	import("stdfaust.lib");
+
+	L = {ambisonics_order};
+
+	encoder3Dxyz(n, x, tx, ty, tz) = ho.encoder3D(n, signal, angle, elevation)
+	with {{
+		max_gain = 10.; // todo: user can pick this.
+		// 10 indicates don't multiply the signal by more than 10 even if it's very close in 3D
+		xz_square = tx*tx+tz*tz;
+	    signal = x / max(1./max_gain, sqrt(xz_square+ty*ty));
+
+	    angle = atan2(tx, -tz);
+	    elevation = atan2(ty, sqrt(xz_square));
+	}};
+
+	process(sig) = encoder3Dxyz(L, sig, 
+	    hslider("tx", 1., -10000., 10000., ma.EPSILON),
+	    hslider("ty", 1., -10000., 10000., ma.EPSILON),
+	    hslider("tz", 1., -10000., 10000., ma.EPSILON)
+	    );
+
+	"""
+
+	faust_processor.set_dsp_string(dsp_code)
+	assert(faust_processor.compile())
+
+	# print(faust_processor.get_parameters_description())
+
+	assert(faust_processor.get_num_input_channels() == 1)
+	assert(faust_processor.get_num_output_channels() == (ambisonics_order+1)**2)
+
+	graph = [
+	    (playback_processor, []),
+	    (faust_processor, ["playback"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	render(engine, file_path='output/test_faust_ambisonics_encoding.wav')

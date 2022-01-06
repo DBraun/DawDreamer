@@ -75,6 +75,7 @@ public:
                 for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
                     for (int sample = 0; sample < numSamples; sample++) {
                         // todo: don't assume float
+                        // todo: use memcpy or similar to be faster
                         static_cast<float**>(soundfile->fBuffers)[chan][offset + sample] = buffer.getSample(chan, sample);
                     }
                 }

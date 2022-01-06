@@ -34,7 +34,7 @@ def load_audio_file(file_path, duration=None):
 
 def render(engine, file_path=None, duration=5.):
 
-	engine.render(duration)
+	assert(engine.render(duration))
 
 	output = engine.get_audio()
 

@@ -1,6 +1,6 @@
 from utils import *
 
-BUFFER_SIZE = 4096*4
+BUFFER_SIZE = 512
 
 def test_sampler(set_data=False):
 
@@ -21,6 +21,8 @@ def test_sampler(set_data=False):
 
 	if set_data:
 		sampler_processor.set_data(data)
+
+	assert(sampler_processor.get_num_output_channels() == 2)
 
 	desc = sampler_processor.get_parameters_description()
 	# print(desc)

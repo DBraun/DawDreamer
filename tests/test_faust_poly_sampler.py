@@ -2,6 +2,9 @@ from utils import *
 
 BUFFER_SIZE = 1024
 
+# todo: this example is bad because it turns a waveform into a very long string,
+#  which takes a long time to compile as Faust code. It would be better to
+#  find a way to use the soundfile primitive with a wavecycle.
 def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)

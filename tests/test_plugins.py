@@ -27,6 +27,8 @@ def test_plugin_effect(set_data=False):
 	effect = engine.make_plugin_processor("effect", abspath("plugins/"+plugin_name))
 
 	# print(effect.get_plugin_parameters_description())
+	assert(effect.get_num_input_channels() == 2)
+	assert(effect.get_num_output_channels() == 2)
 
 	graph = [
 	    (playback_processor, []),
@@ -93,6 +95,9 @@ def test_plugin_serum():
 	assert(synth.set_parameter(0, synth.get_parameter(0)))
 	assert(synth.set_automation(0, np.array([synth.get_parameter(0)])))
 
+	assert(synth.get_num_input_channels() == 0)
+	assert(synth.get_num_output_channels() == 2)
+
 	 # (MIDI note, velocity, start sec, duration sec)
 	synth.add_midi_note(60, 60, 0.0, .25)
 	synth.add_midi_note(64, 80, 0.5, .5)
@@ -110,3 +115,46 @@ def test_plugin_serum():
 
 	audio = engine.get_audio()
 	assert(not np.allclose(audio*0., audio, atol=1e-07))
+
+
+# def test_plugin_effect_ambisonics(set_data=False):
+
+# 	if MY_SYSTEM != "Windows":
+# 		return
+
+# 	DURATION = 5.
+
+# 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+# 	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+# 	playback_processor = engine.make_playback_processor("playback", data)
+
+# 	data = data.mean(axis=0, keepdims=True)
+
+# 	if set_data:
+# 		playback_processor.set_data(data)
+
+# 	plugin_name = "sparta_ambiENC.vst" if MY_SYSTEM == "Darwin" else "sparta_ambiENC.dll"
+
+# 	effect = engine.make_plugin_processor("effect", abspath("plugins/"+plugin_name))
+
+# 	effect.set_parameter(0, 1)
+
+# 	assert(effect.get_num_input_channels() == 64)
+# 	assert(effect.get_num_output_channels() == 64)
+
+# 	# for par in effect.get_plugin_parameters_description():
+# 	# 	print(par)
+
+# 	graph = [
+# 	    (playback_processor, []),
+# 	    (effect, ["playback"])
+# 	]
+
+# 	assert(engine.load_graph(graph))
+
+# 	render(engine, file_path='output/test_plugin_effect_ambisonics.wav', duration=DURATION)
+
+# 	audio = engine.get_audio()
+
+# 	assert(effect.get_num_output_channels() == audio.shape[0])

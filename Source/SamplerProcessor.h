@@ -11,7 +11,7 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         sampler.setSample(inputData, mySampleRate);
-        setMainBusInputsAndOutputs(0, 2);
+        setMainBusInputsAndOutputs(0, inputData.size());
     }
 
     SamplerProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, int blocksize) : ProcessorBase{ newUniqueName }, mySampleRate{ sr }
@@ -19,7 +19,7 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         setData(input);
-        setMainBusInputsAndOutputs(0, 2);
+        setMainBusInputsAndOutputs(0, input.shape(0));
     }
 
     ~SamplerProcessor() {}
@@ -31,7 +31,7 @@ public:
     wrapperGetParameter(int parameterIndex)
     {
         if (parameterIndex >= sampler.getNumParameters()) {
-            std::cout << "Parameter not found for index: " << parameterIndex << std::endl;
+            std::cerr << "Parameter not found for index: " << parameterIndex << std::endl;
             return 0.;
         }
 
@@ -41,13 +41,14 @@ public:
     }
 
     void
-    wrapperSetParameter(const int paramIndex, const float value)
+    wrapperSetParameter(const int parameterIndex, const float value)
     {
-        auto parameterName = sampler.getParameterName(paramIndex);
-
-        if (parameterName == "Param") {
+        if (parameterIndex >= sampler.getNumParameters()) {
+            std::cerr << "Parameter not found for index: " << parameterIndex << std::endl;
             return;
         }
+
+        auto parameterName = sampler.getParameterName(parameterIndex);
 
         ProcessorBase::setAutomationVal(parameterName.toStdString(), value);
     }
@@ -84,6 +85,9 @@ public:
         getPlayHead()->getCurrentPosition(posInfo);
 
         automateParameters();
+
+        buffer.clear(); // todo: why did this become necessary?
+        midiBuffer.clear();
 
         long long int start = posInfo.timeInSamples;
         long long int end = start + buffer.getNumSamples();
@@ -242,19 +246,14 @@ public:
         ValueTree blankState;
         myParameters.replaceState(blankState);
 
-        int usedParameterAmount = 0;
         for (int i = 0; i < sampler.getNumParameters(); ++i)
         {
             auto parameterName = sampler.getParameterName(i);
             // Ensure the parameter is not unused.
-            if (parameterName != "Param")
-            {
-                ++usedParameterAmount;
 
-                myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
-                // give it a valid single sample of automation.
-                ProcessorBase::setAutomationVal(parameterName.toStdString(), sampler.getParameter(i));
-            }
+            myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
+            // give it a valid single sample of automation.
+            ProcessorBase::setAutomationVal(parameterName.toStdString(), sampler.getParameter(i));
         }
     }
 
@@ -273,7 +272,7 @@ public:
                 sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
-                std::cout << "Error automateParameters: " << theName << std::endl;
+                std::cerr << "Error automateParameters: " << theName << std::endl;
             }
         }
         
