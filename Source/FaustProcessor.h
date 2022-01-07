@@ -104,6 +104,7 @@ public:
     FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock);
     ~FaustProcessor();
 
+    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
     void prepareToPlay(double sampleRate, int samplesPerBlock);
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);

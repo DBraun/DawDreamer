@@ -52,6 +52,15 @@ public:
     double getTailLengthSeconds() const override { return 0; }
 
     //==============================================================================
+    virtual bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
+        return AudioProcessor::canApplyBusesLayout(layout);
+    }
+
+    virtual bool setBusesLayout(const BusesLayout& arr) {
+        return AudioProcessor::setBusesLayout(arr);
+    }
+
+    //==============================================================================
     int getNumPrograms() override { return 0; }
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram(int) override {}
@@ -121,7 +130,7 @@ public:
         return AudioProcessor::getTotalNumInputChannels();
     }
 
-    void numChannelsChanged();
+    virtual void numChannelsChanged();
 
     bool isConnectedInGraph() { return m_isConnectedInGraph;}
     void setConnectedInGraph(bool isConnected) {
@@ -135,8 +144,13 @@ public:
         const AudioChannelSet outputChannelSet = AudioChannelSet::discreteChannels(outputs);
         busesLayout.inputBuses.add(inputChannelSet);
         busesLayout.outputBuses.add(outputChannelSet);
-        
-        AudioProcessor::setBusesLayout(busesLayout);
+
+        if (this->canApplyBusesLayout(busesLayout)) {
+            bool result = this->setBusesLayout(busesLayout);
+        }
+        else {
+            std::cerr << this->getUniqueName() << " CANNOT ApplyBusesLayout inputs: " << inputs << " outputs: " << outputs << std::endl;
+        }
     }
 
 private:

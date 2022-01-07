@@ -48,18 +48,24 @@ RenderEngine::loadGraph(DAG inDagNodes) {
 
         nodeInt++;
     }
+
+    myMainProcessorGraph->enableAllBuses();
     
     return success;
 }
 
 bool
 RenderEngine::connectGraph() {
-        
+
+    // remove all connections
+    for (auto connection : myMainProcessorGraph->getConnections()) {
+        myMainProcessorGraph->removeConnection(connection);
+    }
+     
     int numNodes = myMainProcessorGraph->getNumNodes();
     for (int i = 0; i < numNodes; i++) {
         auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
         
-        int numOutputAudioChans = processor->getMainBusNumOutputChannels();
         int numInputAudioChans = 0;
                 
         std::string myUniqueName = processor->getUniqueName();
@@ -74,6 +80,19 @@ RenderEngine::connectGraph() {
             }
         }
 
+        processor->setPlayHead(this);
+        processor->automateParameters();
+        int numOutputAudioChans = processor->getMainBusNumOutputChannels();
+        int actualInputs = processor->getMainBusNumInputChannels();
+        if (numInputAudioChans > actualInputs) {
+            std::cerr << "Too many inputs (" << numInputAudioChans << ") are trying to connect to " << actualInputs << " inputs for processor " << myUniqueName << std::endl;
+            return false;
+        }
+
+        numInputAudioChans = std::max(numInputAudioChans, actualInputs);
+
+        //std::cerr << processor->getUniqueName() << " setPlayConfigDetails inputs: " << numInputAudioChans << " outputs: " << numOutputAudioChans << std::endl;
+        
         processor->setPlayConfigDetails(numInputAudioChans, numOutputAudioChans, mySampleRate, myBufferSize);
         
         int chanDest = 0;
@@ -92,8 +111,11 @@ RenderEngine::connectGraph() {
             auto inputProcessor = myMainProcessorGraph->getNode(slotIndexOfInput)->getProcessor();
             
             for (int chanSource = 0; chanSource < inputProcessor->getMainBusNumOutputChannels(); chanSource++) {
-                bool result = myMainProcessorGraph->addConnection({ { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
-                                                { slots.getUnchecked(i)->nodeID, chanDest } });
+
+                AudioProcessorGraph::Connection connection = { { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
+                                                { slots.getUnchecked(i)->nodeID, chanDest } };
+
+                bool result = myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
                 if (!result) {
                     std::cout << "Error connecting " << inputName << " " << chanSource << " to " << myUniqueName << " " << chanDest << std::endl;
                     return false;
@@ -107,12 +129,10 @@ RenderEngine::connectGraph() {
         
     }
 
-    myMainProcessorGraph->enableAllBuses();
     myMainProcessorGraph->setPlayConfigDetails(0, 0, mySampleRate, myBufferSize);
     myMainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
     for (auto node : myMainProcessorGraph->getNodes()) {
         node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
-        node->getProcessor()->setPlayHead(this);
     }
     
     return true;
@@ -146,17 +166,7 @@ RenderEngine::render(const double renderLength) {
         }
 
     }
-    
-    if (!graphIsConnected) {
-        connectGraph();
-    }
-    
-    int numInputAudioChans = myMainProcessorGraph->getNode(0)->getProcessor()->getMainBusNumInputChannels();
-    int numOutputAudioChans = myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes()-1)->getProcessor()->getMainBusNumOutputChannels();
-    
-    int audioBufferNumChans = std::max(numOutputAudioChans, numInputAudioChans);
-    AudioSampleBuffer audioBuffer(audioBufferNumChans, myBufferSize);
-    
+
     myMainProcessorGraph->reset();
     myMainProcessorGraph->setPlayHead(this);
 
@@ -168,7 +178,21 @@ RenderEngine::render(const double renderLength) {
     myCurrentPositionInfo.timeSigNumerator = 4;
     myCurrentPositionInfo.timeSigDenominator = 4;
     myCurrentPositionInfo.isLooping = false;
-
+    
+    if (!graphIsConnected) {
+        bool result = connectGraph();
+        if (!result) {
+            std::cerr << "Unable to connect graph." << std::endl;
+            return false;
+        }
+    }
+    
+    int numInputAudioChans = myMainProcessorGraph->getNode(0)->getProcessor()->getTotalNumInputChannels();
+    int numOutputAudioChans = myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes()-1)->getProcessor()->getMainBusNumOutputChannels();
+    
+    int audioBufferNumChans = std::max(numOutputAudioChans, numInputAudioChans);
+    AudioSampleBuffer audioBuffer(audioBufferNumChans, myBufferSize);
+    
     for (int i = 0; i < numNodes; i++) {
         auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
         if (processor) {

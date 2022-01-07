@@ -11,6 +11,23 @@ public:
     PluginProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path);
     ~PluginProcessor();
 
+    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
+
+    bool setBusesLayout(const BusesLayout& arr) {
+        if (myPlugin.get()) {
+            AudioProcessor::setBusesLayout(arr);
+            return myPlugin->setBusesLayout(arr);
+        }
+        return false;
+    }
+
+    void numChannelsChanged() {
+        ProcessorBase::numChannelsChanged();
+        if (myPlugin.get()) {
+            myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
+        }
+    }
+
     void prepareToPlay(double sampleRate, int samplesPerBlock);
 
     bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
@@ -69,9 +86,6 @@ private:
 protected:
 
     std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> myPlugin = nullptr;
-    // For an explanation of myCopyBuffer, read PluginProcessor::processBlock
-    juce::AudioSampleBuffer myCopyBuffer;
-    int myCopyBufferNumChans = 0;
 };
 
 

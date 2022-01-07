@@ -44,6 +44,11 @@ FaustProcessor::~FaustProcessor() {
 	deleteAllDSPFactories();
 }
 
+bool
+FaustProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
+	return (layout.getMainInputChannels() == m_numInputChannels) && (layout.getMainOutputChannels() == m_numOutputChannels);
+}
+
 void
 FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {

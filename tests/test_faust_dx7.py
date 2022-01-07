@@ -48,5 +48,6 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 
 def test_faust_dx7():
 
-	for i in range(32):
+	# just test 2 out of 32 to save some time
+	for i in range(2):
 		_test_faust_dx7(algorithm=i, num_voices=8, buffer_size=2048)

@@ -164,21 +164,28 @@ def _test_plugin_goodhertz_sidechain(do_sidechain=True):
 
 	plugin = engine.make_plugin_processor("plugin", plugin_path)
 
+	# plugin.set_parameter(2, 1.)
+	# plugin.set_parameter(5, .1)
+	# plugin.set_parameter(13, 1.)
+	# plugin.set_parameter(15, 1.)
+	# plugin.set_parameter(18, 1.)
+
 	if do_sidechain:
-		# plugin.set_parameter(2, 1.)
-		# plugin.set_parameter(5, .1)
-		# plugin.set_parameter(13, 1.)
-		# plugin.set_parameter(15, 1.)
-		# plugin.set_parameter(18, 1.)
+
 		plugin.set_parameter(19, 0.5)
 		# parameter 19 is the "External Sidechain" for Vulf Compressor. In the UI, click the three dots, which opens the panel
 		# Then look for "External Sidechain" and set it to 50%.
 
-	graph = [
-		(vocals_processor, []),
-		(drums_processor, []),
-		(plugin, ["vocals", "drums"]) if do_sidechain else (plugin, ["vocals"])
-	]
+		graph = [
+			(vocals_processor, []),
+			(drums_processor, []),
+			(plugin, ["vocals", "drums"])
+		]
+	else:
+		graph = [
+			(vocals_processor, []),
+			(plugin, ["vocals"])
+		]
 
 	assert(engine.load_graph(graph))
 

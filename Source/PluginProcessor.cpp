@@ -9,9 +9,6 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
     myPluginPath = path;
 
     loadPlugin(sampleRate, samplesPerBlock);
-
-    // in processBlock, the size will be set correctly.
-    myCopyBuffer.setSize(myCopyBufferNumChans, samplesPerBlock);
 }
 
 bool
@@ -60,21 +57,14 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         if (myPlugin->getMainBusNumInputChannels() == 0 && myPlugin->getMainBusNumOutputChannels() == 0) {
             myPlugin->enableAllBuses();
         }
- 
-        myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
+  
+        auto inputs = myPlugin->getTotalNumInputChannels();
+        auto outputs = myPlugin->getTotalNumOutputChannels();
+        myPlugin->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
+        this->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
         myPlugin->setNonRealtime(true);
         mySampleRate = sampleRate;
         
-        // todo: make this more dynamic
-        auto inputs = myPlugin->getMainBusNumInputChannels();
-        auto outputs = myPlugin->getMainBusNumOutputChannels();
-        
-        myCopyBufferNumChans = std::max(inputs, outputs);
-
-        //std::cerr << "plugin inputs: " << inputs << " outputs: " << outputs << std::endl;
-        
-        setMainBusInputsAndOutputs(inputs, outputs);
-
         createParameterLayout();
 
         return true;
@@ -99,6 +89,16 @@ void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
     if (myPlugin.get()) {
         myPlugin->setPlayHead(newPlayHead);
     }
+}
+
+bool
+PluginProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
+
+    if (!myPlugin.get()) {
+        return false;
+    }
+
+    return myPlugin->checkBusesLayoutSupported(layout);
 }
 
 void
@@ -133,35 +133,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         }
     } while (myIsMessageBetween && myMidiEventsDoRemain);
 
-    /*
-    First copy from buffer to myCopyBuffer.
-    Why? Some plugins involve multiple buses (e.g., sidechain compression). You can check this with
-    `myPlugin->getBusCount()`. However, it can be difficult to add or remove buses: `myPlugin->canRemoveBus(1);`
-    That function may actually not be able to remove a secondary (optional) sidechain bus.
-    myPlugin->processBlock will expect to receive a buffer whose number of channels is the max(the total of all the input bus
-    channels, the total of all output bus channels). When users create a graph with DawDreamer, they may pass only 1 stereo input
-    to a plugin with an optional sidechain. This will cause the arg buffer to have 2 channels. However, myPlugin->processBlock would
-    expect 4 channels (2 channels for each input bus, the second bus being the unspecified sidechain input). Therefore, the solution
-    is to have myCopyBuffer be the larger size, and to copy whatever channels exist in buffer into it. In effect, the sidechain input
-    will have zeros. Then we copy the results of myCopyBuffer back to buffer so that other processors receive the result.
-    */
-
-    int numSamples = buffer.getNumSamples();
-
-    myCopyBuffer.setSize(std::max(buffer.getNumChannels(), myCopyBufferNumChans), numSamples, false, true, false);
-
-    for (int i = 0; i < buffer.getNumChannels(); i++)
-    {
-        myCopyBuffer.copyFrom(i, 0, buffer.getReadPointer(i), numSamples);
-    }
-
-    myPlugin->processBlock(myCopyBuffer, myRenderMidiBuffer);
-
-    // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
-    for (int i = 0; i < getNumOutputChannels(); i++)
-    {
-        buffer.copyFrom(i, 0, myCopyBuffer.getReadPointer(i), numSamples);
-    }
+    myPlugin->processBlock(buffer, myRenderMidiBuffer);
     
     ProcessorBase::processBlock(buffer, midiBuffer);
 }
@@ -180,6 +152,7 @@ PluginProcessor::automateParameters() {
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
             if (theParameter) {
+                // todo: change to setParameterNotifyingHost?
                 myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
