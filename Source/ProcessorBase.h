@@ -110,7 +110,17 @@ public:
             myRecordBuffer.setSize(numChannels, 0);
         }
     }
+
+    int
+    getTotalNumOutputChannels() {
+        return AudioProcessor::getTotalNumOutputChannels();
+    }
     
+    int
+    getTotalNumInputChannels() {
+        return AudioProcessor::getTotalNumInputChannels();
+    }
+
     void numChannelsChanged();
 
     bool isConnectedInGraph() { return m_isConnectedInGraph;}

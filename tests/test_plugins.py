@@ -1,16 +1,19 @@
 from utils import *
 import platform
+import os.path
 
 MY_SYSTEM = platform.system()
 # "Darwin" is macOS. "Windows" is Windows.
 
 BUFFER_SIZE = 16
 
-def test_plugin_effect(set_data=False):
+def _test_stereo_plugin_effect(plugin_path):
 
-	if MY_SYSTEM not in ["Darwin", "Windows"]:
-		# We don't test LV2 plugins on Linux yet.
-		return
+	if MY_SYSTEM == 'Darwin':
+		# macOS treats .component and .vst3 as directories
+		assert(os.path.isdir(plugin_path))
+	else:
+		assert(os.path.isfile(plugin_path))
 
 	DURATION = 5.
 
@@ -19,12 +22,7 @@ def test_plugin_effect(set_data=False):
 	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
 	playback_processor = engine.make_playback_processor("playback", data)
 
-	if set_data:
-		playback_processor.set_data(data)
-
-	plugin_name = "DimensionExpander.vst" if MY_SYSTEM == "Darwin" else "Dimension Expander_x64.dll"
-
-	effect = engine.make_plugin_processor("effect", abspath("plugins/"+plugin_name))
+	effect = engine.make_plugin_processor("effect", plugin_path)
 
 	# print(effect.get_plugin_parameters_description())
 	assert(effect.get_num_input_channels() == 2)
@@ -37,12 +35,36 @@ def test_plugin_effect(set_data=False):
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_plugin_effect.wav', duration=DURATION)
+	plugin_basename = os.path.basename(plugin_path)
+
+	render(engine, file_path=f'output/test_plugin_effect_{plugin_basename}.wav', duration=DURATION)
+
+	# check that it's non-silent
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .05)
+
+def test_stereo_plugin_effects():
+
+	if MY_SYSTEM not in ["Darwin", "Windows"]:
+		# todo: we should test LV2 plugins on Linux.
+		return
+
+	plugin_paths = []
+
+	if MY_SYSTEM == 'Darwin':
+		plugin_paths.append(abspath("plugins/ValhallaFreqEcho.vst"))
+		plugin_paths.append(abspath("plugins/ValhallaFreqEcho.vst3"))
+		plugin_paths.append(abspath("plugins/ValhallaFreqEcho.component"))
+	elif MY_SYSTEM == 'Windows':
+		plugin_paths.append(abspath("plugins/Dimension Expander_x64.dll"))
+
+	for plugin_path in plugin_paths:
+		_test_stereo_plugin_effect(plugin_path)
 
 def test_plugin_instrument():
 
 	if MY_SYSTEM not in ["Darwin", "Windows"]:
-		# We don't test LV2 plugins on Linux yet.
+		# todo: we should test LV2 plugins on Linux.
 		return
 
 	DURATION = 5.

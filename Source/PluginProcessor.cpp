@@ -54,21 +54,31 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
     {
         // Success so set up plugin, then set up features and get all available
         // parameters from this given plugin.
+        
+        // For VST3 on macOS, it seems that the main bus isn't setup,
+        //   but if we run enableAllBuses on VST2 it breaks them...
+        if (myPlugin->getMainBusNumInputChannels() == 0 && myPlugin->getMainBusNumOutputChannels() == 0) {
+            myPlugin->enableAllBuses();
+        }
+
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
         myPlugin->setNonRealtime(true);
-        myNumOutputChans = myPlugin->getTotalNumOutputChannels();
-        myCopyBufferNumChans = std::max(myNumOutputChans, myPlugin->getTotalNumInputChannels());
         mySampleRate = sampleRate;
         
         // todo: make this more dynamic
-        setMainBusInputsAndOutputs(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
+        auto inputs = myPlugin->getMainBusNumInputChannels();
+        auto outputs = myPlugin->getMainBusNumOutputChannels();
+        
+        myCopyBufferNumChans = std::max(inputs, outputs);
+        
+        setMainBusInputsAndOutputs(inputs, outputs);
 
         createParameterLayout();
 
         return true;
     }
 
-    std::cout << "PluginProcessor::loadPlugin error: " << errorMessage.toStdString() << std::endl;
+    std::cerr << "PluginProcessor::loadPlugin error: " << errorMessage.toStdString() << std::endl;
     return false;
 
 }
