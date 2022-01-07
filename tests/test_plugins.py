@@ -139,6 +139,64 @@ def test_plugin_serum():
 	assert(not np.allclose(audio*0., audio, atol=1e-07))
 
 
+def _test_plugin_goodhertz_sidechain(do_sidechain=True):
+
+	if MY_SYSTEM not in ["Windows"]:
+		# We don't Goodhertz on platforms other than Windows.
+		return
+
+	plugin_path = "C:/VSTPlugIns/Goodhertz/Ghz Vulf Compressor 3.vst3"
+
+	if not isfile(plugin_path):
+		return
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	DURATION = 5.1
+
+	vocals = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+	drums = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav", duration=DURATION)
+
+	drums *= .1
+
+	vocals_processor = engine.make_playback_processor("vocals", vocals)
+	drums_processor = engine.make_playback_processor("drums", drums)
+
+	plugin = engine.make_plugin_processor("plugin", plugin_path)
+
+	if do_sidechain:
+		# plugin.set_parameter(2, 1.)
+		# plugin.set_parameter(5, .1)
+		# plugin.set_parameter(13, 1.)
+		# plugin.set_parameter(15, 1.)
+		# plugin.set_parameter(18, 1.)
+		plugin.set_parameter(19, 0.5)
+		# parameter 19 is the "External Sidechain" for Vulf Compressor. In the UI, click the three dots, which opens the panel
+		# Then look for "External Sidechain" and set it to 50%.
+
+	graph = [
+		(vocals_processor, []),
+		(drums_processor, []),
+		(plugin, ["vocals", "drums"]) if do_sidechain else (plugin, ["vocals"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	sidechain_on = "on" if do_sidechain else "off"
+
+	file_path = f'output/test_plugin_goodhertz_sidechain_{sidechain_on}.wav'
+
+	render(engine, file_path=file_path, duration=DURATION)
+
+	audio = engine.get_audio()
+	assert(not np.allclose(audio*0., audio, atol=1e-07))
+
+
+def test_plugin_goodhertz_sidechain():
+	_test_plugin_goodhertz_sidechain(do_sidechain=True)
+	_test_plugin_goodhertz_sidechain(do_sidechain=False)
+
+
 # def test_plugin_effect_ambisonics(set_data=False):
 
 # 	if MY_SYSTEM != "Windows":
@@ -158,7 +216,11 @@ def test_plugin_serum():
 
 # 	plugin_name = "sparta_ambiENC.vst" if MY_SYSTEM == "Darwin" else "sparta_ambiENC.dll"
 
-# 	effect = engine.make_plugin_processor("effect", abspath("plugins/"+plugin_name))
+# 	plugin_path = abspath("plugins/"+plugin_name)
+# 	if not isfile(plugin_path):
+# 		return
+
+# 	effect = engine.make_plugin_processor("effect", plugin_path)
 
 # 	effect.set_parameter(0, 1)
 

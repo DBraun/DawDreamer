@@ -60,7 +60,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         if (myPlugin->getMainBusNumInputChannels() == 0 && myPlugin->getMainBusNumOutputChannels() == 0) {
             myPlugin->enableAllBuses();
         }
-
+ 
         myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
         myPlugin->setNonRealtime(true);
         mySampleRate = sampleRate;
@@ -70,6 +70,8 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         auto outputs = myPlugin->getMainBusNumOutputChannels();
         
         myCopyBufferNumChans = std::max(inputs, outputs);
+
+        //std::cerr << "plugin inputs: " << inputs << " outputs: " << outputs << std::endl;
         
         setMainBusInputsAndOutputs(inputs, outputs);
 
@@ -156,7 +158,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
     myPlugin->processBlock(myCopyBuffer, myRenderMidiBuffer);
 
     // copy myCopyBuffer back to buffer because this is how it gets passed to other processors.
-    for (int i = 0; i < myNumOutputChans; i++)
+    for (int i = 0; i < getNumOutputChannels(); i++)
     {
         buffer.copyFrom(i, 0, myCopyBuffer.getReadPointer(i), numSamples);
     }

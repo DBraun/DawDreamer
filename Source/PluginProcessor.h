@@ -72,8 +72,6 @@ protected:
     // For an explanation of myCopyBuffer, read PluginProcessor::processBlock
     juce::AudioSampleBuffer myCopyBuffer;
     int myCopyBufferNumChans = 0;
-    int myNumOutputChans = 0;
-
 };
 
 

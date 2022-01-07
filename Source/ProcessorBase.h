@@ -101,7 +101,7 @@ public:
     }
 
     void setRecorderLength(int numSamples) {
-        int numChannels = this->getMainBusNumOutputChannels();
+        int numChannels = this->getTotalNumOutputChannels();
         
         if (m_recordEnable) {
             myRecordBuffer.setSize(numChannels, numSamples);
