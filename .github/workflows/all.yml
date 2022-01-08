@@ -51,7 +51,6 @@ jobs:
         cmake \
         python3 \
         python${{ matrix.python-version }}-dev \
-        faust \
         libsamplerate0 \
         libsndfile1 \
         llvm-11 \
@@ -76,11 +75,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel pytest numpy librosa scipy
 
-    - name: Test with pytest
-      run: |
-        cd tests
-        pytest .
-
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
       with:
@@ -94,7 +88,7 @@ jobs:
         rm -rf dawdreamer/faustlibraries/.git
 
     - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.1.1
+      run: python -m pip install cibuildwheel>=2.3.1
 
     # # I think the audit is failing because the build links against local LLVM-related things.
     # #  or https://cibuildwheel.readthedocs.io/en/stable/faq/#linux-builds-on-docker
@@ -211,7 +205,7 @@ jobs:
         pytest .
 
     - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.1.1
+      run: python -m pip install cibuildwheel>=2.3.1
 
     - name: Build wheels 3.7
       if: ${{ matrix.python-version == '3.7' }}
@@ -283,11 +277,10 @@ jobs:
       with:
         submodules: true
 
-    # Only used for hosting cibuildwheel, so version doesn't matter
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: ${{matrix.python-version}}
 
     - name: Get CMake
       uses: lukka/get-cmake@latest
@@ -324,12 +317,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-major }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
-          echo "python bin is $(which python)"
-          echo "python3 bin is $(which python3)"
-          echo "python3-config is $(which python3-config)"
-          echo "1 pythonLocation is $pythonLocation" 
           export pythonLocation=$(python3-config --prefix)
-          echo "2 pythonLocation is $pythonLocation" 
           xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
           mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so

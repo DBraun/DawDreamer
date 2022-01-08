@@ -24,7 +24,6 @@ RUN apt-get update -yq \
     cmake \
     python3 \
     python3.9-dev \
-    faust \
     libsamplerate0 \
     libsndfile1 \
     llvm-11 \
