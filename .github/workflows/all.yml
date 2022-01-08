@@ -322,10 +322,10 @@ jobs:
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-major }}
-        pythonLocation: /Library/Frameworks/Python.framework/Versions/${{ matrix.python-major }}
+        pythonLocation: $(python3-config --prefix)
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_ALL_MACOS: |
-          ls -R ${{env.pythonLocation}}*
+          echo "pythonLocation: ${{env.pythonLocation}}" 
           xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
           mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
