@@ -50,6 +50,8 @@ RenderEngine::loadGraph(DAG inDagNodes) {
     }
 
     myMainProcessorGraph->enableAllBuses();
+    // NB: don't enableAllBuses on all the processors in the graph because
+    // it will actually mess them up (FaustProcessor)
     
     return success;
 }

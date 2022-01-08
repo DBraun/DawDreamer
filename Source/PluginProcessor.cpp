@@ -47,32 +47,24 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         samplesPerBlock,
         errorMessage);
 
-    if (myPlugin.get() != nullptr)
+    if (myPlugin.get() == nullptr)
     {
-        // Success so set up plugin, then set up features and get all available
-        // parameters from this given plugin.
-        
-        // For VST3 on macOS, it seems that the main bus isn't setup,
-        //   but if we run enableAllBuses on VST2 it breaks them...
-        if (myPlugin->getMainBusNumInputChannels() == 0 && myPlugin->getMainBusNumOutputChannels() == 0) {
-            myPlugin->enableAllBuses();
-        }
-  
-        auto inputs = myPlugin->getTotalNumInputChannels();
-        auto outputs = myPlugin->getTotalNumOutputChannels();
-        myPlugin->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
-        this->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
-        myPlugin->setNonRealtime(true);
-        mySampleRate = sampleRate;
-        
-        createParameterLayout();
-
-        return true;
+        std::cerr << "PluginProcessor::loadPlugin error: " << errorMessage.toStdString() << std::endl;
+        return false;
     }
 
-    std::cerr << "PluginProcessor::loadPlugin error: " << errorMessage.toStdString() << std::endl;
-    return false;
+    myPlugin->enableAllBuses();
 
+    auto inputs = myPlugin->getTotalNumInputChannels();
+    auto outputs = myPlugin->getTotalNumOutputChannels();
+    this->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
+    myPlugin->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
+    myPlugin->setNonRealtime(true);
+    mySampleRate = sampleRate;
+    
+    createParameterLayout();
+
+    return true;
 }
 
 PluginProcessor::~PluginProcessor() {
@@ -112,14 +104,19 @@ PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
+    myRenderMidiBuffer.clear();
+    
     if (!myPlugin.get()) {
         buffer.clear();
+        
+        if (posInfo.ppqPosition == 0) {
+            std::cerr << "Error: no plugin was processed." << std::endl;
+        }
         return;
     }
     
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
-
     automateParameters();
 
     long long int start = posInfo.timeInSamples;

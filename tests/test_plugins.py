@@ -7,7 +7,7 @@ MY_SYSTEM = platform.system()
 
 BUFFER_SIZE = 16
 
-def _test_stereo_plugin_effect(plugin_path):
+def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
 
 	if MY_SYSTEM == 'Darwin':
 		# macOS treats .component and .vst3 as directories
@@ -20,12 +20,13 @@ def _test_stereo_plugin_effect(plugin_path):
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
 	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+
 	playback_processor = engine.make_playback_processor("playback", data)
 
 	effect = engine.make_plugin_processor("effect", plugin_path)
 
 	# print(effect.get_plugin_parameters_description())
-	assert(effect.get_num_input_channels() == 2)
+	assert(effect.get_num_input_channels() == expected_num_inputs)
 	assert(effect.get_num_output_channels() == 2)
 
 	graph = [
@@ -52,14 +53,20 @@ def test_stereo_plugin_effects():
 	plugin_paths = []
 
 	if MY_SYSTEM == 'Darwin':
-		plugin_paths.append(abspath("plugins/ValhallaFreqEcho.vst"))
-		plugin_paths.append(abspath("plugins/ValhallaFreqEcho.vst3"))
-		plugin_paths.append(abspath("plugins/ValhallaFreqEcho.component"))
-	elif MY_SYSTEM == 'Windows':
-		plugin_paths.append(abspath("plugins/Dimension Expander_x64.dll"))
+		# todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
+		# plugin_paths.append((abspath("plugins/ValhallaFreqEcho.vst"), 2))
+		# plugin_paths.append((abspath("plugins/ValhallaFreqEcho.vst3"), 2))
+		# plugin_paths.append((abspath("plugins/ValhallaFreqEcho.component"), 2))
 
-	for plugin_path in plugin_paths:
-		_test_stereo_plugin_effect(plugin_path)
+		# RoughRider has an optional mono sidechain input
+		plugin_paths.append((abspath("plugins/RoughRider3.vst"), 3))
+		plugin_paths.append((abspath("plugins/RoughRider3.vst3"), 3))
+		plugin_paths.append((abspath("plugins/RoughRider3.component"), 3))
+	elif MY_SYSTEM == 'Windows':
+		plugin_paths.append((abspath("plugins/Dimension Expander_x64.dll"), 2))
+
+	for plugin_args in plugin_paths:
+		_test_stereo_plugin_effect(*plugin_args)
 
 def test_plugin_instrument():
 
@@ -77,7 +84,8 @@ def test_plugin_instrument():
 
 	# print(synth.get_plugin_parameters_description())
 
-	 # (MIDI note, velocity, start sec, duration sec)
+	# (MIDI note, velocity, start sec, duration sec)
+	# todo: on macOS the note is skipped if it starts at exactly 0.0.
 	synth.add_midi_note(60, 60, 0.0, .25)
 	synth.add_midi_note(64, 80, 0.5, .5)
 	synth.add_midi_note(67, 127, 0.75, .5)
