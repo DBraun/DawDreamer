@@ -4,5 +4,8 @@ authors:
 - family-names: "Braun"
   given-names: "David"
   orcid: "https://orcid.org/0000-0001-8866-0756"
-title: "DawDreamer"
-url: "https://github.com/DBraun/DawDreamer"
+title: "DawDreamer: Bridging the Gap Between Digital Audio Workstations and Python Interfaces"
+journal: "Late-Breaking/Demo ISMIR"
+volume: 2021
+year: 2021
+url: "https://archives.ismir.net/ismir2021/latebreaking/000001.pdf"
