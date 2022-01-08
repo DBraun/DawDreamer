@@ -223,10 +223,13 @@ def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
 	    elevation = atan2(ty, sqrt(xz_square));
 	}};
 
+	// todo: ma.EPSILON doesn't work on Linux?
+	eps = .00001;
+	//eps = ma.EPSILON;
 	process(sig) = encoder3Dxyz(L, sig, 
-	    hslider("tx", 1., -10000., 10000., ma.EPSILON),
-	    hslider("ty", 1., -10000., 10000., ma.EPSILON),
-	    hslider("tz", 1., -10000., 10000., ma.EPSILON)
+	    hslider("tx", 1., -10000., 10000., eps),
+	    hslider("ty", 1., -10000., 10000., eps),
+	    hslider("tz", 1., -10000., 10000., eps)
 	    );
 
 	"""
