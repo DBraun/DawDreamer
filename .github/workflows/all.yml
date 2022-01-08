@@ -318,6 +318,8 @@ jobs:
     - name: Build wheels ${{ matrix.python-version }}
       run: |
         pip install setuptools wheel
+        export pythonLocation=$(python3-config --prefix)
+        echo "1 pythonLocation is $pythonLocation" 
         python -m cibuildwheel --output-dir wheelhouse
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
@@ -325,8 +327,7 @@ jobs:
         # pythonLocation: $(python3-config --prefix)
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_ALL_MACOS: |
-          export pythonLocation=$(python3-config --prefix)
-          echo "pythonLocation is $pythonLocation" 
+          echo "2 pythonLocation is $pythonLocation" 
           xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
           mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
