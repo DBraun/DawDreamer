@@ -801,7 +801,7 @@
 					"$(SRCROOT)/../../JuceLibraryCode",
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
 					"$(pythonLocation)/include/python$(PYTHONMAJOR)",
-					"$(pythonLocation)/include/",
+					"$(pythonLocation)/include/python$(PYTHONMAJOR)m",
 					"$(SRCROOT)/../../thirdparty/pybind11/include",
 					"/usr/local/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
@@ -824,7 +824,7 @@
 					"\"../../thirdparty/libsamplerate/build_debug/src\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(pythonLocation)/include/ $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(pythonLocation)/include/python$(PYTHONMAJOR)m $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython$(PYTHONMAJOR)";
@@ -927,7 +927,7 @@
 					"$(SRCROOT)/../../JuceLibraryCode",
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
 					"$(pythonLocation)/include/python$(PYTHONMAJOR)",
-					"$(pythonLocation)/include/",
+					"$(pythonLocation)/include/python$(PYTHONMAJOR)m",
 					"$(SRCROOT)/../../thirdparty/pybind11/include",
 					"/usr/local/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
@@ -951,7 +951,7 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(pythonLocation)/include/ $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(pythonLocation)/include/python$(PYTHONMAJOR)m $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src/kissfft $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -lpython$(PYTHONMAJOR)";
