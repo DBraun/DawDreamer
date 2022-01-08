@@ -326,7 +326,7 @@ jobs:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_ALL_MACOS: |
           export pythonLocation=$(python3-config --prefix)
-          echo "pythonLocation: ${{env.pythonLocation}}" 
+          echo "pythonLocation is $pythonLocation" 
           xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
           mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
@@ -334,7 +334,7 @@ jobs:
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
           echo "Doing otool shenanigans"
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
-          install_name_tool -change ${{env.pythonLocation}}/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
+          install_name_tool -change $pythonLocation/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
 # Note on otool shenanigans: on an ordinary consumer macOS system, the env var $pythonLocation should be /Library/Frameworks/Python.framework/Versions/3.8
 # This section assumes there is a Unix Executable file at /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python
