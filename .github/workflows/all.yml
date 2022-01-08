@@ -287,7 +287,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel pytest numpy SoundFile scipy
-        ls ${{env.pythonLocation}}/include/python${{ matrix.python-version }}
+        ls -r ${{env.pythonLocation}}
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
