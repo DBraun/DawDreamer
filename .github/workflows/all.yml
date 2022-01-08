@@ -320,10 +320,12 @@ jobs:
         pip install setuptools wheel
         python -m cibuildwheel --output-dir wheelhouse
       env:
-        # note that the Projucer project refers to PYTHONMAJOR, so it must be set here
+        # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-major }}
+        pythonLocation: /Library/Frameworks/Python.framework/Versions/${{ matrix.python-major }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_ALL_MACOS: |
+          ls -R ${{env.pythonLocation}}*
           xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
           mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
@@ -333,7 +335,12 @@ jobs:
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
           install_name_tool -change ${{env.pythonLocation}}/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
-
+# Note on otool shenanigans: on an ordinary consumer macOS system, the env var $pythonLocation should be /Library/Frameworks/Python.framework/Versions/3.8
+# This section assumes there is a Unix Executable file at /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python
+# making @executable_path resolve to /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/
+# However, I was hoping @executable_path would just be /Library/Frameworks/Python.framework/Versions/3.8/bin
+# because of the executable at /Library/Frameworks/Python.framework/Versions/3.8/bin/python3 which is itself a reference to
+# /Library/Frameworks/Python.framework/Versions/3.8/Python
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
         CIBW_BUILD: ${{matrix.build}}
