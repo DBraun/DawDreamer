@@ -121,8 +121,7 @@ setup(
         "Topic :: Multimedia :: Sound/Audio",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10"
+        "Programming Language :: Python :: 3.9"
     ],
     keywords='audio music sound',
     python_requires=python_requires,
