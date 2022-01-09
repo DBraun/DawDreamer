@@ -350,7 +350,6 @@ jobs:
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
         CIBW_BUILD: ${{matrix.build}}
-        MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
         CIBW_TEST_SKIP: "*37* *39* *-macosx_universal2:arm64"
