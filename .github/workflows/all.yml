@@ -280,8 +280,8 @@ jobs:
       matrix:
         include:
         # - { os: macos-latest, build: cp36-macosx_x86_64, python-version: 3.6, osx-archs: "x86_64", python-major: "3.6m" }
-        # - { os: macos-latest, build: cp37-macosx_x86_64, python-version: 3.7, osx-archs: "x86_64", python-major: "3.7m" }
-        - { os: macos-latest, build: cp38-macosx_universal2, python-version: 3.8, osx-archs: "x86_64;arm64", python-major: "3.8" }
+        - { os: macos-latest, build: cp37-macosx_x86_64, python-version: 3.7, osx-archs: "x86_64", python-major: "3.7m" }
+        - { os: macos-latest, build: cp38-macosx_x86_64, python-version: 3.8, osx-archs: "x86_64", python-major: "3.8" }
         - { os: macos-latest, build: cp39-macosx_universal2, python-version: 3.9, osx-archs: "x86_64;arm64", python-major: "3.9" }
         - { os: macos-latest, build: cp310-macosx_universal2, python-version: 3.10, osx-archs: "x86_64;arm64", python-major: "3.10" }
 
@@ -293,7 +293,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.7
 
     - name: Get CMake
       uses: lukka/get-cmake@latest
@@ -352,7 +352,7 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
-        CIBW_TEST_SKIP: "*37* *39* *-macosx_universal2:arm64"
+        CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
 
     - uses: actions/upload-artifact@v2
       with:
