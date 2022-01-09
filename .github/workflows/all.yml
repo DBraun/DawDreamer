@@ -151,7 +151,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, 3.10]
 
     steps:
     - uses: actions/checkout@v2
@@ -244,6 +244,18 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_BUILD: "cp39*"
 
+    - name: Build wheels 3.10
+      if: ${{ matrix.python-version == '3.10' }}
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        PYTHONMAJOR: ${{ matrix.python-version }}
+        CIBW_BUILD_VERBOSITY: 1
+        CIBW_TEST_REQUIRES: -r test-requirements.txt
+        # CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_ARCHS: auto64
+        CIBW_BUILD: "cp31*"
+
     - uses: actions/upload-artifact@v2
       with:
         name: my-wheel-artifact
@@ -271,7 +283,7 @@ jobs:
         # - { os: macos-latest, build: cp37-macosx_x86_64, python-version: 3.7, osx-archs: "x86_64", python-major: "3.7m" }
         - { os: macos-latest, build: cp38-macosx_universal2, python-version: 3.8, osx-archs: "x86_64;arm64", python-major: "3.8" }
         - { os: macos-latest, build: cp39-macosx_universal2, python-version: 3.9, osx-archs: "x86_64;arm64", python-major: "3.9" }
-        # - { os: macos-latest, build: cp310-macosx_universal2, python-version: 3.10, osx-archs: "x86_64;arm64", python-major: "3.10" }
+        - { os: macos-latest, build: cp310-macosx_universal2, python-version: 3.10, osx-archs: "x86_64;arm64", python-major: "3.10" }
 
     steps:
     - uses: actions/checkout@v2
@@ -340,7 +352,8 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_ARCHS: auto64
-        CIBW_ARCHS_MACOS: universal2 # Support Apple Silicon
+        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
+        CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
 
     - uses: actions/upload-artifact@v2
       with:
