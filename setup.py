@@ -13,7 +13,7 @@ import platform
 import glob
 
 
-python_requires = "==" + os.environ['PYTHONMAJOR'] + '.*'  # set with github action
+python_requires = "==" + os.environ['PYTHONMAJOR'].replace('m', '') + '.*'  # set with github action
 print(f'python_requires: {python_requires}')
 
 
