@@ -102,7 +102,7 @@ jobs:
     #     CIBW_BUILD_VERBOSITY: 1
     #     CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
     #     CIBW_TEST_REQUIRES: -r test-requirements.txt
-    #     CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+    #     CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest ."
     #     CIBW_ARCHS: auto64
     #     CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
 
@@ -144,7 +144,7 @@ jobs:
     #     run: |
     #       echo "Running tests"
     #       cd /DawDreamer/tests
-    #       pytest .
+    #       python -m pytest .
 
   build-windows:
     runs-on: windows-latest
@@ -208,7 +208,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: "cp37*"
 
@@ -220,7 +220,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: "cp38*"
 
@@ -232,7 +232,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: "cp39*"
 
@@ -244,7 +244,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: "cp31*"
 
@@ -340,7 +340,7 @@ jobs:
 # because of the executable at /Library/Frameworks/Python.framework/Versions/3.8/bin/python3 which is itself a reference to
 # /Library/Frameworks/Python.framework/Versions/3.8/Python
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+        CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest ."
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
