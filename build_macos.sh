@@ -1,7 +1,7 @@
 # Build Libsamplerate
 cd thirdparty/libsamplerate
 mkdir build_release
-cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DLIBSAMPLERATE_EXAMPLES=off
+cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
 make --directory=build_release
 cd ../..
 
