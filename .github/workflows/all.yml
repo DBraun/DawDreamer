@@ -319,6 +319,7 @@ jobs:
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-major }}
+        MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
           export pythonLocation=$(python3-config --prefix)
@@ -343,7 +344,7 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
-        CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
+        CIBW_TEST_SKIP: "*37* *38*"
 
     - uses: actions/upload-artifact@v2
       with:

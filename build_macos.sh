@@ -24,3 +24,8 @@ codesign -vvvv Builds/MacOSX/build/Release/dawdreamer.so
 
 rm tests/dawdreamer.so
 cp Builds/MacOSX/build/Release/dawdreamer.so tests/dawdreamer.so
+
+# # To make a wheel locally:
+# export MACOSX_DEPLOYMENT_TARGET=10.15
+# pip install setuptools wheel build
+# python3 -m build --wheel
