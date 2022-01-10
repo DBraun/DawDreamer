@@ -344,7 +344,8 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
-        CIBW_TEST_SKIP: "*37* *38*"
+        # todo: want to test 37 and 38
+        CIBW_TEST_SKIP: "*37* *38* *31*"
 
     - uses: actions/upload-artifact@v2
       with:
