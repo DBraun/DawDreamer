@@ -324,10 +324,10 @@ jobs:
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
           install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
-          echo "Doing otool shenanigans"
-          otool -L Builds/MacOSX/build/Release/dawdreamer.so
-          install_name_tool -change $pythonLocation/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
-          otool -L Builds/MacOSX/build/Release/dawdreamer.so
+#          echo "Doing otool shenanigans"
+#          otool -L Builds/MacOSX/build/Release/dawdreamer.so
+#          install_name_tool -change $pythonLocation/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
+#          otool -L Builds/MacOSX/build/Release/dawdreamer.so
 # Note on otool shenanigans: on an ordinary consumer macOS system, the env var $pythonLocation should be /Library/Frameworks/Python.framework/Versions/3.8
 # This section assumes there is a Unix Executable file at /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python
 # making @executable_path resolve to /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/
