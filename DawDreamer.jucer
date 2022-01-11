@@ -240,7 +240,7 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
                vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
-               extraLinkerFlags="-shared -lpython$(PYTHONMAJOR)" externalLibraries="samplerate&#10;faust"
+               extraLinkerFlags="-shared -Wl,-undefined,dynamic_lookup" externalLibraries="samplerate&#10;faust"
                extraDefs="SAMPLER_SKIP_UI&#10;HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer.so"

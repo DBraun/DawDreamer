@@ -13,7 +13,6 @@ xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
 mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
 # otool -L Builds/MacOSX/build/Release/dawdreamer.so
 install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
-install_name_tool -change /Library/Frameworks/Python.framework/Versions/3.9/Python @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
 # otool -L Builds/MacOSX/build/Release/dawdreamer.so
 
 # codesigning
