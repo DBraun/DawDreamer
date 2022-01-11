@@ -335,7 +335,7 @@ jobs:
 # because of the executable at /Library/Frameworks/Python.framework/Versions/3.8/bin/python3 which is itself a reference to
 # /Library/Frameworks/Python.framework/Versions/3.8/Python
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest ."
+        CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -s ."
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
