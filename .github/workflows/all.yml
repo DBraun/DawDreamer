@@ -330,7 +330,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
         # todo: want to test 37 and universal2
-        CIBW_TEST_SKIP: "*37* *macosx_universal2"
+        CIBW_TEST_SKIP: "*37* *38*"
 
     - uses: actions/upload-artifact@v2
       with:
