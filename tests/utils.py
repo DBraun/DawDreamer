@@ -1,5 +1,3 @@
-
-import pytest
 from scipy.io import wavfile
 from os.path import abspath, isfile
 import numpy as np

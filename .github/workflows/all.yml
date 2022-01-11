@@ -309,13 +309,8 @@ jobs:
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
 
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel==2.3.1
-
     - name: Build wheels ${{ matrix.python-version }}
-      run: |
-        pip install setuptools wheel
-        python -m cibuildwheel --output-dir wheelhouse
+      uses: pypa/cibuildwheel@v2.3.1
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-major }}
