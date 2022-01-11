@@ -324,17 +324,19 @@ jobs:
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
           install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
           otool -L Builds/MacOSX/build/Release/dawdreamer.so
-#          echo "Doing otool shenanigans"
-#          otool -L Builds/MacOSX/build/Release/dawdreamer.so
-#          install_name_tool -change $pythonLocation/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
-#          otool -L Builds/MacOSX/build/Release/dawdreamer.so
+          echo "Doing otool shenanigans"
+          otool -L Builds/MacOSX/build/Release/dawdreamer.so
+          install_name_tool -change $pythonLocation/Python intentionally_missing_python.dylib Builds/MacOSX/build/Release/dawdreamer.so
+          otool -L Builds/MacOSX/build/Release/dawdreamer.so
 # Note on otool shenanigans: on an ordinary consumer macOS system, the env var $pythonLocation should be /Library/Frameworks/Python.framework/Versions/3.8
 # This section assumes there is a Unix Executable file at /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python
 # making @executable_path resolve to /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/
 # However, I was hoping @executable_path would just be /Library/Frameworks/Python.framework/Versions/3.8/bin
 # because of the executable at /Library/Frameworks/Python.framework/Versions/3.8/bin/python3 which is itself a reference to
 # /Library/Frameworks/Python.framework/Versions/3.8/Python
-        CIBW_REPAIR_WHEEL_COMMAND: ""
+        CIBW_REPAIR_WHEEL_COMMAND: >
+          delocate-listdeps {wheel} &&
+          delocate-wheel --ignore-missing-dependencies --require-archs {delocate_archs} -w {dest_dir} {wheel}
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -s ."
         CIBW_BUILD: ${{matrix.build}}
