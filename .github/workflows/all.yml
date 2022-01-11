@@ -281,11 +281,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.7
-
     - name: Get CMake
       uses: lukka/get-cmake@latest
 
@@ -330,7 +325,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
         # todo: want to test 37 and universal2
-        CIBW_TEST_SKIP: "*37* *38*"
+        CIBW_TEST_SKIP: "*37* *38* *310*"
 
     - uses: actions/upload-artifact@v2
       with:
