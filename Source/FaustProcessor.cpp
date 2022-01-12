@@ -254,23 +254,18 @@ FaustProcessor::setDSPString(const std::string& code)
 
 #define FAUSTPROCESSOR_FAIL_COMPILE clear(); return false;
 
-#include "llvm-c/Core.h"
-#include "llvm-c/Target.h"
+#if __APPLE__
 #include "llvm-c/TargetMachine.h"
-#include "llvm/Analysis/TargetTransformInfo.h"
-#include "llvm/IR/DataLayout.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/MC/SubtargetFeature.h"
-//#include "llvm/MC/TargetRegistry.h"
-#include "llvm/Support/FileSystem.h"
+#endif
 
 bool
 FaustProcessor::compile()
 {
+#if __APPLE__
     auto triple = LLVMGetDefaultTargetTriple();
     
     std::cerr << "default triple: (" << triple << ")" << std::endl;
+#endif
     
 	m_isCompiled = false;
 
