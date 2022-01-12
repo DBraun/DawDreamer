@@ -255,7 +255,7 @@ FaustProcessor::setDSPString(const std::string& code)
 #define FAUSTPROCESSOR_FAIL_COMPILE clear(); return false;
 
 #if __APPLE__
-#include "llvm-c/TargetMachine.h"
+#include <llvm-c/TargetMachine.h>
 #endif
 
 bool
