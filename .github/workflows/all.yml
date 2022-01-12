@@ -325,8 +325,9 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: ${{matrix.archs-macos}}
+        CIBW_ENVIRONMENT: NPY_BLAS_ORDER="" NPY_LAPACK_ORDER=""
         # todo: want to test 37 and universal2
-        CIBW_TEST_SKIP: "*38* *39* *310*"
+        # CIBW_TEST_SKIP: "*38* *39* *310*"
 
 
     # - name: Setup Python
