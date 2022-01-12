@@ -327,16 +327,18 @@ jobs:
         # todo: want to test 37 and universal2
         CIBW_TEST_SKIP: "*37* *38* *310*"
 
-    - name: Pytest
+    - name: Setup Python
       uses: actions/setup-python@v2
       if: ${{matrix.python-version != "3.10" && matrix.python-version != "3.7"}}
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Pytest
       run: |
         pip install -r test-requirements.txt
         pip install $(ls wheelhouse/*.whl)
         cd tests
         python -m pytest .
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - uses: actions/upload-artifact@v2
       with:
