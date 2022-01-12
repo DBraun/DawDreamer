@@ -333,12 +333,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Pytest
-      run: |
-        pip install -r test-requirements.txt
-        pip install $(ls wheelhouse/*.whl)
-        cd tests
-        python -m pytest .
+    # - name: Pytest
+    #   run: |
+    #     pip install -r test-requirements.txt
+    #     pip install $(ls wheelhouse/*.whl)
+    #     cd tests
+    #     python -m pytest -s .
 
     - uses: actions/upload-artifact@v2
       with:
