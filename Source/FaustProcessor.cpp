@@ -261,10 +261,9 @@ FaustProcessor::setDSPString(const std::string& code)
 bool
 FaustProcessor::compile()
 {
-#if __APPLE__
-    auto triple = LLVMGetDefaultTargetTriple();
-    
-    std::cerr << "default triple: (" << triple << ")" << std::endl;
+#if __APPLE__    
+    std::cerr << "LLVMGetDefaultTargetTriple: (" << LLVMGetDefaultTargetTriple() << ")" << std::endl;
+    std::cerr << "getDSPMachineTarget(): (" << getDSPMachineTarget() << ")" << std::endl;
 #endif
     
 	m_isCompiled = false;
