@@ -1,4 +1,4 @@
-build
+build/*
 .DS_Store
 */**.so
 
@@ -11,3 +11,4 @@ dawdreamer/licenses/*
 __pycache__/*
 dawdreamer.egg-info/*
 dist/*
+!thirdparty/llvm-project/*
