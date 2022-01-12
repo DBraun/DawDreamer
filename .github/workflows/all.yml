@@ -325,7 +325,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: ${{matrix.archs-macos}}
         # todo: want to test 37 and universal2
-        CIBW_TEST_SKIP: "*37* *38* *310*"
+        CIBW_TEST_SKIP: "*38* *39* *310*"
 
     # - name: Setup Python
     #   uses: actions/setup-python@v2
