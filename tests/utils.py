@@ -3,6 +3,7 @@ from os.path import abspath, isfile
 import numpy as np
 import pathlib
 import random
+import librosa
 
 import dawdreamer as daw
 
@@ -15,17 +16,13 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 
 def load_audio_file(file_path, duration=None):
 
-	try:
-		import librosa
-
-		sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE)
-		assert(rate == SAMPLE_RATE)
-		
-	except ModuleNotFoundError as e:
-		import soundfile
-		# todo: soundfile doesn't allow you to specify the duration or sample rate, unless the file is RAW
-		sig, rate = soundfile.read(file_path, always_2d=True)
-		sig = sig.T
+	sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE)
+	assert(rate == SAMPLE_RATE)
+	
+	# import soundfile
+	# # todo: soundfile doesn't allow you to specify the duration or sample rate, unless the file is RAW
+	# sig, rate = soundfile.read(file_path, always_2d=True)
+	# sig = sig.T
 
 	return sig
 
