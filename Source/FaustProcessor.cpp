@@ -282,16 +282,27 @@ FaustProcessor::compile()
 	auto theCode = m_autoImport + "\n" + m_code;
 
 	std::string m_errorString;
+    
+    const char* target = "";
+#if __APPLE__
+#if defined(__aarch64__) || defined(_M_ARM64)
+    target = "arm64-apple-darwin19.6.0";
+#else
+    target = "x86_64-apple-darwin19.6.0";
+#endif
+#endif
+    
+    std::cerr << "using target: " << target << std::endl;
 
 	// create new factory
 	bool is_polyphonic = m_nvoices > 0;
 	if (is_polyphonic) {
 		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, "", m_errorString, optimize);
+			argc, argv, target, m_errorString, optimize);
 	}
 	else {
 		m_factory = createDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, "", m_errorString, optimize);
+			argc, argv, target, m_errorString, optimize);
 	}
 
 	// check for error
