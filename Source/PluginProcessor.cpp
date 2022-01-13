@@ -18,6 +18,8 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
     AudioPluginFormatManager pluginFormatManager;
 
     pluginFormatManager.addDefaultFormats();
+    
+    juce::MessageManager::getInstance(); // to avoid runtime jassert(false) thrown by JUCE
 
     for (int i = pluginFormatManager.getNumFormats(); --i >= 0;)
     {
@@ -36,7 +38,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
     // If there is a problem here first check the preprocessor definitions
     // in the projucer are sensible - is it set up to scan for plugin's?
     if (pluginDescriptions.size() <= 0) {
-        std::cerr << "Unable to load plugin. The path should be absolute.\n";
+        std::cerr << "Unable to load plugin." << std::endl;
         return false;
     }
 

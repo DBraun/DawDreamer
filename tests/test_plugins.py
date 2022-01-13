@@ -1,6 +1,7 @@
 from utils import *
 import platform
 import os.path
+import os
 
 MY_SYSTEM = platform.system()
 # "Darwin" is macOS. "Windows" is Windows.
@@ -8,6 +9,10 @@ MY_SYSTEM = platform.system()
 BUFFER_SIZE = 16
 
 def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
+
+	# Skip .component plugins on GitHub Actions workflows
+	if os.getenv("CIBW_TEST_REQUIRES") and plugin_path.endswith('.component'):
+		return
 
 	if MY_SYSTEM == 'Darwin':
 		# macOS treats .component and .vst3 as directories
