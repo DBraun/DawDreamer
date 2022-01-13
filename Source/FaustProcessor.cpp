@@ -283,15 +283,21 @@ FaustProcessor::compile()
 
 	std::string m_errorString;
     
+#if __APPLE__
+    auto target = getDSPMachineTarget();
+#else
+    auto target = std::string("");
+#endif
+    
 	// create new factory
 	bool is_polyphonic = m_nvoices > 0;
 	if (is_polyphonic) {
 		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, "", m_errorString, optimize);
+			argc, argv, target.c_str(), m_errorString, optimize);
 	}
 	else {
 		m_factory = createDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, "", m_errorString, optimize);
+			argc, argv, target.c_str(), m_errorString, optimize);
 	}
 
 	// check for error
