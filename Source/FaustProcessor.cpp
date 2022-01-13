@@ -257,6 +257,8 @@ FaustProcessor::setDSPString(const std::string& code)
 bool
 FaustProcessor::compile()
 {
+    std::cerr << "getDSPMachineTarget(): (" << getDSPMachineTarget() << ")" << std::endl;
+    
 	m_isCompiled = false;
 
 	// clean up
