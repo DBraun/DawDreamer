@@ -14,32 +14,6 @@ import("stdfaust.lib");
 // SAMPLE_R_SEQ = waveform{0.0, 0.0} : !, _;
 // SAMPLE_LENGTH = 4; // the length of SAMPLE_L_SEQ and SAMPLE_R_SEQ
 
-// The following functions (lagrange_h, lagrangeN, frdtable)
-// were written by Dario Sanfilippo and were merged into Faust here:
-// https://github.com/grame-cncm/faustlibraries/pull/74
-// They are reproduced here because the latest distribution of Faust
-// still doesn't include them.
-
-declare frdtable author "Dario Sanfilippo";
-declare frdtable copyright "Copyright (C) 2021 Dario Sanfilippo
-    <sanfilippo.dario@gmail.com>";
-declare frdtable license "LGPL v3.0 license";
-
-lagrange_h(N, idx) = par(n, N + 1, prod(k, N + 1, f(n, k)))
-    with {
-        f(n, k) = ((idx - k) * (n != k) + (n == k)) / ((n - k) + (n == k));
-    };
-
-lagrangeN(N, idx) = lagrange_h(N, idx) ,
-                    si.bus(N + 1) : ro.interleave(N + 1, 2) : par(i, N + 1, *) :> _;
-frdtable(N, S, init, idx) =
-    lagrangeN(N, f_idx, par(i, N+1, table(i_idx - int(N / 2) + i)))
-    with {
-        table(j) = rdtable(S, init, int(ma.modulo(j, S)));
-        f_idx = ma.frac(idx) + int(N / 2);
-        i_idx = int(idx);
-    };
-
 // variation of hs_phasor that doesn't loop. It's like a one-shot trigger.
 my_phasor(tablesize,freq,c) = inc*on_memory : + ~ (_*(1-start_pulse)) : min(1.) *(tablesize)
 with {
@@ -66,7 +40,7 @@ envVol = en.adsr(.002, 0.1, 0.9, .1, gate);
 
 ridx = my_phasor(SAMPLE_LENGTH, freq, gate);
 
-process = frdtable(LAGRANGE_ORDER, SAMPLE_LENGTH, SAMPLE_L_SEQ, ridx)*gain*envVol*0.5,
-          frdtable(LAGRANGE_ORDER, SAMPLE_LENGTH, SAMPLE_R_SEQ, ridx)*gain*envVol*0.5;
+process = it.frdtable(LAGRANGE_ORDER, SAMPLE_LENGTH, SAMPLE_L_SEQ, ridx)*gain*envVol*0.5,
+          it.frdtable(LAGRANGE_ORDER, SAMPLE_LENGTH, SAMPLE_R_SEQ, ridx)*gain*envVol*0.5;
 // polyphonic DSP code must declare a stereo effect
 effect = _, _;

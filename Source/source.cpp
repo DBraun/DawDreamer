@@ -46,7 +46,7 @@ PYBIND11_MODULE(dawdreamer, m)
     """
     ----------
 )pbdoc")
-        .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"), R"pbdoc(
+.def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"), R"pbdoc(
     Get a parameter's automation as a numpy array.
 
     Parameters
@@ -63,6 +63,8 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 
 )pbdoc")
+        .def("get_num_output_channels", &ProcessorBase::getTotalNumOutputChannels, "Get the total number of output channels (2 indicates stereo output).")
+        .def("get_num_input_channels", &ProcessorBase::getTotalNumInputChannels, "Get the total number of input channels (2 indicates stereo input).")
         .def_property("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable, "Whether recording of this processor is enabled." )
         .def("get_audio", &ProcessorBase::getAudioFrames, "Get the audio data of the processor after a render, assuming recording was enabled.")
         .def("get_name", &ProcessorBase::getUniqueName, "Get the user-defined name of a processor instance.").doc() = R"pbdoc(
@@ -235,8 +237,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine.")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
-        .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), arg("num_input_audio_chans") = 2, arg("num_out_audio_chans") = 2,
-            "Load a directed acyclic graph of processors.")
+        .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
         .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, arg("name"), arg("frequency"),
             "Make an Oscillator Processor", returnPolicy)
         .def("make_plugin_processor", &RenderEngineWrapper::makePluginProcessor, arg("name"), arg("plugin_path"),

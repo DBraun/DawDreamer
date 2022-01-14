@@ -13,13 +13,13 @@ class PlaybackWarpProcessor : public ProcessorBase
 public:
     PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr) : ProcessorBase{ createParameterLayout, newUniqueName }
     {
-        const int numChannels = (int) inputData.size();
+        m_numChannels = (int) inputData.size();
+        setMainBusInputsAndOutputs(0, m_numChannels);
         const int numSamples = (int)inputData.at(0).size();
         
-        // set to stereo
-        myPlaybackData.setSize(channels, numSamples);
-        for (int chan = 0; chan < channels; chan++) {
-            myPlaybackData.copyFrom(chan, 0, inputData.at(std::min(chan, numChannels)).data(), numSamples);
+        myPlaybackData.setSize(m_numChannels, numSamples);
+        for (int chan = 0; chan < m_numChannels; chan++) {
+            myPlaybackData.copyFrom(chan, 0, inputData.at(chan).data(), numSamples);
         }
 
         init(sr);
@@ -36,7 +36,7 @@ private:
         m_sample_rate = sr;
         setAutomationVal("transpose", 0.);
         myTranspose = myParameters.getRawParameterValue("transpose");
-        setupRubberband(sr);
+        setupRubberband(sr, m_numChannels);
         setClipPositionsDefault();
     }
 
@@ -177,10 +177,10 @@ public:
             numToRetrieve = std::min(numToRetrieve,int(std::ceil( (m_currentClip.end_pos-movingPPQ)/(posInfo.bpm)*60.*m_sample_rate)));
 
             if (numToRetrieve > 0) {
-                m_nonInterleavedBuffer.setSize(channels, numToRetrieve);
+                m_nonInterleavedBuffer.setSize(m_numChannels, numToRetrieve);
                 numToRetrieve = m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
 
-                for (int chan = 0; chan < channels; chan++) {
+                for (int chan = 0; chan < m_numChannels; chan++) {
                     auto chanPtr = m_nonInterleavedBuffer.getReadPointer(chan);
                     buffer.copyFrom(chan, numWritten, chanPtr, numToRetrieve);
                 }
@@ -194,7 +194,7 @@ public:
                 m_clipIndex += 1;
                 if (m_clipIndex < m_clips.size()) {
                     m_currentClip = m_clips.at(m_clipIndex);
-                    setupRubberband(m_sample_rate);
+                    setupRubberband(m_sample_rate, m_numChannels);
                     if (m_clipInfo.warp_on) {
                         sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
                     }
@@ -210,7 +210,7 @@ public:
 
             if (nextPPQ < m_currentClip.start_pos || movingPPQ < m_currentClip.start_pos) {
                 // write some zeros into the output
-                for (int chan = 0; chan < channels; chan++) {
+                for (int chan = 0; chan < m_numChannels; chan++) {
                     buffer.setSample(chan, numWritten, 0.f);
                 }
                 numWritten += 1;
@@ -227,7 +227,7 @@ public:
                 if (m_clipIndex < m_clips.size()) {
                     // Use the next clip position.
                     m_currentClip = m_clips.at(m_clipIndex);
-                    setupRubberband(m_sample_rate);
+                    setupRubberband(m_sample_rate, m_numChannels);
                     if (m_clipInfo.warp_on) {
                         sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
                     }
@@ -237,7 +237,7 @@ public:
                     continue;
                 }
                 else {
-                    for (int chan = 0; chan < channels; chan++) {
+                    for (int chan = 0; chan < m_numChannels; chan++) {
                         buffer.setSample(chan, numWritten, 0.f);
                     }
                     numWritten += 1;
@@ -274,12 +274,12 @@ public:
                 }
             }
 
-            m_nonInterleavedBuffer.setSize(channels, 1);
+            m_nonInterleavedBuffer.setSize(m_numChannels, 1);
 
             // can we read from the playback data or are we out of bounds and we need to pass zeros to rubberband?
             const int last_sample = myPlaybackData.getNumSamples() - 1;
             if (sampleReadIndex > -1 && sampleReadIndex <= last_sample) {
-                for (int chan = 0; chan < channels; chan++) {
+                for (int chan = 0; chan < m_numChannels; chan++) {
                     m_nonInterleavedBuffer.copyFrom(chan, 0, myPlaybackData, chan, sampleReadIndex, 1);
                 }
             }
@@ -299,7 +299,7 @@ public:
     void
     reset() {
         
-        setupRubberband(m_sample_rate);
+        setupRubberband(m_sample_rate, m_numChannels);
 
         m_clipIndex = 0;
 
@@ -319,11 +319,12 @@ public:
     void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
         float* input_ptr = (float*)input.data();
         
-        const int numChannels = (int) input.shape(0);
+        m_numChannels = (int) input.shape(0);
+        setMainBusInputsAndOutputs(0, m_numChannels);
         const int numSamples = (int) input.shape(1);
 
-        myPlaybackData.setSize(numChannels, numSamples);
-        for (int chan = 0; chan < channels; chan++) {
+        myPlaybackData.setSize(m_numChannels, numSamples);
+        for (int chan = 0; chan < m_numChannels; chan++) {
             myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
             input_ptr += numSamples;
         }
@@ -339,7 +340,7 @@ private:
 
     std::unique_ptr<RubberBand::RubberBandStretcher> m_rbstretcher;
 
-    const int channels = 2;
+    int m_numChannels = 2;
 
     juce::AudioSampleBuffer m_nonInterleavedBuffer;
     int sampleReadIndex = 0;
@@ -357,7 +358,7 @@ private:
     // Note that we call this instead of calling m_rbstretcher->reset() because
     // that method doesn't seem to work correctly.
     // It's better to just create a whole new stretcher object.
-    void setupRubberband(float sr) {
+    void setupRubberband(float sr, int numChannels) {
         using namespace RubberBand;
 
         RubberBandStretcher::Options options = 0;
@@ -388,7 +389,7 @@ private:
 
         m_rbstretcher = std::make_unique<RubberBand::RubberBandStretcher>(
             sr,
-            2,
+            numChannels,
             options,
             1.,
             1.);

@@ -32,12 +32,11 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
-        const int numberChannels = buffer.getNumChannels();
+        const int numberChannels = myRecordBuffer.getNumChannels();
+        int numSamplesToCopy = std::min(buffer.getNumSamples(), (int) myRecordBuffer.getNumSamples() -(int)posInfo.timeInSamples);
 
         for (int chan = 0; chan < numberChannels; chan++) {
-            // Write the sample to the engine's history for the correct channel.       
-            int numSamplesToCopy = std::min(buffer.getNumSamples(), (int) myRecordBuffer.getNumSamples() -(int)posInfo.timeInSamples);
-            // assume numSamplesToCopy > 0
+            // Write the sample to the engine's history for the correct channel.
             myRecordBuffer.copyFrom(chan, posInfo.timeInSamples, buffer.getReadPointer(chan), numSamplesToCopy);
         }
     }
@@ -51,6 +50,15 @@ public:
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     double getTailLengthSeconds() const override { return 0; }
+
+    //==============================================================================
+    virtual bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
+        return AudioProcessor::canApplyBusesLayout(layout);
+    }
+
+    virtual bool setBusesLayout(const BusesLayout& arr) {
+        return AudioProcessor::setBusesLayout(arr);
+    }
 
     //==============================================================================
     int getNumPrograms() override { return 0; }
@@ -102,11 +110,46 @@ public:
     }
 
     void setRecorderLength(int numSamples) {
+        int numChannels = this->getTotalNumOutputChannels();
+        
         if (m_recordEnable) {
-            myRecordBuffer.setSize(2, numSamples);
+            myRecordBuffer.setSize(numChannels, numSamples);
         }
         else {
-            myRecordBuffer.setSize(2, 0);
+            myRecordBuffer.setSize(numChannels, 0);
+        }
+    }
+
+    int
+    getTotalNumOutputChannels() {
+        return AudioProcessor::getTotalNumOutputChannels();
+    }
+    
+    int
+    getTotalNumInputChannels() {
+        return AudioProcessor::getTotalNumInputChannels();
+    }
+
+    virtual void numChannelsChanged();
+
+    bool isConnectedInGraph() { return m_isConnectedInGraph;}
+    void setConnectedInGraph(bool isConnected) {
+        m_isConnectedInGraph = isConnected;
+        
+    }
+    
+    void setMainBusInputsAndOutputs(int inputs, int outputs) {
+        BusesLayout busesLayout;
+        const AudioChannelSet inputChannelSet = AudioChannelSet::discreteChannels(inputs);
+        const AudioChannelSet outputChannelSet = AudioChannelSet::discreteChannels(outputs);
+        busesLayout.inputBuses.add(inputChannelSet);
+        busesLayout.outputBuses.add(outputChannelSet);
+
+        if (this->canApplyBusesLayout(busesLayout)) {
+            bool result = this->setBusesLayout(busesLayout);
+        }
+        else {
+            std::cerr << this->getUniqueName() << " CANNOT ApplyBusesLayout inputs: " << inputs << " outputs: " << outputs << std::endl;
         }
     }
 
@@ -115,8 +158,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProcessorBase)
     std::string myUniqueName;
     juce::AudioSampleBuffer myRecordBuffer;
+    bool m_isConnectedInGraph = false;
  
 protected:
+    
 
     AudioProcessorValueTreeState myParameters;
 

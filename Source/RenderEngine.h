@@ -26,9 +26,9 @@ public:
     ~RenderEngine();
     // RenderEngine(const RenderEngine&) = delete;
 
-    bool loadGraph(DAG dagNodes, int numInputAudioChans, int numOutputAudioChans);
+    bool loadGraph(DAG dagNodes);
     
-    void render (const double renderLength);
+    bool render (const double renderLength);
 
     void setBPM(double bpm);
 
@@ -47,18 +47,15 @@ protected:
     double mySampleRate;
     int myBufferSize;
     double myBPM = 120.;
+    std::unordered_map<std::string, int> m_UniqueNameToSlotIndex;
+    std::unordered_map<std::string, std::vector<std::string>> m_UniqueNameToInputs;
+    
+    bool connectGraph();
 
 private:
-                           
-    std::vector<std::vector<float>> myRecordedSamples;
 
     std::unique_ptr<juce::AudioProcessorGraph> myMainProcessorGraph;
-
-    juce::AudioProcessorGraph::Node::Ptr myMidiInputNode;
-
-    int myNumInputAudioChans = 2;
-    int myNumOutputAudioChans = 2;
+    juce::ReferenceCountedArray<juce::AudioProcessorGraph::Node> slots;
 
     CurrentPositionInfo myCurrentPositionInfo;
-
 };

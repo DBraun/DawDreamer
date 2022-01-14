@@ -3099,9 +3099,6 @@
     <ClInclude Include="..\..\Source\ProcessorBase.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\RecorderProcessor.h">
-      <Filter>DawDreamer\Processors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\CustomParameters.h">
       <Filter>DawDreamer</Filter>
     </ClInclude>

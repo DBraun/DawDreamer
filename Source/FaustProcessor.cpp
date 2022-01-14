@@ -37,16 +37,16 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 	m_numOutputChannels = 0;
 	// auto import
 	m_autoImport = "// FaustProcessor (DawDreamer) auto import:\nimport(\"stdfaust.lib\");\n";
-
-#ifdef WIN32
-	// At the start of every process
-	guiUpdateMutex = CreateMutex(NULL, FALSE, "Faust gui::update Mutex");  // todo: enable mutex on linux and macOS
-#endif
 }
 
 FaustProcessor::~FaustProcessor() {
 	clear();
 	deleteAllDSPFactories();
+}
+
+bool
+FaustProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
+	return (layout.getMainInputChannels() == m_numInputChannels) && (layout.getMainOutputChannels() == m_numOutputChannels);
 }
 
 void
@@ -159,28 +159,13 @@ FaustProcessor::automateParameters() {
 	// several voices might share the same parameters in a group.
 	// Therefore we have to call updateAllGuis to update all dependent parameters.
 	if (m_nvoices > 0 && m_groupVoices) {
-#ifdef WIN32
 		// When you want to access shared memory:
-		DWORD dwWaitResult = WaitForSingleObject(guiUpdateMutex, INFINITE);
-
-		if (dwWaitResult == WAIT_OBJECT_0 || dwWaitResult == WAIT_ABANDONED)
-		{
-			if (dwWaitResult == WAIT_ABANDONED)
-			{
-				// todo:
-				// Shared memory is maybe in inconsistent state because other program
-				// crashed while holding the mutex. Check the memory for consistency
-			}
-
-			// Have Faust update all GUIs.
-			GUI::updateAllGuis();
-
-			// After this line other processes can access shared memory
-			ReleaseMutex(guiUpdateMutex);
-		}
-#else
-		GUI::updateAllGuis(); // todo: enable mutex on linux and macOS
-#endif
+        if (guiUpdateMutex.Lock()) {
+            // Have Faust update all GUIs.
+            GUI::updateAllGuis();
+                
+            guiUpdateMutex.Unlock();
+        }
 	}
 }
 
@@ -295,16 +280,28 @@ FaustProcessor::compile()
 	auto theCode = m_autoImport + "\n" + m_code;
 
 	std::string m_errorString;
-
+    
+#if __APPLE__
+    // on macOS, specifying the target like this helps us handle LLVM on both x86_64 and arm64.
+    // Crucially, LLVM must have been compiled separately for each architecture.
+    // A different libfaust must have also been compiled for the corresponding LLVM architecture
+    // and the `LLVM_BUILD_UNIVERSAL` preprocessor must have been set while building libfaust.
+    // Then the two libfaust.2.dylib can get combined with
+    // `lipo x86_64.libfaust.2.dylib arm64.libfaust.2.dylib -create -output libfaust.2.dylib`
+    auto target = getDSPMachineTarget();
+#else
+    auto target = std::string("");
+#endif
+    
 	// create new factory
 	bool is_polyphonic = m_nvoices > 0;
 	if (is_polyphonic) {
 		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, "", m_errorString, optimize);
+			argc, argv, target.c_str(), m_errorString, optimize);
 	}
 	else {
 		m_factory = createDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, "", m_errorString, optimize);
+			argc, argv, target.c_str(), m_errorString, optimize);
 	}
 
 	// check for error
@@ -338,7 +335,7 @@ FaustProcessor::compile()
 		// (false, true) works
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
-			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
+			std::cerr << "FaustProcessor::compile(): Cannot create Poly DSP instance." << std::endl;
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
@@ -346,7 +343,7 @@ FaustProcessor::compile()
 		// create DSP instance
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
-			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
+			std::cerr << "FaustProcessor::compile(): Cannot create DSP instance." << std::endl;
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
@@ -357,14 +354,11 @@ FaustProcessor::compile()
 	int inputs = theDsp->getNumInputs();
 	int outputs = theDsp->getNumOutputs();
 
-	if (outputs != 2) {
-		std::cerr << "FaustProcessor::compile(): FaustProcessor must have DSP code with 2 output channels but was compiled for " << m_numOutputChannels << "." << std::endl;
-		FAUSTPROCESSOR_FAIL_COMPILE
-	}
-
 	m_numInputChannels = inputs;
 	m_numOutputChannels = outputs;
-
+        
+    setMainBusInputsAndOutputs(inputs, outputs);
+    
 	// make new UI
 	if (is_polyphonic)
 	{

@@ -1,32 +1,38 @@
 from utils import *
 import platform
+import os.path
+import os
 
 MY_SYSTEM = platform.system()
 # "Darwin" is macOS. "Windows" is Windows.
 
 BUFFER_SIZE = 16
 
-def test_plugin_effect(set_data=False):
+def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
 
-	if MY_SYSTEM not in ["Darwin", "Windows"]:
-		# We don't test LV2 plugins on Linux yet.
+	# Skip .component plugins on GitHub Actions workflows
+	if os.getenv("CIBW_TEST_REQUIRES") and plugin_path.endswith('.component'):
 		return
+
+	if MY_SYSTEM == 'Darwin':
+		# macOS treats .component and .vst3 as directories
+		assert(os.path.isdir(plugin_path))
+	else:
+		assert(os.path.isfile(plugin_path))
 
 	DURATION = 5.
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
 	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+
 	playback_processor = engine.make_playback_processor("playback", data)
 
-	if set_data:
-		playback_processor.set_data(data)
-
-	plugin_name = "DimensionExpander.vst" if MY_SYSTEM == "Darwin" else "Dimension Expander_x64.dll"
-
-	effect = engine.make_plugin_processor("effect", abspath("plugins/"+plugin_name))
+	effect = engine.make_plugin_processor("effect", plugin_path)
 
 	# print(effect.get_plugin_parameters_description())
+	assert(effect.get_num_input_channels() == expected_num_inputs)
+	assert(effect.get_num_output_channels() == 2)
 
 	graph = [
 	    (playback_processor, []),
@@ -35,12 +41,42 @@ def test_plugin_effect(set_data=False):
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_plugin_effect.wav', duration=DURATION)
+	plugin_basename = os.path.basename(plugin_path)
+
+	render(engine, file_path=f'output/test_plugin_effect_{plugin_basename}.wav', duration=DURATION)
+
+	# check that it's non-silent
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .05)
+
+def test_stereo_plugin_effects():
+
+	if MY_SYSTEM not in ["Darwin", "Windows"]:
+		# todo: we should test LV2 plugins on Linux.
+		return
+
+	plugin_paths = []
+
+	if MY_SYSTEM == 'Darwin':
+		# todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
+		# plugin_paths.append((abspath("plugins/ValhallaFreqEcho.vst"), 2))
+		# plugin_paths.append((abspath("plugins/ValhallaFreqEcho.vst3"), 2))
+		# plugin_paths.append((abspath("plugins/ValhallaFreqEcho.component"), 2))
+
+		# RoughRider has an optional mono sidechain input
+		plugin_paths.append((abspath("plugins/RoughRider3.vst"), 3))
+		plugin_paths.append((abspath("plugins/RoughRider3.vst3"), 3))
+		plugin_paths.append((abspath("plugins/RoughRider3.component"), 3))
+	elif MY_SYSTEM == 'Windows':
+		plugin_paths.append((abspath("plugins/Dimension Expander_x64.dll"), 2))
+
+	for plugin_args in plugin_paths:
+		_test_stereo_plugin_effect(*plugin_args)
 
 def test_plugin_instrument():
 
 	if MY_SYSTEM not in ["Darwin", "Windows"]:
-		# We don't test LV2 plugins on Linux yet.
+		# todo: we should test LV2 plugins on Linux.
 		return
 
 	DURATION = 5.
@@ -53,7 +89,8 @@ def test_plugin_instrument():
 
 	# print(synth.get_plugin_parameters_description())
 
-	 # (MIDI note, velocity, start sec, duration sec)
+	# (MIDI note, velocity, start sec, duration sec)
+	# todo: on macOS the note is skipped if it starts at exactly 0.0.
 	synth.add_midi_note(60, 60, 0.0, .25)
 	synth.add_midi_note(64, 80, 0.5, .5)
 	synth.add_midi_note(67, 127, 0.75, .5)
@@ -93,6 +130,9 @@ def test_plugin_serum():
 	assert(synth.set_parameter(0, synth.get_parameter(0)))
 	assert(synth.set_automation(0, np.array([synth.get_parameter(0)])))
 
+	assert(synth.get_num_input_channels() == 0)
+	assert(synth.get_num_output_channels() == 2)
+
 	 # (MIDI note, velocity, start sec, duration sec)
 	synth.add_midi_note(60, 60, 0.0, .25)
 	synth.add_midi_note(64, 80, 0.5, .5)
@@ -110,3 +150,115 @@ def test_plugin_serum():
 
 	audio = engine.get_audio()
 	assert(not np.allclose(audio*0., audio, atol=1e-07))
+
+
+def _test_plugin_goodhertz_sidechain(do_sidechain=True):
+
+	if MY_SYSTEM not in ["Windows"]:
+		# We don't Goodhertz on platforms other than Windows.
+		return
+
+	plugin_path = "C:/VSTPlugIns/Goodhertz/Ghz Vulf Compressor 3.vst3"
+
+	if not isfile(plugin_path):
+		return
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	DURATION = 5.1
+
+	vocals = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+	drums = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav", duration=DURATION)
+
+	drums *= .1
+
+	vocals_processor = engine.make_playback_processor("vocals", vocals)
+	drums_processor = engine.make_playback_processor("drums", drums)
+
+	plugin = engine.make_plugin_processor("plugin", plugin_path)
+
+	# plugin.set_parameter(2, 1.)
+	# plugin.set_parameter(5, .1)
+	# plugin.set_parameter(13, 1.)
+	# plugin.set_parameter(15, 1.)
+	# plugin.set_parameter(18, 1.)
+
+	if do_sidechain:
+
+		plugin.set_parameter(19, 0.5)
+		# parameter 19 is the "External Sidechain" for Vulf Compressor. In the UI, click the three dots, which opens the panel
+		# Then look for "External Sidechain" and set it to 50%.
+
+		graph = [
+			(vocals_processor, []),
+			(drums_processor, []),
+			(plugin, ["vocals", "drums"])
+		]
+	else:
+		graph = [
+			(vocals_processor, []),
+			(plugin, ["vocals"])
+		]
+
+	assert(engine.load_graph(graph))
+
+	sidechain_on = "on" if do_sidechain else "off"
+
+	file_path = f'output/test_plugin_goodhertz_sidechain_{sidechain_on}.wav'
+
+	render(engine, file_path=file_path, duration=DURATION)
+
+	audio = engine.get_audio()
+	assert(not np.allclose(audio*0., audio, atol=1e-07))
+
+
+def test_plugin_goodhertz_sidechain():
+	_test_plugin_goodhertz_sidechain(do_sidechain=True)
+	_test_plugin_goodhertz_sidechain(do_sidechain=False)
+
+
+# def test_plugin_effect_ambisonics(set_data=False):
+
+# 	if MY_SYSTEM != "Windows":
+# 		return
+
+# 	DURATION = 5.
+
+# 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+# 	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+# 	playback_processor = engine.make_playback_processor("playback", data)
+
+# 	data = data.mean(axis=0, keepdims=True)
+
+# 	if set_data:
+# 		playback_processor.set_data(data)
+
+# 	plugin_name = "sparta_ambiENC.vst" if MY_SYSTEM == "Darwin" else "sparta_ambiENC.dll"
+
+# 	plugin_path = abspath("plugins/"+plugin_name)
+# 	if not isfile(plugin_path):
+# 		return
+
+# 	effect = engine.make_plugin_processor("effect", plugin_path)
+
+# 	effect.set_parameter(0, 1)
+
+# 	assert(effect.get_num_input_channels() == 64)
+# 	assert(effect.get_num_output_channels() == 64)
+
+# 	# for par in effect.get_plugin_parameters_description():
+# 	# 	print(par)
+
+# 	graph = [
+# 	    (playback_processor, []),
+# 	    (effect, ["playback"])
+# 	]
+
+# 	assert(engine.load_graph(graph))
+
+# 	render(engine, file_path='output/test_plugin_effect_ambisonics.wav', duration=DURATION)
+
+# 	audio = engine.get_audio()
+
+# 	assert(effect.get_num_output_channels() == audio.shape[0])

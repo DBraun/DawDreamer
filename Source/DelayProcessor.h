@@ -13,7 +13,7 @@ public:
 
         myDelaySize = myParameters.getRawParameterValue("delay");
         myWetLevel = myParameters.getRawParameterValue("wet_level");
-
+        setMainBusInputsAndOutputs(2, 2);
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {

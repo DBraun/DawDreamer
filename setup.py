@@ -7,13 +7,14 @@
 from setuptools import setup, Extension
 from setuptools.dist import Distribution
 import os
+import os.path
 from pathlib import Path
 import shutil
 import platform
 import glob
 
 
-python_requires = "==" + os.environ['PYTHONMAJOR'] + '.*'  # set with github action
+python_requires = "==" + os.environ['PYTHONMAJOR'].replace('m', '') + '.*'  # set with github action
 print(f'python_requires: {python_requires}')
 
 
@@ -77,11 +78,9 @@ else:
     )
 
 faustlibraries = list(glob.glob('dawdreamer/faustlibraries/*', recursive=True))
-# drop hidden files
-faustlibraries = list(filter(lambda x: '.git' not in x, faustlibraries))
 
 if not faustlibraries:
-    raise ValueError("You need to put the FAUST .lib files in dawdreamer/faustlibraries/")
+    raise ValueError("You need to put the faustlibraries repo inside dawdreamer.")
 
 package_data += faustlibraries
 
@@ -100,10 +99,10 @@ setup(
     name='dawdreamer',
     url='https://github.com/DBraun/DawDreamer',
     project_urls={
-        'Documentation': 'https://ccrma.stanford.edu/~braun/dawdreamer',
+        'Documentation': 'https://dirt.design/DawDreamer',
         'Source': 'https://github.com/DBraun/DawDreamer',
     },
-    version='0.5.7.10',
+    version='0.5.8.1',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
     description='An audio-processing Python library supporting core DAW features',
@@ -121,7 +120,8 @@ setup(
         "Topic :: Multimedia :: Sound/Audio",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9"
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10"
     ],
     keywords='audio music sound',
     python_requires=python_requires,

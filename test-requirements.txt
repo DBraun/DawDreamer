@@ -2,4 +2,4 @@ librosa>=0.8.1
 numpy>=1.21.2
 pytest>=6.2.4
 scipy>=1.7.0
-requests
+requests>=2.26.0

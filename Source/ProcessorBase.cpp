@@ -1,6 +1,11 @@
 #include "ProcessorBase.h"
 
 void
+ProcessorBase::numChannelsChanged() {    
+    m_isConnectedInGraph = false;
+}
+
+void
 ProcessorBase::getStateInformation(juce::MemoryBlock& destData)
 {
     auto state = myParameters.copyState();

@@ -74,12 +74,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel pytest numpy librosa scipy
-
-    - name: Test with pytest
-      run: |
-        cd tests
-        pytest .
+        pip install setuptools wheel numpy librosa scipy
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -94,7 +89,7 @@ jobs:
         rm -rf dawdreamer/faustlibraries/.git
 
     - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.1.1
+      run: python -m pip install cibuildwheel>=2.3.1
 
     # # I think the audit is failing because the build links against local LLVM-related things.
     # #  or https://cibuildwheel.readthedocs.io/en/stable/faq/#linux-builds-on-docker
@@ -107,7 +102,7 @@ jobs:
     #     CIBW_BUILD_VERBOSITY: 1
     #     CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
     #     CIBW_TEST_REQUIRES: -r test-requirements.txt
-    #     CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
+    #     CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest ."
     #     CIBW_ARCHS: auto64
     #     CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
 
@@ -149,14 +144,16 @@ jobs:
     #     run: |
     #       echo "Running tests"
     #       cd /DawDreamer/tests
-    #       pytest .
+    #       python -m pytest -s .
 
   build-windows:
-    runs-on: windows-latest
-
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        include:
+        - { os: windows-latest, python-version: "3.7", CIBW-BUILD: "cp37*"}
+        - { os: windows-latest, python-version: "3.8", CIBW-BUILD: "cp38*"}
+        - { os: windows-latest, python-version: "3.9", CIBW-BUILD: "cp39*"}
 
     steps:
     - uses: actions/checkout@v2
@@ -171,7 +168,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel pytest numpy librosa scipy
+        pip install setuptools wheel numpy librosa scipy
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
@@ -189,8 +186,6 @@ jobs:
       # necessary for setup.py to work.
       run: |
         cp -v -r faustlibraries dawdreamer
-        mkdir ${{env.pythonLocation}}/../share/faust
-        cp -v faustlibraries/*.lib ${{env.pythonLocation}}/../share/faust
 
     - name: Build libsamplerate
       run: |
@@ -204,49 +199,19 @@ jobs:
       run: |
         msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
-    - name: Test with pytest
-      run: |
-        cd tests
-        pytest .
-
     - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.1.1
+      run: python -m pip install cibuildwheel>=2.3.1
 
-    - name: Build wheels 3.7
-      if: ${{ matrix.python-version == '3.7' }}
+    - name: Build Wheels
       run: |
         python -m cibuildwheel --output-dir wheelhouse
       env:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
+        CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest ."
         CIBW_ARCHS: auto64
-        CIBW_BUILD: "cp37*"
-
-    - name: Build wheels 3.8
-      if: ${{ matrix.python-version == '3.8' }}
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
-        CIBW_ARCHS: auto64
-        CIBW_BUILD: "cp38*"
-
-    - name: Build wheels 3.9
-      if: ${{ matrix.python-version == '3.9' }}
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # CIBW_TEST_COMMAND: "cd /D {project}\\tests && pytest ."
-        CIBW_ARCHS: auto64
-        CIBW_BUILD: "cp39*"
+        CIBW_BUILD: ${{matrix.CIBW-BUILD}}
 
     - uses: actions/upload-artifact@v2
       with:
@@ -270,37 +235,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.8, 3.9]
-        os: [macos-10.15]
+        include:
+        - { os: macos-latest, build: cp37-macosx_x86_64, archs-macos: "x86_64", python-version: "3.7", osx-archs: "x86_64", ARCHS: "x86_64", python-major: "3.7m" }
+        - { os: macos-latest, build: cp38-macosx_universal2, archs-macos: "universal2", python-version: "3.8", osx-archs: "x86_64;arm64", ARCHS: "x86_64 arm64", python-major: "3.8" }
+        - { os: macos-latest, build: cp39-macosx_universal2, archs-macos: "universal2", python-version: "3.9", osx-archs: "x86_64;arm64", ARCHS: "x86_64 arm64", python-major: "3.9" }
+        - { os: macos-latest, build: cp310-macosx_universal2, archs-macos: "universal2", python-version: "3.10", osx-archs: "x86_64;arm64", ARCHS: "x86_64 arm64", python-major: "3.10" }
+
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel pytest numpy librosa scipy
-
-    - name: Checkout faustlibraries
-      uses: actions/checkout@v2
-      with:
-        repository: grame-cncm/faustlibraries
-        path: faustlibraries
-
-    - name: copy faust libraries
-      run: |
-        mkdir -p ${{env.pythonLocation}}/../share/faust
-        cp $GITHUB_WORKSPACE/faustlibraries/*.lib ${{env.pythonLocation}}/../share/faust/
-        mkdir -p ${{env.pythonLocation}}/share/faust
-        cp $GITHUB_WORKSPACE/faustlibraries/*.lib ${{env.pythonLocation}}/share/faust/
-        mkdir -p /usr/local/share/faust/
-        cp $GITHUB_WORKSPACE/faustlibraries/*.lib /usr/local/share/faust/
 
     - name: Get CMake
       uses: lukka/get-cmake@latest
@@ -309,40 +253,15 @@ jobs:
       run: |
         cd thirdparty/libsamplerate
         mkdir build_release
-        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="${{matrix.osx-archs}}" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
         make --directory=build_release
+        cd ../..
 
-    - name: Build MacOS (Release)
-      # the Projucer refers to PYTHONMAJOR
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }} 
-      run: |
-        xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
-        mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
-        otool -L Builds/MacOSX/build/Release/dawdreamer.so
-        install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
-        otool -L Builds/MacOSX/build/Release/dawdreamer.so
-
-    - name: Test with pytest
-      run: |
-        cp Builds/MacOSX/build/Release/dawdreamer.so ${{env.pythonLocation}}/bin/dawdreamer.so
-        cp thirdparty/libfaust/darwin-x64/Release/libfaust.a ${{env.pythonLocation}}/bin/libfaust.2.dylib
-        cd tests
-        pytest .
-
-    - name: otool shenanigans
-      # Note: on an ordinary consumer macOS system, the env var $pythonLocation should be /Library/Frameworks/Python.framework/Versions/3.8
-      # This section assumes there is a Unix Executable file at /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python
-      # making @executable_path resolve to /Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/
-      # However, I was hoping @executable_path would just be /Library/Frameworks/Python.framework/Versions/3.8/bin
-      # because of the executable at /Library/Frameworks/Python.framework/Versions/3.8/bin/python3 which is itself a reference to
-      # /Library/Frameworks/Python.framework/Versions/3.8/Python
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
-      run: |
-        otool -L Builds/MacOSX/build/Release/dawdreamer.so
-        install_name_tool -change ${{env.pythonLocation}}/lib/libpython${{env.PYTHONMAJOR}}.dylib @executable_path/../../../../Python Builds/MacOSX/build/Release/dawdreamer.so
-        otool -L Builds/MacOSX/build/Release/dawdreamer.so
+    - name: Checkout faustlibraries
+      uses: actions/checkout@v2
+      with:
+        repository: grame-cncm/faustlibraries
+        path: faustlibraries
 
     - name: copy faust libraries
       # necessary for setup.py to work.
@@ -350,38 +269,28 @@ jobs:
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
 
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel==2.1.1
-
-    - name: Build wheels 3.8
-      if: ${{ matrix.python-version == '3.8' }}
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
+    - name: Build wheels ${{ matrix.python-version }}
+      uses: pypa/cibuildwheel@v2.3.1
       env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # # Might need to compile libfaust in Github action for tests to work
-        # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
-        CIBW_BUILD: "cp38*"
+        # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
+        PYTHONMAJOR: ${{ matrix.python-major }}
         MACOSX_DEPLOYMENT_TARGET: 10.15
-        CIBW_ARCHS: auto64
-        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
-
-    - name: Build wheels 3.9
-      if: ${{ matrix.python-version == '3.9' }}
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
+        CIBW_BEFORE_BUILD: |
+          export pythonLocation=$(python3-config --prefix)
+          otool -L $pythonLocation/bin/python3
+          xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
+          mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
+          otool -L Builds/MacOSX/build/Release/dawdreamer.so
+          install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
+          otool -L Builds/MacOSX/build/Release/dawdreamer.so
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        # # Might need to compile libfaust in Github action for tests to work
-        # CIBW_TEST_COMMAND: "cd {project}/tests && pytest ."
-        CIBW_BUILD: "cp39*"
-        MACOSX_DEPLOYMENT_TARGET: 10.15
+        CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -s ."
+        CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
-        CIBW_ARCHS_MACOS: x86_64 universal2 # Support Apple Silicon
+        CIBW_ARCHS_MACOS: ${{matrix.archs-macos}}
+        # todo: want to test Python 3.10
+        CIBW_TEST_SKIP: "*310*"
 
     - uses: actions/upload-artifact@v2
       with:

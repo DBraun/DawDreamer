@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AudioComponents</key>
+	<array>
+		<dict>
+			<key>description</key>
+			<string>RoughRider3</string>
+			<key>factoryFunction</key>
+			<string>RoughRider3AUFactory</string>
+			<key>manufacturer</key>
+			<string>AuDa</string>
+			<key>name</key>
+			<string>Audio Damage, Inc.: RoughRider3</string>
+			<key>sandboxSafe</key>
+			<true/>
+			<key>subtype</key>
+			<string>RR30</string>
+			<key>type</key>
+			<string>aufx</string>
+			<key>version</key>
+			<integer>196864</integer>
+		</dict>
+	</array>
+	<key>BuildMachineOSBuild</key>
+	<string>20B5012d</string>
+	<key>CFBundleDisplayName</key>
+	<string>RoughRider3</string>
+	<key>CFBundleExecutable</key>
+	<string>RoughRider3</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.audiodamage.roughrider3</string>
+	<key>CFBundleName</key>
+	<string>RoughRider3</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>3.1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>3.1.0</string>
+	<key>DTCompiler</key>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>DTPlatformBuild</key>
+	<string>12B5025f</string>
+	<key>DTPlatformName</key>
+	<string>macosx</string>
+	<key>DTPlatformVersion</key>
+	<string>11.0</string>
+	<key>DTSDKBuild</key>
+	<string>20A5384b</string>
+	<key>DTSDKName</key>
+	<string>macosx11.0</string>
+	<key>DTXcode</key>
+	<string>1220</string>
+	<key>DTXcodeBuild</key>
+	<string>12B5025f</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.11</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>2020 Audio Damage, Inc. </string>
+</dict>
+</plist>

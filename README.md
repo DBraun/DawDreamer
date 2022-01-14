@@ -18,11 +18,12 @@
 
 # DawDreamer
 
+Read the [introduction](https://arxiv.org/abs/2111.09931) to DawDreamer, which was presented as a Late-Breaking Demo at the [2021 ISMIR Conference](https://ismir2021.ismir.net/lbd/).
+
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
-* Composing graphs of audio processors
+* Composing graphs of multi-channel audio processors
 * Audio playback
-* VST instruments
-* VST effects
+* VST instruments and effects
 * [FAUST](http://faust.grame.fr/) effects and [polyphonic instruments](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters)
 * Time-stretching and looping according to Ableton Live warp markers
 * Pitch-warping
@@ -44,7 +45,7 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 128 # For speed when not using automation, choose a larger buffer such as 512.
+BUFFER_SIZE = 128 # Parameters will undergo automation at this block size.
 SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
 SYNTH_PRESET = "C:/path/to/preset.fxp"
 REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work
@@ -68,6 +69,7 @@ engine.set_bpm(120.)  # default is 120.
 
 DURATION = 10 # How many seconds we want to render.
 
+# Load audio into a numpy array shaped (Number Channels, Number Samples)
 vocals = load_audio_file(VOCALS_PATH, duration=10.)
 piano = load_audio_file(PIANO_PATH, duration=10.)
 
@@ -85,6 +87,10 @@ print(synth.get_plugin_parameters_description())
 print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
 # The Plugin Processor can set automation according to a parameter index.
 synth.set_automation(1, make_sine(.5, DURATION)) # 0.5 Hz sine wave.
+
+# For any processor type, we can get the number of inputs and outputs
+print("synth num inputs: ", synth.get_num_input_channels())
+print("synth num outputs: ", synth.get_num_output_channels())
 
 # The sampler processor works like the plugin processor.
 # Provide audio for the sample, and then provide MIDI.
@@ -130,7 +136,7 @@ engine.load_graph(graph)
 engine.render(DURATION)  # Render 10 seconds audio.
 
 # Return the audio from the graph's last processor, even if its recording wasn't enabled.
-# The shape will be numpy.ndarray shaped (2, NUM_SAMPLES)
+# The shape will be numpy.ndarray shaped (chans, samples)
 audio = engine.get_audio()  
 wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose()) # don't forget to transpose!
 
@@ -156,7 +162,7 @@ engine.render(DURATION)  # render audio again!
 
 ### Using FAUST processors
 
-Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` All code must result in a `process` with 2 outputs and an even number of inputs. Here's an example using a demo stereo reverb:
+Let's start by looking at FAUST DSP files, which end in `.dsp`. For convenience, the standard library is always imported, so you don't need to `import("stdfaust.lib");` Here's an example using a demo stereo reverb:
 
 #### **faust_reverb.dsp:**
 ```dsp
@@ -232,7 +238,7 @@ Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manua
 
 **soundfile_test.py**
 ```python
-# suppose audio1, audio2, and audio3 are np.array shaped (2, N samples)
+# suppose audio1, audio2, and audio3 are np.array shaped (Channels, Samples)
 soundfiles = {
   'mySound': [audio1, audio2, audio3]
 }

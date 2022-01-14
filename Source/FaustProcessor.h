@@ -12,6 +12,7 @@
 #include "faust/gui/SoundUI.h"
 
 #include "faust/midi/rt-midi.h"
+#include "TMutex.h"
 
 #include <iostream>
 #include <map>
@@ -74,6 +75,7 @@ public:
                 for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
                     for (int sample = 0; sample < numSamples; sample++) {
                         // todo: don't assume float
+                        // todo: use memcpy or similar to be faster
                         static_cast<float**>(soundfile->fBuffers)[chan][offset + sample] = buffer.getSample(chan, sample);
                     }
                 }
@@ -102,6 +104,7 @@ public:
     FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock);
     ~FaustProcessor();
 
+    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
     void prepareToPlay(double sampleRate, int samplesPerBlock);
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);
@@ -194,10 +197,8 @@ protected:
 
     std::map<int, int> m_map_juceIndex_to_faustIndex;
     std::map<int, std::string> m_map_juceIndex_to_parAddress;
-
-#ifdef WIN32
-    HANDLE guiUpdateMutex; // todo: enable mutex on linux and macOS
-#endif
+    
+    TMutex guiUpdateMutex;
 };
 
 #endif
