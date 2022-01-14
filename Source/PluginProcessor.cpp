@@ -8,7 +8,7 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
 {
     myPluginPath = path;
 
-    loadPlugin(sampleRate, samplesPerBlock);
+    isLoaded = loadPlugin(sampleRate, samplesPerBlock);
 }
 
 bool
@@ -110,7 +110,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
     getPlayHead()->getCurrentPosition(posInfo);
     myRenderMidiBuffer.clear();
     
-    if (!myPlugin.get()) {
+    if (!myPlugin.get() || !isLoaded) {
         buffer.clear();
         
         if (posInfo.ppqPosition == 0) {

@@ -69,6 +69,7 @@ public:
 private:
 
     bool loadPlugin(double sampleRate, int samplesPerBlock);
+    bool isLoaded = false;
 
     std::string myPluginPath;
     double mySampleRate;

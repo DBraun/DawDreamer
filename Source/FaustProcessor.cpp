@@ -257,8 +257,6 @@ FaustProcessor::setDSPString(const std::string& code)
 bool
 FaustProcessor::compile()
 {
-    std::cerr << "getDSPMachineTarget(): (" << getDSPMachineTarget() << ")" << std::endl;
-    
 	m_isCompiled = false;
 
 	// clean up
@@ -284,6 +282,12 @@ FaustProcessor::compile()
 	std::string m_errorString;
     
 #if __APPLE__
+    // on macOS, specifying the target like this helps us handle LLVM on both x86_64 and arm64.
+    // Crucially, LLVM must have been compiled separately for each architecture.
+    // A different libfaust must have also been compiled for the corresponding LLVM architecture
+    // and the `LLVM_BUILD_UNIVERSAL` preprocessor must have been set while building libfaust.
+    // Then the two libfaust.2.dylib can get combined with
+    // `lipo x86_64.libfaust.2.dylib arm64.libfaust.2.dylib -create -output libfaust.2.dylib`
     auto target = getDSPMachineTarget();
 #else
     auto target = std::string("");
@@ -331,7 +335,7 @@ FaustProcessor::compile()
 		// (false, true) works
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
-			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
+			std::cerr << "FaustProcessor::compile(): Cannot create Poly DSP instance." << std::endl;
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
@@ -339,7 +343,7 @@ FaustProcessor::compile()
 		// create DSP instance
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
-			std::cerr << "FaustProcessor::compile(): Cannot create instance." << std::endl;
+			std::cerr << "FaustProcessor::compile(): Cannot create DSP instance." << std::endl;
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
