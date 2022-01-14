@@ -14,10 +14,6 @@ import platform
 import glob
 
 
-python_requires = "==" + os.environ['PYTHONMAJOR'].replace('m', '') + '.*'  # set with github action
-print(f'python_requires: {python_requires}')
-
-
 class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
     def has_ext_modules(foo):
@@ -102,7 +98,7 @@ setup(
         'Documentation': 'https://dirt.design/DawDreamer',
         'Source': 'https://github.com/DBraun/DawDreamer',
     },
-    version='0.5.8.1',
+    version='0.5.8.2',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
     description='An audio-processing Python library supporting core DAW features',
@@ -124,7 +120,7 @@ setup(
         "Programming Language :: Python :: 3.10"
     ],
     keywords='audio music sound',
-    python_requires=python_requires,
+    python_requires=">=3.7",
     install_requires=[],
     packages=['dawdreamer'],
     include_package_data=True,

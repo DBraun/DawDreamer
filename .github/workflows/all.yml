@@ -218,7 +218,7 @@ jobs:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
 
-    - name: "Build docs for Github pages"
+    - name: "Build docs for GitHub pages"
       if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
       shell: cmd
       run: |
@@ -226,7 +226,8 @@ jobs:
         cd docs && make.bat html
     - name: Deploy docs
       uses: peaceiris/actions-gh-pages@v3
-      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
+      # todo: make condition for being on main branch
+      if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/_build/html
