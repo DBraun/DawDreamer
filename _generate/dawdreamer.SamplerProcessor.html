@@ -36,7 +36,7 @@
 <h1>dawdreamer.SamplerProcessor<a class="headerlink" href="#dawdreamer-samplerprocessor" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="dawdreamer.SamplerProcessor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">dawdreamer.</span></span><span class="sig-name descname"><span class="pre">SamplerProcessor</span></span><a class="headerlink" href="#dawdreamer.SamplerProcessor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dawdreamer.</span></span><span class="sig-name descname"><span class="pre">SamplerProcessor</span></span><a class="headerlink" href="#dawdreamer.SamplerProcessor" title="Permalink to this definition">¶</a></dt>
 <dd><p>The Sampler Processor works like a basic Sampler instrument. It takes a typically short audio sample and can play it back at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff. Unlike a VST, the parameters don’t need to be between 0 and 1. For example, you can set an envelope attack parameter to 50 to represent 50 milliseconds.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dawdreamer.SamplerProcessor.__init__">
@@ -67,6 +67,12 @@
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_name</span></code>(self)</p></td>
 <td><p>Get the user-defined name of a processor instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_input_channels</span></code>(self)</p></td>
+<td><p>Get the total number of input channels (2 indicates stereo input).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_output_channels</span></code>(self)</p></td>
+<td><p>Get the total number of output channels (2 indicates stereo output).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parameter</span></code>(self, index)</p></td>
 <td><p>Get a parameter's value.</p></td>
@@ -188,7 +194,7 @@
       &copy;2021, David Braun.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

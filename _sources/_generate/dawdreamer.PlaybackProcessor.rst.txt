@@ -17,6 +17,8 @@
       ~PlaybackProcessor.get_audio
       ~PlaybackProcessor.get_automation
       ~PlaybackProcessor.get_name
+      ~PlaybackProcessor.get_num_input_channels
+      ~PlaybackProcessor.get_num_output_channels
       ~PlaybackProcessor.set_automation
       ~PlaybackProcessor.set_data
    

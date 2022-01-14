@@ -17,6 +17,8 @@
       ~FilterProcessor.get_audio
       ~FilterProcessor.get_automation
       ~FilterProcessor.get_name
+      ~FilterProcessor.get_num_input_channels
+      ~FilterProcessor.get_num_output_channels
       ~FilterProcessor.set_automation
    
    

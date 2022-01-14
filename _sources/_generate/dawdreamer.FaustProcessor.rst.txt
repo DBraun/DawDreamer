@@ -20,6 +20,8 @@
       ~FaustProcessor.get_audio
       ~FaustProcessor.get_automation
       ~FaustProcessor.get_name
+      ~FaustProcessor.get_num_input_channels
+      ~FaustProcessor.get_num_output_channels
       ~FaustProcessor.get_parameter
       ~FaustProcessor.get_parameters_description
       ~FaustProcessor.load_midi

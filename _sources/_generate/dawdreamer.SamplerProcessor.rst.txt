@@ -19,6 +19,8 @@
       ~SamplerProcessor.get_audio
       ~SamplerProcessor.get_automation
       ~SamplerProcessor.get_name
+      ~SamplerProcessor.get_num_input_channels
+      ~SamplerProcessor.get_num_output_channels
       ~SamplerProcessor.get_parameter
       ~SamplerProcessor.get_parameter_name
       ~SamplerProcessor.get_parameter_size

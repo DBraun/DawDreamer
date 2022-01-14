@@ -17,6 +17,8 @@
       ~CompressorProcessor.get_audio
       ~CompressorProcessor.get_automation
       ~CompressorProcessor.get_name
+      ~CompressorProcessor.get_num_input_channels
+      ~CompressorProcessor.get_num_output_channels
       ~CompressorProcessor.set_automation
    
    

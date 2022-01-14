@@ -19,6 +19,8 @@
       ~PluginProcessor.get_audio
       ~PluginProcessor.get_automation
       ~PluginProcessor.get_name
+      ~PluginProcessor.get_num_input_channels
+      ~PluginProcessor.get_num_output_channels
       ~PluginProcessor.get_parameter
       ~PluginProcessor.get_parameter_name
       ~PluginProcessor.get_parameter_text

@@ -37,7 +37,7 @@
 <h1>dawdreamer.PannerProcessor<a class="headerlink" href="#dawdreamer-pannerprocessor" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="dawdreamer.PannerProcessor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">dawdreamer.</span></span><span class="sig-name descname"><span class="pre">PannerProcessor</span></span><a class="headerlink" href="#dawdreamer.PannerProcessor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dawdreamer.</span></span><span class="sig-name descname"><span class="pre">PannerProcessor</span></span><a class="headerlink" href="#dawdreamer.PannerProcessor" title="Permalink to this definition">¶</a></dt>
 <dd><p>The Panner Processor class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dawdreamer.PannerProcessor.__init__">
@@ -62,6 +62,12 @@
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_name</span></code>(self)</p></td>
 <td><p>Get the user-defined name of a processor instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_input_channels</span></code>(self)</p></td>
+<td><p>Get the total number of input channels (2 indicates stereo input).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_output_channels</span></code>(self)</p></td>
+<td><p>Get the total number of output channels (2 indicates stereo output).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_automation</span></code>(self, parameter_name, data)</p></td>
 <td><p>Set a parameter's automation with a numpy array.</p></td>
@@ -163,7 +169,7 @@
       &copy;2021, David Braun.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

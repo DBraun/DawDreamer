@@ -17,6 +17,8 @@
       ~ReverbProcessor.get_audio
       ~ReverbProcessor.get_automation
       ~ReverbProcessor.get_name
+      ~ReverbProcessor.get_num_input_channels
+      ~ReverbProcessor.get_num_output_channels
       ~ReverbProcessor.set_automation
    
    

@@ -17,6 +17,8 @@
       ~DelayProcessor.get_audio
       ~DelayProcessor.get_automation
       ~DelayProcessor.get_name
+      ~DelayProcessor.get_num_input_channels
+      ~DelayProcessor.get_num_output_channels
       ~DelayProcessor.set_automation
    
    

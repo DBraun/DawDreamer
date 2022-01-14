@@ -17,6 +17,8 @@
       ~ProcessorBase.get_audio
       ~ProcessorBase.get_automation
       ~ProcessorBase.get_name
+      ~ProcessorBase.get_num_input_channels
+      ~ProcessorBase.get_num_output_channels
       ~ProcessorBase.set_automation
    
    

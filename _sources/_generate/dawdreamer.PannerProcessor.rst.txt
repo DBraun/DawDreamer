@@ -17,6 +17,8 @@
       ~PannerProcessor.get_audio
       ~PannerProcessor.get_automation
       ~PannerProcessor.get_name
+      ~PannerProcessor.get_num_input_channels
+      ~PannerProcessor.get_num_output_channels
       ~PannerProcessor.set_automation
    
    

@@ -17,6 +17,8 @@
       ~PlaybackWarpProcessor.get_audio
       ~PlaybackWarpProcessor.get_automation
       ~PlaybackWarpProcessor.get_name
+      ~PlaybackWarpProcessor.get_num_input_channels
+      ~PlaybackWarpProcessor.get_num_output_channels
       ~PlaybackWarpProcessor.set_automation
       ~PlaybackWarpProcessor.set_clip_file
       ~PlaybackWarpProcessor.set_clip_positions

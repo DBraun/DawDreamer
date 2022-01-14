@@ -17,6 +17,8 @@
       ~AddProcessor.get_audio
       ~AddProcessor.get_automation
       ~AddProcessor.get_name
+      ~AddProcessor.get_num_input_channels
+      ~AddProcessor.get_num_output_channels
       ~AddProcessor.set_automation
    
    
