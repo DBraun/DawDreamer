@@ -2,9 +2,6 @@ from utils import *
 
 BUFFER_SIZE = 1
 
-# todo: this example is bad because it turns a waveform into a very long string,
-#  which takes a long time to compile as Faust code. It would be better to
-#  find a way to use the soundfile primitive with a wavecycle.
 def _test_faust_poly_wavetable(wavecycle, output_path, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -15,19 +12,18 @@ def _test_faust_poly_wavetable(wavecycle, output_path, lagrange_order=4):
 
 	dsp_code = open(dsp_path).read()
 
-	waveform_length = wavecycle.shape[0]
-	wavecycle = ",".join([str(num) for num in wavecycle.tolist()])
-	# print(wavecycle)
+	if wavecycle.ndim == 1:
+		wavecycle = wavecycle.reshape(1, -1)
 
 	dsp_code = """
 LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
-CYCLE_SEQ = waveform{{{CYCLE_SEQ}}} : !, _;
-CYCLE_LENGTH = {CYCLE_LENGTH};
-""".format(LAGRANGE_ORDER=lagrange_order,
-	CYCLE_LENGTH=waveform_length,
-	CYCLE_SEQ=wavecycle) + dsp_code
-	# print('dsp code: ')
-	# print(dsp_code)
+""".format(LAGRANGE_ORDER=lagrange_order) + dsp_code
+
+	# set_soundfiles
+	soundfiles = {
+		'myCycle': [wavecycle]
+	}
+	faust_processor.set_soundfiles(soundfiles)
 
 	assert(faust_processor.set_dsp_string(dsp_code))
 	assert(faust_processor.compile())
@@ -48,6 +44,10 @@ CYCLE_LENGTH = {CYCLE_LENGTH};
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/'+output_path, duration=3.)
+
+	# check that it's non-silent
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .01)
 
 def test_faust_poly_wavetable_sine():
 
