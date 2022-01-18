@@ -11,6 +11,9 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
 
 	dsp_path = abspath("faust_dsp/soundfile.dsp")
 
+	if sample_seq.ndim == 1:
+		sample_seq = sample_seq.reshape(1, -1)
+
 	reversed_audio = np.flip(sample_seq[:,:int(44100*.5)], axis=-1)
 
 	# set_soundfiles

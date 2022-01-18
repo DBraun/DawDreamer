@@ -2,9 +2,6 @@ from utils import *
 
 BUFFER_SIZE = 1024
 
-# todo: this example is bad because it turns a waveform into a very long string,
-#  which takes a long time to compile as Faust code. It would be better to
-#  find a way to use the soundfile primitive with a wavecycle.
 def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -12,22 +9,20 @@ def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = 8
 
+	# set_soundfiles
+	if sample_seq.ndim == 1:
+		sample_seq = sample_seq.reshape(1, -1)
+	soundfiles = {
+		'mySample': [sample_seq]
+	}
+	faust_processor.set_soundfiles(soundfiles)
+
 	dsp_path = abspath("faust_dsp/polyphonic_sampler.dsp")
 	dsp_code = open(dsp_path).read()
 
-	waveform_length = sample_seq.shape[1]
-	sample_l_seq = ",".join([str(num) for num in sample_seq[0].tolist()])
-	sample_r_seq = ",".join([str(num) for num in sample_seq[1].tolist()])
-
 	dsp_code = """
 LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
-SAMPLE_L_SEQ = waveform{{{SAMPLE_L_SEQ}}} : !, _;
-SAMPLE_R_SEQ = waveform{{{SAMPLE_R_SEQ}}} : !, _;
-SAMPLE_LENGTH = {SAMPLE_LENGTH};
-""".format(LAGRANGE_ORDER=lagrange_order,
-	SAMPLE_LENGTH=waveform_length,
-	SAMPLE_L_SEQ=sample_l_seq,
-	SAMPLE_R_SEQ=sample_r_seq) + dsp_code
+""".format(LAGRANGE_ORDER=lagrange_order) + dsp_code
 	# print('dsp code: ')
 	# print(dsp_code)
 
@@ -52,6 +47,10 @@ SAMPLE_LENGTH = {SAMPLE_LENGTH};
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/'+output_path, duration=3.)
+
+	# check that it's non-silent
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .01)
 
 def test_faust_poly_sampler_cymbal():
 	# Load a stereo audio sample and pass it to Faust

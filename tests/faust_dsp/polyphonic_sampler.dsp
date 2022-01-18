@@ -7,12 +7,9 @@ import("stdfaust.lib");
 // Lagrange interpolation. The interpolation probably only matters
 // when the sampler is played at a MIDI note other than the "center_note".
 
-// The following variables are excluded from this file because they come
+// The following variable is excluded from this file because they come
 // from substitution with Python.
 // LAGRANGE_ORDER = 4; // lagrange order. [2-4] are good choices.
-// SAMPLE_L_SEQ = waveform{0.0, 0.0} : !, _;
-// SAMPLE_R_SEQ = waveform{0.0, 0.0} : !, _;
-// SAMPLE_LENGTH = 4; // the length of SAMPLE_L_SEQ and SAMPLE_R_SEQ
 
 // variation of hs_phasor that doesn't loop. It's like a one-shot trigger.
 my_phasor(tablesize,freq,c) = inc*on_memory : + ~ (_*(1-start_pulse)) : min(1.) *(tablesize)
@@ -32,15 +29,39 @@ key = hslider("freq", 60, 1, 127, 1) : ba.hz2midikey;
 root_midi = hslider("center_note", 60., 1., 128., 0.01);
 semitones = key - root_midi;
 ratio = semitones : ba.semi2ratio;
-length_sec = SAMPLE_LENGTH / ma.SR;
+
+soundfile_full = soundfile("mySample",2): _, !, _, _;
+S = 0, 0 : soundfile_full : _, !, !;
+soundfile_table_L = 0, _ : soundfile_full : !, _, !;
+soundfile_table_R = 0, _ : soundfile_full : !, !, _;
+
+length_sec = S / ma.SR;
 
 freq = ratio / length_sec;
 
 envVol = en.adsr(.002, 0.1, 0.9, .1, gate);
 
-ridx = my_phasor(SAMPLE_LENGTH, freq, gate);
+ridx = my_phasor(S, freq, gate);
 
-process = it.frdtable(LAGRANGE_ORDER, SAMPLE_LENGTH, SAMPLE_L_SEQ, ridx)*gain*envVol*0.5,
-          it.frdtable(LAGRANGE_ORDER, SAMPLE_LENGTH, SAMPLE_R_SEQ, ridx)*gain*envVol*0.5;
+declare lagrangeCoeffs author "Dario Sanfilippo";
+declare lagrangeCoeffs copyright "Copyright (C) 2021 Dario Sanfilippo
+    <sanfilippo.dario@gmail.com>";
+declare lagrangeCoeffs license "MIT license";
+// NOTE: this is a modification of the original it.frdtable so that
+// it works with a soundfile
+// https://github.com/grame-cncm/faustlibraries/blob/master/interpolators.lib
+frdtable(N, S, init, idx) =
+    it.lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int(N / 2) + i)))
+    with {
+        table(j) = int(ma.modulo(j, S)) : init;
+        f_idx = ma.frac(idx) + int(N / 2);
+        i_idx = int(idx);
+    };
+
+process = frdtable(LAGRANGE_ORDER, S, soundfile_table_L, ridx),
+          frdtable(LAGRANGE_ORDER, S, soundfile_table_R, ridx) <: _*finalGain, _*finalGain
+with {
+	finalGain = gain*envVol*0.5;
+};
 // polyphonic DSP code must declare a stereo effect
 effect = _, _;
