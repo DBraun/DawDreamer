@@ -155,8 +155,8 @@ but the filter mode cannot under automation.";
         .doc() = "An Add Processor adds one or more stereo inputs with corresponding gain parameters.";
 
     py::class_<PluginProcessorWrapper, std::shared_ptr<PluginProcessorWrapper>, ProcessorBase>(m, "PluginProcessor")
-        .def("load_preset", &PluginProcessorWrapper::loadPreset, arg("filepath"), "Load an FXP preset.")
-        .def("load_vst3_preset", &PluginProcessorWrapper::loadVST3Preset, arg("filepath"), "Load a VST3 preset.")
+        .def("load_preset", &PluginProcessorWrapper::loadPreset, arg("filepath"), "Load an FXP preset with an absolute filepath and \".fxp\" extension.")
+        .def("load_vst3_preset", &PluginProcessorWrapper::loadVST3Preset, arg("filepath"), "Load a VST3 preset with an absolute filepath and \".vstpreset\" extension.")
         .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
         .def("set_patch", &PluginProcessorWrapper::wrapperSetPatch, arg("patch"))
         .def("get_parameter", &PluginProcessorWrapper::wrapperGetParameter, arg("index"), "Get a parameter's value.")
