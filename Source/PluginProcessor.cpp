@@ -4,6 +4,28 @@
 
 #include <filesystem>
 
+using juce::ExtensionsVisitor;
+
+struct PresetVisitor : public ExtensionsVisitor {
+    const std::string presetFilePath;
+
+    PresetVisitor(const std::string presetFilePath) : presetFilePath(presetFilePath) { }
+
+    void visitVST3Client(const ExtensionsVisitor::VST3Client& client) override {
+        juce::File presetFile(presetFilePath);
+        juce::MemoryBlock presetData;
+
+        if (!presetFile.loadFileAsData(presetData)) {
+            throw std::runtime_error("Failed to read preset file: " + presetFilePath);
+        }
+
+        if (!client.setPreset(presetData)) {
+            throw std::runtime_error("Failed to set preset file: " + presetFilePath);
+        }
+    }
+};
+
+
 PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path) : ProcessorBase{ newUniqueName }
 {
     myPluginPath = path;
@@ -155,7 +177,7 @@ PluginProcessor::automateParameters() {
                 myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
-                std::cout << "Error automateParameters: " << myPlugin->getParameterName(i) << std::endl;
+                std::cerr << "Error automateParameters: " << myPlugin->getParameterName(i) << std::endl;
             }
         }
     }
@@ -177,42 +199,17 @@ PluginProcessor::reset()
     myRenderMidiBuffer.clear();
 }
 
-#include <pluginterfaces/vst/ivstcomponent.h>
-#include <public.sdk/source/common/memorystream.h>
-
-bool setVST3PluginStateDirect(AudioPluginInstance* instance, const MemoryBlock& rawData)
-{
-    auto funknown = static_cast<Steinberg::FUnknown*> (instance->getPlatformSpecificData());
-    Steinberg::Vst::IComponent* vstcomponent = nullptr;
-
-    if (funknown->queryInterface(Steinberg::Vst::IComponent_iid, (void**)&vstcomponent) == 0
-        && vstcomponent != nullptr)
-    {
-        void* data = (void*)rawData.getData();
-
-        auto* memoryStream = new Steinberg::MemoryStream(data, (Steinberg::TSize)rawData.getSize());
-        vstcomponent->setState(memoryStream);
-        memoryStream->release();
-        vstcomponent->release();
-
-        return true;
-    }
-
-    return false;
-    
-}
-
 bool
 PluginProcessor::loadPreset(const std::string& path)
 {
     if (!myPlugin.get()) {
-        std::cout << "You must load a plugin before loading a preset." << std::endl;
+        std::cerr << "You must load a plugin before loading a preset." << std::endl;
         return false;
     }
 
     try {
         if (!std::filesystem::exists(path.c_str())) {
-            std::cout << "File not found: " << path.c_str() << std::endl;
+            std::cerr << "File not found: " << path.c_str() << std::endl;
             return false;
         }
 
@@ -231,7 +228,7 @@ PluginProcessor::loadPreset(const std::string& path)
         return result;
     }
     catch (std::exception& e) {
-        std::cout << "Error: (PluginProcessor::loadPreset) " << e.what() << std::endl;
+        std::cerr << "Error: (PluginProcessor::loadPreset) " << e.what() << std::endl;
         return false;
     }
 
@@ -241,33 +238,38 @@ bool
 PluginProcessor::loadVST3Preset(const std::string& path)
 {
     if (!myPlugin.get()) {
-        std::cout << "You must load a plugin before loading a preset." << std::endl;
+        std::cerr << "You must load a plugin before loading a preset." << std::endl;
         return false;
     }
 
-    try {
-        if (!std::filesystem::exists(path.c_str())) {
-            std::cout << "File not found: " << path.c_str() << std::endl;
-            return false;
-        }
+    juce::File fPath(path);
 
-        MemoryBlock mb;
-        File file = File(path);
-        file.loadFileAsData(mb);
-        bool result = setVST3PluginStateDirect(myPlugin.get(), mb);
-
-        for (int i = 0; i < myPlugin->getNumParameters(); i++) {
-            // set the values on the layout.
-            setParameter(i, myPlugin.get()->getParameter(i));
-        }
-
-        return result;
+    if (!fPath.getFileExtension().equalsIgnoreCase(".VSTPRESET")) {
+        std::cerr << "The file extension is not .vstpreset for file: " << path.c_str() << std::endl;
     }
-    catch (std::exception& e) {
-        std::cout << "Error: (PluginProcessor::loadVST3Preset) " << e.what() << std::endl;
+
+    if (!std::filesystem::exists(path.c_str())) {
+        std::cerr << "Preset file not found: " << path.c_str() << std::endl;
         return false;
     }
 
+    PresetVisitor presetVisitor{ path };
+
+    try
+    {
+        myPlugin->getExtensions(presetVisitor);
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+    
+    for (int i = 0; i < myPlugin->getNumParameters(); i++) {
+        // set the values on the layout.
+        setParameter(i, myPlugin.get()->getParameter(i));
+    }
+
+    return true;
 }
 
 void
@@ -300,7 +302,7 @@ PluginProcessor::setPatch(const PluginPatch patch)
             setParameter(pair.first, pair.second);
         }
         else {
-            std::cout << "RenderEngine::setPatch error: Incorrect parameter index!" <<
+            std::cerr << "RenderEngine::setPatch error: Incorrect parameter index!" <<
                 "\n- Current index:  " << pair.first <<
                 "\n- Max index: " << myPlugin->getNumParameters() - 1 << std::endl;
         }
@@ -313,7 +315,7 @@ std::string
 PluginProcessor::getParameterAsText(const int parameter)
 {
     if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
         return "";
     }
     return myPlugin->getParameterText(parameter).toStdString();
@@ -324,7 +326,7 @@ void
 PluginProcessor::setParameter(const int paramIndex, const float value)
 {
     if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
         return;
     }
 
@@ -340,7 +342,7 @@ PluginProcessor::getPatch() {
     PluginPatch params;
 
     if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
         return params;
     }
 
@@ -362,11 +364,11 @@ PluginProcessor::getPatch() {
                 params.push_back(std::make_pair(i, val));
             }
             else {
-                std::cout << "Error getPatch: " << theName << std::endl;
+                std::cerr << "Error getPatch: " << theName << std::endl;
             }
         }
         else {
-            std::cout << "Error getPatch with parameter: " << theName << std::endl;
+            std::cerr << "Error getPatch with parameter: " << theName << std::endl;
         }
 
     }
@@ -380,7 +382,7 @@ const size_t
 PluginProcessor::getPluginParameterSize()
 {
     if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
         return 0;
     }
 
@@ -475,12 +477,12 @@ float
 PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
 {
     if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
         return 0.;
     }
 
     if (parameterIndex >= myPlugin->AudioProcessor::getNumParameters()) {
-        std::cout << "Parameter not found for index: " << parameterIndex << std::endl;
+        std::cerr << "Parameter not found for index: " << parameterIndex << std::endl;
         return 0.;
     }
 
@@ -497,7 +499,7 @@ bool
 PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 {
     if (!myPlugin) {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
         return false;
     }
 
@@ -547,7 +549,7 @@ PluginProcessorWrapper::getPluginParametersDescription()
     }
     else
     {
-        std::cout << "Please load the plugin first!" << std::endl;
+        std::cerr << "Please load the plugin first!" << std::endl;
     }
 
     return myList;
