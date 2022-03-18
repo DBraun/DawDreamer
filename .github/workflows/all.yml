@@ -210,7 +210,7 @@ jobs:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -s ."
-        CIBW_TEST_COMMAND: "pytest -s {package}/tests"
+        CIBW_TEST_COMMAND: "python -m pytest -s {package}/tests"
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
 
