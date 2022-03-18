@@ -41,6 +41,9 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 FaustProcessor::~FaustProcessor() {
 	clear();
+	if (myMidiIterator) {
+		delete myMidiIterator;
+	}
 }
 
 bool
@@ -336,6 +339,7 @@ FaustProcessor::compile()
 	for (int i = 0; i < argc; i++) {
 		argv[i] = NULL;
 	}
+	argv = nullptr;
 
 	if (is_polyphonic) {
 		// (false, true) works
@@ -742,6 +746,8 @@ FaustProcessor::getPathToFaustLibraries() {
 		std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
 
 		std::string p(char_shareFaustDir);
+
+		delete[] char_shareFaustDir;
 		return p;
 #else
 		// this applies to __APPLE__ and LINUX
