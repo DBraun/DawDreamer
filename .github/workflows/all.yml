@@ -202,9 +202,11 @@ jobs:
       # todo: don't force downgrade of distlib:
       # https://github.com/pypa/pip/issues/10875
       run: |
-        python -m pip install -U distlib==0.3.3
         python -m cibuildwheel --output-dir wheelhouse
       env:
+        CIBW_BEFORE_BUILD: |
+          python -m pip install -U pip==21.3.1
+          python -m pip install -U distlib==0.3.3
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
