@@ -166,8 +166,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install Python dependencies
+      # note: something is bad about pip 22 on Windows and Pytest
+      # https://github.com/pytest-dev/pytest/issues/9667
+      # https://github.com/pypa/pip/issues/10444
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install -U pip==21.3.1
         pip install setuptools wheel numpy librosa scipy
 
     - name: Add msbuild to PATH
