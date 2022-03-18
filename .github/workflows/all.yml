@@ -160,19 +160,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install Python dependencies
-      # note: something is bad about pip 22 on Windows and Pytest
-      # https://github.com/pytest-dev/pytest/issues/9667
-      # https://github.com/pypa/pip/issues/10444
-      run: |
-        python -m pip install -U pip==21.3.1
-        pip install setuptools wheel numpy librosa scipy
-
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
@@ -198,19 +185,15 @@ jobs:
         cd build_release
         msbuild libsamplerate.sln /property:Configuration=Release
 
-    - name: Build Windows (Release)
-      run: |
-        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
-
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.3.1
-
     - name: Build Wheels
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
+      uses: pypa/cibuildwheel@v2.3.1
       env:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BUILD_VERBOSITY: 1
+        CIBW_BEFORE_BUILD: |
+          python -c "import os, sys; print(os.path.dirname(sys.executable))" > blah.txt
+          set /p pythonLocation=<blah.txt
+          msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         # CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -s ."
         CIBW_TEST_COMMAND: "python -m pytest -s {package}/tests"
@@ -221,6 +204,12 @@ jobs:
       with:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
+      with:
+        python-version: ${{ matrix.python-version }}
 
     - name: "Build docs for GitHub pages"
       if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
