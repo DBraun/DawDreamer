@@ -45,7 +45,7 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 128 # Parameters will undergo automation at this block size.
+BUFFER_SIZE = 128 # Parameters will undergo automation at this block size. It can be as small as 1 sample.
 SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
 SYNTH_PRESET = "C:/path/to/preset.fxp"
 REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work

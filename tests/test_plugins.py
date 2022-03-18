@@ -262,3 +262,45 @@ def test_plugin_goodhertz_sidechain():
 # 	audio = engine.get_audio()
 
 # 	assert(effect.get_num_output_channels() == audio.shape[0])
+
+
+def test_plugin_upright_piano():
+
+	SYNTH_PLUGIN = "C:/VSTPlugIns/Upright Piano VST/Upright Piano.dll"
+
+	if not isfile(SYNTH_PLUGIN):
+		return
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+	engine.set_bpm(120.) 
+
+	synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
+
+	synth.add_midi_note(67, 127, 0.5, .25)
+
+	# Basic reverb processor from JUCE.
+	room_size = 0.5
+	damping = 0.5
+	wet_level = 0.33
+	dry_level = 0.4
+	width = 1.
+	reverb_processor = engine.make_reverb_processor("my_reverb", room_size, damping, wet_level, dry_level, width)
+	# ReverbProcessor has getters/setters
+	reverb_processor.room_size = room_size
+	reverb_processor.damping = damping
+	reverb_processor.wet_level = wet_level
+	reverb_processor.dry_level = dry_level
+	reverb_processor.width = width
+
+	graph = [
+	  (synth, []),
+	  (reverb_processor, ["my_synth"])
+	]
+	assert(engine.load_graph(graph))
+	engine.render(5.)
+	audio = engine.get_audio()
+	audio = np.array(audio, np.float32).transpose()    
+	wavfile.write('output/test_plugin_upright_piano.wav', SAMPLE_RATE, audio)
+
+if __name__ == '__main__':
+	test_plugin_upright_piano()

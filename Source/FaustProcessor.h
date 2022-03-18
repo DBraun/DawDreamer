@@ -53,7 +53,7 @@ public:
             // todo: used subtract path_name_list.size() instead of 1.
             total_length += (MAX_SOUNDFILE_PARTS - buffers.size()) * BUFFER_SIZE;
 
-            Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, false); 
+            Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, buffers.size(), false);
             
             // Manually fill in the soundfile:
             // The following code is a modification of SoundfileReader::createSoundfile and SoundfileReader::readFile
@@ -153,6 +153,18 @@ public:
 
     void setSoundfiles(py::dict);
 
+    double getReleaseLength();
+
+    void setReleaseLength(double sec);
+
+    void setFaustLibrariesPath(std::string faustLibrariesPath) {
+        m_faustLibrariesPath = faustLibrariesPath;
+    }
+
+    std::string getFaustLibrariesPath() {
+        return m_faustLibrariesPath;
+    }
+
     std::map<std::string, std::vector<juce::AudioSampleBuffer>> m_SoundfileMap;
 
 private:
@@ -165,9 +177,9 @@ private:
 
 protected:
 
-    llvm_dsp_factory* m_factory;
-    dsp* m_dsp;
-    APIUI* m_ui;
+    llvm_dsp_factory* m_factory = nullptr;
+    dsp* m_dsp = nullptr;
+    APIUI* m_ui = nullptr;
 
     llvm_dsp_poly_factory* m_poly_factory = nullptr;
     dsp_poly* m_dsp_poly = nullptr;
@@ -178,8 +190,11 @@ protected:
     int m_numInputChannels = 0;
     int m_numOutputChannels = 0;
 
+    double m_releaseLengthSec = 0.5;
+
     std::string m_autoImport;
     std::string m_code;
+    std::string m_faustLibrariesPath = "";
 
     int m_nvoices = 0;    
     bool m_groupVoices = true;

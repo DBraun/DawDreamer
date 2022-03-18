@@ -128,6 +128,7 @@ def test_faust_soundfile_piano():
 	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = 16
 	faust_processor.group_voices = True
+	faust_processor.release_length = .5
 
 	dsp_path = abspath("faust_dsp/soundfile_piano.dsp")
 
@@ -164,3 +165,53 @@ def test_faust_soundfile_cymbal():
 	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_1.wav', sound_choice=1)
 	_test_faust_soundfile(sample_seq, 'test_faust_soundfile_2.wav', sound_choice=2)
 	_test_faust_soundfile_multichannel('test_faust_soundfile_3.wav')
+
+def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	faust_processor = engine.make_faust_processor("faust")
+	faust_processor.num_voices = num_voices
+
+	dsp_path = abspath("faust_dsp/soundfile.dsp")
+
+	if sample_seq.ndim == 1:
+		sample_seq = sample_seq.reshape(1, -1)
+
+	# set_soundfiles
+	soundfiles = {
+		'mySound': [sample_seq]
+	}
+	faust_processor.set_soundfiles(soundfiles)
+
+	assert(faust_processor.set_dsp(dsp_path))
+	assert(faust_processor.compile())
+
+	# Notice how if the release length is too long then you'll see warnings about voice stealing.
+	# Note that you should actually edit your DSP to use this release length (i.e., use ADSR to modulate
+	# the gain and use this release length)
+	faust_processor.release_length = 0.125
+
+	faust_processor.set_parameter('/Sequencer/DSP1/Polyphonic/Voices/MyInstrument/soundChoice', 0)
+
+	 # (MIDI note, velocity, start sec, duration sec)
+	for i in range(100):
+		faust_processor.add_midi_note(60 + (i%12), 30, i*.125*.25, .125)
+
+	graph = [
+	    (faust_processor, [])
+	]
+
+	assert(engine.load_graph(graph))
+	render(engine, file_path='output/'+output_path, duration=3.)
+
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .001)
+
+def test_faust_soundfile_many_notes():
+	# Load a stereo audio sample and pass it to Faust
+	sample_seq = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav")
+	_test_faust_soundfile_many_notes(sample_seq, 'test_faust_soundfile_many_notes.wav')
+
+# if __name__ == '__main__':
+# 	test_faust_soundfile_many_notes()

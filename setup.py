@@ -13,7 +13,7 @@ import shutil
 import platform
 import glob
 
-DAWDREAMER_VERSION = '0.5.8.3'
+DAWDREAMER_VERSION = '0.5.9'
 
 
 class BinaryDistribution(Distribution):

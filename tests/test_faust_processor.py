@@ -18,8 +18,8 @@ def test_faust_passthrough():
 	# print(faust_processor.get_parameters_description())
 
 	graph = [
-	    (playback_processor, []),
-	    (faust_processor, ["playback"])
+		(playback_processor, []),
+		(faust_processor, ["playback"])
 	]
 
 	assert(engine.load_graph(graph))
@@ -68,8 +68,8 @@ def test_faust_multichannel_in_out():
 	# print(faust_processor.get_parameters_description())
 
 	graph = [
-	    (playback_processor, []),
-	    (faust_processor, ["playback"])
+		(playback_processor, []),
+		(faust_processor, ["playback"])
 	]
 
 	assert(engine.load_graph(graph))
@@ -107,10 +107,10 @@ def test_faust_sidechain():
 	# print(faust_processor.get_parameters_description())
 
 	graph = [
-	    (drums, []),
-	    (bass, []),
-	    (faust_processor, [bass.get_name(), drums.get_name()]),
-	    (engine.make_add_processor("add", [1., 1.]), ["faust", "drums"])
+		(drums, []),
+		(bass, []),
+		(faust_processor, [bass.get_name(), drums.get_name()]),
+		(engine.make_add_processor("add", [1., 1.]), ["faust", "drums"])
 	]
 
 	assert(engine.load_graph(graph))
@@ -118,9 +118,9 @@ def test_faust_sidechain():
 	render(engine, file_path='output/test_sidechain_on.wav')
 
 	graph = [
-	    (drums, []),
-	    (bass, []),
-	    (engine.make_add_processor("add", [1., 1.]), ["bass", "drums"])
+		(drums, []),
+		(bass, []),
+		(engine.make_add_processor("add", [1., 1.]), ["bass", "drums"])
 	]
 
 	assert(engine.load_graph(graph))
@@ -146,8 +146,8 @@ def test_faust_zita_rev1(set_data=False):
 	# print(faust_processor.get_parameters_description())
 
 	graph = [
-	    (playback_processor, []),
-	    (faust_processor, ["playback"])
+		(playback_processor, []),
+		(faust_processor, ["playback"])
 	]
 
 	assert(engine.load_graph(graph))
@@ -179,14 +179,85 @@ def test_faust_automation():
 	faust_processor.set_automation("/MyEffect/cutoff", 10000+9000*make_sine(2, DURATION))
 
 	graph = [
-	    (drums, []),
-	    (other, []),
-	    (faust_processor, [drums.get_name(), other.get_name()])
+		(drums, []),
+		(other, []),
+		(faust_processor, [drums.get_name(), other.get_name()])
 	]
 
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_faust_automation.wav')
+
+def test_faust_add():
+
+	"""
+	This example isn't meant to sound meaningful. It just demonstrates taking a single
+	input ("drums"), passing it to multiple other processors, and then mixing those
+	processors into a single stereo out. It's meaningful to test a system
+	that has more internal channels (8) than inputs (2) or outputs (2).
+	"""
+
+	DURATION = 5.1
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	drums = engine.make_playback_processor("drums",
+	  load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+
+	def get_filter(i):
+		processor = engine.make_faust_processor(f"filter{i}")
+		assert processor.set_dsp_string("""
+			declare name "MyFilter";
+			process = sp.stereoize(fi.lowpass(2, 10000.));
+			""")
+		assert processor.compile()
+		assert processor.get_num_input_channels() == 2
+		assert processor.get_num_output_channels() == 2
+		return processor
+
+	N_INPUTS = 4
+
+	faust_processor = engine.make_faust_processor("faust")
+	assert(faust_processor.set_dsp_string(
+		f"""
+		declare name "MyEQ";
+		process = par(i, {N_INPUTS},
+			sp.stereoize(hslider("gain%i", 1., 0., 1., 0.01)*_)
+			) :> _, _;
+		"""))
+	assert(faust_processor.compile())
+	print(faust_processor.code)
+	assert(faust_processor.get_num_input_channels() == N_INPUTS*2)
+	assert(faust_processor.get_num_output_channels() == 2)
+	print(faust_processor.get_parameters_description())
+
+	faust_processor.set_parameter("/MyEQ/gain0", .1)
+	faust_processor.set_parameter("/MyEQ/gain1", .1)
+	faust_processor.set_parameter("/MyEQ/gain2", .1)
+	faust_processor.set_parameter("/MyEQ/gain3", .1)
+	assert(np.isclose(faust_processor.get_parameter("/MyEQ/gain0"), .1))
+	assert(np.isclose(faust_processor.get_parameter("/MyEQ/gain1"), .1))
+	assert(np.isclose(faust_processor.get_parameter("/MyEQ/gain2"), .1))
+	assert(np.isclose(faust_processor.get_parameter("/MyEQ/gain3"), .1))
+
+	# faust_processor.set_automation("/MyEQ/gain0", .5+.5*make_sine(2, DURATION))
+
+	graph = [
+		(drums, []),
+		(get_filter(0), ["drums"]),
+		(get_filter(1), ["drums"]),
+		(get_filter(2), ["drums"]),
+		(get_filter(3), ["drums"]),
+		(faust_processor, ["filter0", "filter1", "filter2", "filter3"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	assert(engine.render(5.))
+
+	output = engine.get_audio()
+
+	wavfile.write('output/test_faust_add.wav', SAMPLE_RATE, output.transpose())
 
 def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
 
@@ -217,20 +288,20 @@ def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
 		max_gain = 10.; // todo: user can pick this.
 		// 10 indicates don't multiply the signal by more than 10 even if it's very close in 3D
 		xz_square = tx*tx+tz*tz;
-	    signal = x / max(1./max_gain, sqrt(xz_square+ty*ty));
+		signal = x / max(1./max_gain, sqrt(xz_square+ty*ty));
 
-	    angle = atan2(tx, -tz);
-	    elevation = atan2(ty, sqrt(xz_square));
+		angle = atan2(tx, -tz);
+		elevation = atan2(ty, sqrt(xz_square));
 	}};
 
 	// todo: ma.EPSILON doesn't work on Linux?
 	eps = .00001;
 	//eps = ma.EPSILON;
 	process(sig) = encoder3Dxyz(L, sig, 
-	    hslider("tx", 1., -10000., 10000., eps),
-	    hslider("ty", 1., -10000., 10000., eps),
-	    hslider("tz", 1., -10000., 10000., eps)
-	    );
+		hslider("tx", 1., -10000., 10000., eps),
+		hslider("ty", 1., -10000., 10000., eps),
+		hslider("tz", 1., -10000., 10000., eps)
+		);
 
 	"""
 
@@ -243,10 +314,50 @@ def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
 	assert(faust_processor.get_num_output_channels() == (ambisonics_order+1)**2)
 
 	graph = [
-	    (playback_processor, []),
-	    (faust_processor, ["playback"])
+		(playback_processor, []),
+		(faust_processor, ["playback"])
 	]
 
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path='output/test_faust_ambisonics_encoding.wav')
+
+def test_faust_library_extra():
+
+	DURATION = 5.1
+
+	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+	playback_processor = engine.make_playback_processor("playback", data)
+
+	faust_processor = engine.make_faust_processor("faust")
+
+	# The point of this test is that if we don't specify the faust_libraries_path,
+	# then my_hidden_library.lib won't be found and it will fail to compile
+	faust_processor.faust_libraries_path = abspath("faust_dsp")
+
+	assert(faust_processor.set_dsp_string(
+		"""
+		import("my_hidden_library.lib");
+		process = _, _ : my_hidden_stereo_effect;
+		"""))
+	assert(faust_processor.compile())
+
+	# print(faust_processor.get_parameters_description())
+
+	graph = [
+		(playback_processor, []),
+		(faust_processor, ["playback"])
+	]
+
+	assert(engine.load_graph(graph))
+
+	render(engine, file_path='output/test_faust_library_extra.wav')
+
+	# check that it's non-silent
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .05)
+
+if __name__ == '__main__':
+	test_faust_library_extra()

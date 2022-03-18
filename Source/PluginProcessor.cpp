@@ -95,7 +95,8 @@ PluginProcessor::~PluginProcessor() {
     if (myPlugin.get())
     {
         myPlugin->releaseResources();
-        myPlugin.release();
+        auto* raw = myPlugin.release(); // pointer to no-longer-managed object
+        delete raw;                     // needs manual deletion
     }
 }
 

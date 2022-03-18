@@ -41,7 +41,6 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 FaustProcessor::~FaustProcessor() {
 	clear();
-	deleteAllDSPFactories();
 }
 
 bool
@@ -87,7 +86,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 					if (myMidiMessage.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessage.getNoteNumber(), myMidiMessage.getVelocity());
 					}
-					else {
+					else if (myMidiMessage.isNoteOff()) {
 						m_dsp_poly->keyOff(midiChannel, myMidiMessage.getNoteNumber(), myMidiMessage.getVelocity());
 					}
 					
@@ -210,6 +209,10 @@ FaustProcessor::clear()
 	SAFE_DELETE(m_ui);
 	SAFE_DELETE(m_dsp_poly);
 
+	// deleteAllDSPFactories();  // don't actually do this!!
+	// deleteDSPFactory(m_factory);
+	// deleteDSPFactory(m_poly_factory);
+
 	m_factory = NULL;
 	m_poly_factory = NULL;
 }
@@ -269,12 +272,18 @@ FaustProcessor::compile()
 	auto pathToFaustLibraries = getPathToFaustLibraries();
 
 	int argc = 0;
-	const char** argv = NULL;
+	const char** argv = new const char* [256];
 	if (pathToFaustLibraries.compare(std::string("")) != 0) {
-		argc = 2;
-		argv = new const char* [argc];
-		argv[0] = "-I";
-		argv[1] = pathToFaustLibraries.c_str();
+		argv[argc++] = "-I";
+		argv[argc++] = pathToFaustLibraries.c_str();
+	}
+	else {
+		std::cerr << "Error for path for faust libraries: " << pathToFaustLibraries << std::endl;
+	}
+
+	if (m_faustLibrariesPath.compare(std::string("")) != 0) {
+		argv[argc++] = "-I";
+		argv[argc++] = m_faustLibrariesPath.c_str();
 	}
 
 	auto theCode = m_autoImport + "\n" + m_code;
@@ -324,11 +333,8 @@ FaustProcessor::compile()
     //    std::cout << name << "\n" << std::endl;
     //}
 
-	if (argv) {
-		for (int i = 0; i < argc; i++) {
-			argv[i] = NULL;
-		}
-		argv = NULL;
+	for (int i = 0; i < argc; i++) {
+		argv[i] = NULL;
 	}
 
 	if (is_polyphonic) {
@@ -338,6 +344,7 @@ FaustProcessor::compile()
 			std::cerr << "FaustProcessor::compile(): Cannot create Poly DSP instance." << std::endl;
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
+		m_dsp_poly->setReleaseLength(m_releaseLengthSec);
 	}
 	else {
 		// create DSP instance
@@ -420,7 +427,9 @@ bool
 FaustProcessor::setParamWithIndex(const int index, float p)
 {
 	if (!m_isCompiled) {
-		this->compile();
+		if (!this->compile()) {
+			return false;
+		};
 	}
 	if (!m_ui) return false;
 
@@ -439,7 +448,9 @@ float
 FaustProcessor::getParamWithIndex(const int index)
 {
 	if (!m_isCompiled) {
-		this->compile();
+		if (!this->compile()) {
+			return 0;
+		};
 	}
 	if (!m_ui) return 0; // todo: better handling
 
@@ -800,6 +811,20 @@ FaustProcessor::setSoundfiles(py::dict d) {
 			//}
 		}
 		
+	}
+}
+
+double
+FaustProcessor::getReleaseLength() {
+	return m_releaseLengthSec;
+}
+
+
+void
+FaustProcessor::setReleaseLength(double sec) {
+	m_releaseLengthSec = sec;
+	if (m_dsp_poly) {
+		m_dsp_poly->setReleaseLength(m_releaseLengthSec);
 	}
 }
 
