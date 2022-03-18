@@ -199,7 +199,10 @@ jobs:
       run: python -m pip install cibuildwheel>=2.3.1
 
     - name: Build Wheels
+      # todo: don't force downgrade of distlib:
+      # https://github.com/pypa/pip/issues/10875
       run: |
+        python -m pip install -U distlib=0.3.3
         python -m cibuildwheel --output-dir wheelhouse
       env:
         PYTHONMAJOR: ${{ matrix.python-version }}
