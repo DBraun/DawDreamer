@@ -67,6 +67,8 @@ RenderEngine::connectGraph() {
     for (auto connection : myMainProcessorGraph->getConnections()) {
         myMainProcessorGraph->removeConnection(connection);
     }
+
+    bool result = true;
      
     int numNodes = myMainProcessorGraph->getNumNodes();
     for (int i = 0; i < numNodes; i++) {
@@ -91,7 +93,8 @@ RenderEngine::connectGraph() {
         int numOutputAudioChans = processor->getMainBusNumOutputChannels();
         int expectedInputChannels = processor->getMainBusNumInputChannels();
         if (numInputAudioChans > expectedInputChannels) {
-            std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName << " expects " << expectedInputChannels << " input signals, but you are trying to connect " << numInputAudioChans << " signals." << std::endl;
+            // todo: enable this warning
+            //std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName << " expects " << expectedInputChannels << " input signals, but you are trying to connect " << numInputAudioChans << " signals." << std::endl;
         }
         
         processor->setPlayConfigDetails(expectedInputChannels, numOutputAudioChans, mySampleRate, myBufferSize);
@@ -102,8 +105,8 @@ RenderEngine::connectGraph() {
 
             if (m_UniqueNameToSlotIndex.find(inputName) == m_UniqueNameToSlotIndex.end())
             {
-                std::cout << "Error: Unable to connect " << inputName << " to " << myUniqueName << ";" << std::endl;
-                std::cout << "You might need to place " << inputName << " earlier in the graph." << std::endl;
+                std::cerr << "Error: Unable to connect " << inputName << " to " << myUniqueName << ";" << std::endl;
+                std::cerr << "You might need to place " << inputName << " earlier in the graph." << std::endl;
                 return false;
             }
             
@@ -116,9 +119,10 @@ RenderEngine::connectGraph() {
                 AudioProcessorGraph::Connection connection = { { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
                                                 { slots.getUnchecked(i)->nodeID, chanDest } };
 
-                bool result = myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
+                result &= myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
                 if (!result) {
-                    std::cout << "Warning: Unable to connect " << inputName << " channel " << chanSource << " to " << myUniqueName << " channel " << chanDest << std::endl;
+                    // todo: enable this warning
+                    //std::cerr << "Warning: Unable to connect " << inputName << " channel " << chanSource << " to " << myUniqueName << " channel " << chanDest << std::endl;
                     //return false;
                 }
                 
@@ -136,7 +140,7 @@ RenderEngine::connectGraph() {
         node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
     }
     
-    return true;
+    return result;
 }
 
 bool

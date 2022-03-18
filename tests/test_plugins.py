@@ -105,7 +105,12 @@ def test_plugin_instrument():
 
     render(engine, file_path=OUTPUT / 'test_plugin_instrument.wav', duration=DURATION)
 
-    assert(not synth.load_preset('bogus_path.fxp'))
+    try:
+        synth.load_preset('bogus_path.fxp')
+        assert False
+    except Exception as e:
+        print(f"Correctly caught exception: {e}")
+        assert True
 
 def test_plugin_serum():
 

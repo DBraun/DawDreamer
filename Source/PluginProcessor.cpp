@@ -204,13 +204,13 @@ bool
 PluginProcessor::loadPreset(const std::string& path)
 {
     if (!myPlugin.get()) {
-        std::cerr << "You must load a plugin before loading a preset." << std::endl;
+        throw std::runtime_error("You must load a plugin before loading a preset.");
         return false;
     }
 
     try {
         if (!std::filesystem::exists(path.c_str())) {
-            std::cerr << "File not found: " << path.c_str() << std::endl;
+            throw std::runtime_error("Failed to read preset file: " + path);
             return false;
         }
 
@@ -229,7 +229,7 @@ PluginProcessor::loadPreset(const std::string& path)
         return result;
     }
     catch (std::exception& e) {
-        std::cerr << "Error: (PluginProcessor::loadPreset) " << e.what() << std::endl;
+        throw std::runtime_error("Error: (PluginProcessor::loadPreset) " + std::string(e.what()));
         return false;
     }
 
