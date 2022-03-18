@@ -1,5 +1,6 @@
 from scipy.io import wavfile
 from os.path import abspath, isfile
+from pathlib import Path
 import numpy as np
 import pathlib
 import random
@@ -14,6 +15,12 @@ except ModuleNotFoundError as e:
 import dawdreamer as daw
 
 SAMPLE_RATE = 44100
+
+DIR = Path(__file__).parent.resolve()
+ASSETS = DIR / 'assets'
+FAUST_DSP = DIR / 'faust_dsp'
+PLUGINS = DIR / 'plugins'
+OUTPUT = DIR / 'output'
 
 def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 	"""Return sine wave based on freq in Hz and duration in seconds"""

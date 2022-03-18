@@ -24,7 +24,7 @@ def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
 
     playback_processor = engine.make_playback_processor("playback", data)
 
@@ -43,7 +43,7 @@ def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
 
     plugin_basename = os.path.basename(plugin_path)
 
-    render(engine, file_path=f'output/test_plugin_effect_{plugin_basename}.wav', duration=DURATION)
+    render(engine, file_path=OUTPUT / f'test_plugin_effect_{plugin_basename}.wav', duration=DURATION)
 
     # check that it's non-silent
     audio = engine.get_audio()
@@ -64,11 +64,11 @@ def test_stereo_plugin_effects():
         # plugin_paths.append((abspath("plugins/ValhallaFreqEcho.component"), 2))
 
         # RoughRider has an optional mono sidechain input
-        plugin_paths.append((abspath("plugins/RoughRider3.vst"), 3))
-        plugin_paths.append((abspath("plugins/RoughRider3.vst3"), 3))
-        plugin_paths.append((abspath("plugins/RoughRider3.component"), 3))
+        plugin_paths.append((abspath(PLUGINS / "RoughRider3.vst"), 3))
+        plugin_paths.append((abspath(PLUGINS / "RoughRider3.vst3"), 3))
+        plugin_paths.append((abspath(PLUGINS / "RoughRider3.component"), 3))
     elif MY_SYSTEM == 'Windows':
-        plugin_paths.append((abspath("plugins/Dimension Expander_x64.dll"), 2))
+        plugin_paths.append((abspath(PLUGINS / "Dimension Expander_x64.dll"), 2))
 
     for plugin_args in plugin_paths:
         _test_stereo_plugin_effect(*plugin_args)
@@ -85,7 +85,7 @@ def test_plugin_instrument():
 
     plugin_name = "TAL-NoiseMaker.vst" if MY_SYSTEM == "Darwin" else "TAL-NoiseMaker-64.dll"
 
-    synth = engine.make_plugin_processor("synth", abspath("plugins/"+plugin_name))
+    synth = engine.make_plugin_processor("synth", abspath(PLUGINS / plugin_name))
 
     # print(synth.get_plugin_parameters_description())
 
@@ -103,7 +103,7 @@ def test_plugin_instrument():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_plugin_instrument.wav', duration=DURATION)
+    render(engine, file_path=OUTPUT / 'test_plugin_instrument.wav', duration=DURATION)
 
     assert(not synth.load_preset('bogus_path.fxp'))
 
@@ -146,7 +146,7 @@ def test_plugin_serum():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_plugin_serum.wav', duration=DURATION)
+    render(engine, file_path=OUTPUT / 'test_plugin_serum.wav', duration=DURATION)
 
     audio = engine.get_audio()
     assert(not np.allclose(audio*0., audio, atol=1e-07))
@@ -167,8 +167,8 @@ def _test_plugin_goodhertz_sidechain(do_sidechain=True):
 
     DURATION = 5.1
 
-    vocals = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
-    drums = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav", duration=DURATION)
+    vocals = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+    drums = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav", duration=DURATION)
 
     drums *= .1
 
@@ -204,7 +204,7 @@ def _test_plugin_goodhertz_sidechain(do_sidechain=True):
 
     sidechain_on = "on" if do_sidechain else "off"
 
-    file_path = f'output/test_plugin_goodhertz_sidechain_{sidechain_on}.wav'
+    file_path = OUTPUT / f'test_plugin_goodhertz_sidechain_{sidechain_on}.wav'
 
     render(engine, file_path=file_path, duration=DURATION)
 
@@ -300,7 +300,7 @@ def test_plugin_upright_piano():
     engine.render(5.)
     audio = engine.get_audio()
     audio = np.array(audio, np.float32).transpose()    
-    wavfile.write('output/test_plugin_upright_piano.wav', SAMPLE_RATE, audio)
+    wavfile.write(OUTPUT / 'test_plugin_upright_piano.wav', SAMPLE_RATE, audio)
 
 # if __name__ == '__main__':
 #     test_plugin_upright_piano()

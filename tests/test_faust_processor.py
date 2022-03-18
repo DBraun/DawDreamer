@@ -8,7 +8,7 @@ def test_faust_passthrough():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
     playback_processor = engine.make_playback_processor("playback", data)
 
     faust_processor = engine.make_faust_processor("faust")
@@ -24,7 +24,7 @@ def test_faust_passthrough():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_faust_passthrough.wav')
+    render(engine, file_path=OUTPUT / 'test_faust_passthrough.wav')
 
     audio = engine.get_audio()
 
@@ -74,7 +74,7 @@ def test_faust_multichannel_in_out():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_faust_multichannel_in_out.wav')
+    render(engine, file_path=OUTPUT / 'test_faust_multichannel_in_out.wav')
 
     audio = engine.get_audio()
 
@@ -94,12 +94,12 @@ def test_faust_sidechain():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
     drums = engine.make_playback_processor("drums",
-        load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+        load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
     bass = engine.make_playback_processor("bass",
-        load_audio_file("assets/Music Delta - Disco/bass.wav", duration=DURATION))
+        load_audio_file(ASSETS / "Music Delta - Disco" / "bass.wav", duration=DURATION))
 
-    dsp_path = abspath("faust_dsp/sidechain.dsp")
+    dsp_path = abspath(FAUST_DSP / "sidechain.dsp")
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.set_dsp(dsp_path)
     assert(faust_processor.compile())
@@ -115,7 +115,7 @@ def test_faust_sidechain():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_sidechain_on.wav')
+    render(engine, file_path=OUTPUT / 'test_sidechain_on.wav')
 
     graph = [
         (drums, []),
@@ -125,19 +125,19 @@ def test_faust_sidechain():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_sidechain_off.wav')
+    render(engine, file_path=OUTPUT / 'test_sidechain_off.wav')
 
 def test_faust_zita_rev1(set_data=False):
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav")
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav")
     playback_processor = engine.make_playback_processor("playback", data)
 
     if set_data:
         playback_processor.set_data(data)
 
-    dsp_path = abspath("faust_dsp/dm.zita_rev1.dsp")
+    dsp_path = abspath(FAUST_DSP / "dm.zita_rev1.dsp")
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.set_dsp(dsp_path)
     assert(faust_processor.set_dsp(dsp_path))
@@ -152,7 +152,7 @@ def test_faust_zita_rev1(set_data=False):
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_faust_dm.zita_rev1.wav')
+    render(engine, file_path=OUTPUT / 'test_faust_dm.zita_rev1.wav')
 
 def test_faust_automation():
 
@@ -161,12 +161,12 @@ def test_faust_automation():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
     drums = engine.make_playback_processor("drums",
-        load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+        load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
     other = engine.make_playback_processor("other",
-        load_audio_file("assets/Music Delta - Disco/other.wav", duration=DURATION))
+        load_audio_file(ASSETS / "Music Delta - Disco" / "other.wav", duration=DURATION))
 
-    dsp_path = abspath("faust_dsp/two_stereo_inputs_filter.dsp")
+    dsp_path = abspath(FAUST_DSP / "two_stereo_inputs_filter.dsp")
     faust_processor = engine.make_faust_processor("faust")
     assert(faust_processor.set_dsp(dsp_path))
     assert(faust_processor.compile())
@@ -186,7 +186,7 @@ def test_faust_automation():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_faust_automation.wav')
+    render(engine, file_path=OUTPUT / 'test_faust_automation.wav')
 
 def test_faust_add():
 
@@ -202,7 +202,7 @@ def test_faust_add():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
     drums = engine.make_playback_processor("drums",
-      load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+      load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
     def get_filter(i):
         processor = engine.make_faust_processor(f"filter{i}")
@@ -257,13 +257,13 @@ def test_faust_add():
 
     output = engine.get_audio()
 
-    wavfile.write('output/test_faust_add.wav', SAMPLE_RATE, output.transpose())
+    wavfile.write(OUTPUT / 'test_faust_add.wav', SAMPLE_RATE, output.transpose())
 
 def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav")
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav")
 
     data = data.mean(axis=0, keepdims=True)
 
@@ -320,7 +320,7 @@ def test_faust_ambisonics_encoding(ambisonics_order=2, set_data=False):
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_faust_ambisonics_encoding.wav')
+    render(engine, file_path=OUTPUT / 'test_faust_ambisonics_encoding.wav')
 
 def test_faust_library_extra():
 
@@ -328,14 +328,14 @@ def test_faust_library_extra():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
     playback_processor = engine.make_playback_processor("playback", data)
 
     faust_processor = engine.make_faust_processor("faust")
 
     # The point of this test is that if we don't specify the faust_libraries_path,
     # then my_hidden_library.lib won't be found and it will fail to compile
-    faust_processor.faust_libraries_path = abspath("faust_dsp")
+    faust_processor.faust_libraries_path = abspath(FAUST_DSP)
 
     assert(faust_processor.set_dsp_string(
         """
@@ -353,7 +353,7 @@ def test_faust_library_extra():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_faust_library_extra.wav')
+    render(engine, file_path=OUTPUT / 'test_faust_library_extra.wav')
 
     # check that it's non-silent
     audio = engine.get_audio()

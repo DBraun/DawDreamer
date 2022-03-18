@@ -2,7 +2,6 @@ from utils import *
 
 BUFFER_SIZE = 1
 
-
 def test_add_processor():
 
     """
@@ -17,7 +16,7 @@ def test_add_processor():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
     drums = engine.make_playback_processor("drums",
-      load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+      load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
     def get_filter(i):
       return engine.make_filter_processor(f"filter{i}", "low", 18_000, .5, 1.)
@@ -39,7 +38,7 @@ def test_add_processor():
 
     output = engine.get_audio()
 
-    wavfile.write('output/test_add_processor.wav', SAMPLE_RATE, output.transpose())
+    wavfile.write(OUTPUT / 'test_add_processor.wav', SAMPLE_RATE, output.transpose())
 
 # if __name__ == '__main__':
 #     test_add_processor()

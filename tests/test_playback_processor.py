@@ -8,7 +8,7 @@ def test_playback(set_data=False):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav")
+	data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav")
 	playback_processor = engine.make_playback_processor("playback", data)
 
 	if set_data:
@@ -24,7 +24,7 @@ def test_playback(set_data=False):
 
 	output = engine.get_audio()
 
-	wavfile.write('output/test_playback.wav', SAMPLE_RATE, output.transpose())
+	wavfile.write(OUTPUT / 'test_playback.wav', SAMPLE_RATE, output.transpose())
 
 	# do the same for noise
 	data = np.random.rand(2, int(SAMPLE_RATE*(DURATION+.1)))

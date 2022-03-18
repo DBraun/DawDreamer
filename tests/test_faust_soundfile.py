@@ -9,7 +9,7 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.num_voices = 8
 
-    dsp_path = abspath("faust_dsp/soundfile.dsp")
+    dsp_path = abspath(FAUST_DSP / "soundfile.dsp")
 
     if sample_seq.ndim == 1:
         sample_seq = sample_seq.reshape(1, -1)
@@ -42,7 +42,7 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
     ]
 
     assert(engine.load_graph(graph))
-    render(engine, file_path='output/'+output_path, duration=3.)
+    render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
@@ -53,7 +53,7 @@ def _test_faust_soundfile_multichannel(output_path):
 
     faust_processor = engine.make_faust_processor("faust")
 
-    dsp_path = abspath("faust_dsp/soundfile.dsp")
+    dsp_path = abspath(FAUST_DSP / "soundfile.dsp")
 
     numChannels = 9
 
@@ -79,7 +79,7 @@ def _test_faust_soundfile_multichannel(output_path):
     ]
 
     assert(engine.load_graph(graph))
-    render(engine, file_path='output/'+output_path, duration=3.)
+    render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
@@ -90,7 +90,7 @@ def download_grand_piano():
 
     try:
 
-        file_paths = [f"assets/bitKlavierGrand_PianoBar/{i}v8.wav" for i in range(88)]
+        file_paths = [ASSETS / f"bitKlavierGrand_PianoBar/{i}v8.wav" for i in range(88)]
 
         import os.path
 
@@ -104,13 +104,13 @@ def download_grand_piano():
         print(f'Downloading: {bitKlavierURL}')
         r = requests.get(bitKlavierURL)
 
-        path_to_zip_file = abspath("assets/bitKlavierGrand_PianoBar.zip")
+        path_to_zip_file = abspath(ASSETS / "bitKlavierGrand_PianoBar.zip")
         with open(path_to_zip_file, "wb") as zip:
             zip.write(r.content)
 
         import zipfile
         with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
-            zip_ref.extractall("assets")
+            zip_ref.extractall(ASSETS)
 
         os.remove(path_to_zip_file)
 
@@ -130,11 +130,11 @@ def test_faust_soundfile_piano():
     faust_processor.group_voices = True
     faust_processor.release_length = .5
 
-    dsp_path = abspath("faust_dsp/soundfile_piano.dsp")
+    dsp_path = abspath(FAUST_DSP / "soundfile_piano.dsp")
 
     # set_soundfiles
     soundfiles = {
-        'mySound': [load_audio_file(f"assets/bitKlavierGrand_PianoBar/{i}v8.wav") for i in range(88)]
+        'mySound': [load_audio_file(ASSETS / "bitKlavierGrand_PianoBar" / f"{i}v8.wav") for i in range(88)]
     }
     faust_processor.set_soundfiles(soundfiles)
 
@@ -145,14 +145,14 @@ def test_faust_soundfile_piano():
     #   print(par)
 
     midi_path = 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'
-    faust_processor.load_midi(abspath(f'assets/{midi_path}'))
+    faust_processor.load_midi(abspath(ASSETS / midi_path))
 
     graph = [
         (faust_processor, [])
     ]
 
     assert(engine.load_graph(graph))
-    render(engine, file_path='output/test_sound_file_piano.wav', duration=10.)
+    render(engine, file_path=OUTPUT / 'test_sound_file_piano.wav', duration=10.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .0001)
@@ -160,7 +160,7 @@ def test_faust_soundfile_piano():
 
 def test_faust_soundfile_cymbal():
     # Load a stereo audio sample and pass it to Faust
-    sample_seq = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav")
+    sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
     _test_faust_soundfile(sample_seq, 'test_faust_soundfile_0.wav', sound_choice=0)
     _test_faust_soundfile(sample_seq, 'test_faust_soundfile_1.wav', sound_choice=1)
     _test_faust_soundfile(sample_seq, 'test_faust_soundfile_2.wav', sound_choice=2)
@@ -173,7 +173,7 @@ def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.num_voices = num_voices
 
-    dsp_path = abspath("faust_dsp/soundfile.dsp")
+    dsp_path = abspath(FAUST_DSP / "soundfile.dsp")
 
     if sample_seq.ndim == 1:
         sample_seq = sample_seq.reshape(1, -1)
@@ -203,14 +203,14 @@ def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
     ]
 
     assert(engine.load_graph(graph))
-    render(engine, file_path='output/'+output_path, duration=3.)
+    render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .001)
 
 def test_faust_soundfile_many_notes():
     # Load a stereo audio sample and pass it to Faust
-    sample_seq = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav")
+    sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
     _test_faust_soundfile_many_notes(sample_seq, 'test_faust_soundfile_many_notes.wav')
 
 # if __name__ == '__main__':

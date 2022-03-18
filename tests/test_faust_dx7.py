@@ -1,5 +1,6 @@
 from utils import *
 
+
 def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 
 	# There are 32 algorithms.
@@ -10,7 +11,7 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 	faust_processor.num_voices = num_voices
 	faust_processor.group_voices = True
 
-	dsp_path = abspath("faust_dsp/dx7.dsp")
+	dsp_path = abspath(FAUST_DSP / "dx7.dsp")
 	dsp_code = open(dsp_path).read()
 	dsp_code = 'ALGORITHM = {0};\n'.format(algorithm) + dsp_code
 
@@ -44,7 +45,7 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_faust_dx7_algo_{0}.wav'.format(algorithm), duration=3.)
+	render(engine, file_path=OUTPUT / 'test_faust_dx7_algo_{0}.wav'.format(algorithm), duration=3.)
 
 def test_faust_dx7():
 
