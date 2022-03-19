@@ -158,10 +158,10 @@ jobs:
       with:
         submodules: true
 
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+    # - name: Setup Python ${{ matrix.python-version }}
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: ${{ matrix.python-version }}
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
@@ -188,23 +188,29 @@ jobs:
         cd build_release
         msbuild libsamplerate.sln /property:Configuration=Release
 
-    - name: Build Windows (Release)
-      run: |
-        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
+    # - name: Build Windows (Release)
+    #   run: |
+    #     msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
 
-    - name: Install cibuildwheel
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install cibuildwheel>=2.3.1
-        python -m pip install --upgrade pip
+    # - name: Install cibuildwheel
+    #   run: |
+    #     python -m pip install --upgrade pip
+    #     python -m pip install cibuildwheel>=2.3.1
+    #     python -m pip install --upgrade pip
 
     - name: Build Wheels
-      run: |
-        python -m pip install --upgrade pip
-        python -m cibuildwheel --output-dir wheelhouse
+      uses: pypa/cibuildwheel@v2.3.1
       env:
-        CIBW_BEFORE_BUILD: python -m pip install --upgrade pip
         PYTHONMAJOR: ${{ matrix.python-version }}
+        CIBW_BEFORE_BUILD: >
+          python -m pip install --upgrade pip &&
+          echo "saving python location to blah.txt" &&
+          python -c "import os, sys; print(os.path.dirname(sys.executable))" > blah.txt &&
+          set /p pythonLocation=<blah.txt &&
+          echo "pythonLocation " is $pythonLocation &&
+          echo "pythonLocation " is %pythonLocation% &&
+          msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release -verbosity:detailed &&
+          echo "done with msbuild."
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: python -m pytest {project}/tests
