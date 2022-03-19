@@ -4,4 +4,3 @@ pytest>=6.2.4
 scipy>=1.7.0
 requests>=2.26.0
 distlib==0.3.3
-pip==22.0.4
