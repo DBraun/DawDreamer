@@ -178,6 +178,8 @@ jobs:
     - name: copy faust libraries
       # necessary for setup.py to work.
       run: |
+        rm -rf faustlibraries/.git/*
+        rmdir /s faustlibraries/.git
         cp -v -r faustlibraries dawdreamer
 
     - name: Build libsamplerate
