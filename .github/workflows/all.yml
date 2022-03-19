@@ -158,11 +158,6 @@ jobs:
       with:
         submodules: true
 
-    # - name: Setup Python ${{ matrix.python-version }}
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: ${{ matrix.python-version }}
-
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
@@ -189,16 +184,6 @@ jobs:
         cd build_release
         msbuild libsamplerate.sln /property:Configuration=Release
 
-    # - name: Build Windows (Release)
-    #   run: |
-    #     msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
-
-    # - name: Install cibuildwheel
-    #   run: |
-    #     python -m pip install --upgrade pip
-    #     python -m pip install cibuildwheel>=2.3.1
-    #     python -m pip install --upgrade pip
-
     - name: Build Wheels
       uses: pypa/cibuildwheel@v2.3.1
       env:
@@ -210,6 +195,7 @@ jobs:
           set /p pythonLocation=<blah.txt &&
           echo "pythonLocation " is $pythonLocation &&
           echo "pythonLocation " is %pythonLocation% &&
+          echo "pythonLocation " is $(pythonLocation) &&
           msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release -verbosity:detailed &&
           echo "done with msbuild."
         CIBW_BUILD_VERBOSITY: 1
@@ -222,6 +208,11 @@ jobs:
       with:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
+
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
     - name: "Build docs for GitHub pages"
       if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
