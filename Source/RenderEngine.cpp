@@ -17,6 +17,7 @@ RenderEngine::~RenderEngine()
     //    auto processor = myMainProcessorGraph->getNode(i)->decReferenceCountWithoutDeleting();
     //}
     //myMainProcessorGraph->releaseResources();
+    myMainProcessorGraph.reset();
 }
 
 bool
@@ -67,8 +68,6 @@ RenderEngine::connectGraph() {
     for (auto connection : myMainProcessorGraph->getConnections()) {
         myMainProcessorGraph->removeConnection(connection);
     }
-
-    bool result = true;
      
     int numNodes = myMainProcessorGraph->getNumNodes();
     for (int i = 0; i < numNodes; i++) {
@@ -105,8 +104,7 @@ RenderEngine::connectGraph() {
 
             if (m_UniqueNameToSlotIndex.find(inputName) == m_UniqueNameToSlotIndex.end())
             {
-                std::cerr << "Error: Unable to connect " << inputName << " to " << myUniqueName << ";" << std::endl;
-                std::cerr << "You might need to place " << inputName << " earlier in the graph." << std::endl;
+                throw std::runtime_error("Error: Unable to connect " + inputName + " to " + myUniqueName + "; You might need to place " + inputName + " earlier in the graph.");
                 return false;
             }
             
@@ -119,10 +117,10 @@ RenderEngine::connectGraph() {
                 AudioProcessorGraph::Connection connection = { { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
                                                 { slots.getUnchecked(i)->nodeID, chanDest } };
 
-                result &= myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
+                bool result = myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
                 if (!result) {
-                    // todo: enable this warning
-                    //std::cerr << "Warning: Unable to connect " << inputName << " channel " << chanSource << " to " << myUniqueName << " channel " << chanDest << std::endl;
+                    // todo: because we failed here, connectGraph should return false at the very end or immediately.
+                    std::cerr << "Warning: Unable to connect " << inputName << " channel " << chanSource << " to " << myUniqueName << " channel " << chanDest << std::endl;
                     //return false;
                 }
                 
@@ -140,7 +138,7 @@ RenderEngine::connectGraph() {
         node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
     }
     
-    return result;
+    return true;
 }
 
 bool
@@ -148,7 +146,7 @@ RenderEngine::render(const double renderLength) {
 
     int numRenderedSamples = renderLength * mySampleRate;
     if (numRenderedSamples <= 0) {
-        std::cerr << "Render length must be greater than zero.";
+        throw std::runtime_error("Render length must be greater than zero.");
         return false;
     }
     
@@ -167,7 +165,7 @@ RenderEngine::render(const double renderLength) {
         auto faustProcessor = dynamic_cast<FaustProcessor*> (processor);
         if (faustProcessor && (!faustProcessor->isCompiled())) {
             if (!faustProcessor->compile()) {
-                std::cerr << "Faust didn't compile correctly." << std::endl;
+                throw std::runtime_error("Faust didn't compile correctly.");
                 return false;
             }
         }
@@ -193,7 +191,7 @@ RenderEngine::render(const double renderLength) {
     if (!graphIsConnected) {
         bool result = connectGraph();
         if (!result) {
-            std::cerr << "Unable to connect graph." << std::endl;
+            throw std::runtime_error("Unable to connect graph.");
             return false;
         }
     }
@@ -229,7 +227,7 @@ RenderEngine::render(const double renderLength) {
 
 void RenderEngine::setBPM(double bpm) {
     if (bpm <= 0) {
-        std::cerr << "BPM must be positive." << std::endl;
+        throw std::runtime_error("BPM must be positive.");
         return;
     }
     myBPM = bpm;

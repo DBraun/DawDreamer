@@ -46,9 +46,8 @@ def test_plugin_mem_leak2():
 
     add_midi(synth)  
 
-    graph = [(synth, [])]
-
     for _ in range(100):
+        graph = [(synth, [])]
         assert(engine.load_graph(graph))
         render(engine, duration=DURATION)
 

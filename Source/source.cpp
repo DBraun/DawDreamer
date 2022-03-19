@@ -74,7 +74,7 @@ PYBIND11_MODULE(dawdreamer, m)
     py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>, ProcessorBase>(m, "OscillatorProcessor");
 
     py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>, ProcessorBase>(m, "PlaybackProcessor")
-        .def("set_data", &PlaybackProcessor::setData, arg("data"), "Set the audio as a 2xN numpy array.")
+        .def("set_data", &PlaybackProcessor::setData, arg("data"), "Set the audio as a numpy array shaped (Channels, Samples).")
         .doc() = "The Playback Processor can play audio data provided as an argument.";
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
@@ -91,7 +91,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
         .def_property("end_marker", &PlaybackWarpProcessor::getEndMarker, &PlaybackWarpProcessor::setEndMarker, "The end position in beats (typically quarter notes) relative to 1.1.1")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"), "Load an Ableton Live file with an \".asd\" extension")
         .def_property_readonly("warp_markers", &PlaybackWarpProcessor::getWarpMarkers, "Get the warp markers as a 2D array of time positions in seconds and positions in beats.")
-        .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), "Set the audio as a 2xN numpy array")
+        .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), "Set the audio as a numpy array shaped (Channels, Samples).")
         .def("set_clip_positions", &PlaybackWarpProcessor::setClipPositions, arg("clip_positions"), R"pbdoc(
     Set one or more positions at which the clip should play.
 

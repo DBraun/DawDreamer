@@ -86,7 +86,7 @@ private:
 
 protected:
 
-    std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> myPlugin = nullptr;
+    std::unique_ptr<juce::AudioPluginInstance> myPlugin = nullptr;
 };
 
 

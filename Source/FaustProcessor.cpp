@@ -153,7 +153,7 @@ FaustProcessor::automateParameters() {
 		}
 		else {
 			auto theName = this->getParameterName(i);
-			std::cerr << "Error FaustProcessor::automateParameters: " << theName << std::endl;
+			throw std::runtime_error("Error FaustProcessor::automateParameters: " + theName.toStdString());
 		}
 	}
 
@@ -281,7 +281,7 @@ FaustProcessor::compile()
 		argv[argc++] = pathToFaustLibraries.c_str();
 	}
 	else {
-		std::cerr << "Error for path for faust libraries: " << pathToFaustLibraries << std::endl;
+		throw std::runtime_error("Error for path for faust libraries: " + pathToFaustLibraries);
 	}
 
 	if (m_faustLibrariesPath.compare(std::string("")) != 0) {
@@ -319,8 +319,7 @@ FaustProcessor::compile()
 	// check for error
 	if (m_errorString != "") {
 		// output error
-		std::cerr << "FaustProcessor::compile(): " << m_errorString << std::endl;
-		std::cerr << "Check the faustlibraries path: " << pathToFaustLibraries.c_str() << std::endl;
+		throw std::runtime_error("FaustProcessor::compile(): " + m_errorString + ". Check the faustlibraries path: " + pathToFaustLibraries);
 		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
@@ -345,7 +344,7 @@ FaustProcessor::compile()
 		// (false, true) works
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
-			std::cerr << "FaustProcessor::compile(): Cannot create Poly DSP instance." << std::endl;
+			throw std::runtime_error("FaustProcessor::compile(): Cannot create Poly DSP instance.");
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 		m_dsp_poly->setReleaseLength(m_releaseLengthSec);
@@ -354,7 +353,7 @@ FaustProcessor::compile()
 		// create DSP instance
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
-			std::cerr << "FaustProcessor::compile(): Cannot create DSP instance." << std::endl;
+			throw std::runtime_error("FaustProcessor::compile(): Cannot create DSP instance.");
 			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
@@ -413,7 +412,7 @@ FaustProcessor::setDSPFile(const std::string& path)
 	if (!fin.good())
 	{
 		// error
-		std::cerr << "[Faust]: ERROR opening file: '" << path << "'" << std::endl;
+		throw std::runtime_error("[Faust]: ERROR opening file: '" + path + "'");
 		return false;
 	}
 
@@ -603,7 +602,7 @@ FaustProcessor::getPluginParametersDescription()
 	}
 	else
 	{
-		std::cerr << "ERROR: The Faust process isn't compiled." << std::endl;
+		throw std::runtime_error("ERROR: The Faust process isn't compiled.");
 	}
 
 	return myList;
@@ -759,7 +758,7 @@ FaustProcessor::getPathToFaustLibraries() {
 #endif
 	}
 	catch (...) {
-		std::cerr << "Error getting path to faustlibraries." << std::endl;
+		throw std::runtime_error("Error getting path to faustlibraries.");
 	}
 	return "";
 }
@@ -776,7 +775,7 @@ FaustProcessor::setSoundfiles(py::dict d) {
 	for (auto&& [potentialString, potentialListOfAudio] : d) {
 
 		if (!py::isinstance<py::str>(potentialString)) {
-			std::cerr << "Error with FaustProcessor::setSoundfiles. Something was wrong with the keys of the dictionary." << std::endl;
+			throw std::runtime_error("Error with FaustProcessor::setSoundfiles. Something was wrong with the keys of the dictionary.");
 			return;
 		}
 
@@ -784,7 +783,7 @@ FaustProcessor::setSoundfiles(py::dict d) {
 
 		if (!py::isinstance<py::list>(potentialListOfAudio)) {
 			// todo: if it's audio, it's ok. Just use it.
-			std::cerr << "Error with FaustProcessor::setSoundfiles. The values of the dictionary must be lists of audio data." << std::endl;
+			throw std::runtime_error("Error with FaustProcessor::setSoundfiles. The values of the dictionary must be lists of audio data.");
 			return;
 		}
 
