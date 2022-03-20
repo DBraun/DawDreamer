@@ -149,9 +149,9 @@ jobs:
     strategy:
       matrix:
         include:
-        - { os: windows-latest, python-version: "3.7", CIBW-BUILD: "cp37*"}
-        - { os: windows-latest, python-version: "3.8", CIBW-BUILD: "cp38*"}
-        - { os: windows-latest, python-version: "3.9", CIBW-BUILD: "cp39*"}
+        - { os: windows-2019, python-version: "3.7", CIBW-BUILD: "cp37*"}
+        - { os: windows-2019, python-version: "3.8", CIBW-BUILD: "cp38*"}
+        - { os: windows-2019, python-version: "3.9", CIBW-BUILD: "cp39*"}
 
     steps:
     - uses: actions/checkout@v2
@@ -200,7 +200,7 @@ jobs:
           echo "done with msbuild."
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: python -m pip install --upgrade pip && python -m pytest {project}/tests
+        CIBW_TEST_COMMAND: python -m pytest {project}/tests
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
 
