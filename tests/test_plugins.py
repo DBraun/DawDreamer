@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 import platform
 import os.path
 import os

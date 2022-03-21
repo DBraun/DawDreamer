@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 
 def add_midi(synth):

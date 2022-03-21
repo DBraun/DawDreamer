@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 
 def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):

@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, cutoff=None,
 	automation=False, decay=None):
