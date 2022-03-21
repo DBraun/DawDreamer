@@ -185,7 +185,7 @@ jobs:
         msbuild libsamplerate.sln /property:Configuration=Release
 
     - name: Build Wheels
-      uses: pypa/cibuildwheel@v2.3.1
+      uses: pypa/cibuildwheel@f3e608e42cade59fc8e27816f0971606d6dd3f20
       env:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_BEFORE_BUILD: >
