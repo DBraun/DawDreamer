@@ -338,6 +338,7 @@ FaustProcessor::compile()
 	for (int i = 0; i < argc; i++) {
 		argv[i] = NULL;
 	}
+	delete[] argv;
 	argv = nullptr;
 
 	if (is_polyphonic) {

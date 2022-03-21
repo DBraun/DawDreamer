@@ -22,6 +22,10 @@ class MySoundUI : public SoundUI {
 
 public:
 
+    ~MySoundUI() {
+        fSoundfileMap.clear(); // todo: deallocate the Soundfiles correctly
+    }
+
     virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) {
         // Parse the possible list
         std::string saved_url_real = std::string(label);

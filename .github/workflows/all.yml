@@ -191,13 +191,13 @@ jobs:
         CIBW_BEFORE_BUILD: >
           python -m pip install --upgrade pip &&
           echo "Saving Python location to blah.txt" &&
-          python -c "import os, sys; print(os.path.dirname(sys.executable))" > blah.txt &&
-          set /p pythonLocation=<blah.txt &&
+          python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp_pythonLocation.txt &&
+          set /p pythonLocation=<tmp_pythonLocation.txt &&
           msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release -verbosity:detailed &&
           echo "Done with msbuild."
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: cd {project}/tests && python -m pytest .
+        CIBW_TEST_COMMAND: python -m pytest -v {project}/tests
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
 
