@@ -200,7 +200,7 @@ jobs:
         CIBW_BUILD_VERBOSITY: 3
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: >
-          python -m pip install --upgrade pip==21.3.1
+          python -m pip install --upgrade pip==21.3.1 &&
           python -m pip install --upgrade pytest &&
           python -m pytest -v {project}/tests
         CIBW_ARCHS: auto64
