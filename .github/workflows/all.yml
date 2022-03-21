@@ -197,7 +197,7 @@ jobs:
       uses: pypa/cibuildwheel@f3e608e42cade59fc8e27816f0971606d6dd3f20
       env:
         PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BUILD_VERBOSITY: 1
+        CIBW_BUILD_VERBOSITY: 3
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: >
           python -m pip install --no-deps distlib==0.3.3 &&
