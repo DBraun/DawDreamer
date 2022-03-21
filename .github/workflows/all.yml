@@ -158,6 +158,11 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
 
@@ -184,16 +189,14 @@ jobs:
         cd build_release
         msbuild libsamplerate.sln /property:Configuration=Release
 
+    - name: Build DawDreamer
+      run: |
+        msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release
+
     - name: Build Wheels
       uses: pypa/cibuildwheel@f3e608e42cade59fc8e27816f0971606d6dd3f20
       env:
         PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BEFORE_BUILD: >
-          echo "Saving Python location to blah.txt" &&
-          python -c "import os, sys; print(os.path.dirname(sys.executable))" > tmp_pythonLocation.txt &&
-          set /p pythonLocation=<tmp_pythonLocation.txt &&
-          msbuild Builds/VisualStudio2019/DawDreamer.sln /property:Configuration=Release -verbosity:detailed &&
-          echo "Done with msbuild."
         CIBW_BUILD_VERBOSITY: 1
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: >
