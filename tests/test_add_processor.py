@@ -32,9 +32,9 @@ def test_add_processor():
         (add_processor, ["filter0", "filter1", "filter2", "filter3"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
-    assert(engine.render(5.))
+    engine.render(5.)
 
     output = engine.get_audio()
 

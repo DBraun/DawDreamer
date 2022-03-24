@@ -18,7 +18,7 @@ def test_playbackwarp_processor1():
 	other = engine.make_playbackwarp_processor("other",
 		load_audio_file(ASSETS / "Music Delta - Disco" / "other.wav", duration=DURATION))
 
-	assert(other.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "other.wav.asd")))
+	other.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "other.wav.asd"))
 
 	print('drums.start_marker: ', drums.start_marker)
 	print('drums.end_marker: ', drums.end_marker)
@@ -33,7 +33,7 @@ def test_playbackwarp_processor1():
 	    (engine.make_add_processor("add", [1., 1.]), ["drums", "other"])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
 	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1a.wav')
 
@@ -58,7 +58,7 @@ def test_playbackwarp_processor2():
 	drums = engine.make_playbackwarp_processor("drums",
 		load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
-	assert(drums.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "drums.wav.asd")))
+	drums.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "drums.wav.asd"))
 
 	drums.start_marker = 0.
 	drums.loop_on = True
@@ -68,7 +68,7 @@ def test_playbackwarp_processor2():
 	    (drums, []),
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
 	drums.set_clip_positions([[0., 4., 0.], [5., 9., 0.]])
 

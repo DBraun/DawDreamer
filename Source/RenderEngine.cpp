@@ -165,7 +165,6 @@ RenderEngine::render(const double renderLength) {
         auto faustProcessor = dynamic_cast<FaustProcessor*> (processor);
         if (faustProcessor && (!faustProcessor->isCompiled())) {
             if (!faustProcessor->compile()) {
-                throw std::runtime_error("Faust didn't compile correctly.");
                 return false;
             }
         }

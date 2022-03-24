@@ -25,7 +25,7 @@ def test_plugin_mem_leak1():
 
     graph = [(synth, [])]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     for _ in range(100):
         render(engine, duration=DURATION)
@@ -48,7 +48,7 @@ def test_plugin_mem_leak2():
 
     for _ in range(100):
         graph = [(synth, [])]
-        assert(engine.load_graph(graph))
+        engine.load_graph(graph)
         render(engine, duration=DURATION)
 
 def test_plugin_mem_leak3():
@@ -66,7 +66,7 @@ def test_plugin_mem_leak3():
     for _ in range(40):
         synth = engine.make_plugin_processor("synth", plugin_path)
         add_midi(synth)  
-        assert(engine.load_graph([(synth, [])]))
+        engine.load_graph([(synth, [])])
         render(engine, duration=DURATION)
 
 # if __name__ == '__main__':

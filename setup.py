@@ -13,7 +13,16 @@ import shutil
 import platform
 import glob
 
-DAWDREAMER_VERSION = '0.5.9'
+
+def get_dawdreamer_version():
+    import xml.etree.ElementTree as ET
+    tree = ET.parse('DawDreamer.jucer')
+    root = tree.getroot()
+    version = root.attrib['version']
+    return version
+
+
+DAWDREAMER_VERSION = get_dawdreamer_version()
 
 
 class BinaryDistribution(Distribution):

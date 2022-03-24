@@ -25,8 +25,8 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	}
 	faust_processor.set_soundfiles(soundfiles)
 
-	assert(faust_processor.set_dsp_string(dsp_code))
-	assert(faust_processor.compile())
+	faust_processor.set_dsp_string(dsp_code)
+	faust_processor.compile()
 
 	desc = faust_processor.get_parameters_description()
 
@@ -41,7 +41,7 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	    (faust_processor, [])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
 	render(engine, file_path=OUTPUT / output_path, duration=3.)
 

@@ -39,7 +39,7 @@ def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
         (effect, ["playback"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     plugin_basename = os.path.basename(plugin_path)
 
@@ -101,9 +101,13 @@ def test_plugin_instrument():
         (synth, []),
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_plugin_instrument.wav', duration=DURATION)
+
+    # check that it's non-silent
+    audio = engine.get_audio()
+    assert(np.mean(np.abs(audio)) > .01)
 
     try:
         synth.load_preset('bogus_path.fxp')
@@ -111,6 +115,40 @@ def test_plugin_instrument():
     except Exception as e:
         print(f"Correctly caught exception: {e}")
         assert True
+
+def test_plugin_instrument_midi():
+
+    if MY_SYSTEM not in ["Darwin", "Windows"]:
+        # todo: we should test LV2 plugins on Linux.
+        return
+
+    DURATION = 5.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+    plugin_name = "TAL-NoiseMaker.vst" if MY_SYSTEM == "Darwin" else "TAL-NoiseMaker-64.dll"
+
+    synth = engine.make_plugin_processor("synth", abspath(PLUGINS / plugin_name))
+
+    # print(synth.get_plugin_parameters_description())
+
+    synth.load_midi(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
+    synth.clear_midi()
+    synth.load_midi(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'), all_events=True)
+    synth.clear_midi()
+    synth.load_midi(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'), all_events=False)
+
+    graph = [
+        (synth, []),
+    ]
+
+    engine.load_graph(graph)
+
+    render(engine, file_path=OUTPUT / 'test_plugin_instrument_midi.wav', duration=DURATION)
+
+    # check that it's non-silent
+    audio = engine.get_audio()
+    assert(np.mean(np.abs(audio)) > .01)
 
 def test_plugin_serum():
 
@@ -132,8 +170,8 @@ def test_plugin_serum():
     # print(synth.get_plugin_parameters_description())
 
     synth.get_parameter(0)
-    assert(synth.set_parameter(0, synth.get_parameter(0)))
-    assert(synth.set_automation(0, np.array([synth.get_parameter(0)])))
+    synth.set_parameter(0, synth.get_parameter(0))
+    synth.set_automation(0, np.array([synth.get_parameter(0)]))
 
     assert(synth.get_num_input_channels() == 0)
     assert(synth.get_num_output_channels() == 2)
@@ -149,7 +187,7 @@ def test_plugin_serum():
         (synth, []),
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_plugin_serum.wav', duration=DURATION)
 
@@ -205,7 +243,7 @@ def _test_plugin_goodhertz_sidechain(do_sidechain=True):
             (plugin, ["vocals"])
         ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     sidechain_on = "on" if do_sidechain else "off"
 
@@ -301,7 +339,7 @@ def test_plugin_upright_piano():
       (synth, []),
       (reverb_processor, ["my_synth"])
     ]
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
     engine.render(5.)
     audio = engine.get_audio()
     audio = np.array(audio, np.float32).transpose()    

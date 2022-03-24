@@ -125,6 +125,7 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
             return false;
         }
 
+        // todo: enable this:
         //if (!py::isinstance<ProcessorBase*>(castedTuple[0])) {
         // std::cout << "Error: load_graph. First argument in tuple wasn't a Processor object." << std::endl;
         //    return false;

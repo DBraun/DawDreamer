@@ -35,8 +35,8 @@ cp thirdparty/libfaust/darwin-x64/Release/libfaust.a tests/libfaust.2.dylib
 # # To make a wheel locally:
 # pip install setuptools wheel build delocate
 # python3 -m build --wheel
-# delocate-listdeps dist/dawdreamer-0.5.8.1-cp39-cp39-macosx_10_15_universal2.whl 
-# delocate-wheel --require-archs x86_64 -w repaired_wheel dist/dawdreamer-0.5.8.1-cp39-cp39-macosx_10_15_universal2.whl
-# pip install repaired_wheel/dawdreamer-0.5.8.1-cp39-cp39-macosx_10_15_universal2.whl
+# delocate-listdeps dist/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl 
+# delocate-wheel --require-archs x86_64 -w repaired_wheel dist/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl
+# pip install repaired_wheel/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl
 # cd tests
 # python -m pytest -s .

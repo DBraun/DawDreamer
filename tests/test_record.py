@@ -23,7 +23,7 @@ def test_record():
 	    (engine.make_add_processor("add", [1., 1.]), ["playback1", "playback2"])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
 	engine.render(DURATION)
 

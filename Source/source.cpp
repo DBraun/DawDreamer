@@ -3,6 +3,7 @@
 PYBIND11_MODULE(dawdreamer, m)
 {
     using arg = py::arg;
+    using kw_only = py::kw_only;
 
     m.doc() = R"pbdoc(
         dawdreamer
@@ -171,7 +172,7 @@ but the filter mode cannot under automation.";
             "Get a list of dictionaries describing the plugin's parameters.")
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), "Load MIDI from a file.")
+        .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("all_events")=true, "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded.")
         .def("clear_midi", &PluginProcessorWrapper::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"),

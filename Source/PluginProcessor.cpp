@@ -60,7 +60,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
     // If there is a problem here first check the preprocessor definitions
     // in the projucer are sensible - is it set up to scan for plugin's?
     if (pluginDescriptions.size() <= 0) {
-        std::cerr << "Unable to load plugin." << std::endl;
+        throw std::runtime_error("Unable to load plugin.");
         return false;
     }
 
@@ -73,7 +73,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
     if (myPlugin.get() == nullptr)
     {
-        std::cerr << "PluginProcessor::loadPlugin error: " << errorMessage.toStdString() << std::endl;
+        throw std::runtime_error("PluginProcessor::loadPlugin error: " + errorMessage.toStdString());
         return false;
     }
 
@@ -97,6 +97,7 @@ PluginProcessor::~PluginProcessor() {
         myPlugin->releaseResources();
         myPlugin.release();
     }
+    delete myMidiIterator;
 }
 
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
@@ -190,10 +191,7 @@ PluginProcessor::reset()
         myPlugin->reset();
     }
 
-    if (myMidiIterator) {
-        delete myMidiIterator;
-    }
-
+    delete myMidiIterator;
     myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
     myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
     myRenderMidiBuffer.clear();
@@ -203,13 +201,13 @@ bool
 PluginProcessor::loadPreset(const std::string& path)
 {
     if (!myPlugin.get()) {
-        std::cerr << "You must load a plugin before loading a preset." << std::endl;
+        throw std::runtime_error("You must load a plugin before loading a preset.");
         return false;
     }
 
     try {
         if (!std::filesystem::exists(path.c_str())) {
-            std::cerr << "File not found: " << path.c_str() << std::endl;
+            throw std::runtime_error("File not found: " + path);
             return false;
         }
 
@@ -228,7 +226,7 @@ PluginProcessor::loadPreset(const std::string& path)
         return result;
     }
     catch (std::exception& e) {
-        std::cerr << "Error: (PluginProcessor::loadPreset) " << e.what() << std::endl;
+        throw std::runtime_error(std::string("Error: (PluginProcessor::loadPreset) ") + e.what());
         return false;
     }
 
@@ -238,7 +236,7 @@ bool
 PluginProcessor::loadVST3Preset(const std::string& path)
 {
     if (!myPlugin.get()) {
-        std::cerr << "You must load a plugin before loading a preset." << std::endl;
+        throw std::runtime_error("You must load a plugin before loading a preset.");
         return false;
     }
 
@@ -249,7 +247,7 @@ PluginProcessor::loadVST3Preset(const std::string& path)
     }
 
     if (!std::filesystem::exists(path.c_str())) {
-        std::cerr << "Preset file not found: " << path.c_str() << std::endl;
+        throw std::runtime_error("Preset file not found: " + path);
         return false;
     }
 
@@ -261,6 +259,7 @@ PluginProcessor::loadVST3Preset(const std::string& path)
     }
     catch (const std::exception&)
     {
+        throw std::runtime_error("PluginProcessor::loadVST3Preset: unknown error.");
         return false;
     }
     
@@ -395,7 +394,7 @@ PluginProcessor::getNumMidiEvents() {
 };
 
 bool
-PluginProcessor::loadMidi(const std::string& path)
+PluginProcessor::loadMidi(const std::string& path, bool allEvents)
 {
     File file = File(path);
     FileInputStream fileStream(file);
@@ -409,7 +408,9 @@ PluginProcessor::loadMidi(const std::string& path)
         for (int i = 0; i < track->getNumEvents(); i++) {
             MidiMessage& m = track->getEventPointer(i)->message;
             int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
-            myMidiBuffer.addEvent(m, sampleOffset);
+            if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+                myMidiBuffer.addEvent(m, sampleOffset);
+            }
         }
     }
 
@@ -432,6 +433,7 @@ PluginProcessor::addMidiNote(uint8  midiNote,
     if (midiVelocity > 255) midiVelocity = 255;
     if (midiVelocity < 0) midiVelocity = 0;
     if (noteLength <= 0) {
+        throw std::runtime_error("The note length must be greater than zero.");
         return false;
     }
 
@@ -499,7 +501,7 @@ bool
 PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 {
     if (!myPlugin) {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
         return false;
     }
 

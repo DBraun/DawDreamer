@@ -26,6 +26,7 @@ def test_sampler(set_data=False):
 	# print(desc)
 
 	sampler_processor.set_parameter(get_par_index(desc, 'Center Note'), 60.)  # set the center frequency to middle C (60)
+	# sampler_processor.set_parameter(5, 100.) # set the volume envelope's release to 100 milliseconds.
 
 	# (MIDI note, velocity, start sec, duration sec)
 	sampler_processor.add_midi_note(60, 60, 0.0, .25)
@@ -47,7 +48,7 @@ def test_sampler(set_data=False):
 	    (sampler_processor, [])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
 	render(engine, file_path=OUTPUT / 'test_sampler_with_amp.wav', duration=DURATION)
 

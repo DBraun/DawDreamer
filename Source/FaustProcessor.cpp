@@ -41,9 +41,7 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 FaustProcessor::~FaustProcessor() {
 	clear();
-	if (myMidiIterator) {
-		delete myMidiIterator;
-	}
+	delete myMidiIterator;
 }
 
 bool
@@ -182,10 +180,7 @@ FaustProcessor::reset()
 		m_dsp_poly->instanceClear();
 	}
 
-	if (myMidiIterator) {
-		delete myMidiIterator;
-	}
-
+	delete myMidiIterator;
 	myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
 	myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
 
@@ -249,6 +244,7 @@ FaustProcessor::setDSPString(const std::string& code)
 	m_isCompiled = false;
 
 	if (std::strcmp(code.c_str(), "") == 0) {
+		throw std::runtime_error("DSP string is empty.");
 		return false;
 	}
 
@@ -281,7 +277,7 @@ FaustProcessor::compile()
 		argv[argc++] = pathToFaustLibraries.c_str();
 	}
 	else {
-		throw std::runtime_error("Error for path for faust libraries: " + pathToFaustLibraries);
+		throw std::runtime_error("FaustProcessor::compile(): Error for path for faust libraries: " + pathToFaustLibraries);
 	}
 
 	if (m_faustLibrariesPath.compare(std::string("")) != 0) {
@@ -404,6 +400,7 @@ FaustProcessor::setDSPFile(const std::string& path)
 {
 	m_isCompiled = false;
 	if (std::strcmp(path.c_str(), "") == 0) {
+		throw std::runtime_error("Path to DSP file is empty.");
 		return false;
 	}
 
@@ -413,7 +410,7 @@ FaustProcessor::setDSPFile(const std::string& path)
 	if (!fin.good())
 	{
 		// error
-		throw std::runtime_error("[Faust]: ERROR opening file: '" + path + "'");
+		throw std::runtime_error("FaustProcessor::setDSPFile(): ERROR opening file: '" + path + "'");
 		return false;
 	}
 
@@ -435,11 +432,15 @@ FaustProcessor::setParamWithIndex(const int index, float p)
 			return false;
 		};
 	}
-	if (!m_ui) return false;
+	if (!m_ui) {
+		throw std::runtime_error("No UI for FaustProcessor.");
+		return false;
+	}
 
 	auto it = m_map_juceIndex_to_parAddress.find(index);
 	if (it == m_map_juceIndex_to_parAddress.end())
 	{
+		throw std::runtime_error("A parameter with index " + std::to_string(index) + " is not valid for this FaustProcessor.");
 		return false;
 	}
 
@@ -653,6 +654,7 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	if (midiVelocity > 255) midiVelocity = 255;
 	if (midiVelocity < 0) midiVelocity = 0;
 	if (noteLength <= 0) {
+		throw std::runtime_error("The note length must be greater than zero.");
 		return false;
 	}
 

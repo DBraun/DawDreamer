@@ -7,7 +7,7 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 
 	dsp_path = abspath(FAUST_DSP / "polyphonic.dsp")
 	faust_processor = engine.make_faust_processor("faust")
-	assert(faust_processor.set_dsp(dsp_path))
+	faust_processor.set_dsp(dsp_path)
 	
 	# Group voices will affect the number of parameters.
 	# True will result in fewer parameters because all voices will
@@ -15,7 +15,7 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 	faust_processor.group_voices = group_voices
 	faust_processor.num_voices = num_voices
 	
-	assert(faust_processor.compile())
+	faust_processor.compile()
 
 	# for par in faust_processor.get_parameters_description():
 	# 	print(par)
@@ -28,16 +28,16 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 	assert(faust_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
 	if cutoff is not None:
-		assert(faust_processor.set_parameter("/Sequencer/DSP2/MyInstrument/cutoff", cutoff))
+		faust_processor.set_parameter("/Sequencer/DSP2/MyInstrument/cutoff", cutoff)
 	elif automation:
-		assert(faust_processor.set_automation("/Sequencer/DSP2/MyInstrument/cutoff", 5000+4900*make_sine(30, 10.)))
+		faust_processor.set_automation("/Sequencer/DSP2/MyInstrument/cutoff", 5000+4900*make_sine(30, 10.))
 
 	if decay is not None:
 		if group_voices:
-			assert(faust_processor.set_parameter("/Sequencer/DSP1/Polyphonic/Voices/MyInstrument/decay", decay))
+			faust_processor.set_parameter("/Sequencer/DSP1/Polyphonic/Voices/MyInstrument/decay", decay)
 		else:
 			for i in range(1, num_voices+1):
-				assert(faust_processor.set_parameter(f"/Sequencer/DSP1/Polyphonic/V{i}/MyInstrument/decay", decay))
+				faust_processor.set_parameter(f"/Sequencer/DSP1/Polyphonic/V{i}/MyInstrument/decay", decay)
 
 	# for par in faust_processor.get_parameters_description():
 	# 	print(par)
@@ -46,7 +46,7 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 	    (faust_processor, [])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
 	render(engine, file_path=file_path, duration=3.)
 

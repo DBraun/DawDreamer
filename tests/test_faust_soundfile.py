@@ -22,8 +22,8 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
     }
     faust_processor.set_soundfiles(soundfiles)
 
-    assert(faust_processor.set_dsp(dsp_path))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp(dsp_path)
+    faust_processor.compile()
     # desc = faust_processor.get_parameters_description()
     # for par in desc:
     #   print(par)
@@ -41,7 +41,7 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
         (faust_processor, [])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
     render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
@@ -68,8 +68,8 @@ def _test_faust_soundfile_multichannel(output_path):
 
     underscores = ",".join('_'*numChannels)
     dsp_string = f'process = 0,_~+(1):soundfile("mySound",{numChannels}):!,!,{underscores};'
-    assert(faust_processor.set_dsp_string(dsp_string))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp_string(dsp_string)
+    faust_processor.compile()
     # desc = faust_processor.get_parameters_description()
     # for par in desc:
     #   print(par)
@@ -78,7 +78,7 @@ def _test_faust_soundfile_multichannel(output_path):
         (faust_processor, [])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
     render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
@@ -138,8 +138,8 @@ def test_faust_soundfile_piano():
     }
     faust_processor.set_soundfiles(soundfiles)
 
-    assert(faust_processor.set_dsp(dsp_path))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp(dsp_path)
+    faust_processor.compile()
     # desc = faust_processor.get_parameters_description()
     # for par in desc:
     #   print(par)
@@ -151,7 +151,7 @@ def test_faust_soundfile_piano():
         (faust_processor, [])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
     render(engine, file_path=OUTPUT / 'test_sound_file_piano.wav', duration=10.)
 
     audio = engine.get_audio()
@@ -184,8 +184,8 @@ def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
     }
     faust_processor.set_soundfiles(soundfiles)
 
-    assert(faust_processor.set_dsp(dsp_path))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp(dsp_path)
+    faust_processor.compile()
 
     # Notice how if the release length is too long then you'll see warnings about voice stealing.
     # Note that you should actually edit your DSP to use this release length (i.e., use ADSR to modulate
@@ -202,7 +202,7 @@ def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
         (faust_processor, [])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
     render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()

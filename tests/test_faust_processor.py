@@ -12,8 +12,8 @@ def test_faust_passthrough():
     playback_processor = engine.make_playback_processor("playback", data)
 
     faust_processor = engine.make_faust_processor("faust")
-    assert(faust_processor.set_dsp_string('process = _, _;'))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp_string('process = _, _;')
+    faust_processor.compile()
 
     # print(faust_processor.get_parameters_description())
 
@@ -22,7 +22,7 @@ def test_faust_passthrough():
         (faust_processor, ["playback"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_faust_passthrough.wav')
 
@@ -62,8 +62,8 @@ def test_faust_multichannel_in_out():
     playback_processor = engine.make_playback_processor("playback", data)
 
     faust_processor = engine.make_faust_processor("faust")
-    assert(faust_processor.set_dsp_string(f'process = {underscores};'))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp_string(f'process = {underscores};')
+    faust_processor.compile()
 
     # print(faust_processor.get_parameters_description())
 
@@ -72,7 +72,7 @@ def test_faust_multichannel_in_out():
         (faust_processor, ["playback"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_faust_multichannel_in_out.wav')
 
@@ -102,7 +102,7 @@ def test_faust_sidechain():
     dsp_path = abspath(FAUST_DSP / "sidechain.dsp")
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.set_dsp(dsp_path)
-    assert(faust_processor.compile())
+    faust_processor.compile()
 
     # print(faust_processor.get_parameters_description())
 
@@ -113,7 +113,7 @@ def test_faust_sidechain():
         (engine.make_add_processor("add", [1., 1.]), ["faust", "drums"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_sidechain_on.wav')
 
@@ -123,7 +123,7 @@ def test_faust_sidechain():
         (engine.make_add_processor("add", [1., 1.]), ["bass", "drums"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_sidechain_off.wav')
 
@@ -140,8 +140,8 @@ def test_faust_zita_rev1(set_data=False):
     dsp_path = abspath(FAUST_DSP / "dm.zita_rev1.dsp")
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.set_dsp(dsp_path)
-    assert(faust_processor.set_dsp(dsp_path))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp(dsp_path)
+    faust_processor.compile()
 
     # print(faust_processor.get_parameters_description())
 
@@ -150,7 +150,7 @@ def test_faust_zita_rev1(set_data=False):
         (faust_processor, ["playback"])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_faust_dm.zita_rev1.wav')
 
@@ -168,8 +168,8 @@ def test_faust_automation():
 
     dsp_path = abspath(FAUST_DSP / "two_stereo_inputs_filter.dsp")
     faust_processor = engine.make_faust_processor("faust")
-    assert(faust_processor.set_dsp(dsp_path))
-    assert(faust_processor.compile())
+    faust_processor.set_dsp(dsp_path)
+    faust_processor.compile()
 
     # print(faust_processor.get_parameters_description())
 
@@ -184,7 +184,7 @@ def test_faust_automation():
         (faust_processor, [drums.get_name(), other.get_name()])
     ]
 
-    assert(engine.load_graph(graph))
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / 'test_faust_automation.wav')
 

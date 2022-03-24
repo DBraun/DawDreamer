@@ -15,8 +15,8 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 	dsp_code = open(dsp_path).read()
 	dsp_code = 'ALGORITHM = {0};\n'.format(algorithm) + dsp_code
 
-	assert(faust_processor.set_dsp_string(dsp_code))
-	assert(faust_processor.compile())
+	faust_processor.set_dsp_string(dsp_code)
+	faust_processor.compile()
 
 	desc = faust_processor.get_parameters_description()
 	if algorithm == 0:
@@ -27,10 +27,10 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 		par_min = par['min']
 		par_max = par['max']
 		value = par_min + (par_max-par_min)*random.random()
-		assert(faust_processor.set_automation(par['name'], np.array([value])))
-		assert(faust_processor.set_parameter(par['index'], value))
+		faust_processor.set_automation(par['name'], np.array([value]))
+		faust_processor.set_parameter(par['index'], value)
 		if random.random() < .5:
-			assert(faust_processor.set_parameter(par['name'], value))
+			faust_processor.set_parameter(par['name'], value)
 
 	 # (MIDI note, velocity, start sec, duration sec)
 	faust_processor.add_midi_note(60, 60, 0.0, .25)
