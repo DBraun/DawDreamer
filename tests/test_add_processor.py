@@ -32,6 +32,7 @@ def test_add_processor():
         (add_processor, ["filter0", "filter1", "filter2", "filter3"])
     ]
 
+    assert add_processor.get_num_input_channels() == 8
     assert add_processor.get_num_output_channels() == 2
 
     engine.load_graph(graph)
