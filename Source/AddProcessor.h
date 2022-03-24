@@ -6,7 +6,7 @@ class AddProcessor : public ProcessorBase
 {
 public:
     AddProcessor(std::string newUniqueName, std::vector<float> gainLevels) : ProcessorBase(newUniqueName), myGainLevels{ gainLevels } {
-        setMainBusInputsAndOutputs(gainLevels.size()*2, gainLevels.size()*2);
+        setMainBusInputsAndOutputs(gainLevels.size()*2, 2);
     }
 
     void prepareToPlay(double, int) {
@@ -54,7 +54,7 @@ public:
 
     void setGainLevels(const std::vector<float> gainLevels) {
         myGainLevels = gainLevels;
-        setMainBusInputsAndOutputs(gainLevels.size()*2, gainLevels.size()*2);
+        setMainBusInputsAndOutputs(gainLevels.size()*2, 2);
     }
     const std::vector<float> getGainLevels() { return myGainLevels; }
 
