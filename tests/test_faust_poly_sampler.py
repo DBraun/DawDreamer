@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 BUFFER_SIZE = 1024
 
@@ -17,7 +17,7 @@ def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 	}
 	faust_processor.set_soundfiles(soundfiles)
 
-	dsp_path = abspath("faust_dsp/polyphonic_sampler.dsp")
+	dsp_path = abspath(FAUST_DSP / "polyphonic_sampler.dsp")
 	dsp_code = open(dsp_path).read()
 
 	dsp_code = """
@@ -46,7 +46,7 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/'+output_path, duration=3.)
+	render(engine, file_path=OUTPUT / output_path, duration=3.)
 
 	# check that it's non-silent
 	audio = engine.get_audio()
@@ -54,5 +54,5 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 
 def test_faust_poly_sampler_cymbal():
 	# Load a stereo audio sample and pass it to Faust
-	sample_seq = load_audio_file("assets/60988__folktelemetry__crash-fast-14.wav")
+	sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
 	_test_faust_poly_sampler(sample_seq, 'test_faust_poly_sampler_cymbal.wav', lagrange_order=4)

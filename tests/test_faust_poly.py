@@ -1,11 +1,11 @@
-from utils import *
+from dawdreamer_utils import *
 
 def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, cutoff=None,
 	automation=False, decay=None):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
-	dsp_path = abspath("faust_dsp/polyphonic.dsp")
+	dsp_path = abspath(FAUST_DSP / "polyphonic.dsp")
 	faust_processor = engine.make_faust_processor("faust")
 	assert(faust_processor.set_dsp(dsp_path))
 	
@@ -53,22 +53,22 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 	return engine.get_audio()
 
 def test_faust_poly():
-	audio1 = _test_faust_poly('output/test_faust_poly_grouped.wav', group_voices=True)
-	audio2 = _test_faust_poly('output/test_faust_poly_ungrouped.wav', group_voices=False)
+	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_grouped.wav', group_voices=True)
+	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_ungrouped.wav', group_voices=False)
 
 	assert(np.allclose(audio1, audio2))
 
-	audio1 = _test_faust_poly('output/test_faust_poly_2k_cutoff_grouped.wav', group_voices=True, cutoff=2000)
-	audio2 = _test_faust_poly('output/test_faust_poly_2k_cutoff_ungrouped.wav', group_voices=False, cutoff=2000)
+	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_2k_cutoff_grouped.wav', group_voices=True, cutoff=2000)
+	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_2k_cutoff_ungrouped.wav', group_voices=False, cutoff=2000)
 
 	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
 
-	audio1 = _test_faust_poly('output/test_faust_poly_automation_cutoff_grouped.wav', group_voices=True, automation=True)
-	audio2 = _test_faust_poly('output/test_faust_poly_automation_cutoff_ungrouped.wav', group_voices=False, automation=True)
+	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_cutoff_grouped.wav', group_voices=True, automation=True)
+	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_cutoff_ungrouped.wav', group_voices=False, automation=True)
 
 	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
 
-	audio1 = _test_faust_poly('output/test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
-	audio2 = _test_faust_poly('output/test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
+	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
+	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
 
 	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample

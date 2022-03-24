@@ -74,7 +74,7 @@ PYBIND11_MODULE(dawdreamer, m)
     py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>, ProcessorBase>(m, "OscillatorProcessor");
 
     py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>, ProcessorBase>(m, "PlaybackProcessor")
-        .def("set_data", &PlaybackProcessor::setData, arg("data"), "Set the audio as a 2xN numpy array.")
+        .def("set_data", &PlaybackProcessor::setData, arg("data"), "Set the audio as a numpy array shaped (Channels, Samples).")
         .doc() = "The Playback Processor can play audio data provided as an argument.";
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
@@ -91,7 +91,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
         .def_property("end_marker", &PlaybackWarpProcessor::getEndMarker, &PlaybackWarpProcessor::setEndMarker, "The end position in beats (typically quarter notes) relative to 1.1.1")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"), "Load an Ableton Live file with an \".asd\" extension")
         .def_property_readonly("warp_markers", &PlaybackWarpProcessor::getWarpMarkers, "Get the warp markers as a 2D array of time positions in seconds and positions in beats.")
-        .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), "Set the audio as a 2xN numpy array")
+        .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), "Set the audio as a numpy array shaped (Channels, Samples).")
         .def("set_clip_positions", &PlaybackWarpProcessor::setClipPositions, arg("clip_positions"), R"pbdoc(
     Set one or more positions at which the clip should play.
 
@@ -176,7 +176,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
             "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
-        .doc() = "A Plugin Processor can load VST \".dll\" files on Windows and \".vst\" files on macOS. The files can be for either instruments \
+        .doc() = "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
     py::class_<SamplerProcessor, std::shared_ptr<SamplerProcessor>, ProcessorBase>(m, "SamplerProcessor")
@@ -217,6 +217,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
         .def_property("group_voices", &FaustProcessor::getGroupVoices, &FaustProcessor::setGroupVoices, "If grouped, all polyphonic voices will share the same parameters. This parameter only matters if polyphony is enabled.")
+        .def_property("release_length", &FaustProcessor::getReleaseLength, &FaustProcessor::setReleaseLength, "If using polyphony, specifying the release length accurately can help avoid warnings about voices being stolen.")
+        .def_property("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath, &FaustProcessor::setFaustLibrariesPath, "Absolute path to directory containing your custom \".lib\" files containing Faust code.")
         .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")

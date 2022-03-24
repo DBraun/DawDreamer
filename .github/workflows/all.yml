@@ -185,6 +185,7 @@ jobs:
     - name: copy faust libraries
       # necessary for setup.py to work.
       run: |
+        Remove-Item -Recurse -Force "faustlibraries/.git"
         cp -v -r faustlibraries dawdreamer
 
     - name: Build libsamplerate

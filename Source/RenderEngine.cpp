@@ -12,7 +12,12 @@ RenderEngine::RenderEngine(double sr, int bs) :
 
 RenderEngine::~RenderEngine()
 {
-    myMainProcessorGraph->releaseResources();
+    //int numNodes = myMainProcessorGraph->getNumNodes();
+    //for (int i = 0; i < numNodes; i++) {
+    //    auto processor = myMainProcessorGraph->getNode(i)->decReferenceCountWithoutDeleting();
+    //}
+    //myMainProcessorGraph->releaseResources();
+    myMainProcessorGraph.reset();
 }
 
 bool
@@ -85,17 +90,13 @@ RenderEngine::connectGraph() {
         processor->setPlayHead(this);
         processor->automateParameters();
         int numOutputAudioChans = processor->getMainBusNumOutputChannels();
-        int actualInputs = processor->getMainBusNumInputChannels();
-        if (numInputAudioChans > actualInputs) {
-            std::cerr << "Too many inputs (" << numInputAudioChans << ") are trying to connect to " << actualInputs << " inputs for processor " << myUniqueName << std::endl;
-            return false;
+        int expectedInputChannels = processor->getMainBusNumInputChannels();
+        if (numInputAudioChans > expectedInputChannels) {
+            // todo: enable this warning
+            //std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName << " expects " << expectedInputChannels << " input signals, but you are trying to connect " << numInputAudioChans << " signals." << std::endl;
         }
-
-        numInputAudioChans = std::max(numInputAudioChans, actualInputs);
-
-        //std::cerr << processor->getUniqueName() << " setPlayConfigDetails inputs: " << numInputAudioChans << " outputs: " << numOutputAudioChans << std::endl;
         
-        processor->setPlayConfigDetails(numInputAudioChans, numOutputAudioChans, mySampleRate, myBufferSize);
+        processor->setPlayConfigDetails(expectedInputChannels, numOutputAudioChans, mySampleRate, myBufferSize);
         
         int chanDest = 0;
 
@@ -103,8 +104,7 @@ RenderEngine::connectGraph() {
 
             if (m_UniqueNameToSlotIndex.find(inputName) == m_UniqueNameToSlotIndex.end())
             {
-                std::cout << "Error connecting " << inputName << " to " << myUniqueName << ";" << std::endl;
-                std::cout << "You might need to place " << inputName << " earlier in the graph." << std::endl;
+                throw std::runtime_error("Error: Unable to connect " + inputName + " to " + myUniqueName + "; You might need to place " + inputName + " earlier in the graph.");
                 return false;
             }
             
@@ -119,8 +119,9 @@ RenderEngine::connectGraph() {
 
                 bool result = myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
                 if (!result) {
-                    std::cout << "Error connecting " << inputName << " " << chanSource << " to " << myUniqueName << " " << chanDest << std::endl;
-                    return false;
+                    // todo: because we failed here, connectGraph should return false at the very end or immediately.
+                    std::cerr << "Warning: Unable to connect " << inputName << " channel " << chanSource << " to " << myUniqueName << " channel " << chanDest << std::endl;
+                    //return false;
                 }
                 
                 chanDest++;
@@ -145,26 +146,32 @@ RenderEngine::render(const double renderLength) {
 
     int numRenderedSamples = renderLength * mySampleRate;
     if (numRenderedSamples <= 0) {
-        std::cerr << "Render length must be greater than zero.";
+        throw std::runtime_error("Render length must be greater than zero.");
         return false;
     }
     
     int numberOfBuffers = myBufferSize == 1 ? numRenderedSamples : int(std::ceil((numRenderedSamples -1.) / myBufferSize));
 
     bool graphIsConnected = true;
-    
+    int audioBufferNumChans = 0;
+
     int numNodes = myMainProcessorGraph->getNumNodes();
     for (int i = 0; i < numNodes; i++) {
-        auto faustProcessor = dynamic_cast<FaustProcessor*> (myMainProcessorGraph->getNode(i)->getProcessor());
+        auto processor = myMainProcessorGraph->getNode(i)->getProcessor();
+
+        audioBufferNumChans = std::max(audioBufferNumChans, processor->getTotalNumInputChannels());
+        audioBufferNumChans = std::max(audioBufferNumChans, processor->getMainBusNumOutputChannels());
+
+        auto faustProcessor = dynamic_cast<FaustProcessor*> (processor);
         if (faustProcessor && (!faustProcessor->isCompiled())) {
             if (!faustProcessor->compile()) {
-                std::cerr << "Faust didn't compile correctly." << std::endl;
+                throw std::runtime_error("Faust didn't compile correctly.");
                 return false;
             }
         }
-        auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
-        if (processor) {
-            graphIsConnected = graphIsConnected && processor->isConnectedInGraph();
+        auto processorBase = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
+        if (processorBase) {
+            graphIsConnected = graphIsConnected && processorBase->isConnectedInGraph();
         }
 
     }
@@ -184,15 +191,11 @@ RenderEngine::render(const double renderLength) {
     if (!graphIsConnected) {
         bool result = connectGraph();
         if (!result) {
-            std::cerr << "Unable to connect graph." << std::endl;
+            throw std::runtime_error("Unable to connect graph.");
             return false;
         }
     }
     
-    int numInputAudioChans = myMainProcessorGraph->getNode(0)->getProcessor()->getTotalNumInputChannels();
-    int numOutputAudioChans = myMainProcessorGraph->getNode(myMainProcessorGraph->getNumNodes()-1)->getProcessor()->getMainBusNumOutputChannels();
-    
-    int audioBufferNumChans = std::max(numOutputAudioChans, numInputAudioChans);
     AudioSampleBuffer audioBuffer(audioBufferNumChans, myBufferSize);
     
     for (int i = 0; i < numNodes; i++) {
@@ -224,7 +227,7 @@ RenderEngine::render(const double renderLength) {
 
 void RenderEngine::setBPM(double bpm) {
     if (bpm <= 0) {
-        std::cerr << "BPM must be positive." << std::endl;
+        throw std::runtime_error("BPM must be positive.");
         return;
     }
     myBPM = bpm;

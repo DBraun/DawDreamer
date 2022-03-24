@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 BUFFER_SIZE = 16
 
@@ -8,12 +8,10 @@ def test_record():
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	thisdir = str(pathlib.Path(__file__).parent.resolve()) + '/'
-
-	audio1_input = load_audio_file(thisdir+"assets/Music Delta - Disco/bass.wav", duration=5.1)
+	audio1_input = load_audio_file(ASSETS / "Music Delta - Disco" / "bass.wav", duration=5.1)
 	playback1 = engine.make_playback_processor("playback1", audio1_input)
 
-	audio2_input = load_audio_file(thisdir+"assets/Music Delta - Disco/other.wav", duration=5.1)
+	audio2_input = load_audio_file(ASSETS / "Music Delta - Disco" / "other.wav", duration=5.1)
 	playback2 = engine.make_playback_processor("playback2", audio2_input)
 
 	playback1.record = True
@@ -48,6 +46,6 @@ def test_record():
 	assert(audio_missing.shape[0] == 2)
 	assert(audio_missing.shape[1] == 0)
 
-	wavfile.write(thisdir+'output/test_record_both.wav', SAMPLE_RATE, output.transpose())
-	wavfile.write(thisdir+'output/test_record_1.wav', SAMPLE_RATE, audio1.transpose())
-	wavfile.write(thisdir+'output/test_record_2.wav', SAMPLE_RATE, audio2.transpose())
+	wavfile.write(OUTPUT / 'test_record_both.wav', SAMPLE_RATE, output.transpose())
+	wavfile.write(OUTPUT / 'test_record_1.wav', SAMPLE_RATE, audio1.transpose())
+	wavfile.write(OUTPUT / 'test_record_2.wav', SAMPLE_RATE, audio2.transpose())

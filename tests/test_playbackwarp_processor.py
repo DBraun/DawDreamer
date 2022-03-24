@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 BUFFER_SIZE = 1
 
@@ -11,14 +11,14 @@ def test_playbackwarp_processor1():
 	engine.set_bpm(140.)
 
 	drums = engine.make_playbackwarp_processor("drums",
-		load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+		load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
-	assert(drums.set_clip_file(abspath("assets/Music Delta - Disco/drums.wav.asd")))
+	assert(drums.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "drums.wav.asd")))
 
 	other = engine.make_playbackwarp_processor("other",
-		load_audio_file("assets/Music Delta - Disco/other.wav", duration=DURATION))
+		load_audio_file(ASSETS / "Music Delta - Disco" / "other.wav", duration=DURATION))
 
-	assert(other.set_clip_file(abspath("assets/Music Delta - Disco/other.wav.asd")))
+	assert(other.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "other.wav.asd")))
 
 	print('drums.start_marker: ', drums.start_marker)
 	print('drums.end_marker: ', drums.end_marker)
@@ -35,15 +35,15 @@ def test_playbackwarp_processor1():
 
 	assert(engine.load_graph(graph))
 
-	render(engine, file_path='output/test_playbackwarp_processor1a.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1a.wav')
 
 	other.transpose = 2.
 
-	render(engine, file_path='output/test_playbackwarp_processor1b.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1b.wav')
 
 	other.set_automation('transpose', make_sine(1., DURATION))
 
-	render(engine, file_path='output/test_playbackwarp_processor1c.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1c.wav')
 
 def test_playbackwarp_processor2():
 
@@ -56,9 +56,9 @@ def test_playbackwarp_processor2():
 	engine.set_bpm(120.)
 
 	drums = engine.make_playbackwarp_processor("drums",
-		load_audio_file("assets/Music Delta - Disco/drums.wav", duration=DURATION))
+		load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
 
-	assert(drums.set_clip_file(abspath("assets/Music Delta - Disco/drums.wav.asd")))
+	assert(drums.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "drums.wav.asd")))
 
 	drums.start_marker = 0.
 	drums.loop_on = True
@@ -72,18 +72,18 @@ def test_playbackwarp_processor2():
 
 	drums.set_clip_positions([[0., 4., 0.], [5., 9., 0.]])
 
-	render(engine, file_path='output/test_playbackwarp_processor2a.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor2a.wav')
 
 	drums.set_clip_positions([[0., 4., 0.]])
 	drums.start_marker = 0.
 	drums.loop_start = 1.
 	drums.loop_end = 2.
 
-	render(engine, file_path='output/test_playbackwarp_processor2b.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor2b.wav')
 
 	drums.start_marker = 0.
 	drums.loop_start = 3.
 	drums.loop_end = 4.
 	drums.set_clip_positions([[0., 2., 0.], [3., 9., 3.]])
 
-	render(engine, file_path='output/test_playbackwarp_processor2c.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor2c.wav')
