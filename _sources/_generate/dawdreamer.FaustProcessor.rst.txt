@@ -42,9 +42,11 @@
       ~FaustProcessor.auto_import
       ~FaustProcessor.code
       ~FaustProcessor.compiled
+      ~FaustProcessor.faust_libraries_path
       ~FaustProcessor.group_voices
       ~FaustProcessor.n_midi_events
       ~FaustProcessor.num_voices
       ~FaustProcessor.record
+      ~FaustProcessor.release_length
    
    

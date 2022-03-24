@@ -120,17 +120,23 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compiled</span></code></p></td>
 <td><p>Did the most recent DSP code compile?</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_voices</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">faust_libraries_path</span></code></p></td>
+<td><p>Absolute path to directory containing your custom &quot;.lib&quot; files containing Faust code.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_voices</span></code></p></td>
 <td><p>If grouped, all polyphonic voices will share the same parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_midi_events</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_midi_events</span></code></p></td>
 <td><p>The number of MIDI events stored in the buffer.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_voices</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_voices</span></code></p></td>
 <td><p>The number of voices for polyphony.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">record</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">record</span></code></p></td>
 <td><p>Whether recording of this processor is enabled.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_length</span></code></p></td>
+<td><p>If using polyphony, specifying the release length accurately can help avoid warnings about voices being stolen.</p></td>
 </tr>
 </tbody>
 </table>
@@ -211,7 +217,7 @@
       &copy;2021, David Braun.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
