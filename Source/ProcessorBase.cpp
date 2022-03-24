@@ -33,13 +33,13 @@ bool ProcessorBase::setAutomation(std::string parameterName, py::array input) {
             return parameter->setAutomation(input);
         }
         else {
-            std::cerr << "Failed to find parameter: " << parameterName << std::endl;
+            throw std::runtime_error("Failed to find parameter: " + parameterName);
             return false;
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Failed to set '" << parameterName << "' automation: " << e.what() << std::endl;
+        throw std::runtime_error("Failed to set '" + parameterName + "' automation: " + e.what());
         return false;
     }
 
@@ -55,13 +55,13 @@ bool ProcessorBase::setAutomationVal(std::string parameterName, float val) {
             parameter->setAutomation(val);
         }
         else {
-            std::cerr << "Failed to find parameter: " << parameterName << std::endl;
+            throw std::runtime_error("Failed to find parameter: " + parameterName);
             return false;
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Failed to set '" << parameterName << "' automation: " << e.what() << std::endl;
+        throw std::runtime_error("Failed to set '" + parameterName + "' automation: " + e.what());
         return false;
     }
 
@@ -75,7 +75,7 @@ std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
         return parameter->getAutomation();
     }
     else {
-        std::cerr << "Failed to get automation values for parameter: " << parameterName << std::endl;
+        throw std::runtime_error("Failed to get automation values for parameter: " + parameterName);
         std::vector<float> empty;
         return empty;
     }
@@ -88,7 +88,7 @@ float ProcessorBase::getAutomationVal(std::string parameterName, int index) {
         return parameter->sample(index);
     }
     else {
-        std::cerr << "Failed to get automation value for parameter: " << parameterName << std::endl;
+        throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
         return 0.f;
     }
 }

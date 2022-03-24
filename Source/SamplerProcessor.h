@@ -31,7 +31,7 @@ public:
     wrapperGetParameter(int parameterIndex)
     {
         if (parameterIndex >= sampler.getNumParameters()) {
-            std::cerr << "Parameter not found for index: " << parameterIndex << std::endl;
+            throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
             return 0.;
         }
 
@@ -44,7 +44,7 @@ public:
     wrapperSetParameter(const int parameterIndex, const float value)
     {
         if (parameterIndex >= sampler.getNumParameters()) {
-            std::cerr << "Parameter not found for index: " << parameterIndex << std::endl;
+            throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
             return;
         }
 
@@ -169,6 +169,7 @@ public:
         if (midiVelocity > 255) midiVelocity = 255;
         if (midiVelocity < 0) midiVelocity = 0;
         if (noteLength <= 0) {
+            throw std::runtime_error("The note length must be greater than zero.");
             return false;
         }
 

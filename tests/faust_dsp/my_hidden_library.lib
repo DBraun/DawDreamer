@@ -1,0 +1,2 @@
+import("stdfaust.lib");
+my_hidden_stereo_effect = sp.stereoize(_*.5);

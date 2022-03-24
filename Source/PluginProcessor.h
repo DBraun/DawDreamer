@@ -53,7 +53,7 @@ public:
 
     const juce::String getName() const { return "PluginProcessor"; }
 
-    bool loadMidi(const std::string& path);
+    bool loadMidi(const std::string& path, bool allEvents);
 
     void clearMidi();
 
