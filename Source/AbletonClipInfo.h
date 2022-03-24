@@ -80,12 +80,12 @@ class AbletonClipInfo {
             FILE* f = fopen(path, "rb");
             if (!f) {
                 // Return because no warp file was found.
-                std::cerr << "Error: Couldn't open file at path: " << path << std::endl;
+                throw std::runtime_error("Error: Couldn't open file at path: " + std::string(path));
                 return false;
             }
 
             if (!read_loop_info(f)) {
-                std::cerr << "Error: Couldn't find loop info." << std::endl;
+                throw std::runtime_error("Error: Couldn't find loop info in warp file: " + std::string(path));
                 return false;
             }
             else {
@@ -123,7 +123,7 @@ class AbletonClipInfo {
             }
             else {
                 // Then we couldn't get to the byte for loop_on
-                std::cerr << "Error: Couldn't find loop on." << std::endl;
+                throw std::runtime_error("Error: Couldn't find loop on.");
                 return false;
             }
 

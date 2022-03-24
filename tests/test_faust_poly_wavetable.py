@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 BUFFER_SIZE = 1
 
@@ -6,7 +6,7 @@ def _test_faust_poly_wavetable(wavecycle, output_path, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	dsp_path = abspath("faust_dsp/polyphonic_wavetable.dsp")
+	dsp_path = abspath(FAUST_DSP / "polyphonic_wavetable.dsp")
 	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = 8
 
@@ -25,8 +25,8 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	}
 	faust_processor.set_soundfiles(soundfiles)
 
-	assert(faust_processor.set_dsp_string(dsp_code))
-	assert(faust_processor.compile())
+	faust_processor.set_dsp_string(dsp_code)
+	faust_processor.compile()
 
 	desc = faust_processor.get_parameters_description()
 
@@ -41,9 +41,9 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	    (faust_processor, [])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
-	render(engine, file_path='output/'+output_path, duration=3.)
+	render(engine, file_path=OUTPUT / output_path, duration=3.)
 
 	# check that it's non-silent
 	audio = engine.get_audio()

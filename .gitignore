@@ -1,4 +1,5 @@
 build
+wheelhouse/*
 .DS_Store
 */**.so
 
@@ -8,6 +9,7 @@ dawdreamer/*.pyd
 dawdreamer/faustlibraries/*
 dawdreamer/libfaust.2.dylib
 dawdreamer/licenses/*
+dawdreamer/__pycache__
 __pycache__/*
 dawdreamer.egg-info/*
 dist/*

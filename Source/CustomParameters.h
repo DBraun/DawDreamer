@@ -135,7 +135,7 @@ public:
         }
         catch (const std::exception& e)
         {
-            std::cout << "Error: setAutomation: " << e.what() << std::endl;
+            throw std::runtime_error(std::string("Error: setAutomation: ") + e.what());
             return false;
         }
 

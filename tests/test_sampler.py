@@ -1,4 +1,4 @@
-from utils import *
+from dawdreamer_utils import *
 
 BUFFER_SIZE = 512
 
@@ -14,9 +14,7 @@ def test_sampler(set_data=False):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-	thisdir = str(pathlib.Path(__file__).parent.resolve()) + '/'
-
-	data = load_audio_file(thisdir+"assets/60988__folktelemetry__crash-fast-14.wav")
+	data = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
 	sampler_processor = engine.make_sampler_processor("playback", data)
 
 	if set_data:
@@ -28,6 +26,7 @@ def test_sampler(set_data=False):
 	# print(desc)
 
 	sampler_processor.set_parameter(get_par_index(desc, 'Center Note'), 60.)  # set the center frequency to middle C (60)
+	# sampler_processor.set_parameter(5, 100.) # set the volume envelope's release to 100 milliseconds.
 
 	# (MIDI note, velocity, start sec, duration sec)
 	sampler_processor.add_midi_note(60, 60, 0.0, .25)
@@ -49,12 +48,12 @@ def test_sampler(set_data=False):
 	    (sampler_processor, [])
 	]
 
-	assert(engine.load_graph(graph))
+	engine.load_graph(graph)
 
-	render(engine, file_path=thisdir+'output/test_sampler_with_amp.wav', duration=DURATION)
+	render(engine, file_path=OUTPUT / 'test_sampler_with_amp.wav', duration=DURATION)
 
 	sampler_processor.set_parameter(amp_index, 0.)
 
 	assert(sampler_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
-	render(engine, file_path=thisdir+'output/test_sampler_without_amp.wav', duration=DURATION)
+	render(engine, file_path=OUTPUT / 'test_sampler_without_amp.wav', duration=DURATION)

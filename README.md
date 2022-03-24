@@ -37,6 +37,10 @@ DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a 
 
 `pip install dawdreamer`
 
+## API Documentation
+
+[https://dirt.design/DawDreamer/](https://dirt.design/DawDreamer/)
+
 ## Basic Example
 ```python
 import dawdreamer as daw
@@ -45,7 +49,7 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 128 # Parameters will undergo automation at this block size.
+BUFFER_SIZE = 128 # Parameters will undergo automation at this block size. It can be as small as 1 sample.
 SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
 SYNTH_PRESET = "C:/path/to/preset.fxp"
 REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work
@@ -73,8 +77,9 @@ DURATION = 10 # How many seconds we want to render.
 vocals = load_audio_file(VOCALS_PATH, duration=10.)
 piano = load_audio_file(PIANO_PATH, duration=10.)
 
-# Make a processor and give it the name "my_synth", which we must remember later.
+# Make a processor and give it the name "my_synth", which we use later.
 synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
+assert synth.get_name() == "my_synth"
 synth.load_preset(SYNTH_PRESET)
 synth.set_parameter(5, 0.1234) # override a specific parameter.
 synth.load_midi("C:/path/to/song.mid")
@@ -91,20 +96,6 @@ synth.set_automation(1, make_sine(.5, DURATION)) # 0.5 Hz sine wave.
 # For any processor type, we can get the number of inputs and outputs
 print("synth num inputs: ", synth.get_num_input_channels())
 print("synth num outputs: ", synth.get_num_output_channels())
-
-# The sampler processor works like the plugin processor.
-# Provide audio for the sample, and then provide MIDI.
-# The note value affects the pitch and playback speed of the sample.
-# There are basic sampler parameters such as ADSR for volume and filters which you can
-# inspect with `get_parameters_description()`
-sampler = engine.make_sampler_processor("my_sampler", load_audio_file(SAMPLE_PATH))
-# sampler.set_data(load_audio_file(SAMPLE_PATH_2))  # this is allowed too at any time.
-print(sampler.get_parameters_description())
-sampler.set_parameter(0, 60.)  # set the center frequency to middle C (60)
-sampler.set_parameter(5, 100.) # set the volume envelope's release to 100 milliseconds.
-sampler.load_midi("C:/path/to/sampler_rhythm.mid")
-# We can also add notes one at a time.
-sampler.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
 
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
@@ -123,12 +114,11 @@ filter_processor.record = True  # This will allow us to access the filter proces
 # The audio from the last tuple's processor will be accessed automatically later by engine.get_audio()
 graph = [
   (synth, []),  # synth takes no inputs, so we give an empty list.
-  (sampler, []),  # sampler takes no inputs.
-  (engine.make_reverb_processor("reverb"), ["my_synth"]), # Apply JUCE reverb to the synth named earlier
+  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to the synth named earlier
   (engine.make_plugin_processor("more_reverb", REVERB_PLUGIN), ["reverb"]), # Apply VST reverb
   (engine.make_playback_processor("vocals", vocals), []), # Playback has no inputs.
   (filter_processor, ["vocals"]), # High-pass filter with automation set earlier.
-  (engine.make_add_processor("added"), ["more_reverb", "filter", "my_sampler"])
+  (engine.make_add_processor("added"), ["more_reverb", "filter"])
 ]
 
 engine.load_graph(graph)
@@ -176,7 +166,7 @@ faust_processor = engine.make_faust_processor("faust")
 faust_processor.set_dsp(DSP_PATH)  # You can do this anytime.
 
 # Using compile() isn't necessary, but it's an early warning check.
-assert(faust_processor.compile())
+faust_processor.compile()
 
 print(faust_processor.get_parameters_description())
 
@@ -283,7 +273,7 @@ engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 # but we want to play it back at 130 BPM.
 engine.set_bpm(130.)
 playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file("drum_loop.wav"))
-assert(playback_processor.set_clip_file("drum_loop.wav.asd"))
+playback_processor.set_clip_file("drum_loop.wav.asd")
 
 graph = [
   (playback_processor, []),
