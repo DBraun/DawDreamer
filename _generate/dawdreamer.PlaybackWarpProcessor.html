@@ -45,7 +45,7 @@
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -69,22 +69,25 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_output_channels</span></code>(self)</p></td>
 <td><p>Get the total number of output channels (2 indicates stereo output).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_automation</span></code>(self, parameter_name, data)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_warp_markers</span></code>(self, bpm)</p></td>
+<td><p>Reset the warp markers with a BPM.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_automation</span></code>(self, parameter_name, data)</p></td>
 <td><p>Set a parameter's automation with a numpy array.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_file</span></code>(self, asd_file_path)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_file</span></code>(self, asd_file_path)</p></td>
 <td><p>Load an Ableton Live file with an &quot;.asd&quot; extension</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_positions</span></code>(self, clip_positions)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_positions</span></code>(self, clip_positions)</p></td>
 <td><p>Set one or more positions at which the clip should play.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_data</span></code>(self, data)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_data</span></code>(self, data)</p></td>
 <td><p>Set the audio as a numpy array shaped (Channels, Samples).</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
-<table class="longtable docutils align-default">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -115,7 +118,7 @@
 <td><p>The pitch transposition in semitones</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">warp_markers</span></code></p></td>
-<td><p>Get the warp markers as a 2D array of time positions in seconds and positions in beats.</p></td>
+<td><p>Get/set the warp markers as a 2D array of time positions in seconds and positions in beats.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">warp_on</span></code></p></td>
 <td><p>Whether warping is enabled.</p></td>
@@ -199,7 +202,7 @@
       &copy;2021, David Braun.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
