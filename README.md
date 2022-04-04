@@ -35,7 +35,7 @@ DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a 
 
 ## Installation
 
-`pip install dawdreamer`
+`pip install dawdreamer` on macOS/Windows. Use the Dockerfile on Linux.
 
 ## API Documentation
 

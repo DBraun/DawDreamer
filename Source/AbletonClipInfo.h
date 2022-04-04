@@ -13,6 +13,10 @@ class AbletonClipInfo {
         bool loop_on = true;
         bool warp_on = false;
 
+        AbletonClipInfo() : loop_start(0), loop_end(262144), start_marker(0), hidden_loop_start(0), hidden_loop_end(262144), end_marker(262144), loop_on(true), warp_on(false) {
+
+        }
+
         std::vector<std::pair<double, double>> warp_markers;
 
         int beat_to_sample(double beat, double sr) {

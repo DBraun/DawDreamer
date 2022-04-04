@@ -58,7 +58,7 @@ public:
     void setTimeRatio(double ratio) {
         m_time_ratio_if_warp_off = ratio;
     }
-    bool getTimeRatio() {
+    double getTimeRatio() {
         return m_time_ratio_if_warp_off;
     }
 
@@ -103,6 +103,60 @@ public:
         }
 
         return arr;
+    }
+
+    void resetWarpMarkers(double bpm) {
+        m_clipInfo.warp_markers.clear();
+
+        m_clipInfo.warp_markers.push_back(std::make_pair(0, 0));
+        double numSamples = 128;
+        double beats = bpm / (60. * numSamples / m_sample_rate);
+        m_clipInfo.warp_markers.push_back(std::make_pair(numSamples, beats));
+    }
+
+    void setWarpMarkers(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
+
+        if (input.ndim() != 2) {
+            throw std::runtime_error("The warp markers must be two-dimensional and shaped (num_markers, 2).");
+            return;
+        }
+
+        const int numPairs = (int)input.shape(0);
+
+        if (numPairs < 2) {
+            throw std::runtime_error("The number of warp markers must be greater than one.");
+            return;
+        }
+
+        if (input.shape(1) != 2) {
+            throw std::runtime_error("The dimensions of the passed warp markers are incorrect.");
+            return;
+        }
+
+        std::vector<std::pair<double, double>> warp_markers;
+
+        double beat, new_beat;
+        double pos, new_pos;
+        beat = new_beat = pos = new_pos = -999999.;
+
+        float* input_ptr = (float*)input.data();
+
+        for (int pair_i = 0; pair_i < numPairs; pair_i++) {
+
+            new_pos = *input_ptr++;
+            new_beat = *input_ptr++;
+
+            if (new_beat <= beat || new_pos <= pos) {
+                throw std::runtime_error("The warp markers must be monotonically increasing. new_beat: " + std::to_string(new_beat) + " beat: " + std::to_string(beat) + " new_pos: " + std::to_string(new_pos) + " pos: " + std::to_string(pos));
+            }
+
+            pos = new_pos;
+            beat = new_beat;
+
+            warp_markers.push_back(std::make_pair(pos, beat));
+        }
+
+        m_clipInfo.warp_markers = warp_markers;
     }
 
 private:
@@ -234,6 +288,7 @@ public:
                     else {
                         sampleReadIndex = 0;
                     }
+                    
                     continue;
                 }
                 else {
@@ -302,6 +357,7 @@ public:
         setupRubberband(m_sample_rate, m_numChannels);
 
         m_clipIndex = 0;
+        sampleReadIndex = 0;
 
         if (m_clipIndex < m_clips.size()) {
             m_currentClip = m_clips.at(0);
