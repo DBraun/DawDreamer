@@ -4,6 +4,8 @@
 
 #include <filesystem>
 
+#include "StandalonePluginWindow.h"
+
 using juce::ExtensionsVisitor;
 
 struct PresetVisitor : public ExtensionsVisitor {
@@ -31,6 +33,26 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
     myPluginPath = path;
 
     isLoaded = loadPlugin(sampleRate, samplesPerBlock);
+}
+
+void
+PluginProcessor::openEditor() {
+    if (!myPlugin) {
+        throw std::runtime_error(
+            "Editor cannot be shown because the plugin isn't loaded.");
+    }
+
+    if (!juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()) {
+        throw std::runtime_error(
+            "Editor cannot be shown because no visual display devices are available.");
+    }
+
+    if (!juce::MessageManager::getInstance()->isThisTheMessageThread()) {
+        throw std::runtime_error(
+            "Plugin UI windows can only be shown from the main thread.");
+    }
+
+    StandalonePluginWindow::openWindowAndWait(*this, *myPlugin);
 }
 
 bool
@@ -83,10 +105,21 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
     auto outputs = myPlugin->getTotalNumOutputChannels();
     this->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
     myPlugin->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
+    myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
     myPlugin->setNonRealtime(true);
     mySampleRate = sampleRate;
     
     createParameterLayout();
+
+    {
+        // Process a block of silence a few times to "warm up" the processor.
+        juce::AudioSampleBuffer audioBuffer = AudioSampleBuffer(std::max(inputs, outputs), samplesPerBlock);
+        MidiBuffer emptyMidiBuffer;
+        for (int i = 0; i < 5; i++) {
+            audioBuffer.clear();
+            myPlugin->processBlock(audioBuffer, emptyMidiBuffer);
+        }
+    }
 
     return true;
 }
@@ -116,6 +149,15 @@ PluginProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& la
     }
 
     return myPlugin->checkBusesLayoutSupported(layout);
+}
+
+bool
+PluginProcessor::setBusesLayout(const BusesLayout& arr) {
+    if (myPlugin.get()) {
+        AudioProcessor::setBusesLayout(arr);
+        return myPlugin->setBusesLayout(arr);
+    }
+    return false;
 }
 
 void
@@ -328,6 +370,8 @@ PluginProcessor::setParameter(const int paramIndex, const float value)
         std::cerr << "Please load the plugin first!" << std::endl;
         return;
     }
+
+    myPlugin->setParameter(paramIndex, value);
 
     std::string paramID = std::to_string(paramIndex);
 

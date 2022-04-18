@@ -72,3 +72,55 @@ def test_faust_poly():
 	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
 
 	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
+
+
+def _test_faust_sine(midi_path: str, buffer_size=1):
+
+    engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
+
+    faust_processor = engine.make_faust_processor("faust")
+    faust_processor.num_voices = 16
+    faust_processor.group_voices = True
+    faust_processor.release_length = .5  # note that this is the maximum of the "release" hslider below
+
+    faust_processor.set_dsp_string(
+    	f"""
+		declare name "MyInstrument";
+
+		declare options "[nvoices:8]"; // FaustProcessor has a property which will override this.
+		import("stdfaust.lib");
+
+		freq = hslider("freq",200,50,1000,0.01); // note pitch
+		gain = hslider("gain",0.1,0,1,0.01);     // note velocity
+		gate = button("gate");                   // note on/off
+
+		attack = hslider("attack", .002, 0.001, 10., 0.);
+		decay = hslider("decay", .05, 0.001, 10., 0.);
+		sustain = hslider("sustain", 1.0, 0.0, 1., 0.);
+		release = hslider("release", .05, 0.001, {faust_processor.release_length}, 0.);
+
+		envVol = 0.35*gain*en.adsr(attack, decay, sustain, release, gate);
+
+		process = os.osc(freq)*envVol <: _, _;
+		effect = _, _;
+    	"""
+    	)
+    faust_processor.compile()
+    # desc = faust_processor.get_parameters_description()
+    # for par in desc:
+    #   print(par)
+
+    faust_processor.load_midi(abspath(ASSETS / midi_path))
+
+    graph = [
+        (faust_processor, [])
+    ]
+
+    engine.load_graph(graph)
+    render(engine, file_path=OUTPUT / ('test_faust_sine_' + basename(midi_path) + '.wav'), duration=10.)
+
+    audio = engine.get_audio()
+    assert(np.mean(np.abs(audio)) > .0001)
+
+def test_faust_sine1():
+	_test_faust_sine(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))

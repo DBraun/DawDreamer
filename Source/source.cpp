@@ -157,6 +157,11 @@ but the filter mode cannot under automation.";
         .doc() = "An Add Processor adds one or more stereo inputs with corresponding gain parameters.";
 
     py::class_<PluginProcessorWrapper, std::shared_ptr<PluginProcessorWrapper>, ProcessorBase>(m, "PluginProcessor")
+        .def("can_set_bus", &PluginProcessorWrapper::canApplyBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Return bool for whether this combination of input and output channels can be set.")
+        .def("set_bus", &PluginProcessorWrapper::setMainBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Set the number of input and output channels. An error will be thrown for an unaccepted option.")
+        .def("save_state", &PluginProcessorWrapper::saveStateInformation, arg("filepath"), "Save the state to a file.")
+        .def("load_state", &PluginProcessorWrapper::loadStateInformation, arg("filepath"), "Load the state from a file.")
+        .def("open_editor", &PluginProcessorWrapper::openEditor, "Open the UI editor for the plugin.")
         .def("load_preset", &PluginProcessorWrapper::loadPreset, arg("filepath"), "Load an FXP preset with an absolute filepath and \".fxp\" extension.")
         .def("load_vst3_preset", &PluginProcessorWrapper::loadVST3Preset, arg("filepath"), "Load a VST3 preset with an absolute filepath and \".vstpreset\" extension.")
         .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
