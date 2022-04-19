@@ -419,11 +419,8 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
         # todo: need a pytest way to test open_editor()
         return
     
-
-    if not isfile(plugin_path):
+    if not isfile(plugin_path) or not isfile(plugin_path2):
         return
-
-    plugin_basename = os.path.splitext(basename(plugin_path))[0]
 
     DURATION = 5.
 
@@ -434,6 +431,7 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
     ambisonics_encoder.record = True
     ambisonics_decoder.record = True
 
+    plugin_basename = os.path.splitext(basename(plugin_path))[0]
     state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
 
     if isfile(state_file_path):
@@ -457,10 +455,18 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
     # print(ambisonics_encoder.get_plugin_parameters_description())
     # print('inputs: ', ambisonics_encoder.get_num_input_channels(), ' outputs: ', ambisonics_encoder.get_num_output_channels())
 
+    plugin_basename = os.path.splitext(basename(plugin_path2))[0]
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
+
+    if isfile(state_file_path):
+        ambisonics_decoder.load_state(state_file_path)
+
     ambisonics_decoder.set_bus(num_outputs, 2)
 
     # Remember to select AMBISONICS_ORDER ambisonics.
     ambisonics_decoder.open_editor()
+
+    ambisonics_decoder.save_state(state_file_path)
 
     assert ambisonics_decoder.get_num_input_channels() == num_outputs
     assert ambisonics_decoder.get_num_output_channels() == 2
@@ -490,4 +496,5 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
 
 
 if __name__ == '__main__':
+    # test_plugin_iem()
     print('All done!')

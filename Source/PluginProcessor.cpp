@@ -179,7 +179,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         buffer.clear();
         
         if (posInfo.ppqPosition == 0) {
-            std::cerr << "Error: no plugin was processed." << std::endl;
+            throw std::runtime_error("Error: no plugin was processed for processor named " + this->getUniqueName());
         }
         return;
     }
@@ -220,7 +220,7 @@ PluginProcessor::automateParameters() {
                 myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
             }
             else {
-                std::cerr << "Error automateParameters: " << myPlugin->getParameterName(i) << std::endl;
+                throw std::runtime_error("Error automateParameters: " + myPlugin->getParameterName(i).toStdString());
             }
         }
     }
@@ -285,7 +285,7 @@ PluginProcessor::loadVST3Preset(const std::string& path)
     juce::File fPath(path);
 
     if (!fPath.getFileExtension().equalsIgnoreCase(".VSTPRESET")) {
-        std::cerr << "The file extension is not .vstpreset for file: " << path.c_str() << std::endl;
+        throw std::runtime_error("The file extension is not .vstpreset for file: " + path);
     }
 
     if (!std::filesystem::exists(path.c_str())) {
@@ -311,6 +311,46 @@ PluginProcessor::loadVST3Preset(const std::string& path)
     }
 
     return true;
+}
+
+void
+PluginProcessor::loadStateInformation(std::string filepath) {
+
+    if (!std::filesystem::exists(filepath.c_str())) {
+        throw std::runtime_error("File not found: " + filepath);
+    }
+
+    MemoryBlock state;
+    File file = File(filepath);
+    file.loadFileAsData(state);
+
+    myPlugin->setStateInformation((const char*)state.getData(), (int)state.getSize());
+
+    for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
+        std::string paramID = std::to_string(i);
+        ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
+    }
+}
+
+void
+PluginProcessor::saveStateInformation(std::string filepath) {
+    if (!myPlugin) {
+        throw std::runtime_error("Please load the plugin first");
+    }
+    MemoryBlock state;
+    myPlugin->getStateInformation(state);
+
+    juce::File file(filepath);
+    juce::FileOutputStream stream(file);
+
+    if (stream.openedOk())
+    {
+        // overwrite existing file.
+        stream.setPosition(0);
+        stream.truncate();
+    }
+
+    stream.write(state.getData(), state.getSize());
 }
 
 void
@@ -343,9 +383,11 @@ PluginProcessor::setPatch(const PluginPatch patch)
             setParameter(pair.first, pair.second);
         }
         else {
-            std::cerr << "RenderEngine::setPatch error: Incorrect parameter index!" <<
-                "\n- Current index:  " << pair.first <<
-                "\n- Max index: " << myPlugin->getNumParameters() - 1 << std::endl;
+            throw std::runtime_error(
+                "RenderEngine::setPatch error: Incorrect parameter index!"
+                "\n- Current index:  " + std::to_string(pair.first) +
+                "\n- Max index: " + std::to_string(myPlugin->getNumParameters() - 1)
+            );
         }
     }
 
@@ -356,7 +398,7 @@ std::string
 PluginProcessor::getParameterAsText(const int parameter)
 {
     if (!myPlugin) {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
         return "";
     }
     return myPlugin->getParameterText(parameter).toStdString();
@@ -367,7 +409,7 @@ void
 PluginProcessor::setParameter(const int paramIndex, const float value)
 {
     if (!myPlugin) {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
         return;
     }
 
@@ -385,7 +427,7 @@ PluginProcessor::getPatch() {
     PluginPatch params;
 
     if (!myPlugin) {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
         return params;
     }
 
@@ -407,11 +449,11 @@ PluginProcessor::getPatch() {
                 params.push_back(std::make_pair(i, val));
             }
             else {
-                std::cerr << "Error getPatch: " << theName << std::endl;
+                throw std::runtime_error("Error getPatch : " + theName.toStdString());
             }
         }
         else {
-            std::cerr << "Error getPatch with parameter: " << theName << std::endl;
+            throw std::runtime_error("Error getPatch with parameter: " + theName.toStdString());
         }
 
     }
@@ -425,7 +467,7 @@ const size_t
 PluginProcessor::getPluginParameterSize()
 {
     if (!myPlugin) {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
         return 0;
     }
 
@@ -523,12 +565,12 @@ float
 PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
 {
     if (!myPlugin) {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
         return 0.;
     }
 
     if (parameterIndex >= myPlugin->AudioProcessor::getNumParameters()) {
-        std::cerr << "Parameter not found for index: " << parameterIndex << std::endl;
+        throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
         return 0.;
     }
 
@@ -595,7 +637,7 @@ PluginProcessorWrapper::getPluginParametersDescription()
     }
     else
     {
-        std::cerr << "Please load the plugin first!" << std::endl;
+        throw std::runtime_error("Please load the plugin first!");
     }
 
     return myList;

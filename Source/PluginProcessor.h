@@ -79,32 +79,9 @@ public:
 
     void openEditor();
 
-    void loadStateInformation(std::string filepath) {
+    void loadStateInformation(std::string filepath);
 
-        MemoryBlock state;
-        File file = File(filepath);
-        file.loadFileAsData(state);
-        
-        myPlugin->setStateInformation((const char*)state.getData(), (int)state.getSize());
-
-        for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
-            std::string paramID = std::to_string(i);
-            ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
-        }
-    }
-
-    void saveStateInformation(std::string filepath) {
-        if (!myPlugin) {
-            throw std::runtime_error("Please load the plugin first");
-        }
-        MemoryBlock state;
-        myPlugin->getStateInformation(state);
-
-        juce::File file(filepath);
-        juce::FileOutputStream fos(file);
-
-        fos.write(state.getData(), state.getSize());
-    }
+    void saveStateInformation(std::string filepath);
 
 private:
 
