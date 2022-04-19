@@ -2979,6 +2979,9 @@
     <ClInclude Include="..\..\thirdparty\rubberband\rubberband\RubberBandStretcher.h">
       <Filter>DawDreamer\Rubberband</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\StandalonePluginWindow.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h">
       <Filter>DawDreamer\Processors\Sampler\Components</Filter>
     </ClInclude>

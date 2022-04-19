@@ -2316,6 +2316,7 @@ copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$
     <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherChannelData.h"/>
     <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherImpl.h"/>
     <ClInclude Include="..\..\thirdparty\rubberband\rubberband\RubberBandStretcher.h"/>
+    <ClInclude Include="..\..\Source\StandalonePluginWindow.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointsOverlay.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\MainSamplerView.h"/>
