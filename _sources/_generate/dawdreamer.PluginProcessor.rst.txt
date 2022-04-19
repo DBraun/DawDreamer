@@ -15,6 +15,7 @@
    
       ~PluginProcessor.__init__
       ~PluginProcessor.add_midi_note
+      ~PluginProcessor.can_set_bus
       ~PluginProcessor.clear_midi
       ~PluginProcessor.get_audio
       ~PluginProcessor.get_automation
@@ -29,8 +30,12 @@
       ~PluginProcessor.get_plugin_parameters_description
       ~PluginProcessor.load_midi
       ~PluginProcessor.load_preset
+      ~PluginProcessor.load_state
       ~PluginProcessor.load_vst3_preset
+      ~PluginProcessor.open_editor
+      ~PluginProcessor.save_state
       ~PluginProcessor.set_automation
+      ~PluginProcessor.set_bus
       ~PluginProcessor.set_parameter
       ~PluginProcessor.set_patch
    
