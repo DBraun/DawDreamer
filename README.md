@@ -236,11 +236,11 @@ engine.render(DURATION)
 
 ### Polyphony in Faust
 
-Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. 0 disables polyphony. Refer to `tests/test_faust_poly.py`.
+Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. The default (0) disables polyphony. Refer to [tests/test_faust_poly\*.py](https://github.com/DBraun/DawDreamer/tree/main/tests).
 
 ### Soundfiles in Faust
 
-Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays.
+Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays. Refer to [tests/test_faust_soundfile.py](https://github.com/DBraun/DawDreamer/blob/main/tests/test_faust_soundfile.py)
 
 **soundfile_test.py**
 ```python
@@ -271,7 +271,7 @@ engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
 playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file("drums.wav"))
 playback_processor.time_ratio = 2.  # Play back in twice the amount of time (i.e., slowed down).
-playback_processor.transpose = 3.  # Up 3 semitones.
+playback_processor.transpose = -5.  # Down 5 semitones.
 
 graph = [
   (playback_processor, []),
@@ -298,7 +298,7 @@ graph = [
 engine.load_graph(graph)
 ```
 
-This will set several properties:
+The `set_clip_file` method will set several properties:
 * `.warp_markers` (np.array [N, 2]) : List of pairs of (time in samples, time in beats)
 * `.start_marker` (float) : Start marker position in beats relative to 1.1.1
 * `.end_marker` (float) : End marker position in beats relative to 1.1.1
