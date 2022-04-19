@@ -260,51 +260,55 @@ def test_plugin_goodhertz_sidechain():
     _test_plugin_goodhertz_sidechain(do_sidechain=False)
 
 
-# def test_plugin_effect_ambisonics(set_data=False):
+def test_plugin_effect_ambisonics():
 
-#   if MY_SYSTEM != "Windows":
-#       return
+    if MY_SYSTEM != "Windows":
+        return
 
-#   DURATION = 5.
+    DURATION = 5.
 
-#   engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(48000, 128)
 
-#   data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
-#   playback_processor = engine.make_playback_processor("playback", data)
+    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
 
-#   data = data.mean(axis=0, keepdims=True)
+    # convert to mono (1, N)
+    data = data.mean(axis=0, keepdims=True)
 
-#   if set_data:
-#       playback_processor.set_data(data)
+    playback_processor = engine.make_playback_processor("playback", data)
 
-#   plugin_name = "sparta_ambiENC.vst" if MY_SYSTEM == "Darwin" else "sparta_ambiENC.dll"
+    plugin_path = "C:/VSTPlugIns/sparta/sparta_ambiENC.dll"
 
-#   plugin_path = abspath("plugins/"+plugin_name)
-#   if not isfile(plugin_path):
-#       return
+    if not isfile(plugin_path):
+        return
 
-#   effect = engine.make_plugin_processor("effect", plugin_path)
+    proc_encoder = engine.make_plugin_processor("effect", plugin_path)
 
-#   effect.set_parameter(0, 1)
+    # print('inputs: ', proc_encoder.get_num_input_channels(), ' outputs: ', proc_encoder.get_num_output_channels())
 
-#   assert(effect.get_num_input_channels() == 64)
-#   assert(effect.get_num_output_channels() == 64)
+    # proc_encoder.open_editor()
 
-#   # for par in effect.get_plugin_parameters_description():
-#   #   print(par)
+    proc_encoder.set_bus(1, 4)
 
-#   graph = [
-#       (playback_processor, []),
-#       (effect, ["playback"])
-#   ]
+    # print('inputs: ', proc_encoder.get_num_input_channels(), ' outputs: ', proc_encoder.get_num_output_channels())
 
-#   assert(engine.load_graph(graph))
+    assert(proc_encoder.get_num_input_channels() == 1)
+    assert(proc_encoder.get_num_output_channels() == 4)
 
-#   render(engine, file_path='output/test_plugin_effect_ambisonics.wav', duration=DURATION)
+    # for par in proc_encoder.get_plugin_parameters_description():
+    #   print(par)
 
-#   audio = engine.get_audio()
+    graph = [
+        (playback_processor, []),
+        (proc_encoder, ["playback"])
+    ]
 
-#   assert(effect.get_num_output_channels() == audio.shape[0])
+    assert(engine.load_graph(graph))
+
+    render(engine, file_path='output/test_plugin_effect_ambisonics.wav', duration=DURATION)
+
+    audio = engine.get_audio()
+
+    assert(proc_encoder.get_num_output_channels() == audio.shape[0])
 
 
 def test_plugin_upright_piano():
@@ -345,5 +349,145 @@ def test_plugin_upright_piano():
     audio = np.array(audio, np.float32).transpose()    
     wavfile.write(OUTPUT / 'test_plugin_upright_piano.wav', SAMPLE_RATE, audio)
 
-# if __name__ == '__main__':
-#     test_plugin_upright_piano()
+
+def test_plugin_editor():
+
+    if MY_SYSTEM not in ["Windows"]:
+        # We don't Serum on platforms other than Windows.
+        return
+
+    # plugin_path = "C:/VSTPlugIns/Serum_x64.dll"
+    plugin_path = "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3"
+    # plugin_path = "C:/VSTPlugIns/sparta/sparta_ambiBIN.dll"
+
+    plugin_basename = os.path.splitext(basename(plugin_path))[0]
+
+    if not isfile(plugin_path):
+        return
+
+    DURATION = 5.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, 128)
+
+    synth = engine.make_plugin_processor("synth", plugin_path)
+
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
+
+    if isfile(state_file_path):
+        synth.load_state(state_file_path)
+
+    # synth.open_editor()
+
+    synth.save_state(state_file_path)
+
+    # print(synth.get_plugin_parameters_description())
+
+    synth.get_parameter(0)
+    synth.set_parameter(0, synth.get_parameter(0))
+    synth.set_automation(0, np.array([synth.get_parameter(0)]))
+
+    print('inputs: ', synth.get_num_input_channels(), ' outputs: ', synth.get_num_output_channels())
+
+    # assert(synth.get_num_input_channels() == 0)
+    # assert(synth.get_num_output_channels() == 2)
+
+     # (MIDI note, velocity, start sec, duration sec)
+    synth.add_midi_note(60, 60, 0.0, .25)
+    synth.add_midi_note(64, 80, 0.5, .5)
+    synth.add_midi_note(67, 127, 0.75, .5)
+
+    assert(synth.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
+
+    graph = [
+        (synth, []),
+    ]
+
+    engine.load_graph(graph)
+
+    render(engine, file_path=OUTPUT / (f'test_plugin_{plugin_basename}.wav'), duration=DURATION)
+
+    audio = engine.get_audio()
+    assert(not np.allclose(audio*0., audio, atol=1e-07))
+
+
+def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEncoder.dll",
+                    plugin_path2="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/BinauralDecoder.dll"
+    ):
+
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        # we are not actually using pytest, so open the UI.
+        # todo: need a pytest way to test open_editor()
+        return
+    
+
+    if not isfile(plugin_path):
+        return
+
+    plugin_basename = os.path.splitext(basename(plugin_path))[0]
+
+    DURATION = 5.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, 128)
+
+    ambisonics_encoder = engine.make_plugin_processor("ambisonics_encoder", plugin_path)
+    ambisonics_decoder = engine.make_plugin_processor("ambisonics_decoder", plugin_path2)
+    ambisonics_encoder.record = True
+    ambisonics_decoder.record = True
+
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
+
+    if isfile(state_file_path):
+        ambisonics_encoder.load_state(state_file_path)
+
+    AMBISONICS_ORDER = 3
+    num_inputs = 1
+    num_outputs = (AMBISONICS_ORDER+1)**2  # this is a fixed equation
+
+    ambisonics_encoder.set_bus(num_inputs, num_outputs)
+
+    # The UI window will open. In the upper-left, select 1-channel input.
+    # In the upper-right select 3rd-order ambisonics (AMBISONICS_ORDER)
+    ambisonics_encoder.open_editor()
+
+    ambisonics_encoder.save_state(state_file_path)
+
+    assert ambisonics_encoder.get_num_input_channels() == num_inputs
+    assert ambisonics_encoder.get_num_output_channels() == num_outputs
+
+    # print(ambisonics_encoder.get_plugin_parameters_description())
+    # print('inputs: ', ambisonics_encoder.get_num_input_channels(), ' outputs: ', ambisonics_encoder.get_num_output_channels())
+
+    ambisonics_decoder.set_bus(num_outputs, 2)
+
+    # Remember to select AMBISONICS_ORDER ambisonics.
+    ambisonics_decoder.open_editor()
+
+    assert ambisonics_decoder.get_num_input_channels() == num_outputs
+    assert ambisonics_decoder.get_num_output_channels() == 2
+
+    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+    # convert to mono (1, N)
+    data = data.mean(axis=0, keepdims=True)
+
+    graph = [
+        (engine.make_playback_processor("playback", data), []),
+        (ambisonics_encoder, ["playback"]),
+        (ambisonics_decoder, [ambisonics_encoder.get_name()])
+    ]
+
+    engine.load_graph(graph)
+    engine.render(DURATION)
+
+    audio = ambisonics_decoder.get_audio()
+    assert(not np.allclose(audio*0., audio, atol=1e-07))
+    file_path = OUTPUT / f'test_plugin_{plugin_basename}_decoder.wav'
+    wavfile.write(file_path, SAMPLE_RATE, audio.transpose())
+
+    audio = ambisonics_encoder.get_audio()
+    assert(not np.allclose(audio*0., audio, atol=1e-07))
+    file_path = OUTPUT / f'test_plugin_{plugin_basename}_encoder.wav'
+    wavfile.write(file_path, SAMPLE_RATE, audio.transpose())
+
+
+if __name__ == '__main__':
+    print('All done!')

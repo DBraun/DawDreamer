@@ -13,12 +13,23 @@ public:
 
     bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
 
-    bool setBusesLayout(const BusesLayout& arr) {
-        if (myPlugin.get()) {
-            AudioProcessor::setBusesLayout(arr);
-            return myPlugin->setBusesLayout(arr);
+    bool canApplyBusInputsAndOutputs(int inputs, int outputs) {
+        BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
+        return this->canApplyBusesLayout(busesLayout);
+    }
+
+    bool setBusesLayout(const BusesLayout& arr);
+
+    bool setMainBusInputsAndOutputs(int inputs, int outputs) {
+        BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
+
+        if (this->canApplyBusesLayout(busesLayout)) {
+            return this->setBusesLayout(busesLayout);
         }
-        return false;
+        else {
+            throw std::invalid_argument(this->getUniqueName() + " CANNOT ApplyBusesLayout inputs: " + std::to_string(inputs) + " outputs: " + std::to_string(outputs));
+            return false;
+        }
     }
 
     void numChannelsChanged() {
@@ -65,6 +76,35 @@ public:
         const double noteLength);
 
     void setPlayHead(AudioPlayHead* newPlayHead);
+
+    void openEditor();
+
+    void loadStateInformation(std::string filepath) {
+
+        MemoryBlock state;
+        File file = File(filepath);
+        file.loadFileAsData(state);
+        
+        myPlugin->setStateInformation((const char*)state.getData(), (int)state.getSize());
+
+        for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
+            std::string paramID = std::to_string(i);
+            ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
+        }
+    }
+
+    void saveStateInformation(std::string filepath) {
+        if (!myPlugin) {
+            throw std::runtime_error("Please load the plugin first");
+        }
+        MemoryBlock state;
+        myPlugin->getStateInformation(state);
+
+        juce::File file(filepath);
+        juce::FileOutputStream fos(file);
+
+        fos.write(state.getData(), state.getSize());
+    }
 
 private:
 

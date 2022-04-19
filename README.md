@@ -23,7 +23,7 @@ Read the [introduction](https://arxiv.org/abs/2111.09931) to DawDreamer, which w
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features:
 * Composing graphs of multi-channel audio processors
 * Audio playback
-* VST instruments and effects
+* VST instruments and effects (with UI editing and state loading/saving)
 * [FAUST](http://faust.grame.fr/) effects and [polyphonic instruments](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters)
 * Time-stretching and looping according to Ableton Live warp markers
 * Pitch-warping
@@ -49,13 +49,11 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 128 # Parameters will undergo automation at this block size. It can be as small as 1 sample.
+BUFFER_SIZE = 128 # Parameters will undergo automation at this buffer/block size. It can be as small as 1 sample.
 SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
-SYNTH_PRESET = "C:/path/to/preset.fxp"
-REVERB_PLUGIN = "C:/path/to/reverb.dll"  # for effects, both DLLs and .vst3 files work
+REVERB_PLUGIN = "C:/path/to/reverb.dll"  # extensions: .dll, .vst3, .component
 VOCALS_PATH = "C:/path/to/vocals.wav"
 PIANO_PATH = "C:/path/to/piano.wav"
-SAMPLE_PATH = "C:/path/to/clap.wav"  # sound to be used for sampler instrument.
 
 def load_audio_file(file_path, duration=None):
   sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE)
@@ -80,22 +78,40 @@ piano = load_audio_file(PIANO_PATH, duration=10.)
 # Make a processor and give it the name "my_synth", which we use later.
 synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
 assert synth.get_name() == "my_synth"
-synth.load_preset(SYNTH_PRESET)
-synth.set_parameter(5, 0.1234) # override a specific parameter.
+
+# Plugins can show their UI.
+synth.open_editor()  # Open the editor, make changes, and close
+synth.save_state('C:/path/to/state1')
+# Next time, we can load_state without using open_editor.
+synth.load_state('C:/path/to/state1')
+
+# For some plugins, it's possible to load presets:
+synth.load_preset('C:/path/to/preset.fxp')
+synth.load_vst3_preset('C:/path/to/preset.vstpreset')
+
+# Get a list of dictionaries where each dictionary describes a controllable parameter.
+print(synth.get_plugin_parameters_description()) 
+print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
+# Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
+# The Plugin Processor can set automation according to a parameter index.
+synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
+# We can simply use one value constantly:
+synth.set_parameter(1, 0.1234)
+
 synth.load_midi("C:/path/to/song.mid")
 # We can also add notes one at a time.
 synth.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
 
-# We can automate VST parameters over time. First, we must know the parameter names.
-# Get a list of dictionaries where each dictionary describes a controllable parameter.
-print(synth.get_plugin_parameters_description()) 
-print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
-# The Plugin Processor can set automation according to a parameter index.
-synth.set_automation(1, make_sine(.5, DURATION)) # 0.5 Hz sine wave.
-
 # For any processor type, we can get the number of inputs and outputs
 print("synth num inputs: ", synth.get_num_input_channels())
 print("synth num outputs: ", synth.get_num_output_channels())
+
+# Some plugins have multi-channel inputs or outputs.
+# For example, in an ambisonics plugin, the default inputs and outputs might be 64/64.
+# However, we might want to use `set_bus(inputs, outputs)` to change the bus.
+ambisonics_encoder = engine.make_plugin_processor("amb_encoder", "C:/path/to/ambisonics_encoder.dll")
+assert ambisonics_encoder.can_set_bus(1, 9)
+ambisonics_encoder.set_bus(1, 9)
 
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
@@ -105,7 +121,6 @@ filter_processor.set_automation("freq", freq_automation) # argument is single ch
 freq_automation = filter_processor.get_automation("freq") # You can get automation of most processor parameters.
 filter_processor.record = True  # This will allow us to access the filter processor's audio after a render.
 
-# Graph idea is based on https://github.com/magenta/ddsp#processorgroup-with-a-list
 # A graph is a meaningfully ordered list of tuples.
 # In each tuple, the first item is an audio processor.
 # The second item is this audio processor's list of input processors.
@@ -196,8 +211,9 @@ Here's an example that mixes two stereo inputs into one stereo output and applie
 #### **dsp_4_channels.dsp:**
 ```dsp
 declare name "MyEffect";
+import("stdfaust.lib");
 myFilter= fi.lowpass(10, hslider("cutoff",  15000.,  20,  20000,  .01));
-process = _, _, _, _ :> myFilter, myFilter;
+process = si.bus(4) :> sp.stereoize(myFilter);
 ```
 
 #### **faust_test_stereo_mixdown.py:**
@@ -220,11 +236,11 @@ engine.render(DURATION)
 
 ### Polyphony in Faust
 
-Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. 0 disables polyphony. Refer to `tests/test_faust_poly.py`.
+Polyphony is supported too. You simply need to provide DSP code that refers to correctly named parameters such as `freq` or `note`, `gain`, and `gate`. For more information, see the FAUST [manual](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters). In DawDreamer, you must set the number of voices on the processor to 1 or higher. The default (0) disables polyphony. Refer to [tests/test_faust_poly\*.py](https://github.com/DBraun/DawDreamer/tree/main/tests).
 
 ### Soundfiles in Faust
 
-Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays.
+Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays. Refer to [tests/test_faust_soundfile.py](https://github.com/DBraun/DawDreamer/blob/main/tests/test_faust_soundfile.py)
 
 **soundfile_test.py**
 ```python
@@ -255,7 +271,7 @@ engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
 playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file("drums.wav"))
 playback_processor.time_ratio = 2.  # Play back in twice the amount of time (i.e., slowed down).
-playback_processor.transpose = 3.  # Up 3 semitones.
+playback_processor.transpose = -5.  # Down 5 semitones.
 
 graph = [
   (playback_processor, []),
@@ -282,7 +298,8 @@ graph = [
 engine.load_graph(graph)
 ```
 
-This will set several properties:
+The `set_clip_file` method will set several properties:
+* `.warp_markers` (np.array [N, 2]) : List of pairs of (time in samples, time in beats)
 * `.start_marker` (float) : Start marker position in beats relative to 1.1.1
 * `.end_marker` (float) : End marker position in beats relative to 1.1.1
 * `.loop_start` (float) : Loop start position in beats relative to 1.1.1
@@ -292,7 +309,7 @@ This will set several properties:
 
 Any of these properties can be changed after an `.asd` file is loaded.
 
-If `.warp_on` is True, then any value set by `.time_ratio` will be ignored. If `.warp_on` is False, then the `start_marker` and `loop_start` are the first sample of the audio, and the `end_marker` and `loop_end` are the last sample.
+If `.warp_on` is True, then any value set by `.time_ratio` will be ignored.
 
 With `set_clip_positions`, you can use the same audio clip at multiple places along the timeline.
 

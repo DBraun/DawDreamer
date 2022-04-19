@@ -61,6 +61,7 @@
 		C98D426E06BA4F72F0E4C8DB /* Resampler.cpp */ = {isa = PBXBuildFile; fileRef = EF9722353A0A2BDA8376FCC6; };
 		CAE5EFB597BE247AE021B656 /* StretcherImpl.cpp */ = {isa = PBXBuildFile; fileRef = CF40530FC23B166C749C7CD4; };
 		D8E2F775028097109496AAA1 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 7EC708BB8670BC4B971F031E; };
+		D915E61C72D98F0B97F31690 /* StandalonePluginWindow.h */ = {isa = PBXBuildFile; fileRef = 44A26898F037A3E6B43EB911; };
 		DFE780784ED99EACC1B654A6 /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 06AE4EC72C9D2D0775EF879E; };
 		E358C00D8D92D35AFBC9944C /* FaustProcessor.cpp */ = {isa = PBXBuildFile; fileRef = BFD142EBB8AFBADC8AB04A8A; };
 		E6C27C09FEC5B3BBEC75F414 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = E4E23DF360EE14C337676E2D; };
@@ -119,6 +120,7 @@
 		3AAA87ED81FE59EA46C6FE62 /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../JuceLibraryCode/modules/juce_core; sourceTree = SOURCE_ROOT; };
 		3C4A562AA5734126DF3D041A /* SpectralDifferenceAudioCurve.cpp */ /* SpectralDifferenceAudioCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SpectralDifferenceAudioCurve.cpp; path = ../../thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.cpp; sourceTree = SOURCE_ROOT; };
 		41F9CCC5586A494C6A26B0B1 /* samplerate.h */ /* samplerate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = samplerate.h; path = ../../thirdparty/libsamplerate/include/samplerate.h; sourceTree = SOURCE_ROOT; };
+		44A26898F037A3E6B43EB911 /* StandalonePluginWindow.h */ /* StandalonePluginWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StandalonePluginWindow.h; path = ../../Source/StandalonePluginWindow.h; sourceTree = SOURCE_ROOT; };
 		45D38E4893A53D1263DF4E82 /* CompoundAudioCurve.cpp */ /* CompoundAudioCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CompoundAudioCurve.cpp; path = ../../thirdparty/rubberband/src/audiocurves/CompoundAudioCurve.cpp; sourceTree = SOURCE_ROOT; };
 		4782971C3066F785B5354384 /* DataModel.h */ /* DataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DataModel.h; path = ../../Source/Sampler/Source/DataModels/DataModel.h; sourceTree = SOURCE_ROOT; };
 		4915A3C580F0DAA69FAAED98 /* CompressorProcessor.h */ /* CompressorProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CompressorProcessor.h; path = ../../Source/CompressorProcessor.h; sourceTree = SOURCE_ROOT; };
@@ -559,6 +561,7 @@
 		E553BE5C53ED6D87F71CC515 /* Processors */ = {
 			isa = PBXGroup;
 			children = (
+				44A26898F037A3E6B43EB911,
 				D5EBA3BB8BAA3B120AB80BBF,
 				C713F7F77E549E8C08771E49,
 				70B722073FC3FB8EC6C4E41D,
@@ -726,6 +729,7 @@
 				0C01D9069A27A2ECB0B24253,
 				CAE5EFB597BE247AE021B656,
 				21FB7BCF683F51D403A7475D,
+				D915E61C72D98F0B97F31690,
 				911FCAF5D38B28CA617932B9,
 				EC456483653E6271848DB065,
 				972909F8E3C96F724A1E69AE,
@@ -777,14 +781,15 @@
 					"DEBUG=1",
 					"PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==",
 					"SAMPLER_SKIP_UI",
+					"JUCE_MODAL_LOOPS_PERMITTED",
 					"HAVE_LIBSAMPLERATE",
 					"HAVE_VDSP",
 					"USE_PTHREADS",
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.6.1",
-					"JUCE_APP_VERSION_HEX=0x601",
+					"JUCE_APP_VERSION=0.6.2",
+					"JUCE_APP_VERSION_HEX=0x602",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -902,14 +907,15 @@
 					"NDEBUG=1",
 					"PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==",
 					"SAMPLER_SKIP_UI",
+					"JUCE_MODAL_LOOPS_PERMITTED",
 					"HAVE_LIBSAMPLERATE",
 					"HAVE_VDSP",
 					"USE_PTHREADS",
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.6.1",
-					"JUCE_APP_VERSION_HEX=0x601",
+					"JUCE_APP_VERSION=0.6.2",
+					"JUCE_APP_VERSION_HEX=0x602",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",

@@ -135,22 +135,23 @@ public:
     bool isConnectedInGraph() { return m_isConnectedInGraph;}
     void setConnectedInGraph(bool isConnected) {
         m_isConnectedInGraph = isConnected;
-        
     }
     
-    void setMainBusInputsAndOutputs(int inputs, int outputs) {
-        BusesLayout busesLayout;
-        const AudioChannelSet inputChannelSet = AudioChannelSet::discreteChannels(inputs);
-        const AudioChannelSet outputChannelSet = AudioChannelSet::discreteChannels(outputs);
-        busesLayout.inputBuses.add(inputChannelSet);
-        busesLayout.outputBuses.add(outputChannelSet);
+    bool setMainBusInputsAndOutputs(int inputs, int outputs) {
+        BusesLayout busesLayout = makeBusesLayout(inputs, outputs);
 
         if (this->canApplyBusesLayout(busesLayout)) {
-            bool result = this->setBusesLayout(busesLayout);
+            return this->setBusesLayout(busesLayout);
         }
         else {
-            std::cerr << this->getUniqueName() << " CANNOT ApplyBusesLayout inputs: " << inputs << " outputs: " << outputs << std::endl;
+            throw std::invalid_argument(this->getUniqueName() + " CANNOT ApplyBusesLayout inputs: " + std::to_string(inputs) + " outputs: " + std::to_string(outputs));
+            return false;
         }
+    }
+
+    bool canApplyBusInputsAndOutputs(int inputs, int outputs) {
+        BusesLayout busesLayout = makeBusesLayout(inputs, outputs);
+        return this->canApplyBusesLayout(busesLayout);
     }
 
 private:
@@ -161,7 +162,6 @@ private:
     bool m_isConnectedInGraph = false;
  
 protected:
-    
 
     AudioProcessorValueTreeState myParameters;
 
@@ -171,4 +171,13 @@ protected:
         return params;
     }
     bool m_recordEnable = false;
+
+    BusesLayout makeBusesLayout(int inputs, int outputs) {
+        BusesLayout busesLayout;
+        const AudioChannelSet inputChannelSet = AudioChannelSet::discreteChannels(inputs);
+        const AudioChannelSet outputChannelSet = AudioChannelSet::discreteChannels(outputs);
+        busesLayout.inputBuses.add(inputChannelSet);
+        busesLayout.outputBuses.add(outputChannelSet);
+        return busesLayout;
+    }
 };
