@@ -74,7 +74,8 @@ def test_faust_poly():
 	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
 
 
-def _test_faust_sine(midi_path: str, buffer_size=1):
+@pytest.mark.parametrize("midi_path", [abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi')])
+def test_faust_sine(midi_path: str, buffer_size=1):
 
     engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
@@ -110,17 +111,14 @@ def _test_faust_sine(midi_path: str, buffer_size=1):
     # for par in desc:
     #   print(par)
 
-    faust_processor.load_midi(abspath(ASSETS / midi_path))
+    faust_processor.load_midi(midi_path)
 
     graph = [
         (faust_processor, [])
     ]
 
     engine.load_graph(graph)
-    render(engine, file_path=OUTPUT / ('test_faust_sine_' + basename(midi_path) + '.wav'), duration=10.)
+    render(engine, file_path=OUTPUT / ('test_faust_sine_' + splitext(basename(midi_path))[0] + '.wav'), duration=10.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .0001)
-
-def test_faust_sine1():
-	_test_faust_sine(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))

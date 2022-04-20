@@ -7,13 +7,10 @@ def add_midi(synth):
     synth.add_midi_note(64, 80, 0.5, .5)
     synth.add_midi_note(67, 127, 0.75, .5)
 
-def test_plugin_mem_leak1():
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
+def test_plugin_mem_leak1(plugin_path):
 
     """test that multiple renders don't leak"""
-
-    plugin_path = "C:/VSTPlugins/Serum_x64.dll"
-    if not isfile(plugin_path):
-        return
 
     DURATION = 5.
 
@@ -30,13 +27,10 @@ def test_plugin_mem_leak1():
     for _ in range(100):
         render(engine, duration=DURATION)
 
-def test_plugin_mem_leak2():
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
+def test_plugin_mem_leak2(plugin_path):
 
     """test that reloading the same graph doesn't leak"""
-
-    plugin_path = "C:/VSTPlugins/Serum_x64.dll"
-    if not isfile(plugin_path):
-        return
 
     DURATION = 5.
 
@@ -51,13 +45,10 @@ def test_plugin_mem_leak2():
         engine.load_graph(graph)
         render(engine, duration=DURATION)
 
-def test_plugin_mem_leak3():
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
+def test_plugin_mem_leak3(plugin_path):
 
     """test that re-creating plugin processors doesn't leak"""
-
-    plugin_path = "C:/VSTPlugins/Serum_x64.dll"
-    if not isfile(plugin_path):
-        return
 
     DURATION = 5.
 

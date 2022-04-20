@@ -2,7 +2,10 @@ from dawdreamer_utils import *
 
 BUFFER_SIZE = 1024
 
-def _test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
+@pytest.mark.parametrize("sample_seq,output_path", [
+	(load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), "test_faust_poly_sampler_cymbal.wav")
+	])
+def test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -51,8 +54,3 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	# check that it's non-silent
 	audio = engine.get_audio()
 	assert(np.mean(np.abs(audio)) > .01)
-
-def test_faust_poly_sampler_cymbal():
-	# Load a stereo audio sample and pass it to Faust
-	sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
-	_test_faust_poly_sampler(sample_seq, 'test_faust_poly_sampler_cymbal.wav', lagrange_order=4)
