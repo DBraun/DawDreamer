@@ -2,7 +2,13 @@ from dawdreamer_utils import *
 
 BUFFER_SIZE = 1024
 
-def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
+# # Load a stereo audio sample and pass it to Faust
+@pytest.mark.parametrize("sample_seq,output_path,sound_choice", [
+    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_0.wav', 0),
+    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_1.wav', 1),
+    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_2.wav', 2),
+    ])
+def test_faust_soundfile(sample_seq, output_path, sound_choice):
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -37,17 +43,15 @@ def _test_faust_soundfile(sample_seq, output_path, sound_choice=0):
 
     assert(faust_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
-    graph = [
-        (faust_processor, [])
-    ]
-
-    engine.load_graph(graph)
+    engine.load_graph([(faust_processor, [])])
     render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
 
-def _test_faust_soundfile_multichannel(output_path):
+
+@pytest.mark.parametrize("output_path", ['test_faust_soundfile_multichannel.wav'])
+def test_faust_soundfile_multichannel(output_path):
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -74,11 +78,7 @@ def _test_faust_soundfile_multichannel(output_path):
     # for par in desc:
     #   print(par)
 
-    graph = [
-        (faust_processor, [])
-    ]
-
-    engine.load_graph(graph)
+    engine.load_graph([(faust_processor, [])])
     render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
@@ -147,26 +147,18 @@ def test_faust_soundfile_piano():
     midi_path = 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'
     faust_processor.load_midi(abspath(ASSETS / midi_path))
 
-    graph = [
-        (faust_processor, [])
-    ]
-
-    engine.load_graph(graph)
+    engine.load_graph([(faust_processor, [])])
     render(engine, file_path=OUTPUT / 'test_sound_file_piano.wav', duration=10.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .0001)
 
+@pytest.mark.parametrize("sample_seq,output_path", [
+    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_many_notes.wav')
+    ])
+def test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
 
-def test_faust_soundfile_cymbal():
-    # Load a stereo audio sample and pass it to Faust
-    sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
-    _test_faust_soundfile(sample_seq, 'test_faust_soundfile_0.wav', sound_choice=0)
-    _test_faust_soundfile(sample_seq, 'test_faust_soundfile_1.wav', sound_choice=1)
-    _test_faust_soundfile(sample_seq, 'test_faust_soundfile_2.wav', sound_choice=2)
-    _test_faust_soundfile_multichannel('test_faust_soundfile_3.wav')
-
-def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
+    """ Load a stereo audio sample and pass it to Faust """
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -198,20 +190,11 @@ def _test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
     for i in range(100):
         faust_processor.add_midi_note(60 + (i%12), 30, i*.125*.25, .125)
 
-    graph = [
-        (faust_processor, [])
-    ]
-
-    engine.load_graph(graph)
+    engine.load_graph( [(faust_processor, [])])
     render(engine, file_path=OUTPUT / output_path, duration=3.)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .001)
-
-def test_faust_soundfile_many_notes():
-    # Load a stereo audio sample and pass it to Faust
-    sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
-    _test_faust_soundfile_many_notes(sample_seq, 'test_faust_soundfile_many_notes.wav')
 
 # if __name__ == '__main__':
 #   test_faust_soundfile_many_notes()

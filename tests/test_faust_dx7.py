@@ -1,7 +1,7 @@
 from dawdreamer_utils import *
 
-
-def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
+@pytest.mark.parametrize("algorithm", [0, 1])
+def test_faust_dx7(algorithm, num_voices=8, buffer_size=2048):
 
 	# There are 32 algorithms.
 
@@ -46,9 +46,3 @@ def _test_faust_dx7(algorithm=0, num_voices=8, buffer_size=2048):
 	assert(engine.load_graph(graph))
 
 	render(engine, file_path=OUTPUT / 'test_faust_dx7_algo_{0}.wav'.format(algorithm), duration=3.)
-
-def test_faust_dx7():
-
-	# just test 2 out of 32 to save some time
-	for i in range(2):
-		_test_faust_dx7(algorithm=i, num_voices=8, buffer_size=2048)

@@ -18,7 +18,8 @@ def make_impulse(duration):
 
     return y
 
-def _test_impulse(set_data=False):
+@pytest.mark.parametrize("set_data", [True, False])
+def test_impulse(set_data):
 
 	DURATION = .0007
 
@@ -41,10 +42,3 @@ def _test_impulse(set_data=False):
 	output = engine.get_audio()
 
 	assert(np.allclose(impulse_input, output, atol=1e-07))
-
-
-def test_impulse1():
-	_test_impulse(False)
-
-def test_impulse2():
-	_test_impulse(True)

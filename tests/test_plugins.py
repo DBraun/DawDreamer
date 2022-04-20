@@ -1,26 +1,14 @@
 from dawdreamer_utils import *
-import platform
-import os.path
-import os
 
-MY_SYSTEM = platform.system()
-# "Darwin" is macOS. "Windows" is Windows.
 
 BUFFER_SIZE = 16
 
-def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
-
-    # Skip .component plugins on GitHub Actions workflows
-    if os.getenv("CIBW_TEST_REQUIRES") and plugin_path.endswith('.component'):
-        return
-
-    if MY_SYSTEM == 'Darwin':
-        # macOS treats .component and .vst3 as directories
-        assert(os.path.isdir(plugin_path))
-    else:
-        assert(os.path.isfile(plugin_path))
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_EFFECTS)
+def test_stereo_plugin_effect(plugin_path):
 
     DURATION = 5.
+
+    plugin_basename = splitext(basename(plugin_path))[0]
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -31,8 +19,8 @@ def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
     effect = engine.make_plugin_processor("effect", plugin_path)
 
     # print(effect.get_plugin_parameters_description())
-    assert(effect.get_num_input_channels() == expected_num_inputs)
-    assert(effect.get_num_output_channels() == 2)
+    assert(effect.get_num_input_channels() == PLUGIN_INPUT_CHANNELS[plugin_basename])
+    assert(effect.get_num_output_channels() == PLUGIN_OUTPUT_CHANNELS[plugin_basename])
 
     graph = [
         (playback_processor, []),
@@ -41,7 +29,7 @@ def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
 
     engine.load_graph(graph)
 
-    plugin_basename = os.path.basename(plugin_path)
+    plugin_basename = splitext(basename(plugin_path))[0]
 
     render(engine, file_path=OUTPUT / f'test_plugin_effect_{plugin_basename}.wav', duration=DURATION)
 
@@ -49,86 +37,63 @@ def _test_stereo_plugin_effect(plugin_path, expected_num_inputs):
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .05)
 
-def test_stereo_plugin_effects():
 
-    if MY_SYSTEM not in ["Darwin", "Windows"]:
-        # todo: we should test LV2 plugins on Linux.
-        return
-
-    plugin_paths = []
-
-    if MY_SYSTEM == 'Darwin':
-        # todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
-        # plugin_paths.append((abspath("plugins/ValhallaFreqEcho.vst"), 2))
-        # plugin_paths.append((abspath("plugins/ValhallaFreqEcho.vst3"), 2))
-        # plugin_paths.append((abspath("plugins/ValhallaFreqEcho.component"), 2))
-
-        # RoughRider has an optional mono sidechain input
-        plugin_paths.append((abspath(PLUGINS / "RoughRider3.vst"), 3))
-        plugin_paths.append((abspath(PLUGINS / "RoughRider3.vst3"), 3))
-        plugin_paths.append((abspath(PLUGINS / "RoughRider3.component"), 3))
-    elif MY_SYSTEM == 'Windows':
-        plugin_paths.append((abspath(PLUGINS / "Dimension Expander_x64.dll"), 2))
-
-    for plugin_args in plugin_paths:
-        _test_stereo_plugin_effect(*plugin_args)
-
-def test_plugin_instrument():
-
-    if MY_SYSTEM not in ["Darwin", "Windows"]:
-        # todo: we should test LV2 plugins on Linux.
-        return
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
+def test_plugin_instrument(plugin_path):
 
     DURATION = 5.
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    plugin_name = "TAL-NoiseMaker.vst" if MY_SYSTEM == "Darwin" else "TAL-NoiseMaker-64.dll"
+    plugin_basename = splitext(basename(plugin_path))[0]
 
-    synth = engine.make_plugin_processor("synth", abspath(PLUGINS / plugin_name))
+    synth = engine.make_plugin_processor("synth", plugin_path)
 
     # print(synth.get_plugin_parameters_description())
 
+    synth.get_parameter(0)
+    synth.set_parameter(0, synth.get_parameter(0))
+    synth.set_automation(0, np.array([synth.get_parameter(0)]))
+
+    # todo: generalize this
+    num_input_channels = synth.get_num_input_channels()
+    exp_channels = PLUGIN_INST_INPUT_CHANNELS[plugin_basename]
+    if num_input_channels != exp_channels:
+        msg = f"""The number of input channels for plugin instrument "{plugin_basename}" was found to be {num_input_channels}, not {exp_channels}."""
+        warnings.warn(UserWarning(msg))
+
+    assert(synth.get_num_output_channels() == PLUGIN_OUTPUT_CHANNELS[plugin_basename])
+
     # (MIDI note, velocity, start sec, duration sec)
-    # todo: on macOS the note is skipped if it starts at exactly 0.0.
     synth.add_midi_note(60, 60, 0.0, .25)
     synth.add_midi_note(64, 80, 0.5, .5)
     synth.add_midi_note(67, 127, 0.75, .5)
 
     assert(synth.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
-    graph = [
-        (synth, []),
-    ]
+    engine.load_graph([(synth, [])])
 
-    engine.load_graph(graph)
-
-    render(engine, file_path=OUTPUT / 'test_plugin_instrument.wav', duration=DURATION)
+    render(engine, file_path=OUTPUT / f'test_plugin_instrument_{plugin_basename}.wav', duration=DURATION)
 
     # check that it's non-silent
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
+    assert(np.mean(np.abs(audio[:10000])) > .001)  # test that the first note wasn't silent
 
-    try:
+    with pytest.raises(Exception):
         synth.load_preset('bogus_path.fxp')
-        assert False
-    except Exception as e:
-        print(f"Correctly caught exception: {e}")
-        assert True
 
-def test_plugin_instrument_midi():
 
-    if MY_SYSTEM not in ["Darwin", "Windows"]:
-        # todo: we should test LV2 plugins on Linux.
-        return
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
+def test_plugin_instrument_midi(plugin_path):
 
     DURATION = 5.
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    plugin_name = "TAL-NoiseMaker.vst" if MY_SYSTEM == "Darwin" else "TAL-NoiseMaker-64.dll"
+    plugin_basename = splitext(basename(plugin_path))[0]
 
-    synth = engine.make_plugin_processor("synth", abspath(PLUGINS / plugin_name))
+    synth = engine.make_plugin_processor("synth", plugin_path)
 
     # print(synth.get_plugin_parameters_description())
 
@@ -144,62 +109,15 @@ def test_plugin_instrument_midi():
 
     engine.load_graph(graph)
 
-    render(engine, file_path=OUTPUT / 'test_plugin_instrument_midi.wav', duration=DURATION)
+    file_path = abspath(OUTPUT / f'test_plugin_instrument_midi_{plugin_basename}.wav')
+    render(engine, file_path=file_path, duration=DURATION)
 
     # check that it's non-silent
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
 
-def test_plugin_serum():
-
-    if MY_SYSTEM not in ["Windows"]:
-        # We don't Serum on platforms other than Windows.
-        return
-
-    plugin_path = "C:/VSTPlugIns/Serum_x64.dll"
-
-    if not isfile(plugin_path):
-        return
-
-    DURATION = 5.
-
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-
-    synth = engine.make_plugin_processor("synth", plugin_path)
-
-    # print(synth.get_plugin_parameters_description())
-
-    synth.get_parameter(0)
-    synth.set_parameter(0, synth.get_parameter(0))
-    synth.set_automation(0, np.array([synth.get_parameter(0)]))
-
-    assert(synth.get_num_input_channels() == 0)
-    assert(synth.get_num_output_channels() == 2)
-
-     # (MIDI note, velocity, start sec, duration sec)
-    synth.add_midi_note(60, 60, 0.0, .25)
-    synth.add_midi_note(64, 80, 0.5, .5)
-    synth.add_midi_note(67, 127, 0.75, .5)
-
-    assert(synth.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
-
-    graph = [
-        (synth, []),
-    ]
-
-    engine.load_graph(graph)
-
-    render(engine, file_path=OUTPUT / 'test_plugin_serum.wav', duration=DURATION)
-
-    audio = engine.get_audio()
-    assert(not np.allclose(audio*0., audio, atol=1e-07))
-
-
-def _test_plugin_goodhertz_sidechain(do_sidechain=True):
-
-    if MY_SYSTEM not in ["Windows"]:
-        # We don't Goodhertz on platforms other than Windows.
-        return
+@pytest.mark.parametrize("do_sidechain", [False, True])
+def test_plugin_goodhertz_sidechain(do_sidechain):
 
     plugin_path = "C:/VSTPlugIns/Goodhertz/Ghz Vulf Compressor 3.vst3"
 
@@ -252,40 +170,34 @@ def _test_plugin_goodhertz_sidechain(do_sidechain=True):
     render(engine, file_path=file_path, duration=DURATION)
 
     audio = engine.get_audio()
-    assert(not np.allclose(audio*0., audio, atol=1e-07))
-
-
-def test_plugin_goodhertz_sidechain():
-    _test_plugin_goodhertz_sidechain(do_sidechain=True)
-    _test_plugin_goodhertz_sidechain(do_sidechain=False)
+    assert(np.mean(np.abs(audio)) > .01)
 
 
 def test_plugin_effect_ambisonics():
-
-    if MY_SYSTEM != "Windows":
-        return
-
-    DURATION = 5.
-
-    engine = daw.RenderEngine(48000, 128)
-
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
-
-    # convert to mono (1, N)
-    data = data.mean(axis=0, keepdims=True)
-
-    playback_processor = engine.make_playback_processor("playback", data)
 
     plugin_path = "C:/VSTPlugIns/sparta/sparta_ambiENC.dll"
 
     if not isfile(plugin_path):
         return
 
+    DURATION = 5.
+
+    engine = daw.RenderEngine(48000, 128)
+
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+
+    # convert to mono (1, N)
+    data = data.mean(axis=0, keepdims=True)
+
+    playback_processor = engine.make_playback_processor("playback", data)
+
     proc_encoder = engine.make_plugin_processor("effect", plugin_path)
 
     # print('inputs: ', proc_encoder.get_num_input_channels(), ' outputs: ', proc_encoder.get_num_output_channels())
 
-    # proc_encoder.open_editor()
+    if not is_pytesting():
+        # todo: need a pytest way to test open_editor()
+        proc_encoder.open_editor()
 
     proc_encoder.set_bus(1, 4)
 
@@ -313,15 +225,15 @@ def test_plugin_effect_ambisonics():
 
 def test_plugin_upright_piano():
 
-    SYNTH_PLUGIN = "C:/VSTPlugIns/Upright Piano VST/Upright Piano.dll"
+    plugin_path = "C:/VSTPlugIns/Upright Piano VST/Upright Piano.dll"
 
-    if not isfile(SYNTH_PLUGIN):
+    if not isfile(plugin_path):
         return
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     engine.set_bpm(120.) 
 
-    synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
+    synth = engine.make_plugin_processor("my_synth", plugin_path)
 
     synth.add_midi_note(67, 127, 0.5, .25)
 
@@ -352,15 +264,12 @@ def test_plugin_upright_piano():
 
 def test_plugin_editor():
 
-    if MY_SYSTEM not in ["Windows"]:
-        # We don't Serum on platforms other than Windows.
-        return
-
     # plugin_path = "C:/VSTPlugIns/Serum_x64.dll"
     plugin_path = "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3"
+    # plugin_path = "C:/VSTPlugIns/LABS (64 Bit).dll"
     # plugin_path = "C:/VSTPlugIns/sparta/sparta_ambiBIN.dll"
 
-    plugin_basename = os.path.splitext(basename(plugin_path))[0]
+    plugin_basename = splitext(basename(plugin_path))[0]
 
     if not isfile(plugin_path):
         return
@@ -376,7 +285,9 @@ def test_plugin_editor():
     if isfile(state_file_path):
         synth.load_state(state_file_path)
 
-    # synth.open_editor()
+    if not is_pytesting():
+        # todo: need a pytest way to test open_editor()
+        synth.open_editor()
 
     synth.save_state(state_file_path)
 
@@ -398,11 +309,7 @@ def test_plugin_editor():
 
     assert(synth.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
-    graph = [
-        (synth, []),
-    ]
-
-    engine.load_graph(graph)
+    engine.load_graph([(synth, [])])
 
     render(engine, file_path=OUTPUT / (f'test_plugin_{plugin_basename}.wav'), duration=DURATION)
 
@@ -410,28 +317,23 @@ def test_plugin_editor():
     assert(not np.allclose(audio*0., audio, atol=1e-07))
 
 
-def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEncoder.dll",
-                    plugin_path2="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/BinauralDecoder.dll"
-    ):
-
-    if "PYTEST_CURRENT_TEST" in os.environ:
-        # we are not actually using pytest, so open the UI.
-        # todo: need a pytest way to test open_editor()
-        return
+def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEncoder.dll",
+                    plugin_path2="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/BinauralDecoder.dll"):
     
-    if not isfile(plugin_path) or not isfile(plugin_path2):
+    if not isfile(plugin_path1) or not isfile(plugin_path2):
         return
 
     DURATION = 5.
 
     engine = daw.RenderEngine(SAMPLE_RATE, 128)
 
-    ambisonics_encoder = engine.make_plugin_processor("ambisonics_encoder", plugin_path)
+    ambisonics_encoder = engine.make_plugin_processor("ambisonics_encoder", plugin_path1)
     ambisonics_decoder = engine.make_plugin_processor("ambisonics_decoder", plugin_path2)
     ambisonics_encoder.record = True
     ambisonics_decoder.record = True
 
-    plugin_basename = os.path.splitext(basename(plugin_path))[0]
+    plugin_basename = splitext(basename(plugin_path1))[0]
+
     state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
 
     if isfile(state_file_path):
@@ -445,8 +347,11 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
 
     # The UI window will open. In the upper-left, select 1-channel input.
     # In the upper-right select 3rd-order ambisonics (AMBISONICS_ORDER)
-    ambisonics_encoder.open_editor()
 
+    if not is_pytesting():
+        # todo: need a pytest way to test open_editor()
+        ambisonics_encoder.open_editor()
+    
     ambisonics_encoder.save_state(state_file_path)
 
     assert ambisonics_encoder.get_num_input_channels() == num_inputs
@@ -455,7 +360,7 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
     # print(ambisonics_encoder.get_plugin_parameters_description())
     # print('inputs: ', ambisonics_encoder.get_num_input_channels(), ' outputs: ', ambisonics_encoder.get_num_output_channels())
 
-    plugin_basename = os.path.splitext(basename(plugin_path2))[0]
+    plugin_basename = splitext(basename(plugin_path2))[0]
     state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
 
     if isfile(state_file_path):
@@ -464,14 +369,16 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
     ambisonics_decoder.set_bus(num_outputs, 2)
 
     # Remember to select AMBISONICS_ORDER ambisonics.
-    ambisonics_decoder.open_editor()
+    if not is_pytesting():
+        # todo: need a pytest way to test open_editor()
+        ambisonics_decoder.open_editor()
 
     ambisonics_decoder.save_state(state_file_path)
 
     assert ambisonics_decoder.get_num_input_channels() == num_outputs
     assert ambisonics_decoder.get_num_output_channels() == 2
 
-    data = load_audio_file("assets/575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
     # convert to mono (1, N)
     data = data.mean(axis=0, keepdims=True)
 
@@ -497,4 +404,5 @@ def test_plugin_iem(plugin_path="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnco
 
 if __name__ == '__main__':
     # test_plugin_iem()
+    test_plugin_editor()
     print('All done!')
