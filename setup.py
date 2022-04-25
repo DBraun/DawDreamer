@@ -54,10 +54,13 @@ if platform.system() == "Windows":
 elif platform.system() == "Linux":
 
     build_folder = os.path.join(this_dir, "Builds", "LinuxMakefile", "build")
+    # todo: disabling this line so that CIBuildWheel doesn't detect 
+    # Builds/LinuxMakefile/build/libdawdreamer.so
+    # In other words, here we assume dawdreamer/dawdreamer.so already exists.
+    # Also assume dawdreamer/libfaust.so already exists.
+    # shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
 
-    shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
-
-    package_data += ['dawdreamer/dawdreamer.so']
+    package_data += ['dawdreamer/dawdreamer.so', 'dawdreamer/libfaust.so']
 
     # For Linux, we do a hacky thing where we force a compilation of an empty file
     # in order for auditwheel to work.

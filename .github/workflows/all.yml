@@ -68,7 +68,8 @@ jobs:
         cd Builds/LinuxMakefile
         sudo ldconfig
         make CONFIG=Release
-        cp build/libdawdreamer.so ../../tests/dawdreamer.so
+        mv build/libdawdreamer.so {project}/dawdreamer/dawdreamer.so
+        cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so {project}/dawdreamer/libfaust.so
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -87,6 +88,8 @@ jobs:
       run: |
         rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so
         rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so
+        rm -f thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
+        rm -f thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so
 
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.4.0
