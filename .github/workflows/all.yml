@@ -69,7 +69,8 @@ jobs:
         sudo ldconfig
         make CONFIG=Release
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
-        cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so ../../dawdreamer/libfaust.so
+        cd ../..
+        cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
