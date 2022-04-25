@@ -50,13 +50,16 @@ jobs:
         cmake \
         python3 \
         python${{ matrix.python-version }}-dev \
-        libsamplerate0 \
         libsndfile1 \
         && sudo apt-get clean -y
 
-    - name: Make symantic links
+    - name: Build libsamplerate
       run: |
-        sudo ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+        cd thirdparty/libsamplerate
+        mkdir build_release
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        cd build_release
+        TARGET_ARCH=x86_64 make CONFIG=Release 
 
     - name: Build DawDreamer
       # TARGET_ARCH=aarch64
@@ -78,6 +81,12 @@ jobs:
       run: |
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
+
+    - name: cleanup libraries
+      # necessary for cibuildwheel to work.
+      run: |
+        rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so
+        rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so
 
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.4.0
