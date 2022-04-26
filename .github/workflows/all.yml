@@ -10,7 +10,7 @@ jobs:
 
   build-ubuntu:
     runs-on: ubuntu-latest
-
+    container: quay.io/pypa/manylinux_2_24_x86_64
     strategy:
       matrix:
         python-version: [3.9]
@@ -28,8 +28,8 @@ jobs:
     - name: Install Ubuntu dependencies
       # todo: need to run this? update-ca-certificates \
       run: |
-        sudo apt-get update -yq \
-        && sudo apt-get install -yq --no-install-recommends \
+        apt-get update -yq \
+        && apt-get install -yq --no-install-recommends \
         ca-certificates \
         build-essential \
         clang \
@@ -51,7 +51,7 @@ jobs:
         python3 \
         python${{ matrix.python-version }}-dev \
         libsndfile1 \
-        && sudo apt-get clean -y
+        && apt-get clean -y
 
     - name: Build libsamplerate
       run: |
@@ -66,7 +66,7 @@ jobs:
       run: |
         CPLUS_INCLUDE_PATH=/usr/include/python${{ matrix.python-version }}/
         cd Builds/LinuxMakefile
-        sudo ldconfig
+        ldconfig
         make CONFIG=Release
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
