@@ -22,11 +22,11 @@ jobs:
         submodules: true
 
     - name: Install Ubuntu dependencies
-
+      # build-essential
+      # yum install gcc gcc-c++ make
       run: |
         yum install -y \
         ca-certificates \
-        build-essential \
         clang \
         pkg-config \
         libboost-all-dev \
