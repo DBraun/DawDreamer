@@ -25,6 +25,7 @@ jobs:
       # yum install gcc gcc-c++ make
       run: |
         yum install -y \
+        zip \
         ca-certificates \
         boost-devel \
         boost-python \
