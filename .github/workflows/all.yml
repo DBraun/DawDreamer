@@ -45,6 +45,7 @@ jobs:
         libXcomposite-devel \
         cmake \
         alsa-lib \
+        alsa-lib-devel \
         alsa-tools \
         alsa-utils \
         libsndfile \
