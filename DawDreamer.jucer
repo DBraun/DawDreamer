@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.3"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.4"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
@@ -279,11 +279,11 @@
                 externalLibraries="samplerate&#10;faust">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
-                       headerPath="/usr/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       headerPath="/usr/include/python3.9;&#10;$(pythonLocation)/include;&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
+                       libraryPath="/usr/local/lib&#10;$(pythonLocation)/lib;&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
-                       headerPath="/usr/include/python3.9;&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       headerPath="/usr/include/python3.9;&#10;$(pythonLocation)/include;&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
+                       libraryPath="/usr/local/lib&#10;$(pythonLocation)/lib;&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
