@@ -46,10 +46,10 @@ jobs:
         cmake \
         libsndfile \
         libsndfile-devel \
-        libvorbis \
-        opus-tools \
-        flac \
-        lame
+        libvorbis-devel \
+        opus-devel \
+        flac-devel \
+        flac-libs
 
     - name: Build libsamplerate
       run: |
