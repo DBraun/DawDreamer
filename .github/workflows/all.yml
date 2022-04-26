@@ -25,7 +25,6 @@ jobs:
       # yum install gcc gcc-c++ make
       run: |
         yum install -y \
-        zip \
         ca-certificates \
         boost-devel \
         boost-python \
@@ -79,14 +78,11 @@ jobs:
         pythonLibPath: /opt/python/cp${{matrix.python-major}}-cp${{matrix.python-major}}/lib
         pythonInclude: /opt/python/cp${{matrix.python-major}}-cp${{matrix.python-major}}/include/python${{matrix.python-version}}
 
-    - name: Make distribution
-      run: zip -r dawdreamer-ubuntu.zip dawdreamer
-
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: dawdreamer-ubuntu-python-${{matrix.python-major}}
-        path: dawdreamer-ubuntu.zip
+        path: dawdreamer/
 
   build-ubuntu-2:
     runs-on: ubuntu-latest
@@ -101,18 +97,10 @@ jobs:
       with:
         submodules: true
 
-    - name: Install Ubuntu dependencies
-      run: |
-        sudo apt-get -yq install unzip
-
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: dawdreamer-ubuntu-python-${{matrix.python-major}}
-        path: dawdreamer-ubuntu.zip
-
-    - name: Unzip artifact
-      run: |
-        unzip -o dawdreamer-ubuntu.zip
+        path: dawdreamer
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -140,12 +128,12 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_PLATFORM: linux
         CIBW_BUILD: cp39-manylinux_x86_64
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_24
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_BUILD_VERBOSITY: 1
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           rm -f dawdreamer/libfaust.so &&
           rm -f dawdreamer/dawdreamer.so &&
-          pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
+          pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
