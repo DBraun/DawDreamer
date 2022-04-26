@@ -49,6 +49,7 @@ jobs:
         git \
         cmake \
         python3 \
+        python${{ matrix.python-version }} \
         python${{ matrix.python-version }}-dev \
         libsndfile1 \
         && apt-get clean -y
