@@ -98,6 +98,7 @@ jobs:
         PYTHONMAJOR: ${{ matrix.python-version }}
         CIBW_PLATFORM: linux
         CIBW_BUILD: cp39-manylinux_x86_64
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_24
         CIBW_BUILD_VERBOSITY: 1
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           rm -f dawdreamer/libfaust.so &&
