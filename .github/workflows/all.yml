@@ -44,6 +44,10 @@ jobs:
         libXcomposite \
         libXcomposite-devel \
         cmake \
+        alsa \
+        alsa-lib \
+        alsa-tools \
+        alsa-utils \
         libsndfile \
         libsndfile-devel \
         libvorbis-devel \
