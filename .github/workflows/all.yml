@@ -49,6 +49,7 @@ jobs:
         git \
         cmake \
         libsndfile1 \
+        python3-dev \
         && apt-get clean -y
 
     - name: Build libsamplerate
