@@ -22,28 +22,27 @@ jobs:
         submodules: true
 
     - name: Install Ubuntu dependencies
-      # build-essential
       # yum install gcc gcc-c++ make
       run: |
         yum install -y \
         ca-certificates \
-        clang \
-        pkg-config \
-        libboost-all-dev \
-        libboost-python-dev \
-        libfreetype6-dev \
-        libx11-dev \
-        libxinerama-dev \
-        libxrandr-dev \
-        libxcursor-dev \
-        mesa-common-dev \
-        libasound2-dev \
-        freeglut3-dev \
-        libxcomposite-dev \
-        libcurl4-gnutls-dev \
-        git \
+        boost-devel \
+        boost-python \
+        freetype \
+        freetype-devel \
+        libXinerama \
+        libXinerama-devel \
+        libXrandr \
+        libXrandr-devel \
+        libXcursor \
+        libXcursor-devel \
+        freeglut \
+        freeglut-devel \
+        libXcomposite \
+        libXcomposite-devel \
         cmake \
-        libsndfile1
+        libsndfile \
+        libsndfile-devel
 
     - name: Build libsamplerate
       run: |
