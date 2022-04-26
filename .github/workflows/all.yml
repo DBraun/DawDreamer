@@ -62,7 +62,7 @@ jobs:
         ls -R $pythonInclude
         cd Builds/LinuxMakefile
         ldconfig
-        make CONFIG=Release
+        make CONFIG=Release LIBS=-lstdc++fs
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
         cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
