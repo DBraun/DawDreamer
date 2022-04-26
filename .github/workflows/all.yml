@@ -13,17 +13,13 @@ jobs:
     container: quay.io/pypa/manylinux_2_24_x86_64
     strategy:
       matrix:
-        python-version: [3.9]
+        include:
+        - { python-version: "3.9", python-major: "39"}
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
 
     - name: Install Ubuntu dependencies
 
@@ -49,7 +45,6 @@ jobs:
         git \
         cmake \
         libsndfile1 \
-        python3-dev \
         && apt-get clean -y
 
     - name: Build libsamplerate
@@ -63,13 +58,17 @@ jobs:
     - name: Build DawDreamer
       # TARGET_ARCH=aarch64
       run: |
-        CPLUS_INCLUDE_PATH=/usr/include/python${{ matrix.python-version }}/
+        ls -R $pythonLibPath
+        ls -R $pythonInclude
         cd Builds/LinuxMakefile
         ldconfig
         make CONFIG=Release
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
         cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
+      env:
+        pythonLibPath: /opt/python/cp${{matrix.python-major}}-cp${{matrix.python-major}}/lib
+        pythonInclude: /opt/python/cp${{matrix.python-major}}-cp${{matrix.python-major}}/include/python${{matrix.python-version}}
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -118,7 +117,8 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.9]
+        include:
+        - { python-version: "3.9"}
 
     steps:
     - uses: actions/checkout@v2
