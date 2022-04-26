@@ -10,7 +10,7 @@ jobs:
 
   build-ubuntu:
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux_2_24_x86_64
+    container: quay.io/pypa/manylinux2014_x86_64
     strategy:
       matrix:
         include:
@@ -24,8 +24,7 @@ jobs:
     - name: Install Ubuntu dependencies
 
       run: |
-        apt-get update -yq \
-        && apt-get install -yq --no-install-recommends \
+        yum install -y \
         ca-certificates \
         build-essential \
         clang \
@@ -44,8 +43,7 @@ jobs:
         libcurl4-gnutls-dev \
         git \
         cmake \
-        libsndfile1 \
-        && apt-get clean -y
+        libsndfile1
 
     - name: Build libsamplerate
       run: |
