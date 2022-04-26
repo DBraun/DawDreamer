@@ -30,19 +30,26 @@ jobs:
         boost-python \
         freetype \
         freetype-devel \
+        libX11-devel \
+        libXext-devel \
         libXinerama \
         libXinerama-devel \
         libXrandr \
         libXrandr-devel \
         libXcursor \
         libXcursor-devel \
+        libcurl-devel \
         freeglut \
         freeglut-devel \
         libXcomposite \
         libXcomposite-devel \
         cmake \
         libsndfile \
-        libsndfile-devel
+        libsndfile-devel \
+        libvorbis \
+        opus-tools \
+        flac \
+        lame
 
     - name: Build libsamplerate
       run: |
