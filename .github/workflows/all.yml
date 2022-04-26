@@ -44,7 +44,6 @@ jobs:
         libXcomposite \
         libXcomposite-devel \
         cmake \
-        alsa \
         alsa-lib \
         alsa-tools \
         alsa-utils \
