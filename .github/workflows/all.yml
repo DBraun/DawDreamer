@@ -60,10 +60,7 @@ jobs:
     - name: Build ALSA-lib
       run: |
         cd alsa-lib
-        autoconf
-        ./configure
-        make
-        make install
+        ./gitcompile
 
     - name: Checkout Freetype
       uses: actions/checkout@v2
@@ -87,10 +84,9 @@ jobs:
     - name: Build curl
       run: |
         cd curl
-        autoconf
+        autoreconf -fi
         ./configure
         make
-        make install
 
     - name: Build libsamplerate
       run: |
