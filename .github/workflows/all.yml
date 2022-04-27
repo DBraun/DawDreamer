@@ -119,7 +119,7 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
         ldconfig
-        make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include;../../curl/include;../../freetype/include"
+        make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
         cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
