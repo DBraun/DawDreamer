@@ -1,7 +1,3 @@
-echo "which python"
-which python
-# pythonLocation=$(python3-config --prefix)
-# echo "pythonLocation: " $pythonLocation
 yum install -y libsndfile \
 libX11-devel \
 libXrandr-devel \
@@ -27,6 +23,7 @@ cd build_release
 TARGET_ARCH=x86_64 make CONFIG=Release VERBOSE=1
 cd ../../..
 
+CPLUS_INCLUDE_PATH=/usr/include/python$PYTHONVERSION
 cd Builds/LinuxMakefile
 ldconfig
 PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config:../../alsa-lib/utils:/__w/DawDreamer/DawDreamer/alsa-lib/utils

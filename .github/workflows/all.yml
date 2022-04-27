@@ -154,10 +154,16 @@ jobs:
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
 
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.4.0
       env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
+        PYTHONMAJOR: ${{ matrix.python-major }}
+        PYTHONVERSION: ${{ matrix.python-version }}
         CIBW_PLATFORM: linux
         CIBW_BUILD: cp39-manylinux_x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
