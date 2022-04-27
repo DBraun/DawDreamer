@@ -25,7 +25,7 @@ RUN apt-get update -yq \
     python3 \
     python3.9-dev \
     libsamplerate0 \
-    libsndfile1
+    libsndfile1 \
 && update-ca-certificates \
 && apt-get clean -y
 
