@@ -10,7 +10,7 @@ jobs:
 
   build-ubuntu:
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
+    # container: quay.io/pypa/manylinux2014_x86_64
     strategy:
       matrix:
         include:
@@ -21,39 +21,39 @@ jobs:
       with:
         submodules: true
 
-    - name: Install Ubuntu dependencies
-      # yum install gcc gcc-c++ make
-      run: |
-        yum -y update && \
-        yum install -y \
-        tar \
-        autoconf \
-        automake \
-        libtool \
-        ca-certificates \
-        boost-devel \
-        boost-python \
-        libX11-devel \
-        libXext-devel \
-        libXinerama \
-        libXinerama-devel \
-        libXrandr \
-        libXrandr-devel \
-        libXcursor \
-        libXcursor-devel \
-        freeglut \
-        freeglut-devel \
-        libXcomposite \
-        libXcomposite-devel \
-        cmake \
-        libsndfile \
-        libsndfile-devel \
-        libvorbis-devel \
-        opus-devel \
-        flac-devel \
-        flac-libs \
-        alsa-lib-devel \
-        alsa-utils
+    # - name: Install Ubuntu dependencies
+    #   # yum install gcc gcc-c++ make
+    #   run: |
+    #     yum -y update && \
+    #     yum install -y \
+    #     tar \
+    #     autoconf \
+    #     automake \
+    #     libtool \
+    #     ca-certificates \
+    #     boost-devel \
+    #     boost-python \
+    #     libX11-devel \
+    #     libXext-devel \
+    #     libXinerama \
+    #     libXinerama-devel \
+    #     libXrandr \
+    #     libXrandr-devel \
+    #     libXcursor \
+    #     libXcursor-devel \
+    #     freeglut \
+    #     freeglut-devel \
+    #     libXcomposite \
+    #     libXcomposite-devel \
+    #     cmake \
+    #     libsndfile \
+    #     libsndfile-devel \
+    #     libvorbis-devel \
+    #     opus-devel \
+    #     flac-devel \
+    #     flac-libs \
+    #     alsa-lib-devel \
+    #     alsa-utils
 
     # - name: Checkout alsa-lib
     #   uses: actions/checkout@v2
@@ -82,19 +82,19 @@ jobs:
     #     make test
     #     make install
 
-    - name: Checkout Freetype
-      uses: actions/checkout@v2
-      with:
-        repository: freetype/freetype
-        path: freetype
+    # - name: Checkout Freetype
+    #   uses: actions/checkout@v2
+    #   with:
+    #     repository: freetype/freetype
+    #     path: freetype
 
-    - name: Build Freetype
-      run: |
-        cd freetype
-        sh autogen.sh
-        ./configure
-        make
-        make install
+    # - name: Build Freetype
+    #   run: |
+    #     cd freetype
+    #     sh autogen.sh
+    #     ./configure
+    #     make
+    #     make install
 
     # - name: Checkout curl
     #   uses: actions/checkout@v2
@@ -109,51 +109,38 @@ jobs:
     #     ./configure --with-openssl
     #     make
 
-    - name: Build libsamplerate
-      run: |
-        cd thirdparty/libsamplerate
-        mkdir build_release
-        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        cd build_release
-        TARGET_ARCH=x86_64 make CONFIG=Release VERBOSE=1
+    # - name: Build libsamplerate
+    #   run: |
+    #     cd thirdparty/libsamplerate
+    #     mkdir build_release
+    #     cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    #     cd build_release
+    #     TARGET_ARCH=x86_64 make CONFIG=Release VERBOSE=1
 
-    - name: Build DawDreamer
-      # TARGET_ARCH=aarch64
-      run: |
-        cd Builds/LinuxMakefile
-        ldconfig
-        PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config:../../alsa-lib/utils:/__w/DawDreamer/DawDreamer/alsa-lib/utils
-        make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
-        mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
-        cd ../..
-        cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
-      env:
-        pythonLibPath: /opt/python/cp${{matrix.python-major}}-cp${{matrix.python-major}}/lib
-        pythonInclude: /opt/python/cp${{matrix.python-major}}-cp${{matrix.python-major}}/include/python${{matrix.python-version}}
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: dawdreamer-ubuntu-python-${{matrix.python-major}}
-        path: dawdreamer/
+  #   - name: Upload artifact
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: dawdreamer-ubuntu-python-${{matrix.python-major}}
+  #       path: dawdreamer/
 
-  build-ubuntu-2:
-    runs-on: ubuntu-latest
-    needs: [build-ubuntu]
-    strategy:
-      matrix:
-        include:
-        - { python-version: "3.9", python-major: "39"}
+  # build-ubuntu-2:
+  #   runs-on: ubuntu-latest
+  #   needs: [build-ubuntu]
+  #   strategy:
+  #     matrix:
+  #       include:
+  #       - { python-version: "3.9", python-major: "39"}
 
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
+    # steps:
+    # - uses: actions/checkout@v2
+    #   with:
+    #     submodules: true
 
-    - uses: actions/download-artifact@v3
-      with:
-        name: dawdreamer-ubuntu-python-${{matrix.python-major}}
-        path: dawdreamer
+    # - uses: actions/download-artifact@v3
+    #   with:
+    #     name: dawdreamer-ubuntu-python-${{matrix.python-major}}
+    #     path: dawdreamer
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -167,14 +154,6 @@ jobs:
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
 
-    - name: cleanup libraries
-      # necessary for cibuildwheel to work.
-      run: |
-        rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so
-        rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so
-        rm -f thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
-        rm -f thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so
-
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.4.0
       env:
@@ -183,7 +162,46 @@ jobs:
         CIBW_BUILD: cp39-manylinux_x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_BUILD_VERBOSITY: 1
+        CIBW_BEFORE_BUILD: pythonLocation=$(python3-config --prefix)
+        CIBW_BEFORE_BUILD_LINUX: >
+          echo "pythonLocation: " $pythonLocation
+          yum install -y libsndfile \
+          libX11-devel \
+          libXrandr-devel \
+          libXinerama-devel \
+          libXrender-devel \
+          libXcomposite-devel \
+          libXinerama-devel \
+          libXcursor-devel \
+          freetype-devel \
+          libsndfile-devel \
+          libvorbis-devel \
+          opus-devel \
+          flac-devel \
+          flac-libs \
+          alsa-lib-devel \
+          alsa-utils
+
+          echo "Build libsamplerate"
+          cd thirdparty/libsamplerate
+          mkdir build_release
+          cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+          cd build_release
+          TARGET_ARCH=x86_64 make CONFIG=Release VERBOSE=1
+          cd ../../..
+
+          cd Builds/LinuxMakefile
+          ldconfig
+          PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config:../../alsa-lib/utils:/__w/DawDreamer/DawDreamer/alsa-lib/utils
+          make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
+          mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
+          cd ../..
+          cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+          rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so &&
+          rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so &&
+          rm -f thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so &&
+          rm -f thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so &&
           rm -f dawdreamer/libfaust.so &&
           rm -f dawdreamer/dawdreamer.so &&
           pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
