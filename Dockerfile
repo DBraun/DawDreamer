@@ -32,7 +32,7 @@ RUN apt-get update -yq \
 # clone repo by copying in
 COPY . .
 
-RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git dawdreamer/
+RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git dawdreamer/faustlibraries
 
 # Make symlinks to use during building DawDreamer
 RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
