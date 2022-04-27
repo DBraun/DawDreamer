@@ -53,7 +53,7 @@ if platform.system() == "Windows":
 
 elif platform.system() == "Linux":
 
-    files = ['dawdreamer/dawdreamer.so', 'dawdreamer/libfaust.so.2']
+    files = ['dawdreamer/dawdreamer.so', 'dawdreamer/libfaust.so', 'dawdreamer/libfaust.so.2']
     for file in files:
         assert os.path.isfile(file)
 

@@ -168,6 +168,7 @@ jobs:
         CIBW_BUILD_VERBOSITY: 3
         CIBW_BEFORE_BUILD_LINUX: sh -v before_linux_build.sh ${{ matrix.python-major }} ${{ matrix.python-version }}
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+          rm -f dawdreamer/libfaust.so &&
           rm -f dawdreamer/libfaust.so.2 &&
           rm -f dawdreamer/dawdreamer.so &&
           pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})

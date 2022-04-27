@@ -12,7 +12,6 @@ libXrender-devel \
 libXcomposite-devel \
 libXinerama-devel \
 libXcursor-devel \
-freetype-devel \
 libsndfile-devel \
 libvorbis-devel \
 opus-devel \
@@ -20,6 +19,7 @@ flac-devel \
 flac-libs \
 alsa-lib-devel \
 alsa-utils
+# freetype-devel
 
 echo "Build libsamplerate"
 cd thirdparty/libsamplerate
@@ -44,6 +44,7 @@ make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDr
 # make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src -L$pythonLibPath" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include -I$pythonInclude"
 mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
 cd ../..
+cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
 cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so.2
 
 rm -f thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
