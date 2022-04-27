@@ -57,41 +57,21 @@ jobs:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
 
-  # build-ubuntu-docker:
-  #   runs-on: ubuntu-latest
+  build-ubuntu-docker:
+    runs-on: ubuntu-latest
 
-  #   strategy:
-  #     matrix:
-  #       include:
-  #       - { python-version: "3.9"}
+    strategy:
+      matrix:
+        include:
+        - { python-version: "3.9"}
 
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #     with:
-  #       submodules: true
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
 
-  #   - name: Setup Python ${{ matrix.python-version }}
-  #     uses: actions/setup-python@v2
-  #     with:
-  #       python-version: ${{ matrix.python-version }}
-
-  #   - name: Install Python dependencies
-  #     run: |
-  #       python -m pip install --upgrade pip
-  #       pip install setuptools wheel pytest numpy librosa scipy
-
-  #   - name: Build Docker image
-  #     run: docker build -t dawdreamer .
-
-    # todo: enable this
-    # note that the Dockerfile pulls the main branch!
-    # - uses: addnab/docker-run-action@v3
-    #   with:
-    #     image: dawdreamer
-    #     run: |
-    #       echo "Running tests"
-    #       cd /DawDreamer/tests
-    #       python -m pytest -s .
+    - name: Build Docker image
+      run: docker build -t dawdreamer .
 
   # build-windows:
   #   runs-on: ${{ matrix.os }}

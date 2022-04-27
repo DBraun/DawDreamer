@@ -24,38 +24,36 @@ RUN apt-get update -yq \
     cmake \
     python3 \
     python3.9-dev \
-    faust \
     libsamplerate0 \
-    libsndfile1 \
-    llvm-11 \
-    llvm-11-dev \
+    libsndfile1
 && update-ca-certificates \
 && apt-get clean -y
 
-# clone repo
-RUN git clone --recursive https://github.com/DBraun/DawDreamer.git
-## or copy:
-# WORKDIR /DawDreamer
-# COPY . .
+# clone repo by copying in
+COPY . .
+
+RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git dawdreamer/
 
 # Make symlinks to use during building DawDreamer
-RUN ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
 RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+
+RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so
+RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so.2
 
 # Build DawDreamer
 WORKDIR /DawDreamer/Builds/LinuxMakefile
 ENV CPLUS_INCLUDE_PATH=/usr/include/python3.9/
 RUN ldconfig
-RUN make CONFIG=Release
-RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/tests/dawdreamer.so
+RUN make VERBOSE=1 CONFIG=Release
+RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/dawdreamer/dawdreamer.so
 
-# Pytest Full Test
+# Setup Python Requirements
 RUN apt install -y python3-pip
-RUN python3.9 -m pip install librosa scipy numpy pytest
+RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 
-# Basic Import Test
+# Build and install wheel
+RUN python3.9 setup.py install
+
+# Run all Tests
 WORKDIR /DawDreamer/tests
-RUN python3.9 -c "import dawdreamer; print('DawDreamer was successfully imported in python3.')"
-
-#WORKDIR /DawDreamer/tests
-#RUN python3.9 -m pytest .
+RUN python3.9 -m pytest -v .
