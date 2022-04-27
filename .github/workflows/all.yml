@@ -71,6 +71,7 @@ jobs:
     - name: Build Freetype
       run: |
         cd freetype
+        sh autogen.sh
         ./configure
         make
         make install
