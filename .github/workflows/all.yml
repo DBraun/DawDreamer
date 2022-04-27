@@ -165,10 +165,6 @@ jobs:
         CIBW_BEFORE_BUILD: pythonLocation=$(python3-config --prefix)
         CIBW_BEFORE_BUILD_LINUX: sh before_linux_build.sh
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-          rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so &&
-          rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so &&
-          rm -f thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so &&
-          rm -f thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so &&
           rm -f dawdreamer/libfaust.so &&
           rm -f dawdreamer/dawdreamer.so &&
           pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})

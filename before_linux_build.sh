@@ -31,3 +31,8 @@ make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa
 mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
 cd ../..
 cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
+
+rm -f thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
+rm -f thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so
+rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so
+rm -f thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so
