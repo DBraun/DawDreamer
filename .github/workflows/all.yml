@@ -53,19 +53,17 @@ jobs:
         flac-devel \
         flac-libs
 
-    # - name: Checkout openssl
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: openssl/openssl
-    #     path: openssl
+    - name: Checkout openssl
+      uses: actions/checkout@v2
+      with:
+        repository: openssl/openssl
+        path: openssl
 
     - name: Build openssl
       run: |
         yum install -y make gcc perl-core pcre-devel wget zlib-devel
-        wget https://ftp.openssl.org/source/openssl-1.1.1k.tar.gz
-        tar -xzvf openssl-1.1.1k.tar.gz
-        cd openssl-1.1.1k
-        ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
+        cd openssl
+        ./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
         make
         make test
         make install
