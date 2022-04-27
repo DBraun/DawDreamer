@@ -51,19 +51,21 @@ jobs:
         libvorbis-devel \
         opus-devel \
         flac-devel \
-        flac-libs
+        flac-libs \
+        alsa-lib-devel \
+        alsa-utils
 
-    - name: Checkout alsa-lib
-      uses: actions/checkout@v2
-      with:
-        repository: alsa-project/alsa-lib
-        path: alsa-lib
+    # - name: Checkout alsa-lib
+    #   uses: actions/checkout@v2
+    #   with:
+    #     repository: alsa-project/alsa-lib
+    #     path: alsa-lib
 
-    - name: Build ALSA-lib
-      run: |
-        cd alsa-lib
-        autoupdate
-        ./gitcompile
+    # - name: Build ALSA-lib
+    #   run: |
+    #     cd alsa-lib
+    #     autoupdate
+    #     ./gitcompile
 
     # - name: Checkout openssl
     #   uses: actions/checkout@v2
