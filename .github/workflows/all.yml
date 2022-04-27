@@ -120,7 +120,7 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
         ldconfig
-        PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config
+        PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config:../../alsa-lib/utils:/__w/DawDreamer/DawDreamer/alsa-lib/utils
         make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
