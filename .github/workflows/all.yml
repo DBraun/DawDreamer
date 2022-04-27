@@ -53,17 +53,17 @@ jobs:
         flac-devel \
         flac-libs
 
-    # - name: Checkout alsa-lib
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: alsa-project/alsa-lib
-    #     path: alsa-lib
+    - name: Checkout alsa-lib
+      uses: actions/checkout@v2
+      with:
+        repository: alsa-project/alsa-lib
+        path: alsa-lib
 
-    # - name: Build ALSA-lib
-    #   run: |
-    #     cd alsa-lib
-    #     autoupdate
-    #     ./gitcompile
+    - name: Build ALSA-lib
+      run: |
+        cd alsa-lib
+        autoupdate
+        ./gitcompile
 
     # - name: Checkout openssl
     #   uses: actions/checkout@v2
@@ -120,7 +120,7 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
         ldconfig
-        PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;/usr/lib64/pkgconfig;/usr/lib/pkgconfig/;/usr/local/include/freetype2/freetype/config"
+        PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config
         make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
