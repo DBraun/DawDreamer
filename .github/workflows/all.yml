@@ -25,11 +25,11 @@ jobs:
       # yum install gcc gcc-c++ make
       run: |
         yum install -y \
+        automake \
+        libtool \
         ca-certificates \
         boost-devel \
         boost-python \
-        freetype \
-        freetype-devel \
         libX11-devel \
         libXext-devel \
         libXinerama \
@@ -38,22 +38,56 @@ jobs:
         libXrandr-devel \
         libXcursor \
         libXcursor-devel \
-        libcurl-devel \
         freeglut \
         freeglut-devel \
         libXcomposite \
         libXcomposite-devel \
         cmake \
-        alsa-lib \
-        alsa-lib-devel \
-        alsa-tools \
-        alsa-utils \
         libsndfile \
         libsndfile-devel \
         libvorbis-devel \
         opus-devel \
         flac-devel \
         flac-libs
+
+    - name: Checkout alsa-lib
+      uses: actions/checkout@v2
+      with:
+        repository: alsa-project/alsa-lib
+        path: alsa-lib
+
+    - name: Build ALSA-lib
+      run: |
+        cd alsa-lib
+        ./configure
+        make
+        make install
+
+    - name: Checkout Freetype
+      uses: actions/checkout@v2
+      with:
+        repository: freetype/freetype
+        path: freetype
+
+    - name: Build Freetype
+      run: |
+        cd freetype
+        ./configure
+        make
+        make install
+
+    - name: Checkout curl
+      uses: actions/checkout@v2
+      with:
+        repository: curl/curl
+        path: curl
+
+    - name: Build curl
+      run: |
+        cd curl
+        ./configure
+        make
+        make install
 
     - name: Build libsamplerate
       run: |
