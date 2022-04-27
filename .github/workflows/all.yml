@@ -86,7 +86,7 @@ jobs:
       run: |
         cd curl
         autoreconf -fi
-        ./configure
+        ./configure --with-openssl
         make
 
     - name: Build libsamplerate
