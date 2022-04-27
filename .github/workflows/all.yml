@@ -53,32 +53,32 @@ jobs:
         flac-devel \
         flac-libs
 
-    - name: Checkout alsa-lib
-      uses: actions/checkout@v2
-      with:
-        repository: alsa-project/alsa-lib
-        path: alsa-lib
+    # - name: Checkout alsa-lib
+    #   uses: actions/checkout@v2
+    #   with:
+    #     repository: alsa-project/alsa-lib
+    #     path: alsa-lib
 
-    - name: Build ALSA-lib
-      run: |
-        cd alsa-lib
-        autoupdate
-        ./gitcompile
+    # - name: Build ALSA-lib
+    #   run: |
+    #     cd alsa-lib
+    #     autoupdate
+    #     ./gitcompile
 
-    - name: Checkout openssl
-      uses: actions/checkout@v2
-      with:
-        repository: openssl/openssl
-        path: openssl
+    # - name: Checkout openssl
+    #   uses: actions/checkout@v2
+    #   with:
+    #     repository: openssl/openssl
+    #     path: openssl
 
-    - name: Build openssl
-      run: |
-        yum install -y make gcc perl-core pcre-devel wget zlib-devel
-        cd openssl
-        ./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
-        make
-        make test
-        make install
+    # - name: Build openssl
+    #   run: |
+    #     yum install -y make gcc perl-core pcre-devel wget zlib-devel
+    #     cd openssl
+    #     ./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
+    #     make
+    #     make test
+    #     make install
 
     - name: Checkout Freetype
       uses: actions/checkout@v2
@@ -94,18 +94,18 @@ jobs:
         make
         make install
 
-    - name: Checkout curl
-      uses: actions/checkout@v2
-      with:
-        repository: curl/curl
-        path: curl
+    # - name: Checkout curl
+    #   uses: actions/checkout@v2
+    #   with:
+    #     repository: curl/curl
+    #     path: curl
 
-    - name: Build curl
-      run: |
-        cd curl
-        autoreconf -fi
-        ./configure --with-openssl
-        make
+    # - name: Build curl
+    #   run: |
+    #     cd curl
+    #     autoreconf -fi
+    #     ./configure --with-openssl
+    #     make
 
     - name: Build libsamplerate
       run: |
@@ -120,7 +120,7 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
         ldconfig
-        PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;/usr/lib64/pkgconfig;/usr/lib/pkgconfig/"
+        PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;/usr/lib64/pkgconfig;/usr/lib/pkgconfig/;/usr/local/include/freetype2/freetype/config"
         make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
