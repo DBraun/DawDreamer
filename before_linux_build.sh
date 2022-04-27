@@ -26,8 +26,12 @@ cd ../../..
 CPLUS_INCLUDE_PATH=/usr/include/python$PYTHONVERSION
 cd Builds/LinuxMakefile
 ldconfig
+
+pythonLibPath=/opt/python/cp$PYTHONMAJOR-cp$PYTHONMAJOR/lib
+pythonInclude=/opt/python/cp$PYTHONMAJOR-cp$PYTHONMAJOR/include/python$PYTHONVERSION
+
 PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig:/usr/lib/pkgconfig/:/usr/local/include/freetype2/freetype/config:../../alsa-lib/utils:/__w/DawDreamer/DawDreamer/alsa-lib/utils
-make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include"
+make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src -L$pythonLibPath" CXXFLAGS="-I../../alsa-lib/include -I../../curl/include -I../../freetype/include -I$pythonInclude"
 mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
 cd ../..
 cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
