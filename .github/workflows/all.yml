@@ -117,11 +117,9 @@ jobs:
     - name: Build DawDreamer
       # TARGET_ARCH=aarch64
       run: |
-        ls -R $pythonLibPath
-        ls -R $pythonInclude
         cd Builds/LinuxMakefile
         ldconfig
-        make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include"
+        make CONFIG=Release LIBS="-lstdc++fs -lasound" CXXFLAGS="-I../../alsa-lib/include;../../curl/include;../../freetype/include"
         mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
         cd ../..
         cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
