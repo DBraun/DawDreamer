@@ -25,6 +25,7 @@ jobs:
       # yum install gcc gcc-c++ make
       run: |
         yum install -y \
+        autoconf \
         automake \
         libtool \
         ca-certificates \
@@ -59,6 +60,7 @@ jobs:
     - name: Build ALSA-lib
       run: |
         cd alsa-lib
+        autoconf
         ./configure
         make
         make install
@@ -85,6 +87,7 @@ jobs:
     - name: Build curl
       run: |
         cd curl
+        autoconf
         ./configure
         make
         make install
