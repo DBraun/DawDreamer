@@ -10,137 +10,16 @@ jobs:
 
   build-ubuntu:
     runs-on: ubuntu-latest
-    # container: quay.io/pypa/manylinux2014_x86_64
     strategy:
       matrix:
         include:
-        - { python-version: "3.9", python-major: "39"}
+        - { python-version: "3.9", python-major: "39", cibwbuild: "cp39-manylinux_x86_64"}
+        - { python-version: "3.10", python-major: "310", cibwbuild: "cp310-manylinux_x86_64"}
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-
-    # - name: Install Ubuntu dependencies
-    #   # yum install gcc gcc-c++ make
-    #   run: |
-    #     yum -y update && \
-    #     yum install -y \
-    #     tar \
-    #     autoconf \
-    #     automake \
-    #     libtool \
-    #     ca-certificates \
-    #     boost-devel \
-    #     boost-python \
-    #     libX11-devel \
-    #     libXext-devel \
-    #     libXinerama \
-    #     libXinerama-devel \
-    #     libXrandr \
-    #     libXrandr-devel \
-    #     libXcursor \
-    #     libXcursor-devel \
-    #     freeglut \
-    #     freeglut-devel \
-    #     libXcomposite \
-    #     libXcomposite-devel \
-    #     cmake \
-    #     libsndfile \
-    #     libsndfile-devel \
-    #     libvorbis-devel \
-    #     opus-devel \
-    #     flac-devel \
-    #     flac-libs \
-    #     alsa-lib-devel \
-    #     alsa-utils
-
-    # - name: Checkout alsa-lib
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: alsa-project/alsa-lib
-    #     path: alsa-lib
-
-    # - name: Build ALSA-lib
-    #   run: |
-    #     cd alsa-lib
-    #     autoupdate
-    #     ./gitcompile
-
-    # - name: Checkout openssl
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: openssl/openssl
-    #     path: openssl
-
-    # - name: Build openssl
-    #   run: |
-    #     yum install -y make gcc perl-core pcre-devel wget zlib-devel
-    #     cd openssl
-    #     ./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
-    #     make
-    #     make test
-    #     make install
-
-    # - name: Checkout Freetype
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: freetype/freetype
-    #     path: freetype
-
-    # - name: Build Freetype
-    #   run: |
-    #     cd freetype
-    #     sh autogen.sh
-    #     ./configure
-    #     make
-    #     make install
-
-    # - name: Checkout curl
-    #   uses: actions/checkout@v2
-    #   with:
-    #     repository: curl/curl
-    #     path: curl
-
-    # - name: Build curl
-    #   run: |
-    #     cd curl
-    #     autoreconf -fi
-    #     ./configure --with-openssl
-    #     make
-
-    # - name: Build libsamplerate
-    #   run: |
-    #     cd thirdparty/libsamplerate
-    #     mkdir build_release
-    #     cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-    #     cd build_release
-    #     TARGET_ARCH=x86_64 make CONFIG=Release VERBOSE=1
-
-
-  #   - name: Upload artifact
-  #     uses: actions/upload-artifact@v3
-  #     with:
-  #       name: dawdreamer-ubuntu-python-${{matrix.python-major}}
-  #       path: dawdreamer/
-
-  # build-ubuntu-2:
-  #   runs-on: ubuntu-latest
-  #   needs: [build-ubuntu]
-  #   strategy:
-  #     matrix:
-  #       include:
-  #       - { python-version: "3.9", python-major: "39"}
-
-    # steps:
-    # - uses: actions/checkout@v2
-    #   with:
-    #     submodules: true
-
-    # - uses: actions/download-artifact@v3
-    #   with:
-    #     name: dawdreamer-ubuntu-python-${{matrix.python-major}}
-    #     path: dawdreamer
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -163,7 +42,7 @@ jobs:
       uses: pypa/cibuildwheel@v2.4.0
       env:
         CIBW_PLATFORM: linux
-        CIBW_BUILD: cp39-manylinux_x86_64
+        CIBW_BUILD: ${{ matrix.cibwbuild }}
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_BUILD_VERBOSITY: 3
         CIBW_BEFORE_BUILD_LINUX: sh -v before_linux_build.sh ${{ matrix.python-major }} ${{ matrix.python-version }}
@@ -172,7 +51,6 @@ jobs:
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
         CIBW_TEST_COMMAND: "yum install -y libsndfile libsndfile-devel && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
-        CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
 
     - uses: actions/upload-artifact@v2
       with:

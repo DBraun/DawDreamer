@@ -273,16 +273,15 @@
       </MODULEPATHS>
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
-                extraLinkerFlags="$(python3.9-config --cflags --ldflags --embed)"
                 cppLanguageStandard="-std=c++11" vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
                 extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;HAVE_LIBSAMPLERATE&#10;USE_BUILTIN_FFT&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND"
                 externalLibraries="samplerate&#10;faust">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
-                       headerPath="/usr/include/python3.9&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
+                       headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
-                       headerPath="/usr/include/python3.9&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
+                       headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
