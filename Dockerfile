@@ -26,6 +26,8 @@ RUN apt-get update -yq \
     python3.9-dev \
     libsamplerate0 \
     libsndfile1 \
+    libncurses6-dev \
+    libncursesw6-dev \
 && update-ca-certificates \
 && apt-get clean -y
 
