@@ -131,6 +131,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[],
     packages=['dawdreamer'],
+    py_modules=['DawDreamer'],
     include_package_data=True,
     package_data={
         "": package_data

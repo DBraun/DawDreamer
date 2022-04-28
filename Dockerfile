@@ -48,12 +48,14 @@ RUN make VERBOSE=1 CONFIG=Release
 RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/dawdreamer/dawdreamer.so
 
 # Setup Python Requirements
+WORKDIR /DawDreamer
 RUN apt install -y python3-pip
 RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 
 # Build and install wheel
 WORKDIR /DawDreamer
 RUN LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer
+RUN echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 RUN DISTUTILS_DEBUG=1 python3.9 /DawDreamer/setup.py install
 
 # Run all Tests
