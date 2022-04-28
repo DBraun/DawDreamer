@@ -26,6 +26,8 @@ RUN apt-get update -yq \
     python3.9-dev \
     libsamplerate0 \
     libsndfile1 \
+    libncurses5 \
+    libncursesw5 \
     libncurses5-dev \
     libncursesw5-dev \
 && update-ca-certificates \
@@ -38,6 +40,9 @@ RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git /DawD
 
 # Make symlinks to use during building DawDreamer
 RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libncurses.so.6 /usr/lib/x86_64-linux-gnu/libncurses.so.5
+RUN ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
+RUN ln -s /usr/lib/x86_64-linux-gnu/libform.so.6 /usr/lib/x86_64-linux-gnu/libform.so.5
 
 RUN ldd /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
 RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so
