@@ -47,14 +47,13 @@ jobs:
         CIBW_BUILD: ${{ matrix.cibwbuild }}
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_BUILD_VERBOSITY: 3
-        CIBW_BEFORE_BUILD_LINUX: sh -v build_linux.sh
+        CIBW_BEFORE_BUILD_LINUX:
+          PYTHONLIBPATH=${{ matrix.pythonLibPath }} && PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && sh -v build_linux.sh
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
-        PYTHONLIBPATH: ${{ matrix.pythonLibPath }}
-        PYTHONINCLUDEPATH: ${{ matrix.pythonInclude }}
 
     - uses: actions/upload-artifact@v2
       with:
