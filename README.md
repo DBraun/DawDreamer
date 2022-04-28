@@ -29,13 +29,14 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * Pitch-warping
 * Parameter automation
 * Rendering multiple processors simultaneously
-* Full support on macOS, Windows, Linux, and Ubuntu Dockerfile
+* Full support on macOS, Windows, Linux, Google Colab, and Ubuntu Dockerfile
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Installation
 
-`pip install dawdreamer` on macOS/Windows. Use the Dockerfile on Linux.
+Install with [PyPI](https://pypi.org/project/dawdreamer/):
+`pip install dawdreamer`
 
 ## API Documentation
 

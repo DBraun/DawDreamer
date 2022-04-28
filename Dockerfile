@@ -1,61 +1,32 @@
-FROM ubuntu:21.04 as ubuntu_base
+FROM quay.io/pypa/manylinux2014_x86_64
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -yq \
-&& apt-get install -yq --no-install-recommends \
-    ca-certificates \
-    build-essential \
-    clang \
-    pkg-config \
-    libboost-all-dev \
-    libboost-python-dev \
-    libfreetype6-dev \
-    libx11-dev \
-    libxinerama-dev \
-    libxrandr-dev \
-    libxcursor-dev \
-    mesa-common-dev \
-    libasound2-dev \
-    freeglut3-dev \
-    libxcomposite-dev \
-    libcurl4-gnutls-dev \
-    git \
-    cmake \
-    python3 \
-    python3.9-dev \
-    faust \
-    libsamplerate0 \
-    libsndfile1 \
-    llvm-11 \
-    llvm-11-dev \
-&& update-ca-certificates \
-&& apt-get clean -y
+# get pip
+RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python3.9 get-pip.py
 
-# clone repo
-RUN git clone --recursive https://github.com/DBraun/DawDreamer.git
-## or copy:
-# WORKDIR /DawDreamer
-# COPY . .
+# clone repo by copying in
+COPY . /DawDreamer
 
-# Make symlinks to use during building DawDreamer
-RUN ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
-RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
+RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git /DawDreamer/dawdreamer/faustlibraries
 
-# Build DawDreamer
-WORKDIR /DawDreamer/Builds/LinuxMakefile
-ENV CPLUS_INCLUDE_PATH=/usr/include/python3.9/
-RUN ldconfig
-RUN make CONFIG=Release
-RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/tests/dawdreamer.so
+WORKDIR /DawDreamer
+ENV PYTHONLIBPATH=/opt/python/cp39-cp39/lib
+ENV PYTHONINCLUDEPATH=/opt/python/cp39-cp39/include/python3.9
+RUN sh -v build_linux.sh
 
-# Pytest Full Test
-RUN apt install -y python3-pip
-RUN python3.9 -m pip install librosa scipy numpy pytest
+# Setup Python Requirements
+WORKDIR /DawDreamer
+RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 
-# Basic Import Test
+# Build and install wheel
+WORKDIR /DawDreamer
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer
+RUN DISTUTILS_DEBUG=1 python3.9 /DawDreamer/setup.py install
+
+# todo: ideally we could remove the files here
+# RUN rm -rf /DawDreamer/dawdreamer/*.so*
+
+# Run all Tests
 WORKDIR /DawDreamer/tests
-RUN python3.9 -c "import dawdreamer; print('DawDreamer was successfully imported in python3.')"
-
-#WORKDIR /DawDreamer/tests
-#RUN python3.9 -m pytest .
+RUN python3.9 -m pytest -v .

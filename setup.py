@@ -14,9 +14,11 @@ import platform
 import glob
 
 
+this_dir = os.path.abspath(os.path.dirname(__file__))
+
 def get_dawdreamer_version():
     import xml.etree.ElementTree as ET
-    tree = ET.parse('DawDreamer.jucer')
+    tree = ET.parse(Path(__file__).parent / 'DawDreamer.jucer')
     root = tree.getroot()
     version = root.attrib['version']
     return version
@@ -30,8 +32,6 @@ class BinaryDistribution(Distribution):
     def has_ext_modules(foo):
         return True
 
-
-this_dir = os.path.abspath(os.path.dirname(__file__))
 
 ext_modules = []
 package_data = []
@@ -53,19 +53,27 @@ if platform.system() == "Windows":
 
 elif platform.system() == "Linux":
 
-    build_folder = os.path.join(this_dir, "Builds", "LinuxMakefile", "build")
+    files = ['dawdreamer/dawdreamer.so']
+    files += list(glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))
+    for file in files:
+        filepath = os.path.abspath(file)
+        assert os.path.isfile(filepath), ValueError("File not found: " + filepath)
+    print('Using compiled files: ', str(files))
 
-    shutil.copy(os.path.join(build_folder, 'libdawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
-
-    package_data += ['dawdreamer/dawdreamer.so']
+    package_data += files
 
     # For Linux, we do a hacky thing where we force a compilation of an empty file
     # in order for auditwheel to work.
+    dawdreamer_dir = os.path.join(this_dir, 'dawdreamer')
     ext_modules = [
         Extension(
             'dawdreamer',
             ['dawdreamer/null.c'],
-            language='c++'
+            language='c++',
+            # null.c doesn't use libfaust, so we must prevent it getting culled with --no-as-needed
+            extra_compile_args=['-Wl,--no-as-needed -lfaust'],
+            library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
+            runtime_library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
         ),
     ]
 
@@ -84,7 +92,7 @@ else:
         f"setup.py hasn't been implemented for platform: {platform}."
     )
 
-faustlibraries = list(glob.glob('dawdreamer/faustlibraries/*', recursive=True))
+faustlibraries = list(glob.glob(os.path.join(this_dir, 'dawdreamer/faustlibraries/*'), recursive=True))
 
 if not faustlibraries:
     raise ValueError("You need to put the faustlibraries repo inside dawdreamer.")
@@ -93,14 +101,11 @@ package_data += faustlibraries
 
 package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))
 
-# note: package_data must be relative paths, not absolute.
-package_data = [a.replace('\\', '/') for a in package_data]
-
-prefix = 'dawdreamer/'
-package_data = [a[len(prefix):] if a.startswith(prefix) else a for a in package_data]
-
+# Every item in package_data should be inside the dawdreamer directory.
+# Then we make the paths relative to this directory.
+package_data = [os.path.relpath(os.path.abspath(a), os.path.join(this_dir, "dawdreamer")).replace('\\', '/') for a in package_data]
+print('package_data: ', package_data)
 long_description = (Path(__file__).parent / "README.md").read_text()
-
 
 setup(
     name='dawdreamer',
@@ -134,6 +139,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[],
     packages=['dawdreamer'],
+    py_modules=['dawdreamer'],
     include_package_data=True,
     package_data={
         "": package_data

@@ -35,7 +35,7 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.3" "-DJUCE_APP_VERSION_HEX=0x603" $(shell pkg-config --cflags alsa freetype2 libcurl) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I/usr/include/python3.9 -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.4" "-DJUCE_APP_VERSION_HEX=0x604" $(shell pkg-config --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
   JUCE_CPPFLAGS_DYNAMIC_LIBRARY :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_CFLAGS_DYNAMIC_LIBRARY := -fPIC -fvisibility=hidden
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
@@ -43,7 +43,7 @@ ifeq ($(CONFIG),Debug)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -g -ggdb -O0 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-11/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-11 $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/lib -L../../thirdparty/libsamplerate/build_release/src $(shell pkg-config --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaust $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
@@ -58,7 +58,7 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.3" "-DJUCE_APP_VERSION_HEX=0x603" $(shell pkg-config --cflags alsa freetype2 libcurl) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I/usr/include/python3.9 -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.4" "-DJUCE_APP_VERSION_HEX=0x604" $(shell pkg-config --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
   JUCE_CPPFLAGS_DYNAMIC_LIBRARY :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_CFLAGS_DYNAMIC_LIBRARY := -fPIC -fvisibility=hidden
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
@@ -66,7 +66,7 @@ ifeq ($(CONFIG),Release)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/lib/llvm-11/lib -L/usr/local/lib -L../../thirdparty/libsamplerate/build/src $(shell pkg-config --libs alsa freetype2 libcurl) -fvisibility=hidden $(python3.9-config --cflags --ldflags --embed) -lrt -ldl -lpthread -lGL -lsamplerate -lfaust -lLLVM-11 $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/lib -L../../thirdparty/libsamplerate/build_release/src $(shell pkg-config --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaust $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
@@ -129,7 +129,7 @@ all : $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY)
 
 $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) : $(OBJECTS_DYNAMIC_LIBRARY) $(RESOURCES)
 	@command -v pkg-config >/dev/null 2>&1 || { echo >&2 "pkg-config not installed. Please, install it."; exit 1; }
-	@pkg-config --print-errors alsa freetype2 libcurl
+	@pkg-config --print-errors alsa freetype2
 	@echo Linking "DawDreamer - Dynamic Library"
 	-$(V_AT)mkdir -p $(JUCE_BINDIR)
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)

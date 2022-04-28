@@ -10,70 +10,18 @@ jobs:
 
   build-ubuntu:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        python-version: [3.9]
+        include:
+        - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_x86_64"}
+        - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
+        - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
+        - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install Ubuntu dependencies
-      # todo: need to run this? update-ca-certificates \
-      run: |
-        sudo apt-get update -yq \
-        && sudo apt-get install -yq --no-install-recommends \
-        ca-certificates \
-        build-essential \
-        clang \
-        pkg-config \
-        libboost-all-dev \
-        libboost-python-dev \
-        libfreetype6-dev \
-        libx11-dev \
-        libxinerama-dev \
-        libxrandr-dev \
-        libxcursor-dev \
-        mesa-common-dev \
-        libasound2-dev \
-        freeglut3-dev \
-        libxcomposite-dev \
-        libcurl4-gnutls-dev \
-        git \
-        cmake \
-        python3 \
-        python${{ matrix.python-version }}-dev \
-        faust \
-        libsamplerate0 \
-        libsndfile1 \
-        llvm-11 \
-        llvm-11-dev \
-        && sudo apt-get clean -y
-
-    - name: Make symantic links
-      run: |
-        sudo ln -s /usr/bin/llvm-config-11 /usr/bin/llvm-config
-        sudo ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
-
-    - name: Build DawDreamer
-      run: |
-        CPLUS_INCLUDE_PATH=/usr/include/python${{ matrix.python-version }}/
-        cd Builds/LinuxMakefile
-        sudo ldconfig
-        make CONFIG=Release
-        cp build/libdawdreamer.so ../../tests/dawdreamer.so
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel numpy librosa scipy
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -87,63 +35,46 @@ jobs:
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
 
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel>=2.3.1
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
-    # # I think the audit is failing because the build links against local LLVM-related things.
-    # #  or https://cibuildwheel.readthedocs.io/en/stable/faq/#linux-builds-on-docker
-    # - name: Build wheels
-    #   run: |
-    #     python -m cibuildwheel --output-dir wheelhouse --platform linux
-    #   env:
-    #     PYTHONMAJOR: ${{ matrix.python-version }}
-    #     CIBW_PLATFORM: linux
-    #     CIBW_BUILD_VERBOSITY: 1
-    #     CIBW_REPAIR_WHEEL_COMMAND_LINUX: pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2010 {wheel})
-    #     CIBW_TEST_REQUIRES: -r test-requirements.txt
-    #     CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest ."
-    #     CIBW_ARCHS: auto64
-    #     CIBW_SKIP: "*pp* *p36-* *p37-* *p38-* *p310-*"
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v2.4.0
+      env:
+        CIBW_PLATFORM: linux
+        CIBW_BUILD: ${{ matrix.cibwbuild }}
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+        CIBW_BUILD_VERBOSITY: 3
+        CIBW_BEFORE_BUILD_LINUX:
+          export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && sh -v build_linux.sh
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
+        CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
+        CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
+        CIBW_ARCHS: auto64
 
-    # - uses: actions/upload-artifact@v2
-    #   with:
-    #     name: my-wheel-artifact
-    #     path: ./wheelhouse/*.whl
+    - uses: actions/upload-artifact@v2
+      with:
+        name: my-wheel-artifact
+        path: ./wheelhouse/*.whl
 
   build-ubuntu-docker:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: [3.9]
+        include:
+        - { python-version: "3.9"}
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
 
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel pytest numpy librosa scipy
-
     - name: Build Docker image
       run: docker build -t dawdreamer .
-
-    # todo: enable this
-    # note that the Dockerfile pulls the main branch!
-    # - uses: addnab/docker-run-action@v3
-    #   with:
-    #     image: dawdreamer
-    #     run: |
-    #       echo "Running tests"
-    #       cd /DawDreamer/tests
-    #       python -m pytest -s .
 
   build-windows:
     runs-on: ${{ matrix.os }}
