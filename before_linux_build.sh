@@ -17,9 +17,9 @@ libsndfile-devel \
 libvorbis-devel \
 opus-devel \
 flac-devel \
-flac-libs \
-alsa-lib-devel \
-alsa-utils
+flac-libs
+# alsa-lib-devel \
+# alsa-utils
 
 echo "Build libsamplerate"
 cd thirdparty/libsamplerate
@@ -39,7 +39,8 @@ pythonInclude=/opt/python/cp$PYTHONMAJOR-cp$PYTHONMAJOR/include/python$PYTHONVER
 echo "pythonLibPath: $pythonLibPath" 
 echo "pythonInclude: $pythonInclude" 
 
-make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src -L$pythonLibPath" CXXFLAGS="-I../../alsa-lib/include -I$pythonInclude"
+# make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src -L$pythonLibPath" CXXFLAGS="-I../../alsa-lib/include -I$pythonInclude"
+make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L$pythonLibPath" CXXFLAGS="-I$pythonInclude"
 mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
 cd ../..
 cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
