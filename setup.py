@@ -14,9 +14,11 @@ import platform
 import glob
 
 
+this_dir = os.path.abspath(os.path.dirname(__file__))
+
 def get_dawdreamer_version():
     import xml.etree.ElementTree as ET
-    tree = ET.parse('DawDreamer.jucer')
+    tree = ET.parse(Path(__file__).parent / 'DawDreamer.jucer')
     root = tree.getroot()
     version = root.attrib['version']
     return version
@@ -30,8 +32,6 @@ class BinaryDistribution(Distribution):
     def has_ext_modules(foo):
         return True
 
-
-this_dir = os.path.abspath(os.path.dirname(__file__))
 
 ext_modules = []
 package_data = []
@@ -55,7 +55,7 @@ elif platform.system() == "Linux":
 
     files = ['dawdreamer/dawdreamer.so', 'dawdreamer/libfaust.so', 'dawdreamer/libfaust.so.2']
     for file in files:
-        assert os.path.isfile(file)
+        assert os.path.isfile(os.path.join(this_dir, file))
 
     package_data += files
 
