@@ -70,10 +70,10 @@ elif platform.system() == "Linux":
             'dawdreamer',
             ['dawdreamer/null.c'],
             language='c++',
+            # null.c doesn't use libfaust, so we must prevent it getting culled with --no-as-needed
             extra_compile_args=['-Wl,--no-as-needed -lfaust'],
-            library_dirs=[dawdreamer_dir, './', 'dawdreamer', './dawdreamer', '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
-            runtime_library_dirs=[dawdreamer_dir, './', 'dawdreamer', './dawdreamer', '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
-            data_files=[('/usr/lib/x86_64-linux-gnu', glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))]
+            library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
+            runtime_library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
         ),
     ]
 
