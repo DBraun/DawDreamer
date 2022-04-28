@@ -70,8 +70,8 @@ elif platform.system() == "Linux":
             ['dawdreamer/null.c'],
             language='c++',
             libraries=['faust'],
-            library_dirs=['./'],
-            runtime_library_dirs=['./']
+            library_dirs=['./', 'dawdreamer'],
+            runtime_library_dirs=['./', 'dawdreamer']
         ),
     ]
 
