@@ -19,6 +19,7 @@ echo "pythonLibPath: $pythonLibPath"
 echo "pythonInclude: $pythonInclude"
 
 cp -v thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 dawdreamer/
+ln dawdreamer/libfaust.so.2 dawdreamer/libfaust.so
 
 yum install -y libsndfile \
 libX11-devel \
