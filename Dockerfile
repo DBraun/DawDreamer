@@ -47,6 +47,8 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libform.so.6 /usr/local/lib/libform.so.5
 RUN ldd /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
 RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so
 RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so.2
+RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /usr/lib/x86_64-linux-gnu/libfaust.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libfaust.so /usr/local/lib/libfaust.so
 
 # Build DawDreamer
 WORKDIR /DawDreamer/Builds/LinuxMakefile
