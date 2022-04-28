@@ -53,9 +53,11 @@ if platform.system() == "Windows":
 
 elif platform.system() == "Linux":
 
-    files = ['dawdreamer/dawdreamer.so', 'dawdreamer/libfaust.so', 'dawdreamer/libfaust.so.2']
+    files = ['dawdreamer/dawdreamer.so']
+    files += list(glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))
     for file in files:
-        assert os.path.isfile(os.path.join(this_dir, file))
+        assert os.path.isfile(os.path.abspath(file)), ValueError("File not found: " + file)
+    print('Using compiled files: ', str(files))
 
     package_data += files
 
