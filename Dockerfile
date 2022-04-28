@@ -11,7 +11,9 @@ COPY . /DawDreamer
 RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git /DawDreamer/dawdreamer/faustlibraries
 
 WORKDIR /DawDreamer
-RUN sh -v before_linux_build.sh "39" "3.9"
+ENV PYTHONLIBPATH=/opt/python/cp39-cp39/lib
+ENV PYTHONINCLUDEPATH=/opt/python/cp39-cp39/include/python3.9
+RUN sh -v build_linux.sh
 
 # Setup Python Requirements
 WORKDIR /DawDreamer

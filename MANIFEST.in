@@ -1,1 +1,1 @@
-graft dawdreamer # will copy the entire package including non-python files. 
+graft dawdreamer # copy everything
