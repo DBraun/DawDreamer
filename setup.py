@@ -64,14 +64,15 @@ elif platform.system() == "Linux":
 
     # For Linux, we do a hacky thing where we force a compilation of an empty file
     # in order for auditwheel to work.
+    dawdreamer_dir = os.path.join(this_dir, 'dawdreamer')
     ext_modules = [
         Extension(
             'dawdreamer',
             ['dawdreamer/null.c'],
             language='c++',
             libraries=['faust'],
-            library_dirs=['./', 'dawdreamer'],
-            runtime_library_dirs=['./', 'dawdreamer']
+            library_dirs=[dawdreamer_dir, './', 'dawdreamer', './dawdreamer', '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
+            runtime_library_dirs=[dawdreamer_dir, './', 'dawdreamer', './dawdreamer', '/usr/local/lib', '/usr/lib/x86_64-linux-gnu']
         ),
     ]
 
