@@ -38,9 +38,9 @@ RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git /DawD
 
 # Make symlinks to use during building DawDreamer
 RUN ln -s /usr/lib/x86_64-linux-gnu/libsamplerate.so.0 /usr/local/lib/libsamplerate.so
-RUN ls /usr/lib/x86_64-linux-gnu/*
 RUN ln -s /usr/lib/x86_64-linux-gnu/libncurses.so.6 /usr/local/lib/libncurses.so.5
 
+RUN ldd /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
 RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so
 RUN cp /DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so /DawDreamer/dawdreamer/libfaust.so.2
 
@@ -50,6 +50,7 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/python3.9/
 RUN ldconfig
 RUN make VERBOSE=1 CONFIG=Release
 RUN cp /DawDreamer/Builds/LinuxMakefile/build/libdawdreamer.so /DawDreamer/dawdreamer/dawdreamer.so
+RUN ldd /DawDreamer/dawdreamer/dawdreamer.so
 
 # Setup Python Requirements
 WORKDIR /DawDreamer
