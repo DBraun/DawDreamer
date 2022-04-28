@@ -73,7 +73,7 @@ elif platform.system() == "Linux":
             libraries=['faust'],
             library_dirs=[dawdreamer_dir, './', 'dawdreamer', './dawdreamer', '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
             runtime_library_dirs=[dawdreamer_dir, './', 'dawdreamer', './dawdreamer', '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
-            data_files=[('/usr/local/lib', glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))]
+            data_files=[('/usr/lib/x86_64-linux-gnu', glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))]
         ),
     ]
 
