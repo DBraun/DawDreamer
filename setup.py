@@ -56,7 +56,8 @@ elif platform.system() == "Linux":
     files = ['dawdreamer/dawdreamer.so']
     files += list(glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))
     for file in files:
-        assert os.path.isfile(os.path.abspath(file)), ValueError("File not found: " + file)
+        filepath = os.path.abspath(file)
+        assert os.path.isfile(filepath), ValueError("File not found: " + filepath)
     print('Using compiled files: ', str(files))
 
     package_data += files
@@ -67,7 +68,10 @@ elif platform.system() == "Linux":
         Extension(
             'dawdreamer',
             ['dawdreamer/null.c'],
-            language='c++'
+            language='c++',
+            libraries=['faust'],
+            library_dirs=['./'],
+            runtime_library_dirs=['./']
         ),
     ]
 
