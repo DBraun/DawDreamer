@@ -104,7 +104,7 @@ package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))
 # Every item in package_data should be inside the dawdreamer directory.
 # Then we make the paths relative to this directory.
 package_data = [os.path.relpath(os.path.abspath(a), os.path.join(this_dir, "dawdreamer")).replace('\\', '/') for a in package_data]
-
+print('package_data: ', package_data)
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
