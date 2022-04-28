@@ -2,6 +2,7 @@ recursive-include . licenses *
 recursive-include . dawdreamer.pyd
 recursive-include . dawdreamer.so*
 recursive-include . faust.dll
-recursive-include . libfaust.so*
+recursive-include . libfaust.so
+recursive-include . libfaust.so.2*
 recursive-include . libfaust.2.dylib
 recursive-include . dawdreamer faustlibraries

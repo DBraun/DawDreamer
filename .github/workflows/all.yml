@@ -13,6 +13,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - { python-version: "3.7", python-major: "37", cibwbuild: "cp37-manylinux_x86_64"}
+        - { python-version: "3.8", python-major: "38", cibwbuild: "cp38-manylinux_x86_64"}
         - { python-version: "3.9", python-major: "39", cibwbuild: "cp39-manylinux_x86_64"}
         - { python-version: "3.10", python-major: "310", cibwbuild: "cp310-manylinux_x86_64"}
 
@@ -46,8 +48,9 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_BUILD_VERBOSITY: 3
         CIBW_BEFORE_BUILD_LINUX: sh -v before_linux_build.sh ${{ matrix.python-major }} ${{ matrix.python-version }}
+        # LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
+          rm -rf dawdreamer/*.so* && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
         CIBW_TEST_COMMAND: "cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64

@@ -23,5 +23,5 @@ RUN DISTUTILS_DEBUG=1 python3.9 /DawDreamer/setup.py install
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer
+# ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer
 RUN python3.9 -m pytest -v .

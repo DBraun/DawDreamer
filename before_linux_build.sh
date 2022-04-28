@@ -2,7 +2,9 @@ PYTHONMAJOR="$1"
 PYTHONVERSION="$2"
 
 echo "PYTHONMAJOR: $PYTHONMAJOR" 
-echo "PYTHONVERSION: $PYTHONVERSION" 
+echo "PYTHONVERSION: $PYTHONVERSION"
+
+cp -v thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so* dawdreamer/
 
 yum install -y libsndfile \
 libX11-devel \
@@ -43,6 +45,5 @@ echo "pythonInclude: $pythonInclude"
 make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src -L$pythonLibPath" CXXFLAGS="-I../../alsa-lib/include -I$pythonInclude"
 mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
 cd ../..
-cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so dawdreamer/libfaust.so
 
 echo "before_linux_build.sh is done!"
