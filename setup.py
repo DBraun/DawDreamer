@@ -84,7 +84,7 @@ else:
         f"setup.py hasn't been implemented for platform: {platform}."
     )
 
-faustlibraries = list(glob.glob('dawdreamer/faustlibraries/*', recursive=True))
+faustlibraries = list(glob.glob(os.path.join(this_dir, 'dawdreamer/faustlibraries/*'), recursive=True))
 
 if not faustlibraries:
     raise ValueError("You need to put the faustlibraries repo inside dawdreamer.")
@@ -93,14 +93,11 @@ package_data += faustlibraries
 
 package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))
 
-# note: package_data must be relative paths, not absolute.
-package_data = [a.replace('\\', '/') for a in package_data]
-
-prefix = 'dawdreamer/'
-package_data = [a[len(prefix):] if a.startswith(prefix) else a for a in package_data]
+# Every item in package_data should be inside the dawdreamer directory.
+# Then we make the paths relative to this directory.
+package_data = [os.path.relpath(os.path.abspath(a), os.path.join(this_dir, "dawdreamer")).replace('\\', '/') for a in package_data]
 
 long_description = (Path(__file__).parent / "README.md").read_text()
-
 
 setup(
     name='dawdreamer',
