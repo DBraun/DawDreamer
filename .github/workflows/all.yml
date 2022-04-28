@@ -49,7 +49,7 @@ jobs:
         CIBW_BUILD_VERBOSITY: 3
         CIBW_BEFORE_BUILD_LINUX: sh -v before_linux_build.sh ${{ matrix.python-major }} ${{ matrix.python-version }}
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
+          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
