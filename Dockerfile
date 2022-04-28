@@ -21,7 +21,7 @@ RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 WORKDIR /DawDreamer
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer
 RUN DISTUTILS_DEBUG=1 python3.9 /DawDreamer/setup.py install
-RUN rm -rf /DawDreamer/dawdreamer/*.so*
+# RUN rm -rf /DawDreamer/dawdreamer/*.so*
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
