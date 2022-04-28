@@ -2,6 +2,9 @@ FROM quay.io/pypa/manylinux2014_x86_64
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# get pip
+RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python get-pip.py
+
 # clone repo by copying in
 COPY . /DawDreamer
 
