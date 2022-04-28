@@ -52,7 +52,8 @@ RUN apt install -y python3-pip
 RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 
 # Build and install wheel
-RUN python3.9 /DawDreamer/setup.py install
+WORKDIR /DawDreamer
+RUN python3.9 DISTUTILS_DEBUG=1 /DawDreamer/setup.py install
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
