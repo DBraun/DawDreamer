@@ -36,6 +36,7 @@ DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a 
 ## Installation
 
 Install with [PyPI](https://pypi.org/project/dawdreamer/):
+
 `pip install dawdreamer`
 
 ## API Documentation
@@ -43,6 +44,39 @@ Install with [PyPI](https://pypi.org/project/dawdreamer/):
 [https://dirt.design/DawDreamer/](https://dirt.design/DawDreamer/)
 
 ## Basic Example
+
+Using Faust, let's make a stereo sine-tone at 440 Hz and -6 dB. You can run this code as-is.
+
+```python
+import dawdreamer as daw
+from scipy.io import wavfile
+SAMPLE_RATE = 44100
+engine = daw.RenderEngine(SAMPLE_RATE, 512)  # 512 block size
+faust_processor = engine.make_faust_processor("faust")
+faust_processor.set_dsp_string(
+    """
+    declare name "MySine";
+    freq = hslider("freq", 440, 0, 20000, 0);
+    gain = hslider("vol[unit:dB]", 0, -120, 20, 0) : ba.db2linear;
+    process = freq : os.osc : _*gain <: si.bus(2);
+    """
+    )
+print(faust_processor.get_parameters_description())
+engine.load_graph([
+                   (faust_processor, [])
+])
+faust_processor.set_parameter("/MySine/freq", 440.)  # 440 Hz
+faust_processor.set_parameter("/MySine/vol", -6.)  # -6 dB volume
+
+engine.render(1.)  # render 1 sec
+audio = engine.get_audio()  # shaped (2, N samples)
+wavfile.write('sine_demo.wav', SAMPLE_RATE, audio.transpose())
+```
+
+## Advanced Example
+
+Let's demonstate audio playback, graph-building, VST instruments/effects, and automation. You need to change many hard-coded paths for this to work.
+
 ```python
 import dawdreamer as daw
 import numpy as np
@@ -241,7 +275,7 @@ Polyphony is supported too. You simply need to provide DSP code that refers to c
 
 ### Soundfiles in Faust
 
-Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays. Refer to [tests/test_faust_soundfile.py](https://github.com/DBraun/DawDreamer/blob/main/tests/test_faust_soundfile.py)
+Faust code in DawDreamer can use the [soundfile](https://faustdoc.grame.fr/manual/syntax/#soundfile-primitive) primitive. Normally `soundfile` is meant to load `.wav` files, but DawDreamer uses it to receive data from numpy arrays. Refer to [tests/test_faust_soundfile.py](https://github.com/DBraun/DawDreamer/blob/main/tests/test_faust_soundfile.py) which contains an example of loading 88 piano notes and playing them with polyphony.
 
 **soundfile_test.py**
 ```python
@@ -326,7 +360,7 @@ DawDreamer is licensed under GPLv3 to make it easier to comply with all of the d
 
 ## Wiki
 
-Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki) for more [examples](https://github.com/DBraun/DawDreamer/wiki/Documentation), the [API documentation](https://dirt.design/DawDreamer), and the [Developer's Guide](https://github.com/DBraun/DawDreamer/wiki/Developer's-Guide). The [tests](https://github.com/DBraun/DawDreamer/tree/main/tests) may also be helpful.
+Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki), the [API documentation](https://dirt.design/DawDreamer), and the [Developer's Guide](https://github.com/DBraun/DawDreamer/wiki/Developer's-Guide). The [tests](https://github.com/DBraun/DawDreamer/tree/main/tests) may also be helpful.
 
 ## Thanks to contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
 * [fedden](https://github.com/fedden), RenderMan creator

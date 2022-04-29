@@ -56,22 +56,22 @@ def test_faust_poly():
 	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_grouped.wav', group_voices=True)
 	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_ungrouped.wav', group_voices=False)
 
-	assert(np.allclose(audio1, audio2))
+	assert np.allclose(audio1, audio2)
 
 	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_2k_cutoff_grouped.wav', group_voices=True, cutoff=2000)
 	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_2k_cutoff_ungrouped.wav', group_voices=False, cutoff=2000)
 
-	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
+	assert np.allclose(audio1, audio2)
 
 	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_cutoff_grouped.wav', group_voices=True, automation=True)
 	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_cutoff_ungrouped.wav', group_voices=False, automation=True)
 
-	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
+	assert np.allclose(audio1, audio2)
 
 	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
 	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
 
-	assert(np.allclose(audio1[:,:-1], audio2[:,:-1]))  # todo: don't drop last sample
+	assert np.allclose(audio1, audio2)
 
 
 @pytest.mark.parametrize("midi_path", [abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi')])

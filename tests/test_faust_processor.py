@@ -2,13 +2,16 @@ from dawdreamer_utils import *
 
 BUFFER_SIZE = 1
 
-def test_faust_passthrough():
+from itertools import product
 
-    DURATION = 5.1
+@pytest.mark.parametrize("duration,buffer_size", product(
+    [(44099.5/44100), (44100.5/44100), 1., (4./44100)],
+    [1, 2, 4, 8, 16, 128, 2048]))
+def test_faust_passthrough(duration, buffer_size):
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
-    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", duration=DURATION)
+    data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", duration=duration)
     playback_processor = engine.make_playback_processor("playback", data)
 
     faust_processor = engine.make_faust_processor("faust")
@@ -24,45 +27,50 @@ def test_faust_passthrough():
 
     engine.load_graph(graph)
 
-    render(engine, file_path=OUTPUT / 'test_faust_passthrough.wav')
+    render(engine, duration=duration)
 
     audio = engine.get_audio()
 
-    # Todo: the last sample is inaccurate by a little bit
-    # So we trim the last sample and compare
-    data = data[:,:audio.shape[1]]
-    audio = audio[:,:audio.shape[1]]
+    assert data.shape[1] == audio.shape[1]
 
-    assert(np.allclose(data, audio, atol=1e-07))
+    # todo: shouldn't need to trim one sample like this
+    min_length = min(audio.shape[1], data.shape[1]) - 1
+    data = data[:,:min_length]
+    audio = audio[:,:min_length]
+
+    assert np.allclose(data, audio, atol=1e-07)
 
     # do the same for noise
-    data = np.random.rand(2, int(SAMPLE_RATE*(DURATION+.1)))
+    data = np.random.rand(2, int(SAMPLE_RATE*duration))
     playback_processor.set_data(data)
-    render(engine)
+    render(engine, duration=duration)
     audio = engine.get_audio()
 
-    data = data[:,:audio.shape[1]]
-    audio = audio[:,:audio.shape[1]]
+    assert data.shape[1] == audio.shape[1]
 
-    assert(np.allclose(data, audio, atol=1e-07))
+    # todo: shouldn't need to trim one sample like this
+    min_length = min(audio.shape[1], data.shape[1]) - 1
+    data = data[:,:min_length]
+    audio = audio[:,:min_length]
 
+    assert np.allclose(data, audio, atol=1e-07)
 
-def test_faust_multichannel_in_out():
+@pytest.mark.parametrize("duration,buffer_size", product(
+    [(44099.5/44100), (44100.5/44100), 1., (4./44100)],
+    [1, 2, 4, 8, 16, 128, 2048]))
+def test_faust_multichannel_in_out(duration, buffer_size):
 
-    DURATION = 5.1
-
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
     numChannels = 9
-    underscores = ",".join('_'*numChannels)
 
-    data = np.sin(np.linspace(0, 4000, num=int(44100*(DURATION+.1))))
+    data = np.sin(np.linspace(0, 4000, num=int(SAMPLE_RATE*duration)))
     data = np.stack([data for _ in range(numChannels)])
 
     playback_processor = engine.make_playback_processor("playback", data)
 
     faust_processor = engine.make_faust_processor("faust")
-    faust_processor.set_dsp_string(f'process = {underscores};')
+    faust_processor.set_dsp_string(f'process = si.bus({numChannels});')
     faust_processor.compile()
 
     # print(faust_processor.get_parameters_description())
@@ -74,14 +82,14 @@ def test_faust_multichannel_in_out():
 
     engine.load_graph(graph)
 
-    render(engine, file_path=OUTPUT / 'test_faust_multichannel_in_out.wav')
+    render(engine, duration=duration)
 
     audio = engine.get_audio()
 
-    # Todo: the last sample is inaccurate by a little bit
-    # So we trim the last sample and compare
-    data = data[:,:audio.shape[1]]
-    audio = audio[:,:audio.shape[1]]
+    # todo: shouldn't need to trim one sample like this
+    min_length = min(audio.shape[1], data.shape[1]) -1
+    data = data[:,:min_length]
+    audio = audio[:,:min_length]
 
     assert(np.allclose(data, audio, atol=1e-07))
 
