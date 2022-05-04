@@ -17,11 +17,21 @@ jobs:
         - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
         - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
         - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
+        - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_aarch64"}
+        - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_aarch64"}
+        - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_aarch64"}
+        - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_aarch64"}
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
+
+    - name: Set up QEMU for aarch64 on Linux
+      if: runner.os == 'Linux'
+      uses: docker/setup-qemu-action@v1
+      with:
+        platforms: all
 
     - name: Checkout faustlibraries
       uses: actions/checkout@v2
@@ -45,8 +55,9 @@ jobs:
       env:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_BUILD_VERBOSITY: 3
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_BEFORE_BUILD_LINUX:
           export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && sh -v build_linux.sh
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
@@ -54,6 +65,7 @@ jobs:
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
+        CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
 
     - uses: actions/upload-artifact@v2
       with:

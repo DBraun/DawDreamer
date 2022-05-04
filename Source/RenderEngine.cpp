@@ -3,21 +3,21 @@
 
 RenderEngine::RenderEngine(double sr, int bs) :
     mySampleRate{ sr },
-    myBufferSize{ bs }
+    myBufferSize{ bs },
+    myMainProcessorGraph(new juce::AudioProcessorGraph())
 {
-    myMainProcessorGraph.reset(new juce::AudioProcessorGraph());
     myMainProcessorGraph->setNonRealtime(true);
     myMainProcessorGraph->setPlayHead(this);
 }
 
 RenderEngine::~RenderEngine()
 {
+    myMainProcessorGraph->clear();
     //int numNodes = myMainProcessorGraph->getNumNodes();
     //for (int i = 0; i < numNodes; i++) {
     //    auto processor = myMainProcessorGraph->getNode(i)->decReferenceCountWithoutDeleting();
     //}
-    //myMainProcessorGraph->releaseResources();
-    myMainProcessorGraph.reset();
+    myMainProcessorGraph->releaseResources();
 }
 
 bool
@@ -55,7 +55,7 @@ RenderEngine::loadGraph(DAG inDagNodes) {
     }
 
     myMainProcessorGraph->enableAllBuses();
-    // NB: don't enableAllBuses on all the processors in the graph because
+    // NB: don't enableAllBuses on all the nodes in the graph because
     // it will actually mess them up (FaustProcessor)
     
     return success;
