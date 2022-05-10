@@ -1,51 +1,78 @@
 #include "RenderEngineWrapper.h"
 
+
 RenderEngineWrapper::RenderEngineWrapper(double sr, int bs) :
     RenderEngine(sr, bs)
 {
 }
 
-/// @brief
-std::shared_ptr<OscillatorProcessor>
+
+void
+RenderEngineWrapper::prepareProcessor(ProcessorBase* processor, const std::string& name)
+{
+    if (m_UniqueNameToNodeID.find(name) != m_UniqueNameToNodeID.end()) {
+        myMainProcessorGraph->removeNode(m_UniqueNameToNodeID[name]);
+        m_UniqueNameToNodeID.erase(name);
+    }
+
+    auto node = myMainProcessorGraph->addNode((std::unique_ptr<ProcessorBase>)(processor));
+    m_UniqueNameToNodeID[name] = node->nodeID;
+}
+
+
+OscillatorProcessor*
 RenderEngineWrapper::makeOscillatorProcessor(const std::string& name, float freq)
 {
-    return std::shared_ptr<OscillatorProcessor>{new OscillatorProcessor{ name, freq }};
+    auto processor = new OscillatorProcessor{ name, freq };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
-/// @brief
-std::shared_ptr<PluginProcessorWrapper>
+
+PluginProcessorWrapper*
 RenderEngineWrapper::makePluginProcessor(const std::string& name, const std::string& path)
 {
-    return std::shared_ptr<PluginProcessorWrapper>{new PluginProcessorWrapper{ name, mySampleRate, myBufferSize, path }};
+    auto processor = new PluginProcessorWrapper{ name, mySampleRate, myBufferSize, path };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
-/// @brief
-std::shared_ptr<PlaybackProcessor>
+
+PlaybackProcessor*
 RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array data)
 {
-    return std::shared_ptr<PlaybackProcessor>{new PlaybackProcessor{ name, data }};
+    auto processor = new PlaybackProcessor{ name, data };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
+
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-/// @brief
-std::shared_ptr<PlaybackWarpProcessor>
+PlaybackWarpProcessor*
 RenderEngineWrapper::makePlaybackWarpProcessor(const std::string& name, py::array data)
 {
-    return std::shared_ptr<PlaybackWarpProcessor>{new PlaybackWarpProcessor{ name, data, mySampleRate }};
+    auto processor =new PlaybackWarpProcessor{ name, data, mySampleRate };
+    this->prepareProcessor(processor, name);
+    return processor;
+
 }
 #endif
 
-std::shared_ptr<FilterProcessor>
+
+FilterProcessor*
 RenderEngineWrapper::makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain) {
 
     float validFreq = std::fmax(.0001f, freq);
     float validQ = std::fmax(.0001f, q);
     float validGain = std::fmax(.0001f, gain);
 
-    return std::shared_ptr<FilterProcessor>{new FilterProcessor{ name, mode, validFreq, validQ, validGain }};
+    auto processor = new FilterProcessor{ name, mode, validFreq, validQ, validGain };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
-std::shared_ptr<CompressorProcessor>
+
+CompressorProcessor*
 RenderEngineWrapper::makeCompressorProcessor(const std::string& name, float threshold = 0.f, float ratio = 2.f, float attack = 2.f, float release = 50.f) {
 
     // ratio must be >= 1.0
@@ -53,52 +80,73 @@ RenderEngineWrapper::makeCompressorProcessor(const std::string& name, float thre
     float validRatio = std::fmax(1.0f, ratio);
     float validAttack = std::fmax(0.f, attack);
     float validRelease = std::fmax(0.f, release);
-    return std::shared_ptr<CompressorProcessor>{new CompressorProcessor{ name, threshold, validRatio, validAttack, validRelease }};
+
+    auto processor = new CompressorProcessor{ name, threshold, validRatio, validAttack, validRelease };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
 
-std::shared_ptr<AddProcessor>
+AddProcessor*
 RenderEngineWrapper::makeAddProcessor(const std::string& name, std::vector<float> gainLevels) {
-    return std::shared_ptr<AddProcessor>{new AddProcessor{ name, gainLevels }};
+
+    auto processor = new AddProcessor{ name, gainLevels };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
 
-std::shared_ptr<ReverbProcessor>
+ReverbProcessor*
 RenderEngineWrapper::makeReverbProcessor(const std::string& name, float roomSize = 0.5f, float damping = 0.5f, float wetLevel = 0.33f,
     float dryLevel = 0.4f, float width = 1.0f) {
-    return std::shared_ptr<ReverbProcessor>{new ReverbProcessor{ name, roomSize, damping, wetLevel, dryLevel, width }};
+
+    auto processor = new ReverbProcessor{ name, roomSize, damping, wetLevel, dryLevel, width };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
-std::shared_ptr<PannerProcessor>
+
+PannerProcessor*
 RenderEngineWrapper::makePannerProcessor(const std::string& name, std::string& rule, float pan) {
 
     float safeVal = std::fmax(-1.f, pan);
     safeVal = std::fmin(1.f, pan);
 
-    return std::shared_ptr<PannerProcessor>{new PannerProcessor{ name, rule, safeVal }};
+    auto processor = new PannerProcessor{ name, rule, safeVal };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
-std::shared_ptr<DelayProcessor>
+
+DelayProcessor*
 RenderEngineWrapper::makeDelayProcessor(const std::string& name, std::string& rule, float delay, float wet) {
     float safeDelay = std::fmax(0.f, delay);
 
     float safeWet = std::fmin(1.f, std::fmax(0.f, wet));
+    auto processor = new DelayProcessor{ name, rule, safeDelay, safeWet };
 
-    return std::shared_ptr<DelayProcessor>{new DelayProcessor{ name, rule, safeDelay, safeWet }};
+    this->prepareProcessor(processor, name);
+
+    return processor;
 }
 
-/// @brief
-std::shared_ptr<SamplerProcessor>
+
+SamplerProcessor*
 RenderEngineWrapper::makeSamplerProcessor(const std::string& name, py::array data)
 {
-    return std::shared_ptr<SamplerProcessor>{new SamplerProcessor{ name, data, mySampleRate, myBufferSize }};
+    auto processor = new SamplerProcessor{ name, data, mySampleRate, myBufferSize };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 
+
 #ifdef BUILD_DAWDREAMER_FAUST
-std::shared_ptr<FaustProcessor>
+FaustProcessor*
 RenderEngineWrapper::makeFaustProcessor(const std::string& name)
 {
-    return std::shared_ptr<FaustProcessor>{new FaustProcessor{ name, mySampleRate, myBufferSize }};
+    auto processor = new FaustProcessor{ name, mySampleRate, myBufferSize };
+    this->prepareProcessor(processor, name);
+    return processor;
 }
 #endif
 

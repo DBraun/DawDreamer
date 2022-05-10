@@ -1,4 +1,6 @@
 #include "RenderEngine.h"
+#include "AllProcessors.h"
+
 #include <unordered_map>
 
 RenderEngine::RenderEngine(double sr, int bs) :
@@ -12,52 +14,42 @@ RenderEngine::RenderEngine(double sr, int bs) :
 
 RenderEngine::~RenderEngine()
 {
-    myMainProcessorGraph->clear();
-    //int numNodes = myMainProcessorGraph->getNumNodes();
-    //for (int i = 0; i < numNodes; i++) {
-    //    auto processor = myMainProcessorGraph->getNode(i)->decReferenceCountWithoutDeleting();
-    //}
+    //myMainProcessorGraph->clear();
+    myMainProcessorGraph->reset();
     myMainProcessorGraph->releaseResources();
 }
 
 bool
 RenderEngine::loadGraph(DAG inDagNodes) {
-
     bool success = true;
     
     std::vector<DAGNode>* dagNodes = (std::vector<DAGNode>*) &inDagNodes;
 
-    myMainProcessorGraph->clear();
-
-    using AudioGraphIOProcessor = juce::AudioProcessorGraph::AudioGraphIOProcessor;
-
-    int nodeInt = 0;
-
-    m_UniqueNameToSlotIndex.clear();
-    m_UniqueNameToInputs.clear();
-    
-    slots.clear();
+    m_stringDag.clear();
 
     for (auto node : *dagNodes) {
         auto processorBase = node.processorBase;
 
-        auto myNode = myMainProcessorGraph->addNode((std::unique_ptr<ProcessorBase>)processorBase);
+        if (m_UniqueNameToNodeID.find(processorBase->getUniqueName()) == m_UniqueNameToNodeID.end()) {
+            m_stringDag.clear();
+            throw std::runtime_error("Error: Unable to find processor with unique name: " + processorBase->getUniqueName() + ".");
+        }
 
-        // todo: does incReferenceCount() cause memory leak??
-        // If we don't do it, later calls to this function to load a new graph crash at myMainProcessorGraph->clear();
-        myNode.get()->incReferenceCount();
+        for (auto inputName : node.inputs) {
+            if (m_UniqueNameToNodeID.find(processorBase->getUniqueName()) == m_UniqueNameToNodeID.end()) {
+                m_stringDag.clear();
+                throw std::runtime_error("Error: Unable to find processor with unique name: " + inputName + ".");
+            }
+        }
 
-        slots.set(nodeInt, myNode);
-        m_UniqueNameToSlotIndex[processorBase->getUniqueName()] = nodeInt;
-        m_UniqueNameToInputs[processorBase->getUniqueName()] = node.inputs;
-
-        nodeInt++;
+        m_stringDag.push_back(
+            std::pair<std::string, std::vector<std::string>>(processorBase->getUniqueName(), node.inputs)
+        );
     }
 
     myMainProcessorGraph->enableAllBuses();
     // NB: don't enableAllBuses on all the nodes in the graph because
     // it will actually mess them up (FaustProcessor)
-    
     return success;
 }
 
@@ -68,54 +60,63 @@ RenderEngine::connectGraph() {
     for (auto connection : myMainProcessorGraph->getConnections()) {
         myMainProcessorGraph->removeConnection(connection);
     }
-     
-    int numNodes = myMainProcessorGraph->getNumNodes();
-    for (int i = 0; i < numNodes; i++) {
-        auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
+
+    for (auto entry : m_stringDag) {
+
+        if (m_UniqueNameToNodeID.find(entry.first) == m_UniqueNameToNodeID.end()) {
+            m_stringDag.clear();
+            throw std::runtime_error("Error: Unable to find processor with unique name: " + entry.first + ".");
+        }
+
+        auto node = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
+        
+        auto processor = dynamic_cast<ProcessorBase*> (node->getProcessor());
+
+        if (!processor) {
+            throw std::runtime_error("Unable to cast to ProcessorBase during connectGraph.");
+        }
         
         int numInputAudioChans = 0;
                 
         std::string myUniqueName = processor->getUniqueName();
         
-        auto inputs = m_UniqueNameToInputs[myUniqueName];
-                
-        for (auto otherNode : myMainProcessorGraph->getNodes()) {
-            auto otherName = ((ProcessorBase*) otherNode->getProcessor())->getUniqueName();
-            
-            if (std::find(inputs.begin(), inputs.end(), otherName) != inputs.end()) {
-                numInputAudioChans += otherNode->getProcessor()->getMainBusNumOutputChannels();
-            }
-        }
+        auto inputNames = entry.second;
 
+        for (auto inputName : inputNames) {
+
+            if (m_UniqueNameToNodeID.find(inputName) == m_UniqueNameToNodeID.end()) {
+                m_stringDag.clear();
+                throw std::runtime_error("Error: Unable to find processor with unique name: " + inputName + ".");
+            }
+
+            auto otherNode = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[inputName]);
+
+            numInputAudioChans += otherNode->getProcessor()->getMainBusNumOutputChannels();
+        }
+                
         processor->setPlayHead(this);
         processor->automateParameters();
         int numOutputAudioChans = processor->getMainBusNumOutputChannels();
         int expectedInputChannels = processor->getMainBusNumInputChannels();
         if (numInputAudioChans > expectedInputChannels) {
-            // todo: enable this warning
-            //std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName << " expects " << expectedInputChannels << " input signals, but you are trying to connect " << numInputAudioChans << " signals." << std::endl;
+            std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName << " expects " << expectedInputChannels << " input signals, but you are trying to connect " << numInputAudioChans << " signals." << std::endl;
         }
         
         processor->setPlayConfigDetails(expectedInputChannels, numOutputAudioChans, mySampleRate, myBufferSize);
         
         int chanDest = 0;
 
-        for (const std::string inputName : m_UniqueNameToInputs[myUniqueName]) {
-
-            if (m_UniqueNameToSlotIndex.find(inputName) == m_UniqueNameToSlotIndex.end())
-            {
-                throw std::runtime_error("Error: Unable to connect " + inputName + " to " + myUniqueName + "; You might need to place " + inputName + " earlier in the graph.");
-                return false;
-            }
+        for (const std::string inputName : inputNames) {
             
-            int slotIndexOfInput = m_UniqueNameToSlotIndex[inputName];
+            auto inputNode = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[inputName]);
 
-            auto inputProcessor = myMainProcessorGraph->getNode(slotIndexOfInput)->getProcessor();
+            auto inputProcessor = inputNode->getProcessor();
             
             for (int chanSource = 0; chanSource < inputProcessor->getMainBusNumOutputChannels(); chanSource++) {
 
-                AudioProcessorGraph::Connection connection = { { slots.getUnchecked(slotIndexOfInput)->nodeID, chanSource },
-                                                { slots.getUnchecked(i)->nodeID, chanDest } };
+                AudioProcessorGraph::Connection connection = {
+                    { inputNode->nodeID, chanSource },
+                    { node->nodeID, chanDest } };
 
                 bool result = myMainProcessorGraph->canConnect(connection) && myMainProcessorGraph->addConnection(connection);
                 if (!result) {
@@ -134,7 +135,8 @@ RenderEngine::connectGraph() {
 
     myMainProcessorGraph->setPlayConfigDetails(0, 0, mySampleRate, myBufferSize);
     myMainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
-    for (auto node : myMainProcessorGraph->getNodes()) {
+    for (auto entry : m_stringDag) {
+        auto node = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
         node->getProcessor()->prepareToPlay(mySampleRate, myBufferSize);
     }
     
@@ -155,12 +157,25 @@ RenderEngine::render(const double renderLength) {
     bool graphIsConnected = true;
     int audioBufferNumChans = 0;
 
-    int numNodes = myMainProcessorGraph->getNumNodes();
-    for (int i = 0; i < numNodes; i++) {
-        auto processor = myMainProcessorGraph->getNode(i)->getProcessor();
+    for (auto entry : m_stringDag) {
+
+        if (m_UniqueNameToNodeID.find(entry.first) == m_UniqueNameToNodeID.end()) {
+            throw std::runtime_error("Unable to find processor named: " + entry.first + ".");
+        }
+
+        auto node = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
+        auto processor = node->getProcessor();
 
         audioBufferNumChans = std::max(audioBufferNumChans, processor->getTotalNumInputChannels());
         audioBufferNumChans = std::max(audioBufferNumChans, processor->getMainBusNumOutputChannels());
+
+        auto processorBase = dynamic_cast<ProcessorBase*> (processor);
+        if (processorBase) {
+            graphIsConnected = graphIsConnected && processorBase->isConnectedInGraph();
+        }
+        else {
+            throw std::runtime_error("Unable to cast to Processor Base during render.");
+        }
 
         auto faustProcessor = dynamic_cast<FaustProcessor*> (processor);
         if (faustProcessor && (!faustProcessor->isCompiled())) {
@@ -168,11 +183,6 @@ RenderEngine::render(const double renderLength) {
                 return false;
             }
         }
-        auto processorBase = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
-        if (processorBase) {
-            graphIsConnected = graphIsConnected && processorBase->isConnectedInGraph();
-        }
-
     }
 
     myMainProcessorGraph->reset();
@@ -197,14 +207,19 @@ RenderEngine::render(const double renderLength) {
     
     AudioSampleBuffer audioBuffer(audioBufferNumChans, myBufferSize);
     
-    for (int i = 0; i < numNodes; i++) {
-        auto processor = dynamic_cast<ProcessorBase*> (myMainProcessorGraph->getNode(i)->getProcessor());
+    for (auto entry : m_stringDag) {
+        auto node = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
+        auto processor = dynamic_cast<ProcessorBase*> (node->getProcessor());
+
         if (processor) {
-            if (i == numNodes-1) {
-                // always force the last processor to record. todo: maybe this is clumsy.
+            if (entry == m_stringDag.at(m_stringDag.size()-1)) {
+                // Always force the last processor to record.
                 processor->setRecordEnable(true);
             }
             processor->setRecorderLength(processor->getRecordEnable() ? numRenderedSamples : 0);
+        }
+        else {
+            throw std::runtime_error("Unable to cast to ProcessorBase during render.");
         }
     }
 
@@ -234,37 +249,24 @@ void RenderEngine::setBPM(double bpm) {
 
 py::array_t<float>
 RenderEngine::getAudioFrames()
-{
-    auto nodes = myMainProcessorGraph->getNodes();
-    
-    if (nodes.size() == 0) {
+{    
+    if (myMainProcessorGraph->getNumNodes() == 0 || m_stringDag.size() == 0) {
         // NB: For some reason we can't initialize the array as shape (2, 0)
         py::array_t<float, py::array::c_style> arr({ 2, 1 });
         arr.resize({ 2, 0 });
 
         return arr;
     }
-    
-    auto node = nodes.getLast();
-    
-    auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
-    if (processor) {
-        auto uniqueName = processor->getUniqueName();
-        return getAudioFramesForName(uniqueName);
-    }
 
-    // NB: For some reason we can't initialize the array as shape (2, 0)
-    py::array_t<float, py::array::c_style> arr({ 2, 1 });
-    arr.resize({ 2, 0 });
-
-    return arr;
+    return getAudioFramesForName(m_stringDag.at(m_stringDag.size() - 1).first);
 }
 
 py::array_t<float>
 RenderEngine::getAudioFramesForName(std::string& name)
 {
-    auto nodes = myMainProcessorGraph->getNodes();
-    for (auto& node : nodes) {
+
+    if (m_UniqueNameToNodeID.find(name) != m_UniqueNameToNodeID.end()) {
+        auto node = myMainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[name]);
 
         auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
         if (processor) {

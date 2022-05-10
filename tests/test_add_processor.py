@@ -11,7 +11,7 @@ def test_add_processor():
     that has more internal channels (8) than inputs (2) or outputs (2).
     """
 
-    DURATION = 5.1
+    DURATION = 5.
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -37,11 +37,16 @@ def test_add_processor():
 
     engine.load_graph(graph)
 
-    engine.render(5.)
 
-    output = engine.get_audio()
+    engine.render(DURATION)
 
-    wavfile.write(OUTPUT / 'test_add_processor.wav', SAMPLE_RATE, output.transpose())
+    audio = engine.get_audio()
+
+    wavfile.write(OUTPUT / 'test_add_processor.wav', SAMPLE_RATE, audio.transpose())
+
+    assert(abs(audio.shape[1]-int(DURATION*SAMPLE_RATE)) <= 1)
+
+    assert(np.mean(np.abs(audio)) > .01)
 
 # if __name__ == '__main__':
 #     test_add_processor()

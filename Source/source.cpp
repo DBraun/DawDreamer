@@ -29,7 +29,7 @@ PYBIND11_MODULE(dawdreamer, m)
            SamplerProcessor
     )pbdoc";
 
-    py::class_<ProcessorBase, std::shared_ptr<ProcessorBase>>(m, "ProcessorBase")
+    py::class_<ProcessorBase>(m, "ProcessorBase")
         .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), R"pbdoc(
     Set a parameter's automation with a numpy array.
 
@@ -72,14 +72,14 @@ PYBIND11_MODULE(dawdreamer, m)
     The abstract Processor Base class, which all processors subclass.
 )pbdoc";
 
-    py::class_<OscillatorProcessor, std::shared_ptr<OscillatorProcessor>, ProcessorBase>(m, "OscillatorProcessor");
+    py::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor");
 
-    py::class_<PlaybackProcessor, std::shared_ptr<PlaybackProcessor>, ProcessorBase>(m, "PlaybackProcessor")
+    py::class_<PlaybackProcessor, ProcessorBase>(m, "PlaybackProcessor")
         .def("set_data", &PlaybackProcessor::setData, arg("data"), "Set the audio as a numpy array shaped (Channels, Samples).")
         .doc() = "The Playback Processor can play audio data provided as an argument.";
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-    py::class_<PlaybackWarpProcessor, std::shared_ptr<PlaybackWarpProcessor>, ProcessorBase>(m, "PlaybackWarpProcessor")
+    py::class_<PlaybackWarpProcessor, ProcessorBase>(m, "PlaybackWarpProcessor")
         .def_property("time_ratio", &PlaybackWarpProcessor::getTimeRatio, &PlaybackWarpProcessor::setTimeRatio,
             "The time ratio has an effect if an Ableton ASD file hasn't been loaded or if `warp_on` is false. A value of 2.0 for the time ratio will \
 play the audio in double the amount of time, so it will sound slowed down.")
@@ -110,12 +110,12 @@ play the audio in double the amount of time, so it will sound slowed down.")
 (https://github.com/breakfastquay/rubberband). This processor can load Ableton Live \".asd\" files to do beat-matching.";
 #endif
 
-    py::class_<PannerProcessor, std::shared_ptr<PannerProcessor>, ProcessorBase>(m, "PannerProcessor")
+    py::class_<PannerProcessor, ProcessorBase>(m, "PannerProcessor")
         .def_property("rule", &PannerProcessor::getRule, &PannerProcessor::setRule,
             "The rule must be among \"linear\", \"balanced\", \"sin3dB\", \"sin4p5dB\", \"sin6dB\", \"squareRoot3dB\", \"squareRoot4p5dB.\"")
         .def_property("pan", &PannerProcessor::getPan, &PannerProcessor::setPan, "The pan value between -1.0 and 1.0.").doc() = "The Panner Processor class";
 
-    py::class_<CompressorProcessor, std::shared_ptr<CompressorProcessor>, ProcessorBase>(m, "CompressorProcessor")
+    py::class_<CompressorProcessor, ProcessorBase>(m, "CompressorProcessor")
         .def_property("threshold", &CompressorProcessor::getThreshold, &CompressorProcessor::setThreshold,
             "The compressor's threshold in decibels.")
         .def_property("ratio", &CompressorProcessor::getRatio, &CompressorProcessor::setRatio,
@@ -126,12 +126,12 @@ play the audio in double the amount of time, so it will sound slowed down.")
             "The compressor's release in millisecods.")
         .doc() = "A compressor from JUCE.";
 
-    py::class_<DelayProcessor, std::shared_ptr<DelayProcessor>, ProcessorBase>(m, "DelayProcessor")
+    py::class_<DelayProcessor, ProcessorBase>(m, "DelayProcessor")
         .def_property("delay", &DelayProcessor::getDelay, &DelayProcessor::setDelay, "The delay in milliseconds.")
         .def_property("wet", &DelayProcessor::getWet, &DelayProcessor::setWet, "A wet level between 0.0 and 1.0.")
         .doc() = "A delay from JUCE.";
 
-    py::class_<FilterProcessor, std::shared_ptr<FilterProcessor>, ProcessorBase>(m, "FilterProcessor")
+    py::class_<FilterProcessor, ProcessorBase>(m, "FilterProcessor")
         .def_property("mode", &FilterProcessor::getMode, &FilterProcessor::setMode,
             "Choose from \"low\", \"high\", \"band\", \"low_shelf\", \"high_shelf\", \"notch\"." )
         .def_property("frequency", &FilterProcessor::getFrequency, &FilterProcessor::setFrequency,
@@ -143,7 +143,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
         .doc() = "A Filter Processor applies one of several kinds of filters. The filter cutoff, Q-value and gain can be adjusted, \
 but the filter mode cannot under automation.";
 
-    py::class_<ReverbProcessor, std::shared_ptr<ReverbProcessor>, ProcessorBase>(m, "ReverbProcessor")
+    py::class_<ReverbProcessor, ProcessorBase>(m, "ReverbProcessor")
         .def_property("room_size", &ReverbProcessor::getRoomSize, &ReverbProcessor::setRoomSize, "The room size between 0.0 and 1.0.")
         .def_property("damping", &ReverbProcessor::getDamping, &ReverbProcessor::setDamping, "The damping amount between 0.0 and 1.0.")
         .def_property("wet_level", &ReverbProcessor::getWetLevel, &ReverbProcessor::setWetLevel, "A wet level between 0.0 and 1.0.")
@@ -151,12 +151,12 @@ but the filter mode cannot under automation.";
         .def_property("width", &ReverbProcessor::getWidth, &ReverbProcessor::setWidth, "The stereo width from 0.0 to 1.0.")
         .doc() = "A Reverb Processor applies reverb with the FreeVerb algorithm.";
 
-    py::class_<AddProcessor, std::shared_ptr<AddProcessor>, ProcessorBase>(m, "AddProcessor")
+    py::class_<AddProcessor, ProcessorBase>(m, "AddProcessor")
         .def_property("gain_levels", &AddProcessor::getGainLevels, &AddProcessor::setGainLevels,
             "A list of gain levels to apply to the corresponding inputs.")
         .doc() = "An Add Processor adds one or more stereo inputs with corresponding gain parameters.";
 
-    py::class_<PluginProcessorWrapper, std::shared_ptr<PluginProcessorWrapper>, ProcessorBase>(m, "PluginProcessor")
+    py::class_<PluginProcessorWrapper, ProcessorBase>(m, "PluginProcessor")
         .def("can_set_bus", &PluginProcessorWrapper::canApplyBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Return bool for whether this combination of input and output channels can be set.")
         .def("set_bus", &PluginProcessorWrapper::setMainBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Set the number of input and output channels. An error will be thrown for an unaccepted option.")
         .def("save_state", &PluginProcessorWrapper::saveStateInformation, arg("filepath"), "Save the state to a file.")
@@ -186,7 +186,7 @@ Note that note-ons and note-offs are counted separately.")
         .doc() = "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
-    py::class_<SamplerProcessor, std::shared_ptr<SamplerProcessor>, ProcessorBase>(m, "SamplerProcessor")
+    py::class_<SamplerProcessor, ProcessorBase>(m, "SamplerProcessor")
         .def("set_data", &SamplerProcessor::setData, arg("data"), "Set an audio sample.")
         .def("get_parameter", &SamplerProcessor::wrapperGetParameter, arg("index"), "Get a parameter's value.")
         .def("get_parameter_name", &SamplerProcessor::wrapperGetParameterName, arg("index"), "Get a parameter's name.")
@@ -208,7 +208,7 @@ at different pitches and speeds. It has parameters for an ADSR envelope controll
 Unlike a VST, the parameters don't need to be between 0 and 1. For example, you can set an envelope attack parameter to 50 to represent 50 milliseconds.";
 
 #ifdef BUILD_DAWDREAMER_FAUST
-    py::class_<FaustProcessor, std::shared_ptr<FaustProcessor>, ProcessorBase>(m, "FaustProcessor")
+    py::class_<FaustProcessor, ProcessorBase>(m, "FaustProcessor")
         .def("set_dsp", &FaustProcessor::setDSPFile, arg("filepath"), "Set the FAUST signal process with a file.")
         .def("set_dsp_string", &FaustProcessor::setDSPString, arg("faust_code"), 
             "Set the FAUST signal process with a string containing FAUST code.")
@@ -238,7 +238,7 @@ Note that note-ons and note-offs are counted separately.")
 
     std::vector<float> defaultGain;
 
-    py::return_value_policy returnPolicy = py::return_value_policy::take_ownership;
+    py::return_value_policy returnPolicy = py::return_value_policy::reference;
 
     py::class_<RenderEngineWrapper>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))

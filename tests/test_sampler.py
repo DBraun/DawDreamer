@@ -57,3 +57,6 @@ def test_sampler(set_data=False):
 	assert(sampler_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
 
 	render(engine, file_path=OUTPUT / 'test_sampler_without_amp.wav', duration=DURATION)
+
+	audio = engine.get_audio()
+	assert(np.mean(np.abs(audio)) > .01)

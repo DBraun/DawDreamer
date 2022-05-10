@@ -1,11 +1,17 @@
 # Test
 
-`pytest .`
+`python -m pytest .`
 
 Or verbosely
 
-`pytest -s .`
+`python -m pytest -s .`
 
 Or
 
-`pytest -v .`
+`python -m pytest -v .`
+
+You can do specific files and tests:
+
+`python -m pytest -v test_plugins.py -k "test_plugin_editor" -p no:faulthandler`
+
+Note that `-p no:faulthandler` is included to avoid errors when GUIs are opened.

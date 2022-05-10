@@ -262,40 +262,55 @@ def test_plugin_upright_piano():
     wavfile.write(OUTPUT / 'test_plugin_upright_piano.wav', SAMPLE_RATE, audio)
 
 
-def test_plugin_editor():
+@pytest.mark.parametrize("plugin_path",
+    [
+    "C:/VSTPlugIns/LABS (64 Bit).dll",
+    # "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
+    # "C:/VSTPlugIns/sparta/sparta_ambiBIN.dll",
+    ]
+    )
+def test_plugin_editor(plugin_path: str):
 
-    # plugin_path = "C:/VSTPlugIns/Serum_x64.dll"
-    plugin_path = "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3"
-    # plugin_path = "C:/VSTPlugIns/LABS (64 Bit).dll"
-    # plugin_path = "C:/VSTPlugIns/sparta/sparta_ambiBIN.dll"
-
-    plugin_basename = splitext(basename(plugin_path))[0]
+    """Remember to use `-p no:faulthandler` when running this pytest."""
 
     if not isfile(plugin_path):
         return
 
+    def load_help(processor, filepath: str):
+
+        """
+        Load a state if it exists.
+        Otherwise open the UI to have the user select/create it. Then it will be saved.
+        """
+
+        if isfile(filepath):
+            processor.load_state(filepath)
+            # processor.open_editor()
+            # processor.save_state(filepath)
+        else:
+
+            # if is_pytesting():
+            #     return
+
+            # This will interrupt a headless process
+            processor.open_editor()
+            # Save it for next time
+            processor.save_state(filepath)
+
     DURATION = 5.
+
+    plugin_basename = splitext(basename(plugin_path))[0]
 
     engine = daw.RenderEngine(SAMPLE_RATE, 128)
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
+    plat_system = platform.system()
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plat_system}_{plugin_basename}'))
 
-    if isfile(state_file_path):
-        synth.load_state(state_file_path)
-
-    if not is_pytesting():
-        # todo: need a pytest way to test open_editor()
-        synth.open_editor()
-
-    synth.save_state(state_file_path)
+    load_help(synth, state_file_path)
 
     # print(synth.get_plugin_parameters_description())
-
-    synth.get_parameter(0)
-    synth.set_parameter(0, synth.get_parameter(0))
-    synth.set_automation(0, np.array([synth.get_parameter(0)]))
 
     print('inputs: ', synth.get_num_input_channels(), ' outputs: ', synth.get_num_output_channels())
 

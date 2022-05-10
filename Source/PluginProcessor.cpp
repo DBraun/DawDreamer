@@ -6,6 +6,7 @@
 
 #include "StandalonePluginWindow.h"
 
+static std::mutex PLUGIN_INSTANCE_MUTEX;
 using juce::ExtensionsVisitor;
 
 struct PresetVisitor : public ExtensionsVisitor {
@@ -75,8 +76,8 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
     if (myPlugin.get())
     {
-        myPlugin->releaseResources();
-        myPlugin.release();
+        std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
+        myPlugin.reset();
     }
 
     // If there is a problem here first check the preprocessor definitions
@@ -88,6 +89,7 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
     String errorMessage;
 
+    std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
     myPlugin = pluginFormatManager.createPluginInstance(*pluginDescriptions[0],
         sampleRate,
         samplesPerBlock,
@@ -127,8 +129,8 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 PluginProcessor::~PluginProcessor() {
     if (myPlugin.get())
     {
-        myPlugin->releaseResources();
-        myPlugin.release();
+        std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
+        myPlugin.reset();
     }
     delete myMidiIterator;
 }
@@ -235,6 +237,7 @@ PluginProcessor::reset()
 
     delete myMidiIterator;
     myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
+
     myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
     myRenderMidiBuffer.clear();
 }
@@ -330,6 +333,11 @@ PluginProcessor::loadStateInformation(std::string filepath) {
         std::string paramID = std::to_string(i);
         ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
     }
+
+    // todo: this is a little hacky. We create a window because this forces the loaded state to take effect
+    // in certain plugins.
+    // This allows us to call load_state and not bother calling open_editor().
+    StandalonePluginWindow::StandalonePluginWindow(*this, *myPlugin);
 }
 
 void

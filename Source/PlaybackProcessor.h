@@ -53,14 +53,14 @@ public:
     void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
         float* input_ptr = (float*)input.data();
 
-        myPlaybackData.setSize(input.shape(0), input.shape(1));
-        
         int numChannels = input.shape(0);
+        int numSamples = input.shape(1);
 
-        for (int y = 0; y < input.shape(1); y++) {
-            for (int x = 0; x < input.shape(0); x++) {
-                myPlaybackData.setSample(x, y, input_ptr[x * input.shape(1) + y]);
-            }
+        myPlaybackData.setSize(numChannels, numSamples);
+
+        for (int chan = 0; chan < numChannels; chan++) {
+            myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
+            input_ptr += numSamples;
         }
         setMainBusInputsAndOutputs(0, numChannels);
     }
