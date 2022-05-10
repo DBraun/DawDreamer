@@ -337,7 +337,7 @@ PluginProcessor::loadStateInformation(std::string filepath) {
     // todo: this is a little hacky. We create a window because this forces the loaded state to take effect
     // in certain plugins.
     // This allows us to call load_state and not bother calling open_editor().
-    StandalonePluginWindow::StandalonePluginWindow(*this, *myPlugin);
+    StandalonePluginWindow tmp_window(*this, *myPlugin);
 }
 
 void

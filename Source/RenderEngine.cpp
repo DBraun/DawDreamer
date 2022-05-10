@@ -12,13 +12,6 @@ RenderEngine::RenderEngine(double sr, int bs) :
     myMainProcessorGraph->setPlayHead(this);
 }
 
-RenderEngine::~RenderEngine()
-{
-    //myMainProcessorGraph->clear();
-    myMainProcessorGraph->reset();
-    myMainProcessorGraph->releaseResources();
-}
-
 bool
 RenderEngine::loadGraph(DAG inDagNodes) {
     bool success = true;

@@ -26,8 +26,6 @@ class RenderEngine : AudioPlayHead
 {
 public:
     RenderEngine(double sr, int bs);
-    ~RenderEngine();
-    // RenderEngine(const RenderEngine&) = delete;
 
     bool loadGraph(DAG dagNodes);
     
