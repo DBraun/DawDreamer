@@ -155,7 +155,6 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
 
     if (!py::isinstance<py::list>(dagObj)) {
         throw std::runtime_error("Error: load_graph. No processors were passed.");
-        return false;
     }
 
     DAG* buildingDag = new DAG();
@@ -164,13 +163,11 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
 
         if (!py::isinstance<py::tuple>(theTuple) && !py::isinstance<py::list>(theTuple)) {
             throw std::runtime_error("Error: load_graph. Received graph that is not a list.");
-            return false;
         }
         py::list castedTuple = theTuple.cast<py::list>();
 
         if (castedTuple.size() != 2) {
             throw std::runtime_error("Error: load_graph. Each tuple in the graph must be size 2.");
-            return false;
         }
 
         // todo: enable this:
@@ -180,7 +177,6 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
         //}
         if (!py::isinstance<py::list>(castedTuple[1])) {
             throw std::runtime_error("Error: load_graph. Something was wrong with the list of inputs.");
-            return false;
         }
 
         py::list listOfStrings = castedTuple[1].cast<py::list>();
@@ -190,7 +186,6 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
         for (py::handle potentialString : listOfStrings) {
             if (!py::isinstance<py::str>(potentialString)) {
                 throw std::runtime_error("Error: load_graph. Something was wrong with the list of inputs.");
-                return false;
             }
 
             inputs.push_back(potentialString.cast<std::string>());
@@ -202,7 +197,6 @@ RenderEngineWrapper::loadGraphWrapper(py::object dagObj) {
         }
         catch (std::exception&) {
             throw std::runtime_error("Error: Load_graph. First argument in tuple wasn't a Processor object.");
-            return false;
         }
 
         dagNode.inputs = inputs;

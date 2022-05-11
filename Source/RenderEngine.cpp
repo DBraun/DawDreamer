@@ -142,7 +142,6 @@ RenderEngine::render(const double renderLength) {
     int numRenderedSamples = renderLength * mySampleRate;
     if (numRenderedSamples <= 0) {
         throw std::runtime_error("Render length must be greater than zero.");
-        return false;
     }
     
     int numberOfBuffers = myBufferSize == 1 ? numRenderedSamples : int(std::ceil((numRenderedSamples -1.) / myBufferSize));
@@ -194,7 +193,6 @@ RenderEngine::render(const double renderLength) {
         bool result = connectGraph();
         if (!result) {
             throw std::runtime_error("Unable to connect graph.");
-            return false;
         }
     }
     

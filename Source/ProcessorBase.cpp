@@ -34,13 +34,11 @@ bool ProcessorBase::setAutomation(std::string parameterName, py::array input) {
         }
         else {
             throw std::runtime_error("Failed to find parameter: " + parameterName);
-            return false;
         }
     }
     catch (const std::exception& e)
     {
         throw std::runtime_error("Failed to set '" + parameterName + "' automation: " + e.what());
-        return false;
     }
 
     return true;
@@ -56,13 +54,11 @@ bool ProcessorBase::setAutomationVal(std::string parameterName, float val) {
         }
         else {
             throw std::runtime_error("Failed to find parameter: " + parameterName);
-            return false;
         }
     }
     catch (const std::exception& e)
     {
         throw std::runtime_error("Failed to set '" + parameterName + "' automation: " + e.what());
-        return false;
     }
 
     return true;
@@ -76,8 +72,6 @@ std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
     }
     else {
         throw std::runtime_error("Failed to get automation values for parameter: " + parameterName);
-        std::vector<float> empty;
-        return empty;
     }
 }
 
@@ -89,7 +83,6 @@ float ProcessorBase::getAutomationVal(std::string parameterName, int index) {
     }
     else {
         throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
-        return 0.f;
     }
 }
 
