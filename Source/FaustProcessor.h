@@ -68,7 +68,7 @@ public:
                 soundfile->fSR[i] = sample_rate;
                 soundfile->fOffset[i] = offset;
 
-                void* tmpBuffers = _malloca(soundfile->fChannels * sizeof(float*));
+                void* tmpBuffers = alloca(soundfile->fChannels * sizeof(float*));
                 soundfile->getBuffersOffsetReal<float>(tmpBuffers, offset);
 
                 for (int chan = 0; chan < buffer.getNumChannels(); chan++) {
