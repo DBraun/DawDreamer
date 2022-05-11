@@ -58,10 +58,16 @@ public:
 
         myPlaybackData.setSize(numChannels, numSamples);
 
-        for (int chan = 0; chan < numChannels; chan++) {
-            myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
-            input_ptr += numSamples;
+        //for (int chan = 0; chan < numChannels; chan++) {
+        //    myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
+        //    input_ptr += numSamples;
+        //}
+        for (int x = 0; x < numChannels; x++) {
+            for (int y = 0; y < numSamples; y++) {
+                myPlaybackData.setSample(x, y, input_ptr[x * numSamples + y]);
+            }
         }
+
         setMainBusInputsAndOutputs(0, numChannels);
     }
 
