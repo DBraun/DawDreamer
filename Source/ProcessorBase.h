@@ -98,24 +98,16 @@ public:
 
         auto ra = arr.mutable_unchecked();
 
+        auto chans = myRecordBuffer.getArrayOfReadPointers();
         for (size_t i = 0; i < num_channels; i++)
         {
+            auto chanPtr = chans[i];
+
             for (size_t j = 0; j < num_samples; j++)
             {
-                ra(i, j) = myRecordBuffer.getSample(i, j);
+                ra(i, j) = *(chanPtr++);
             }
         }
-        // this faster method doesn't work with cibuildwheel on windows?
-        //auto chans = myRecordBuffer.getArrayOfReadPointers();
-        //for (size_t i = 0; i < num_channels; i++)
-        //{
-        //    auto chanPtr = chans[i];
-
-        //    for (size_t j = 0; j < num_samples; j++)
-        //    {
-        //        ra(i, j) = *(chanPtr++);
-        //    }
-        //}
 
         return arr;
     }

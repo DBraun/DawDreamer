@@ -208,11 +208,8 @@ FaustProcessor::clear()
 	SAFE_DELETE(m_dsp_poly);
 
 	// deleteAllDSPFactories();  // don't actually do this!!
-	// deleteDSPFactory(m_factory);
-	// deleteDSPFactory(m_poly_factory);
-
-	m_factory = NULL;
-	m_poly_factory = NULL;
+	deleteDSPFactory(m_factory);
+	SAFE_DELETE(m_poly_factory);
 }
 
 void

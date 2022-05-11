@@ -216,7 +216,7 @@ def test_plugin_effect_ambisonics():
 
     assert(engine.load_graph(graph))
 
-    render(engine, file_path='output/test_plugin_effect_ambisonics.wav', duration=DURATION)
+    render(engine, file_path=(OUTPUT / 'test_plugin_effect_ambisonics.wav'), duration=DURATION)
 
     audio = engine.get_audio()
 

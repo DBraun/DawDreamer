@@ -22,10 +22,6 @@ class MySoundUI : public SoundUI {
 
 public:
 
-    ~MySoundUI() {
-        fSoundfileMap.clear(); // todo: deallocate the Soundfiles correctly
-    }
-
     virtual void addSoundfile(const char* label, const char* filename, Soundfile** sf_zone) {
         // Parse the possible list
         std::string saved_url_real = std::string(label);
@@ -54,7 +50,6 @@ public:
                 numChannels = std::max(numChannels, buffer.getNumChannels());
             }
 
-            // todo: used subtract path_name_list.size() instead of 1.
             total_length += (MAX_SOUNDFILE_PARTS - buffers.size()) * BUFFER_SIZE;
 
             Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, buffers.size(), false);
@@ -73,7 +68,7 @@ public:
                 soundfile->fSR[i] = sample_rate;
                 soundfile->fOffset[i] = offset;
 
-                void* tmpBuffers = alloca(soundfile->fChannels * sizeof(float*));
+                void* tmpBuffers = _malloca(soundfile->fChannels * sizeof(float*));
                 soundfile->getBuffersOffsetReal<float>(tmpBuffers, offset);
 
                 for (int chan = 0; chan < buffer.getNumChannels(); chan++) {

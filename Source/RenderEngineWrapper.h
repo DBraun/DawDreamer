@@ -9,7 +9,6 @@ class RenderEngineWrapper : public RenderEngine
 public:
 
     RenderEngineWrapper(double sr, int bs);
-    //RenderEngineWrapper(const RenderEngineWrapper&) = delete;
 
     OscillatorProcessor* makeOscillatorProcessor(const std::string& name, float freq);
 
