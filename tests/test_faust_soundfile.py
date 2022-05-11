@@ -70,8 +70,7 @@ def test_faust_soundfile_multichannel(output_path):
     }
     faust_processor.set_soundfiles(soundfiles)
 
-    underscores = ",".join('_'*numChannels)
-    dsp_string = f'process = 0,_~+(1):soundfile("mySound",{numChannels}):!,!,{underscores};'
+    dsp_string = f'process = 0,_~+(1):soundfile("mySound",{numChannels}):!,!,si.bus({numChannels});'
     faust_processor.set_dsp_string(dsp_string)
     faust_processor.compile()
     # desc = faust_processor.get_parameters_description()

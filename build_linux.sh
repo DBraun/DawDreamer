@@ -1,9 +1,17 @@
 echo "PYTHONLIBPATH: $PYTHONLIBPATH"
 echo "PYTHONINCLUDEPATH: $PYTHONINCLUDEPATH"
 
-cp -v thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 dawdreamer/
-ln dawdreamer/libfaust.so.2 dawdreamer/libfaust.so
-ln thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
+if [[ $(uname -m) == 'x86_64' ]]; then
+    echo "building for x86_64"
+	cp -v thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 dawdreamer/
+	ln dawdreamer/libfaust.so.2 dawdreamer/libfaust.so
+	ln thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
+else
+    echo "building for $(uname -m)" 
+	cp -v thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so.2 dawdreamer/
+	ln dawdreamer/libfaust.so.2 dawdreamer/libfaust.so
+	ln thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so.2 thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so
+fi
 
 yum install -y libsndfile \
 libX11-devel \
@@ -27,7 +35,7 @@ cd thirdparty/libsamplerate
 mkdir build_release
 cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 cd build_release
-TARGET_ARCH=x86_64 make CONFIG=Release
+make CONFIG=Release
 cd ../../..
 
 cd Builds/LinuxMakefile

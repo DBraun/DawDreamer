@@ -6,6 +6,7 @@
 
 #include "StandalonePluginWindow.h"
 
+static std::mutex PLUGIN_INSTANCE_MUTEX;
 using juce::ExtensionsVisitor;
 
 struct PresetVisitor : public ExtensionsVisitor {
@@ -75,19 +76,19 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
     if (myPlugin.get())
     {
-        myPlugin->releaseResources();
-        myPlugin.release();
+        std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
+        myPlugin.reset();
     }
 
     // If there is a problem here first check the preprocessor definitions
     // in the projucer are sensible - is it set up to scan for plugin's?
     if (pluginDescriptions.size() <= 0) {
         throw std::runtime_error("Unable to load plugin.");
-        return false;
     }
 
     String errorMessage;
 
+    std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
     myPlugin = pluginFormatManager.createPluginInstance(*pluginDescriptions[0],
         sampleRate,
         samplesPerBlock,
@@ -96,7 +97,6 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
     if (myPlugin.get() == nullptr)
     {
         throw std::runtime_error("PluginProcessor::loadPlugin error: " + errorMessage.toStdString());
-        return false;
     }
 
     myPlugin->enableAllBuses();
@@ -127,8 +127,8 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 PluginProcessor::~PluginProcessor() {
     if (myPlugin.get())
     {
-        myPlugin->releaseResources();
-        myPlugin.release();
+        std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
+        myPlugin.reset();
     }
     delete myMidiIterator;
 }
@@ -235,6 +235,7 @@ PluginProcessor::reset()
 
     delete myMidiIterator;
     myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
+
     myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
     myRenderMidiBuffer.clear();
 }
@@ -244,13 +245,11 @@ PluginProcessor::loadPreset(const std::string& path)
 {
     if (!myPlugin.get()) {
         throw std::runtime_error("You must load a plugin before loading a preset.");
-        return false;
     }
 
     try {
         if (!std::filesystem::exists(path.c_str())) {
             throw std::runtime_error("File not found: " + path);
-            return false;
         }
 
         MemoryBlock mb;
@@ -269,7 +268,6 @@ PluginProcessor::loadPreset(const std::string& path)
     }
     catch (std::exception& e) {
         throw std::runtime_error(std::string("Error: (PluginProcessor::loadPreset) ") + e.what());
-        return false;
     }
 
 }
@@ -279,7 +277,6 @@ PluginProcessor::loadVST3Preset(const std::string& path)
 {
     if (!myPlugin.get()) {
         throw std::runtime_error("You must load a plugin before loading a preset.");
-        return false;
     }
 
     juce::File fPath(path);
@@ -290,7 +287,6 @@ PluginProcessor::loadVST3Preset(const std::string& path)
 
     if (!std::filesystem::exists(path.c_str())) {
         throw std::runtime_error("Preset file not found: " + path);
-        return false;
     }
 
     PresetVisitor presetVisitor{ path };
@@ -302,7 +298,6 @@ PluginProcessor::loadVST3Preset(const std::string& path)
     catch (const std::exception&)
     {
         throw std::runtime_error("PluginProcessor::loadVST3Preset: unknown error.");
-        return false;
     }
     
     for (int i = 0; i < myPlugin->getNumParameters(); i++) {
@@ -330,6 +325,11 @@ PluginProcessor::loadStateInformation(std::string filepath) {
         std::string paramID = std::to_string(i);
         ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
     }
+
+    // todo: this is a little hacky. We create a window because this forces the loaded state to take effect
+    // in certain plugins.
+    // This allows us to call load_state and not bother calling open_editor().
+    StandalonePluginWindow tmp_window(*this, *myPlugin);
 }
 
 void
@@ -520,7 +520,6 @@ PluginProcessor::addMidiNote(uint8  midiNote,
     if (midiVelocity < 0) midiVelocity = 0;
     if (noteLength <= 0) {
         throw std::runtime_error("The note length must be greater than zero.");
-        return false;
     }
 
     // Get the note on midiBuffer.
@@ -588,7 +587,6 @@ PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 {
     if (!myPlugin) {
         throw std::runtime_error("Please load the plugin first!");
-        return false;
     }
 
     std::string paramID = std::to_string(parameter);

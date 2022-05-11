@@ -208,11 +208,8 @@ FaustProcessor::clear()
 	SAFE_DELETE(m_dsp_poly);
 
 	// deleteAllDSPFactories();  // don't actually do this!!
-	// deleteDSPFactory(m_factory);
-	// deleteDSPFactory(m_poly_factory);
-
-	m_factory = NULL;
-	m_poly_factory = NULL;
+	deleteDSPFactory(m_factory);
+	SAFE_DELETE(m_poly_factory);
 }
 
 void
@@ -245,7 +242,6 @@ FaustProcessor::setDSPString(const std::string& code)
 
 	if (std::strcmp(code.c_str(), "") == 0) {
 		throw std::runtime_error("DSP string is empty.");
-		return false;
 	}
 
 	// save
@@ -401,7 +397,6 @@ FaustProcessor::setDSPFile(const std::string& path)
 	m_isCompiled = false;
 	if (std::strcmp(path.c_str(), "") == 0) {
 		throw std::runtime_error("Path to DSP file is empty.");
-		return false;
 	}
 
 	// open file
@@ -411,7 +406,6 @@ FaustProcessor::setDSPFile(const std::string& path)
 	{
 		// error
 		throw std::runtime_error("FaustProcessor::setDSPFile(): ERROR opening file: '" + path + "'");
-		return false;
 	}
 
 	// clear code string
@@ -434,14 +428,12 @@ FaustProcessor::setParamWithIndex(const int index, float p)
 	}
 	if (!m_ui) {
 		throw std::runtime_error("No UI for FaustProcessor.");
-		return false;
 	}
 
 	auto it = m_map_juceIndex_to_parAddress.find(index);
 	if (it == m_map_juceIndex_to_parAddress.end())
 	{
 		throw std::runtime_error("A parameter with index " + std::to_string(index) + " is not valid for this FaustProcessor.");
-		return false;
 	}
 
 	auto& parAddress = it->second;
@@ -655,7 +647,6 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	if (midiVelocity < 0) midiVelocity = 0;
 	if (noteLength <= 0) {
 		throw std::runtime_error("The note length must be greater than zero.");
-		return false;
 	}
 
 	// Get the note on midiBuffer.

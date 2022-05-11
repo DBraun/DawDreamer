@@ -279,10 +279,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
                        headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libfaust/ubuntu-aarch64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
                        headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libfaust/ubuntu-aarch64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>

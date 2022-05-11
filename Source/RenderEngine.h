@@ -1,12 +1,15 @@
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "custom_pybind_wrappers.h"
+#include "CustomParameters.h"
 #include <random>
 #include <array>
 #include <iomanip>
 #include <sstream>
 #include <string>
 
-#include "AllProcessors.h"
+class ProcessorBase;
 
 class DAGNode {
 public:
@@ -23,8 +26,6 @@ class RenderEngine : AudioPlayHead
 {
 public:
     RenderEngine(double sr, int bs);
-    ~RenderEngine();
-    // RenderEngine(const RenderEngine&) = delete;
 
     bool loadGraph(DAG dagNodes);
     
@@ -47,15 +48,15 @@ protected:
     double mySampleRate;
     int myBufferSize;
     double myBPM = 120.;
-    std::unordered_map<std::string, int> m_UniqueNameToSlotIndex;
-    std::unordered_map<std::string, std::vector<std::string>> m_UniqueNameToInputs;
+    std::unordered_map<std::string, juce::AudioProcessorGraph::NodeID> m_UniqueNameToNodeID;
     
     bool connectGraph();
 
-private:
-
     std::unique_ptr<juce::AudioProcessorGraph> myMainProcessorGraph;
-    juce::ReferenceCountedArray<juce::AudioProcessorGraph::Node> slots;
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> m_stringDag;
+
+private:
 
     CurrentPositionInfo myCurrentPositionInfo;
 };
