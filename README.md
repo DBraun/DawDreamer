@@ -75,7 +75,7 @@ wavfile.write('sine_demo.wav', SAMPLE_RATE, audio.transpose())
 
 ## Advanced Example
 
-Let's demonstate audio playback, graph-building, VST instruments/effects, and automation. You need to change many hard-coded paths for this to work.
+Let's demonstrate audio playback, graph-building, VST instruments/effects, and automation. You need to change many hard-coded paths for this to work.
 
 ```python
 import dawdreamer as daw
@@ -102,7 +102,13 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-engine.set_bpm(120.)  # default is 120.
+engine.set_bpm(120.)  # default is 120 beats per minute.
+
+# The BPM can also be set as a numpy array that is interpreted
+# at a PPQN (Pulses Per Quarter Note) rate of 960.
+# In other words, if the numpy array abruptly changes values every 960 samples,
+# the tempo will abruptly change "on the beat".
+engine.set_bpm(120.+60.*make_sine(1./2., duration*10., sr=960))
 
 DURATION = 10 # How many seconds we want to render.
 

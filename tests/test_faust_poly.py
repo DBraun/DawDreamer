@@ -30,7 +30,7 @@ def _test_faust_poly(file_path, group_voices=True, num_voices=8, buffer_size=1, 
 	if cutoff is not None:
 		faust_processor.set_parameter("/Sequencer/DSP2/MyInstrument/cutoff", cutoff)
 	elif automation:
-		faust_processor.set_automation("/Sequencer/DSP2/MyInstrument/cutoff", 5000+4900*make_sine(30, 10.))
+		faust_processor.set_automation("/Sequencer/DSP2/MyInstrument/cutoff", 5000+4900*make_sine(30., 10.))
 
 	if decay is not None:
 		if group_voices:
@@ -68,16 +68,27 @@ def test_faust_poly():
 
 	assert np.allclose(audio1, audio2)
 
-	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_grouped.wav', group_voices=True, decay=.5)
-	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_automation_decay_ungrouped.wav', group_voices=False, decay=.5)
+	audio1 = _test_faust_poly(OUTPUT / 'test_faust_poly_decay_grouped.wav', group_voices=True, decay=.5)
+	audio2 = _test_faust_poly(OUTPUT / 'test_faust_poly_decay_ungrouped.wav', group_voices=False, decay=.5)
 
 	assert np.allclose(audio1, audio2)
 
 
-@pytest.mark.parametrize("midi_path", [abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi')])
-def test_faust_sine(midi_path: str, buffer_size=1):
+@pytest.mark.parametrize("midi_path,bpm_automation,buffer_size",
+	product(
+		[abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi')],
+		[False, True],
+		[1, 128]
+	)
+)
+def test_faust_sine(midi_path: str, bpm_automation: bool, buffer_size: int):
 
     engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
+
+    duration = 10.
+
+    if bpm_automation:
+    	engine.set_bpm(120.+60.*make_sine(1./2., duration*10., sr=960))
 
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.num_voices = 16
@@ -118,7 +129,8 @@ def test_faust_sine(midi_path: str, buffer_size=1):
     ]
 
     engine.load_graph(graph)
-    render(engine, file_path=OUTPUT / ('test_faust_sine_' + splitext(basename(midi_path))[0] + '.wav'), duration=10.)
+    file_path = OUTPUT / ('test_faust_sine_' + ('bpm_' if bpm_automation else '') + f'bs_{buffer_size}_' + splitext(basename(midi_path))[0] + '.wav')
+    render(engine, file_path=file_path, duration=duration)
 
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .0001)

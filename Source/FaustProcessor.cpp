@@ -41,7 +41,8 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 FaustProcessor::~FaustProcessor() {
 	clear();
-	delete myMidiIterator;
+	delete myMidiIteratorQN;
+	delete myMidiIteratorSec;
 }
 
 bool
@@ -75,26 +76,53 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 	else if (m_dsp_poly != NULL) {
 		long long int start = posInfo.timeInSamples;
 
+		const double PPQN = 960.;
+
+		auto pulseStart = posInfo.ppqPosition * PPQN;
+		auto pulseStep = (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+		auto pulseOffset = std::max(1., pulseStep);
+
 		// render one sample at a time
+
+		int midiChannel = 0;
 
 		for (size_t i = 0; i < buffer.getNumSamples(); i++)
 		{
-			myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < start + 1;
-			do {
-				if (myIsMessageBetween) {
+			{
+				myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
+				do {
+					if (myIsMessageBetweenSec) {
 
-					int midiChannel = 0;
-					if (myMidiMessage.isNoteOn()) {
-						m_dsp_poly->keyOn(midiChannel, myMidiMessage.getNoteNumber(), myMidiMessage.getVelocity());
-					}
-					else if (myMidiMessage.isNoteOff()) {
-						m_dsp_poly->keyOff(midiChannel, myMidiMessage.getNoteNumber(), myMidiMessage.getVelocity());
-					}
+						if (myMidiMessageSec.isNoteOn()) {
+							m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
+						}
+						else if (myMidiMessageSec.isNoteOff()) {
+							m_dsp_poly->keyOff(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
+						}
 
-					myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
-					myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < start + 1;
-				}
-			} while (myIsMessageBetween && myMidiEventsDoRemain);
+						myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+						myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
+					}
+				} while (myIsMessageBetweenSec && myMidiEventsDoRemainSec);
+			}
+
+			{
+				myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + pulseOffset;
+				do {
+					if (myIsMessageBetweenQN) {
+
+						if (myMidiMessageQN.isNoteOn()) {
+							m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
+						}
+						else if (myMidiMessageQN.isNoteOff()) {
+							m_dsp_poly->keyOff(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
+						}
+
+						myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+						myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + pulseOffset;
+					}
+				} while (myIsMessageBetweenQN && myMidiEventsDoRemainQN);
+			}
 
 			for (size_t chan = 0; chan < m_numInputChannels; chan++)
 			{
@@ -109,6 +137,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			}
 
 			start += 1;
+			pulseStart += pulseStep;
 		}
 	}
 
@@ -180,9 +209,13 @@ FaustProcessor::reset()
 		m_dsp_poly->instanceClear();
 	}
 
-	delete myMidiIterator;
-	myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
-	myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+	delete myMidiIteratorQN;
+	myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+	myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+
+	delete myMidiIteratorSec;
+	myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
+	myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
 
 	if (!m_isCompiled) {
 		this->compile();
@@ -605,25 +638,56 @@ FaustProcessor::getPluginParametersDescription()
 int
 FaustProcessor::getNumMidiEvents()
 {
-	return myMidiBuffer.getNumEvents();
+	return myMidiBufferSec.getNumEvents() + myMidiBufferQN.getNumEvents();
 };
 
 bool
-FaustProcessor::loadMidi(const std::string& path)
+FaustProcessor::loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents)
 {
+	if (!std::filesystem::exists(path.c_str())) {
+		throw std::runtime_error("File not found: " + path);
+	}
+
+	const double PPQN = 960.;
+
 	File file = File(path);
 	FileInputStream fileStream(file);
 	MidiFile midiFile;
 	midiFile.readFrom(fileStream);
-	midiFile.convertTimestampTicksToSeconds();
-	myMidiBuffer.clear();
 
-	for (int t = 0; t < midiFile.getNumTracks(); t++) {
-		const MidiMessageSequence* track = midiFile.getTrack(t);
-		for (int i = 0; i < track->getNumEvents(); i++) {
-			MidiMessage& m = track->getEventPointer(i)->message;
-			int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
-			myMidiBuffer.addEvent(m, sampleOffset);
+	if (clearPrevious) {
+		myMidiBufferSec.clear();
+		myMidiBufferQN.clear();
+	}
+
+	if (convertToSeconds) {
+		midiFile.convertTimestampTicksToSeconds();
+		
+		for (int t = 0; t < midiFile.getNumTracks(); t++) {
+			const MidiMessageSequence* track = midiFile.getTrack(t);
+			for (int i = 0; i < track->getNumEvents(); i++) {
+				MidiMessage& m = track->getEventPointer(i)->message;
+				int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
+				if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+					myMidiBufferSec.addEvent(m, sampleOffset);
+				}
+			}
+		}
+	}
+	else {
+		auto timeFormat = midiFile.getTimeFormat(); // the ppqn (Ableton makes midi files with 96 ppqn)
+
+		for (int t = 0; t < midiFile.getNumTracks(); t++) {
+			const MidiMessageSequence* track = midiFile.getTrack(t);
+			for (int i = 0; i < track->getNumEvents(); i++) {
+				MidiMessage& m = track->getEventPointer(i)->message;
+
+				if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+					// convert timestamp from its original time format to 960 (very high resolution)
+					auto timeStamp = m.getTimeStamp() * PPQN / timeFormat;
+					myMidiBufferQN.addEvent(m, timeStamp);
+				}
+			}
 		}
 	}
 
@@ -632,7 +696,8 @@ FaustProcessor::loadMidi(const std::string& path)
 
 void
 FaustProcessor::clearMidi() {
-	myMidiBuffer.clear();
+	myMidiBufferSec.clear();
+	myMidiBufferQN.clear();
 }
 
 bool
@@ -661,8 +726,8 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	auto startTime = noteStart * mySampleRate;
 	onMessage.setTimeStamp(startTime);
 	offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
-	myMidiBuffer.addEvent(onMessage, (int)onMessage.getTimeStamp());
-	myMidiBuffer.addEvent(offMessage, (int)offMessage.getTimeStamp());
+	myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
+	myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
 
 	return true;
 }

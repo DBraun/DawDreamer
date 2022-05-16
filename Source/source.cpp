@@ -178,7 +178,7 @@ but the filter mode cannot under automation.";
             "Get a list of dictionaries describing the plugin's parameters.")
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("all_events")=true, "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded.")
+        .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("clear_previous") = true, arg("convert_to_sec") = true, arg("all_events")=true, "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded.")
         .def("clear_midi", &PluginProcessorWrapper::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
@@ -198,7 +198,7 @@ or effects. Some plugins such as ones that do sidechain compression can accept t
             "Get a list of dictionaries describing the plugin's parameters.")
         .def_property_readonly("n_midi_events", &SamplerProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &SamplerProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")
+        .def("load_midi", &SamplerProcessor::loadMidi, arg("filepath"), kw_only(), arg("clear_previous") = true, arg("convert_to_sec") = true, arg("all_events") = true, "Load MIDI from a file.")
         .def("clear_midi", &SamplerProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &SamplerProcessor::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
@@ -228,7 +228,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def_property("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath, &FaustProcessor::setFaustLibrariesPath, "Absolute path to directory containing your custom \".lib\" files containing Faust code.")
         .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")
+        .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), kw_only(), arg("clear_previous") = true, arg("convert_to_sec") = true, arg("all_events") = true, "Load MIDI from a file.")
         .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &FaustProcessor::addMidiNote, arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
     "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
@@ -244,6 +244,7 @@ Note that note-ons and note-offs are counted separately.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngineWrapper::render, arg("seconds"), "Render the most recently loaded graph.")
         .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine.")
+        .def("set_bpm", &RenderEngineWrapper::setBPMVec, arg("bpm"), "Set the beats-per-minute of the engine.")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
         .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")

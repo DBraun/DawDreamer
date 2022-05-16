@@ -64,7 +64,7 @@ public:
 
     const juce::String getName() const { return "PluginProcessor"; }
 
-    bool loadMidi(const std::string& path, bool allEvents);
+    bool loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents);
 
     void clearMidi();
 
@@ -91,13 +91,25 @@ private:
     std::string myPluginPath;
     double mySampleRate;
 
-    MidiBuffer myMidiBuffer;
+    MidiBuffer myMidiBufferQN;
+    MidiBuffer myMidiBufferSec;
+
     MidiBuffer myRenderMidiBuffer;
-    MidiMessage myMidiMessage;
-    int myMidiMessagePosition = -1;
-    MidiBuffer::Iterator* myMidiIterator = nullptr;
-    bool myIsMessageBetween = false;
-    bool myMidiEventsDoRemain = false;
+
+    MidiMessage myMidiMessageQN;
+    MidiMessage myMidiMessageSec;
+
+    int myMidiMessagePositionQN = -1;
+    int myMidiMessagePositionSec = -1;
+
+    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
+    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+
+    bool myIsMessageBetweenQN = false;
+    bool myIsMessageBetweenSec = false;
+
+    bool myMidiEventsDoRemainQN = false;
+    bool myMidiEventsDoRemainSec = false;
 
     void automateParameters();
 

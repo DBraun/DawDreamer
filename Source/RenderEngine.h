@@ -33,6 +33,8 @@ public:
 
     void setBPM(double bpm);
 
+    bool setBPMVec(py::array_t<float> input);
+
     py::array_t<float> getAudioFrames();
 
     py::array_t<float> getAudioFramesForName(std::string& name);
@@ -47,7 +49,6 @@ protected:
 
     double mySampleRate;
     int myBufferSize;
-    double myBPM = 120.;
     std::unordered_map<std::string, juce::AudioProcessorGraph::NodeID> m_UniqueNameToNodeID;
     
     bool connectGraph();
@@ -59,4 +60,7 @@ protected:
 private:
 
     CurrentPositionInfo myCurrentPositionInfo;
+    AudioSampleBuffer bpmAutomation;
+
+    double getBPM(double ppqPosition);
 };

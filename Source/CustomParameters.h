@@ -123,15 +123,13 @@ public:
 
         try
         {
-            float* input_ptr = (float*)input.data();
             myAutomation.clear();
 
-            myAutomation = std::vector<float>(input.shape(0), 0.f);
+            auto numSamples = input.shape(0);
 
-            for (int x = 0; x < input.shape(0); x++) {
-                myAutomation[x] = *(input_ptr++);
-            }
+            myAutomation = std::vector<float>(numSamples, 0.f);
 
+            memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
         }
         catch (const std::exception& e)
         {

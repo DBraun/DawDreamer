@@ -10,6 +10,9 @@ RenderEngine::RenderEngine(double sr, int bs) :
 {
     myMainProcessorGraph->setNonRealtime(true);
     myMainProcessorGraph->setPlayHead(this);
+
+    bpmAutomation.setSize(1, 1);
+    bpmAutomation.setSample(0, 0, 120.); // default 120 bpm
 }
 
 bool
@@ -136,6 +139,18 @@ RenderEngine::connectGraph() {
     return true;
 }
 
+double RenderEngine::getBPM(double ppqPosition) {
+
+    const double PPQN = 960.;
+
+    int index = int(PPQN * ppqPosition);
+    index = std::min(bpmAutomation.getNumSamples() - 1, index);
+
+    auto bpm = bpmAutomation.getSample(0, index);
+
+    return bpm;
+}
+
 bool
 RenderEngine::render(const double renderLength) {
 
@@ -181,13 +196,15 @@ RenderEngine::render(const double renderLength) {
     myMainProcessorGraph->setPlayHead(this);
 
     myCurrentPositionInfo.resetToDefault();
-    myCurrentPositionInfo.bpm = myBPM;
+    myCurrentPositionInfo.ppqPosition = 0.;
     myCurrentPositionInfo.isPlaying = true;
     myCurrentPositionInfo.isRecording = true;
+    myCurrentPositionInfo.timeInSeconds = 0;
     myCurrentPositionInfo.timeInSamples = 0;
     myCurrentPositionInfo.timeSigNumerator = 4;
     myCurrentPositionInfo.timeSigDenominator = 4;
     myCurrentPositionInfo.isLooping = false;
+    myCurrentPositionInfo.bpm = getBPM(myCurrentPositionInfo.ppqPosition);
     
     if (!graphIsConnected) {
         bool result = connectGraph();
@@ -218,10 +235,13 @@ RenderEngine::render(const double renderLength) {
     
     for (long long int i = 0; i < numberOfBuffers; ++i)
     {
+        myCurrentPositionInfo.bpm = getBPM(myCurrentPositionInfo.ppqPosition);
+
         myMainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
 
-        myCurrentPositionInfo.timeInSamples += myBufferSize;
-        myCurrentPositionInfo.ppqPosition = (myCurrentPositionInfo.timeInSamples / (mySampleRate * 60.)) * myBPM;
+        myCurrentPositionInfo.timeInSamples += double(myBufferSize);
+        myCurrentPositionInfo.timeInSeconds += double(myBufferSize) / mySampleRate;
+        myCurrentPositionInfo.ppqPosition += (double(myBufferSize) / (mySampleRate * 60.)) * myCurrentPositionInfo.bpm;
     }
 
     myCurrentPositionInfo.isPlaying = false;
@@ -235,7 +255,19 @@ void RenderEngine::setBPM(double bpm) {
         throw std::runtime_error("BPM must be positive.");
         return;
     }
-    myBPM = bpm;
+    bpmAutomation.setSize(1, 1);
+    bpmAutomation.setSample(0, 0, bpm);
+}
+
+bool RenderEngine::setBPMVec(py::array_t<float> input) {
+
+    auto numSamples = input.shape(0);
+
+    bpmAutomation.setSize(1, numSamples);
+
+    bpmAutomation.copyFrom(0, 0, (float*)input.data(), numSamples);
+
+    return true;
 }
 
 py::array_t<float>
