@@ -8,8 +8,10 @@ def test_playbackwarp_processor1(buffer_size: int):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
-	half_measure = 960 * 4  # todo: hard coded PPQN of 960.
-	bpm = np.concatenate([140*np.ones(half_measure), 70.*np.ones(half_measure)])
+	PPQN = 960  # todo: hard coded PPQN of 960. This is hard-coded in C++ too.
+
+	full_measure = PPQN * 4  # four beats is a measure
+	bpm = np.concatenate([140*np.ones(full_measure), 70.*np.ones(full_measure)])
 	bpm = np.tile(bpm, (100))
 	engine.set_bpm(bpm)
 

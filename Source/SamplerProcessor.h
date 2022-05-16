@@ -96,41 +96,33 @@ public:
 
         buffer.clear(); // todo: why did this become necessary?
         midiBuffer.clear();
-
+        myRenderMidiBuffer.clear();
 
         {
-            long long int start = posInfo.timeInSamples;
-            long long int end = start + buffer.getNumSamples();
+            auto start = posInfo.timeInSamples;
+            auto end = start + buffer.getNumSamples();
 
             myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
-            do {
-                if (myIsMessageBetweenSec) {
-                    myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
-                    myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
-                    myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
-                }
-            } while (myIsMessageBetweenSec && myMidiEventsDoRemainSec);
+            while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
+                myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
+                myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+                myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
+            }
         }
 
         {
-            const double PPQN = 960.;
-
             auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
             auto pulseEnd = pulseStart + buffer.getNumSamples() * (posInfo.bpm * PPQN) / (mySampleRate * 60.);
 
             myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
-            do {
-                if (myIsMessageBetweenQN) {
-                    myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
-                    myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
-                    myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
-                }
-            } while (myIsMessageBetweenQN && myMidiEventsDoRemainQN);
+            while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
+                myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
+                myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+                myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
+            }
         }
 
         sampler.processBlock(buffer, myRenderMidiBuffer);
-
-        myRenderMidiBuffer.clear();
 
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
@@ -166,8 +158,6 @@ public:
             throw std::runtime_error("File not found: " + path);
         }
 
-        const double PPQN = 960.;
-
         File file = File(path);
         FileInputStream fileStream(file);
         MidiFile midiFile;
@@ -200,7 +190,7 @@ public:
                     MidiMessage& m = track->getEventPointer(i)->message;
 
                     if (allEvents || m.isNoteOff() || m.isNoteOn()) {
-                        // convert timestamp from its original time format to 960 (very high resolution)
+                        // convert timestamp from its original time format to our high resolution PPQN
                         auto timeStamp = m.getTimeStamp() * PPQN / timeFormat;
                         myMidiBufferQN.addEvent(m, timeStamp);
                     }
@@ -221,7 +211,8 @@ public:
     addMidiNote(uint8  midiNote,
             uint8  midiVelocity,
             const double noteStart,
-            const double noteLength) {
+            const double noteLength,
+            bool convert_to_sec) {
 
         if (midiNote > 255) midiNote = 255;
         if (midiNote < 0) midiNote = 0;
@@ -241,11 +232,20 @@ public:
             midiNote,
             midiVelocity);
 
-        auto startTime = noteStart * mySampleRate;
-        onMessage.setTimeStamp(startTime);
-        offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
-        myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
-        myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
+        if (convert_to_sec) {
+            auto startTime = noteStart * mySampleRate;
+            onMessage.setTimeStamp(startTime);
+            offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
+            myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
+            myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
+        }
+        else {
+            auto startTime = noteStart * PPQN;
+            onMessage.setTimeStamp(startTime);
+            offMessage.setTimeStamp(startTime + noteLength * PPQN);
+            myMidiBufferQN.addEvent(onMessage, (int)onMessage.getTimeStamp());
+            myMidiBufferQN.addEvent(offMessage, (int)offMessage.getTimeStamp());
+        }
 
         return true;
     }

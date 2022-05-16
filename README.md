@@ -84,9 +84,9 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 128 # Parameters will undergo automation at this buffer/block size. It can be as small as 1 sample.
-SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
-REVERB_PLUGIN = "C:/path/to/reverb.dll"  # extensions: .dll, .vst3, .component
+BUFFER_SIZE = 128 # Parameters will undergo automation at this buffer/block size.
+SYNTH_PLUGIN = "C:/path/to/synth.dll"  # extensions: .dll, .vst3, .vst, .component
+REVERB_PLUGIN = "C:/path/to/reverb.dll"  # extensions: .dll, .vst3, .vst, .component
 VOCALS_PATH = "C:/path/to/vocals.wav"
 PIANO_PATH = "C:/path/to/piano.wav"
 
@@ -139,9 +139,20 @@ synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remap
 # We can simply use one value constantly:
 synth.set_parameter(1, 0.1234)
 
-synth.load_midi("C:/path/to/song.mid")
-# We can also add notes one at a time.
-synth.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
+# Load a MIDI file and convert the timing to absolute seconds. Changes to the Render Engine's BPM
+# won't affect the timing. The kwargs below are defaults.
+synth.load_midi("C:/path/to/song.mid", clear_previous=True, convert_to_sec=True, all_events=True)
+
+# Load a MIDI file and keep the timing in units of beats. Changes to the Render Engine's BPM
+# will affect the timing.
+synth.load_midi("C:/path/to/song.mid", convert_to_sec=False)
+
+# We can also add one note at a time, specifying a start time and duration, both in seconds
+synth.add_midi_note(60, 127, 0.5, .25) # (MIDI note, velocity, start, duration)
+
+# With `convert_to_sec=False`, we can use beats as the unit for the start time and duration.
+# Rest for a beat and then play a note for a half beat.
+synth.add_midi_note(67, 127, 1, .5, convert_to_sec=False)
 
 # For any processor type, we can get the number of inputs and outputs
 print("synth num inputs: ", synth.get_num_input_channels())
@@ -222,7 +233,7 @@ faust_processor = engine.make_faust_processor("faust")
 faust_processor.set_dsp(DSP_PATH)  # You can do this anytime.
 
 # Using compile() isn't necessary, but it's an early warning check.
-faust_processor.compile()
+faust_processor.compile() # throws a catchable Python Runtime Error for bad Faust code
 
 print(faust_processor.get_parameters_description())
 

@@ -148,7 +148,8 @@ public:
     bool addMidiNote(const uint8  midiNote,
         const uint8  midiVelocity,
         const double noteStart,
-        const double noteLength);
+        const double noteLength,
+        bool convert_to_sec);
 
     void setSoundfiles(py::dict);
 

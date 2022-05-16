@@ -53,6 +53,9 @@ FaustProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& lay
 void
 FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+	if (!m_isCompiled) {
+		this->compile();
+	}
 }
 
 void
@@ -64,8 +67,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 	getPlayHead()->getCurrentPosition(posInfo);
 
 	if (!m_isCompiled) {
-		ProcessorBase::processBlock(buffer, midiBuffer);
-		return;
+		throw std::runtime_error("Faust Processor called processBlock but it wasn't compiled.");
 	}
 
 	if (m_nvoices < 1) {
@@ -74,54 +76,50 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 		}
 	}
 	else if (m_dsp_poly != NULL) {
-		long long int start = posInfo.timeInSamples;
+		auto start = posInfo.timeInSamples;
 
-		const double PPQN = 960.;
-
-		auto pulseStart = posInfo.ppqPosition * PPQN;
+		auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
 		auto pulseStep = (posInfo.bpm * PPQN) / (mySampleRate * 60.);
-		auto pulseOffset = std::max(1., pulseStep);
 
-		// render one sample at a time
+		// render one sample at a time because we want accurate timing of keyOn/keyOff.
 
-		int midiChannel = 0;
+		auto oneSampReadPtrs = (float**)oneSampleInBuffer.getArrayOfReadPointers();
+		auto oneSampWritePtrs = (float**)oneSampleOutBuffer.getArrayOfWritePointers();
+		const int midiChannel = 0;
 
 		for (size_t i = 0; i < buffer.getNumSamples(); i++)
 		{
 			{
 				myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
-				do {
-					if (myIsMessageBetweenSec) {
+				while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
 
-						if (myMidiMessageSec.isNoteOn()) {
-							m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
-						}
-						else if (myMidiMessageSec.isNoteOff()) {
-							m_dsp_poly->keyOff(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
-						}
-
-						myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
-						myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
+					if (myMidiMessageSec.isNoteOn()) {
+						m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
 					}
-				} while (myIsMessageBetweenSec && myMidiEventsDoRemainSec);
+					else if (myMidiMessageSec.isNoteOff()) {
+						m_dsp_poly->keyOff(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
+					}
+
+					myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+					myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
+				}
 			}
 
 			{
-				myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + pulseOffset;
-				do {
-					if (myIsMessageBetweenQN) {
+				myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + 1;
+				while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
 
-						if (myMidiMessageQN.isNoteOn()) {
-							m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
-						}
-						else if (myMidiMessageQN.isNoteOff()) {
-							m_dsp_poly->keyOff(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
-						}
-
-						myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
-						myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + pulseOffset;
+					if (myMidiMessageQN.isNoteOn()) {
+						m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
 					}
-				} while (myIsMessageBetweenQN && myMidiEventsDoRemainQN);
+					else if (myMidiMessageQN.isNoteOff()) {
+						m_dsp_poly->keyOff(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
+					}
+
+					myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+
+					myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + 1;
+				}
 			}
 
 			for (size_t chan = 0; chan < m_numInputChannels; chan++)
@@ -129,7 +127,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				oneSampleInBuffer.setSample(chan, 0, buffer.getSample(chan, i));
 			}
 
-			m_dsp_poly->compute(1, (float**)oneSampleInBuffer.getArrayOfReadPointers(), (float**)oneSampleOutBuffer.getArrayOfWritePointers());
+			m_dsp_poly->compute(1, oneSampReadPtrs, oneSampWritePtrs);
 
 			for (size_t chan = 0; chan < m_numOutputChannels; chan++)
 			{
@@ -201,6 +199,7 @@ FaustProcessor::automateParameters() {
 void
 FaustProcessor::reset()
 {
+
 	if (m_dsp) {
 		m_dsp->instanceClear();
 	}
@@ -283,8 +282,6 @@ FaustProcessor::setDSPString(const std::string& code)
 	return true;
 }
 
-#define FAUSTPROCESSOR_FAIL_COMPILE clear(); return false;
-
 bool
 FaustProcessor::compile()
 {
@@ -299,15 +296,15 @@ FaustProcessor::compile()
 
 	auto pathToFaustLibraries = getPathToFaustLibraries();
 
-	int argc = 0;
-	const char** argv = new const char* [256];
-	if (pathToFaustLibraries.compare(std::string("")) != 0) {
-		argv[argc++] = "-I";
-		argv[argc++] = pathToFaustLibraries.c_str();
-	}
-	else {
+	if (pathToFaustLibraries.compare(std::string("")) == 0) {
 		throw std::runtime_error("FaustProcessor::compile(): Error for path for faust libraries: " + pathToFaustLibraries);
 	}
+
+	int argc = 0;
+	const char** argv = new const char* [256];
+
+	argv[argc++] = "-I";
+	argv[argc++] = pathToFaustLibraries.c_str();
 
 	if (m_faustLibrariesPath.compare(std::string("")) != 0) {
 		argv[argc++] = "-I";
@@ -341,11 +338,17 @@ FaustProcessor::compile()
 			argc, argv, target.c_str(), m_errorString, optimize);
 	}
 
+	for (int i = 0; i < argc; i++) {
+		argv[i] = NULL;
+	}
+	delete[] argv;
+	argv = nullptr;
+
 	// check for error
 	if (m_errorString != "") {
 		// output error
+		clear();
 		throw std::runtime_error("FaustProcessor::compile(): " + m_errorString + ". Check the faustlibraries path: " + pathToFaustLibraries);
-		FAUSTPROCESSOR_FAIL_COMPILE
 	}
 
 	//// print where faustlib is looking for stdfaust.lib and the other lib files.
@@ -360,18 +363,12 @@ FaustProcessor::compile()
 	//    std::cout << name << "\n" << std::endl;
 	//}
 
-	for (int i = 0; i < argc; i++) {
-		argv[i] = NULL;
-	}
-	delete[] argv;
-	argv = nullptr;
-
 	if (is_polyphonic) {
 		// (false, true) works
 		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
 		if (!m_dsp_poly) {
+			clear();
 			throw std::runtime_error("FaustProcessor::compile(): Cannot create Poly DSP instance.");
-			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 		m_dsp_poly->setReleaseLength(m_releaseLengthSec);
 	}
@@ -379,8 +376,8 @@ FaustProcessor::compile()
 		// create DSP instance
 		m_dsp = m_factory->createDSPInstance();
 		if (!m_dsp) {
+			clear();
 			throw std::runtime_error("FaustProcessor::compile(): Cannot create DSP instance.");
-			FAUSTPROCESSOR_FAIL_COMPILE
 		}
 	}
 
@@ -428,6 +425,11 @@ bool
 FaustProcessor::setDSPFile(const std::string& path)
 {
 	m_isCompiled = false;
+
+	if (!std::filesystem::exists(path.c_str())) {
+		throw std::runtime_error("File not found: " + path);
+	}
+
 	if (std::strcmp(path.c_str(), "") == 0) {
 		throw std::runtime_error("Path to DSP file is empty.");
 	}
@@ -648,8 +650,6 @@ FaustProcessor::loadMidi(const std::string& path, bool clearPrevious, bool conve
 		throw std::runtime_error("File not found: " + path);
 	}
 
-	const double PPQN = 960.;
-
 	File file = File(path);
 	FileInputStream fileStream(file);
 	MidiFile midiFile;
@@ -683,7 +683,7 @@ FaustProcessor::loadMidi(const std::string& path, bool clearPrevious, bool conve
 				MidiMessage& m = track->getEventPointer(i)->message;
 
 				if (allEvents || m.isNoteOff() || m.isNoteOn()) {
-					// convert timestamp from its original time format to 960 (very high resolution)
+					// convert timestamp from its original time format to our high resolution PPQN
 					auto timeStamp = m.getTimeStamp() * PPQN / timeFormat;
 					myMidiBufferQN.addEvent(m, timeStamp);
 				}
@@ -704,7 +704,8 @@ bool
 FaustProcessor::addMidiNote(uint8  midiNote,
 	uint8  midiVelocity,
 	const double noteStart,
-	const double noteLength) {
+	const double noteLength,
+	bool convert_to_sec) {
 
 	if (midiNote > 255) midiNote = 255;
 	if (midiNote < 0) midiNote = 0;
@@ -723,11 +724,20 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 		midiNote,
 		midiVelocity);
 
-	auto startTime = noteStart * mySampleRate;
-	onMessage.setTimeStamp(startTime);
-	offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
-	myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
-	myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
+	if (convert_to_sec) {
+		auto startTime = noteStart * mySampleRate;
+		onMessage.setTimeStamp(startTime);
+		offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
+		myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
+		myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
+	}
+	else {
+		auto startTime = noteStart * PPQN;
+		onMessage.setTimeStamp(startTime);
+		offMessage.setTimeStamp(startTime + noteLength * PPQN);
+		myMidiBufferQN.addEvent(onMessage, (int)onMessage.getTimeStamp());
+		myMidiBufferQN.addEvent(offMessage, (int)offMessage.getTimeStamp());
+	}
 
 	return true;
 }
@@ -819,7 +829,6 @@ FaustProcessor::getPathToFaustLibraries() {
 	catch (...) {
 		throw std::runtime_error("Error getting path to faustlibraries.");
 	}
-	return "";
 }
 
 using  myaudiotype = py::array_t<float, py::array::c_style | py::array::forcecast>;

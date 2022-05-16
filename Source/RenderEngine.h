@@ -29,6 +29,8 @@ public:
     RenderEngine(double sr, int bs);
 
     bool loadGraph(DAG dagNodes);
+
+    bool removeProcessor(const std::string& name);
     
     bool render (const double renderLength);
 
@@ -63,5 +65,5 @@ private:
     CurrentPositionInfo myCurrentPositionInfo;
     AudioSampleBuffer bpmAutomation;
 
-    double getBPM(double ppqPosition);
+    float getBPM(double ppqPosition);
 };

@@ -10,10 +10,9 @@ RenderEngineWrapper::RenderEngineWrapper(double sr, int bs) :
 void
 RenderEngineWrapper::prepareProcessor(ProcessorBase* processor, const std::string& name)
 {
-    if (m_UniqueNameToNodeID.find(name) != m_UniqueNameToNodeID.end()) {
-        myMainProcessorGraph->removeNode(m_UniqueNameToNodeID[name]);
-        m_UniqueNameToNodeID.erase(name);
-    }
+    if (this->removeProcessor(name)) {
+        // todo: maybe warn the user that a processor was removed.
+    };
 
     auto node = myMainProcessorGraph->addNode((std::unique_ptr<ProcessorBase>)(processor));
     m_UniqueNameToNodeID[name] = node->nodeID;
