@@ -212,10 +212,11 @@ public:
 
         double nextPPQ = posInfo.ppqPosition + (double(buffer.getNumSamples())/ m_sample_rate) * posInfo.bpm / 60.;
         
-        int numAvailable = 0;
-        const int numSamplesNeeded = buffer.getNumSamples();
+        long long numAvailable = 0;
+        const long long numSamplesNeeded = buffer.getNumSamples();
 
-        int numWritten = 0;
+        long long numWritten = 0;
+        long long numToRetrieve = 0;
 
         while (numWritten < numSamplesNeeded) {
             // In this loop, figure out just one sample at a time.
@@ -226,9 +227,9 @@ public:
             // The clip info: is warping enabled, is looping enabled.
 
             numAvailable = m_rbstretcher->available();
-
-            int numToRetrieve = std::min(numAvailable, numSamplesNeeded - numWritten);
-            numToRetrieve = std::min(numToRetrieve,int(std::ceil( (m_currentClip.end_pos-movingPPQ)/(posInfo.bpm)*60.*m_sample_rate)));
+ 
+            numToRetrieve = std::min(numAvailable, numSamplesNeeded - numWritten);
+            numToRetrieve = std::min(numToRetrieve,(long long)(std::ceil( (m_currentClip.end_pos-movingPPQ)/(posInfo.bpm)*60.*m_sample_rate)));
 
             if (numToRetrieve > 0) {
                 m_nonInterleavedBuffer.setSize(m_numChannels, numToRetrieve);
@@ -240,7 +241,7 @@ public:
                 }
 
                 numWritten += numToRetrieve;
-                movingPPQ += (double)(numToRetrieve)*posInfo.bpm / (m_sample_rate * 60.);
+                movingPPQ += double(numToRetrieve)*posInfo.bpm / (m_sample_rate * 60.);
                 continue;
             }
 
@@ -269,7 +270,6 @@ public:
                 }
                 numWritten += 1;
                 movingPPQ += posInfo.bpm / (m_sample_rate * 60.);
-
                 continue;
             }
 
@@ -288,7 +288,6 @@ public:
                     else {
                         sampleReadIndex = 0;
                     }
-                    
                     continue;
                 }
                 else {
@@ -297,7 +296,6 @@ public:
                     }
                     numWritten += 1;
                     movingPPQ += posInfo.bpm / (m_sample_rate * 60.);
-
                     continue;
                 }
             }
@@ -429,8 +427,8 @@ private:
         options |= RubberBandStretcher::OptionChannelsTogether;  // enabling this is NOT the default
 
         // Pick one of these:
-        options |= RubberBandStretcher::OptionThreadingAuto;
-        //options |= RubberBandStretcher::OptionThreadingNever;
+        //options |= RubberBandStretcher::OptionThreadingAuto;
+        options |= RubberBandStretcher::OptionThreadingNever;
         //options |= RubberBandStretcher::OptionThreadingAlways;
 
         // Pick one of these:
