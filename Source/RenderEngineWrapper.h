@@ -1,8 +1,21 @@
 #pragma once
 
 #include "RenderEngine.h"
-#include "AllProcessors.h"
 #include "custom_pybind_wrappers.h"
+
+#include "ProcessorBase.h"
+#include "AddProcessor.h"
+#include "CompressorProcessor.h"
+#include "DelayProcessor.h"
+#include "FaustProcessor.h"
+#include "FilterProcessor.h"
+#include "OscillatorProcessor.h"
+#include "PlaybackProcessor.h"
+#include "PlaybackWarpProcessor.h"
+#include "PluginProcessor.h"
+#include "ReverbProcessor.h"
+#include "PannerProcessor.h"
+#include "SamplerProcessor.h"
 
 class RenderEngineWrapper : public RenderEngine
 {

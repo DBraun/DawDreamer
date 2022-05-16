@@ -631,6 +631,9 @@
     <ClCompile Include="..\..\Source\FilterProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\PlaybackWarpProcessor.cpp">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>

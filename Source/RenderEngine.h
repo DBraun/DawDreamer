@@ -3,13 +3,14 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "custom_pybind_wrappers.h"
 #include "CustomParameters.h"
+
+#include "ProcessorBase.h"
+
 #include <random>
 #include <array>
 #include <iomanip>
 #include <sstream>
 #include <string>
-
-class ProcessorBase;
 
 class DAGNode {
 public:

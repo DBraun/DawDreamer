@@ -1,5 +1,5 @@
 #include "RenderEngine.h"
-#include "AllProcessors.h"
+#include "FaustProcessor.h"
 
 #include <unordered_map>
 
@@ -185,6 +185,7 @@ RenderEngine::render(const double renderLength) {
         }
 
         auto faustProcessor = dynamic_cast<FaustProcessor*> (processor);
+        // todo: avoid needing to do this here.
         if (faustProcessor && (!faustProcessor->isCompiled())) {
             if (!faustProcessor->compile()) {
                 return false;

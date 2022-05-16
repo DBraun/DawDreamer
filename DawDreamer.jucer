@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.5"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.6"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
@@ -211,6 +211,8 @@
             file="Source/OscillatorProcessor.h"/>
       <FILE id="tlHHTL" name="PlaybackWarpProcessor.h" compile="0" resource="0"
             file="Source/PlaybackWarpProcessor.h"/>
+      <FILE id="qEKHvR" name="PlaybackWarpProcessor.cpp" compile="1" resource="0"
+            file="Source/PlaybackWarpProcessor.cpp"/>
       <FILE id="D0T0n5" name="PlaybackProcessor.h" compile="0" resource="0"
             file="Source/PlaybackProcessor.h"/>
       <FILE id="sHn6tW" name="PluginProcessor.h" compile="0" resource="0"
