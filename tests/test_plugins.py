@@ -265,6 +265,7 @@ def test_plugin_upright_piano():
 @pytest.mark.parametrize("plugin_path",
     [
     "C:/VSTPlugIns/LABS (64 Bit).dll",
+    "C:/VSTPlugIns/Kontakt.dll",
     # "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
     # "C:/VSTPlugIns/sparta/sparta_ambiBIN.dll",
     ]
@@ -312,7 +313,7 @@ def test_plugin_editor(plugin_path: str):
 
     # print(synth.get_plugin_parameters_description())
 
-    print('inputs: ', synth.get_num_input_channels(), ' outputs: ', synth.get_num_output_channels())
+    print('synth: ', plugin_basename, ' inputs: ', synth.get_num_input_channels(), ' outputs: ', synth.get_num_output_channels())
 
     # assert(synth.get_num_input_channels() == 0)
     # assert(synth.get_num_output_channels() == 2)
@@ -321,10 +322,23 @@ def test_plugin_editor(plugin_path: str):
     synth.add_midi_note(60, 60, 0.0, .25)
     synth.add_midi_note(64, 80, 0.5, .5)
     synth.add_midi_note(67, 127, 0.75, .5)
+    synth.add_midi_note(48, 80, 1.5, .5)
+    synth.add_midi_note(36, 80, 2.0, .5)
 
-    assert(synth.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
+    assert(synth.n_midi_events == 5*2)  # multiply by 2 because of the off-notes.
 
-    engine.load_graph([(synth, [])])
+    graph = [(synth, [])]
+
+    num_outputs = synth.get_num_output_channels()
+
+    if num_outputs > 2:
+        # Use faust to "fan-in" the number of channels from something larger than 2 to 2.
+        faust_processor = engine.make_faust_processor("faust")
+        num_outputs = synth.get_num_output_channels()
+        faust_processor.set_dsp_string(f"process = si.bus({num_outputs}) :> si.bus(2);")
+        graph.append((faust_processor, ["synth"]))
+
+    engine.load_graph(graph)
 
     render(engine, file_path=OUTPUT / (f'test_plugin_{plugin_basename}.wav'), duration=DURATION)
 
