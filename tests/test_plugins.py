@@ -264,10 +264,10 @@ def test_plugin_upright_piano():
 
 @pytest.mark.parametrize("plugin_path",
     [
+    "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
     "C:/VSTPlugIns/LABS (64 Bit).dll",
     "C:/VSTPlugIns/Kontakt.dll",
-    # "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
-    # "C:/VSTPlugIns/sparta/sparta_ambiBIN.dll",
+    # "C:/VSTPlugIns/Kontakt.vst3",  # not working
     ]
     )
 def test_plugin_editor(plugin_path: str):
@@ -300,16 +300,21 @@ def test_plugin_editor(plugin_path: str):
 
     DURATION = 5.
 
-    plugin_basename = splitext(basename(plugin_path))[0]
+    plugin_basename = basename(plugin_path)
 
     engine = daw.RenderEngine(SAMPLE_RATE, 128)
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
     plat_system = platform.system()
-    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plat_system}_{plugin_basename}'))
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plat_system}_{plugin_basename}.bin'))
+
+    # from time import sleep
+    # sleep(.5)
 
     load_help(synth, state_file_path)
+
+    # sleep(.5)
 
     # print(synth.get_plugin_parameters_description())
 
@@ -361,9 +366,9 @@ def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnc
     ambisonics_encoder.record = True
     ambisonics_decoder.record = True
 
-    plugin_basename = splitext(basename(plugin_path1))[0]
+    plugin_basename = basename(plugin_path1)
 
-    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}.bin'))
 
     if isfile(state_file_path):
         ambisonics_encoder.load_state(state_file_path)
@@ -389,8 +394,8 @@ def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnc
     # print(ambisonics_encoder.get_plugin_parameters_description())
     # print('inputs: ', ambisonics_encoder.get_num_input_channels(), ' outputs: ', ambisonics_encoder.get_num_output_channels())
 
-    plugin_basename = splitext(basename(plugin_path2))[0]
-    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}'))
+    plugin_basename = basename(plugin_path2)
+    state_file_path = abspath(OUTPUT / (f'state_test_plugin_{plugin_basename}.bin'))
 
     if isfile(state_file_path):
         ambisonics_decoder.load_state(state_file_path)
