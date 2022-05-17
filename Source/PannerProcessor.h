@@ -37,7 +37,7 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
-        *myPan = getAutomationVal("pan", posInfo.timeInSamples);
+        *myPan = getAutomationVal("pan", posInfo);
         updateParameters();
     }
 
@@ -48,7 +48,7 @@ public:
     const juce::String getName() { return "PannerProcessor"; };
 
     void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
-    float getPan() { return getAutomationVal("pan", 0); }
+    float getPan() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("pan", posInfo); }
 
     void setRule(std::string newRule) {
         myRule = stringToRule(newRule);

@@ -46,6 +46,15 @@ FaustProcessor::~FaustProcessor() {
 }
 
 bool
+FaustProcessor::setAutomation(std::string parameterName, py::array input, bool is_audio_rate) {
+
+	if (!m_isCompiled) {
+		this->compile();
+	}
+	return ProcessorBase::setAutomation(parameterName, input, is_audio_rate);
+}
+
+bool
 FaustProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
 	return (layout.getMainInputChannels() == m_numInputChannels) && (layout.getMainOutputChannels() == m_numOutputChannels);
 }
@@ -174,7 +183,7 @@ FaustProcessor::automateParameters() {
 		int faustIndex = m_map_juceIndex_to_faustIndex[i];
 
 		if (theParameter) {
-			m_ui->setParamValue(faustIndex, theParameter->sample(posInfo.timeInSamples));
+			m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
 		}
 		else {
 			auto theName = this->getParameterName(i);
@@ -494,7 +503,9 @@ FaustProcessor::getParamWithIndex(const int index)
 
 	auto& parAddress = it->second;
 
-	return this->getAutomationVal(parAddress, 0);
+	AudioPlayHead::CurrentPositionInfo posInfo;
+
+	return this->getAutomationVal(parAddress, posInfo);
 }
 
 float
@@ -506,7 +517,9 @@ FaustProcessor::getParamWithPath(const std::string& n)
 	}
 	if (!m_ui) return 0; // todo: better handling
 
-	return this->getAutomationVal(n, 0);
+	AudioPlayHead::CurrentPositionInfo posInfo;
+
+	return this->getAutomationVal(n, posInfo);
 }
 
 std::string
@@ -624,7 +637,8 @@ FaustProcessor::getPluginParametersDescription()
 			myDictionary["min"] = m_ui->getParamMin(faustIndex);
 			myDictionary["max"] = m_ui->getParamMax(faustIndex);
 			myDictionary["step"] = m_ui->getParamStep(faustIndex);
-			myDictionary["value"] = this->getAutomationVal(theName, 0);
+			AudioPlayHead::CurrentPositionInfo posInfo;
+			myDictionary["value"] = this->getAutomationVal(theName, posInfo);
 
 			myList.append(myDictionary);
 		}

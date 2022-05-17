@@ -225,7 +225,7 @@ PluginProcessor::automateParameters() {
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
             if (theParameter) {
                 // todo: change to setParameterNotifyingHost?
-                myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
+                myPlugin->setParameter(i, theParameter->sample(posInfo));
             }
             else {
                 throw std::runtime_error("Error automateParameters: " + myPlugin->getParameterName(i).toStdString());
@@ -448,6 +448,8 @@ PluginProcessor::getPatch() {
     params.clear();
     params.reserve(myPlugin->getNumParameters());
 
+
+    AudioPlayHead::CurrentPositionInfo posInfo;
     for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
         auto theName = myPlugin->getParameterName(i);
@@ -458,7 +460,7 @@ PluginProcessor::getPatch() {
 
         auto parameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
         if (parameter) {
-            float val = parameter->sample(0);
+            float val = parameter->sample(posInfo);
             if (parameter) {
                 params.push_back(std::make_pair(i, val));
             }
@@ -624,7 +626,9 @@ PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
         return 0.;
     }
 
-    return ProcessorBase::getAutomationVal(std::to_string(parameterIndex), 0);
+    AudioPlayHead::CurrentPositionInfo posInfo;
+
+    return ProcessorBase::getAutomationVal(std::to_string(parameterIndex), posInfo);
 }
 
 std::string
@@ -646,8 +650,8 @@ PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 }
 
 bool
-PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input) {
-    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input);
+PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, bool is_audio_rate) {
+    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input, is_audio_rate);
 }
 
 int

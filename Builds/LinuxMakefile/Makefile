@@ -104,6 +104,7 @@ OBJECTS_DYNAMIC_LIBRARY := \
   $(JUCE_OBJDIR)/PlaybackWarpProcessor_eedba470.o \
   $(JUCE_OBJDIR)/PluginProcessor_a059e380.o \
   $(JUCE_OBJDIR)/ProcessorBase_65bf9464.o \
+  $(JUCE_OBJDIR)/CustomParameters_5970e144.o \
   $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o \
   $(JUCE_OBJDIR)/RenderEngine_d1c4d401.o \
   $(JUCE_OBJDIR)/RenderEngineWrapper_9b21dedc.o \
@@ -295,6 +296,11 @@ $(JUCE_OBJDIR)/PluginProcessor_a059e380.o: ../../Source/PluginProcessor.cpp
 $(JUCE_OBJDIR)/ProcessorBase_65bf9464.o: ../../Source/ProcessorBase.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling ProcessorBase.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/CustomParameters_5970e144.o: ../../Source/CustomParameters.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling CustomParameters.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o: ../../Source/custom_pybind_wrappers.cpp

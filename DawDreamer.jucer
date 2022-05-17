@@ -198,7 +198,6 @@
       <FILE id="jkEvDu" name="AddProcessor.h" compile="0" resource="0" file="Source/AddProcessor.h"/>
       <FILE id="WFptFr" name="CompressorProcessor.h" compile="0" resource="0"
             file="Source/CompressorProcessor.h"/>
-      <FILE id="VdWCsf" name="AllProcessors.h" compile="0" resource="0" file="Source/AllProcessors.h"/>
       <FILE id="wA54Bg" name="FaustProcessor.h" compile="0" resource="0"
             file="Source/FaustProcessor.h"/>
       <FILE id="TwJEHz" name="FaustProcessor.cpp" compile="1" resource="0"
@@ -226,6 +225,8 @@
     <GROUP id="{6A50F3BF-C55C-AF7D-5BA6-E62FF469B8C4}" name="Source"/>
     <FILE id="ejbgC9" name="CustomParameters.h" compile="0" resource="0"
           file="Source/CustomParameters.h"/>
+    <FILE id="jUQDYH" name="CustomParameters.cpp" compile="1" resource="0"
+          file="Source/CustomParameters.cpp"/>
     <FILE id="rDTPMs" name="custom_pybind_wrappers.h" compile="0" resource="0"
           file="Source/custom_pybind_wrappers.h"/>
     <FILE id="p932XA" name="custom_pybind_wrappers.cpp" compile="1" resource="0"

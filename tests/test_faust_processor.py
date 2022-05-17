@@ -55,6 +55,32 @@ def test_faust_passthrough(duration, buffer_size):
 
     assert np.allclose(data, audio, atol=1e-07)
 
+def test_faust_automation_tempo():
+
+    duration = 10.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, 128)
+
+    faust_processor = engine.make_faust_processor("faust")
+    faust_processor.set_dsp_string(
+        """
+        declare name "MyInstrument"; 
+        process = hslider("freq", 440., 0., 15000., 0.) : os.osc : _*.4 <: _, _;
+        """)
+
+    automation = make_sine(4, duration, sr=960)
+    automation = 220.+220.*(automation > 0).astype(np.float32)
+    faust_processor.set_automation("/MyInstrument/freq", automation, is_audio_rate=False)
+    # print(faust_processor.get_parameters_description())
+
+    graph = [
+        (faust_processor, [])
+    ]
+
+    engine.load_graph(graph)
+
+    render(engine, file_path=OUTPUT / 'test_faust_automation_tempo.wav', duration=duration)
+
 @pytest.mark.parametrize("duration,buffer_size", product(
     [(44099.5/44100), (44100.5/44100), 1., (4./44100)],
     [1, 2, 4, 8, 16, 128, 2048]))

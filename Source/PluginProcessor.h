@@ -137,7 +137,7 @@ public:
 
     bool wrapperSetParameter(int parameter, float value);
 
-    bool wrapperSetAutomation(int parameterIndex, py::array input);
+    bool wrapperSetAutomation(int parameterIndex, py::array input, bool is_audio_rate);
 
     int wrapperGetPluginParameterSize();
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "custom_pybind_wrappers.h"
 
 using juce::ADSR;
 using juce::AbstractFifo;
@@ -112,6 +113,7 @@ using juce::roundFloatToInt;
 using juce::roundToInt;
 using juce::uint8;
 
+
 class AutomateParameter
 {
 
@@ -119,49 +121,20 @@ public:
 
     AutomateParameter() {}
 
-    bool setAutomation(py::array_t<float> input) {
+    bool setAutomation(py::array_t<float> input, bool is_audio_rate);
 
-        try
-        {
-            myAutomation.clear();
+    void setAutomation(const float val);
 
-            auto numSamples = input.shape(0);
+    std::vector<float> getAutomation();
 
-            myAutomation = std::vector<float>(numSamples, 0.f);
+    float sample(juce::AudioPlayHead::CurrentPositionInfo& posInfo);
 
-            memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
-        }
-        catch (const std::exception& e)
-        {
-            throw std::runtime_error(std::string("Error: setAutomation: ") + e.what());
-            return false;
-        }
-
-        return true;
-    }
-
-    void setAutomation(const float val) {
-        myAutomation.clear();
-        myAutomation.push_back(val);
-    }
-
-    std::vector<float> getAutomation() {
-        return myAutomation;
-    }
-
-    float sample(size_t index) {
-        auto i = std::min(myAutomation.size() - 1, index);
-        i = std::max((size_t)0, i);
-        return myAutomation.at(i);
-    }
+    ~AutomateParameter() {}
 
 protected:
 
     std::vector<float> myAutomation;
-
-    ~AutomateParameter()
-    {
-    }
+    bool m_is_audio_rate = true;
 
 };
 

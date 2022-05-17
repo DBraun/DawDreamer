@@ -42,10 +42,10 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
-        *myThreshold = getAutomationVal("threshold", posInfo.timeInSamples);
-        *myRatio = getAutomationVal("ratio", posInfo.timeInSamples);
-        *myAttack = getAutomationVal("attack", posInfo.timeInSamples);
-        *myRelease = getAutomationVal("release", posInfo.timeInSamples);
+        *myThreshold = getAutomationVal("threshold", posInfo);
+        *myRatio = getAutomationVal("ratio", posInfo);
+        *myAttack = getAutomationVal("attack", posInfo);
+        *myRelease = getAutomationVal("release", posInfo);
         updateParameters();
     }
 
@@ -56,16 +56,16 @@ public:
     const juce::String getName() { return "CompressorProcessor"; };
 
     void setThreshold(float threshold) { setAutomationVal("threshold", threshold); }
-    float getThreshold() { return getAutomationVal("threshold", 0); }
+    float getThreshold() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("threshold", posInfo); }
 
     void setRatio(float ratio) { setAutomationVal("ratio", ratio); }
-    float getRatio() { return getAutomationVal("ratio", 0); }
+    float getRatio() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("ratio", posInfo); }
 
     void setAttack(float attack) { setAutomationVal("attack", attack); }
-    float getAttack() { return getAutomationVal("attack", 0); }
+    float getAttack() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("attack", posInfo); }
 
     void setRelease(float release) { setAutomationVal("release", release); }
-    float getRelease() { return getAutomationVal("release", 0); }
+    float getRelease() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("release", posInfo); }
 
 
 private:

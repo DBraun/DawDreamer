@@ -31,7 +31,7 @@ public:
     double getTimeRatio() { return m_time_ratio_if_warp_off; }
 
     void setTranspose(float newVal) { setAutomationVal("transpose", newVal); }
-    float getTranspose() { return getAutomationVal("transpose", 0); }
+    float getTranspose() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("transpose", posInfo); }
 
     bool getWarpOn() { return m_clipInfo.warp_on; }
     void setWarpOn(bool warpOn) { m_clipInfo.warp_on = warpOn; }

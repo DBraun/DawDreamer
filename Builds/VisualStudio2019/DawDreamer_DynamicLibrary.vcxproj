@@ -203,6 +203,7 @@ copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$
     <ClCompile Include="..\..\Source\PlaybackWarpProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>
     <ClCompile Include="..\..\Source\ProcessorBase.cpp"/>
+    <ClCompile Include="..\..\Source\CustomParameters.cpp"/>
     <ClCompile Include="..\..\Source\custom_pybind_wrappers.cpp"/>
     <ClCompile Include="..\..\Source\RenderEngine.cpp"/>
     <ClCompile Include="..\..\Source\RenderEngineWrapper.cpp"/>
@@ -2350,7 +2351,6 @@ copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$
     <ClInclude Include="..\..\Source\ReverbProcessor.h"/>
     <ClInclude Include="..\..\Source\AddProcessor.h"/>
     <ClInclude Include="..\..\Source\CompressorProcessor.h"/>
-    <ClInclude Include="..\..\Source\AllProcessors.h"/>
     <ClInclude Include="..\..\Source\FaustProcessor.h"/>
     <ClInclude Include="..\..\Source\FilterProcessor.h"/>
     <ClInclude Include="..\..\Source\OscillatorProcessor.h"/>

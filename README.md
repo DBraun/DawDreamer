@@ -134,10 +134,18 @@ synth.load_vst3_preset('C:/path/to/preset.vstpreset')
 print(synth.get_plugin_parameters_description()) 
 print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
 # Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
-# The Plugin Processor can set automation according to a parameter index.
-synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
-# We can simply use one value constantly:
+# We can simply set a constant value.
 synth.set_parameter(1, 0.1234)
+# The Plugin Processor can set automation with data at audio rate.
+synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
+
+# It's also possible to set automation in alignment with the tempo.
+# Let's make a numpy array whose PPQN is 960. Each 960 values in the array correspond to a quarter note
+# of time progressing.
+# Let's make a parameter alternate between 0.25 and 0.75 four times per beat.
+automation = make_sine(4, DURATION, sr=960)
+automation = 0.25+.5*(automation > 0).astype(np.float32)
+synth.set_automation(1, automation, is_audio_rate=False)
 
 # Load a MIDI file and convert the timing to absolute seconds. Changes to the Render Engine's BPM
 # won't affect the timing. The kwargs below are defaults.

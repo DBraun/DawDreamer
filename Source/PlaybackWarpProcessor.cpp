@@ -52,7 +52,7 @@ PlaybackWarpProcessor::automateParameters() {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
-    *myTranspose = getAutomationVal("transpose", posInfo.timeInSamples);
+    *myTranspose = getAutomationVal("transpose", posInfo);
     double scale = std::pow(2., *myTranspose / 12.);
     m_rbstretcher->setPitchScale(scale);
 }

@@ -41,7 +41,9 @@ public:
 
         auto parameterName = sampler.getParameterName(parameterIndex);
 
-        return ProcessorBase::getAutomationVal(parameterName.toStdString(), 0);
+        juce::AudioPlayHead::CurrentPositionInfo posInfo;
+
+        return ProcessorBase::getAutomationVal(parameterName.toStdString(), posInfo);
     }
 
     void
@@ -220,7 +222,6 @@ public:
         if (midiVelocity < 0) midiVelocity = 0;
         if (noteLength <= 0) {
             throw std::runtime_error("The note length must be greater than zero.");
-            return false;
         }
 
         // Get the note on midiBuffer.
@@ -329,7 +330,7 @@ public:
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo.timeInSamples));
+                sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo));
             }
             else {
                 std::cerr << "Error automateParameters: " << theName << std::endl;

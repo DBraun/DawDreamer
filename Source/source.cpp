@@ -30,15 +30,17 @@ PYBIND11_MODULE(dawdreamer, m)
     )pbdoc";
 
     py::class_<ProcessorBase>(m, "ProcessorBase")
-        .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), R"pbdoc(
+        .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("is_audio_rate")=true, R"pbdoc(
     Set a parameter's automation with a numpy array.
 
     Parameters
     ----------
     parameter_name : str
         The name of the parameter.
-    data : str
+    data : np.array
         An array of data for the parameter automation.
+    is_audio_rate : bool
+        True if the data is at the sample-rate of the RenderEngine. Otherwise, it should be the PPQN of 960.
 
     Returns
     -------
@@ -174,7 +176,7 @@ but the filter mode cannot under automation.";
         .def("get_parameter_text", &PluginProcessorWrapper::getParameterAsText, arg("index"), "Get a parameter's value as text.")
         .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter, arg("index"), arg("value"),
             "Set a parameter's value to a constant.")
-        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"),
+        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"), kw_only(), arg("is_audio_rate")=true,
             "Set the automation based on its index.")
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize, "Get the number of parameters.")
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
@@ -221,6 +223,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def("get_parameter", &FaustProcessor::getParamWithPath, arg("parameter_path"))
         .def("set_parameter", &FaustProcessor::setParamWithIndex, arg("parameter_index"), arg("value"))
         .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"), arg("value"))
+        .def("set_automation", &FaustProcessor::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("is_audio_rate") = true)
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")

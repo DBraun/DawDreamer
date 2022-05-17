@@ -29,7 +29,7 @@ public:
         if (!m_recordEnable) {
             return;
         }
-        AudioPlayHead::CurrentPositionInfo posInfo;
+        juce::AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
         const int numberChannels = myRecordBuffer.getNumChannels();
@@ -71,11 +71,11 @@ public:
     void getStateInformation(juce::MemoryBlock&);
     void setStateInformation(const void*, int);
 
-    bool setAutomation(std::string parameterName, py::array input);
+    bool setAutomation(std::string parameterName, py::array input, bool is_audio_rate);
 
-    bool setAutomationVal(std::string parameterName, float val);
+    virtual bool setAutomationVal(std::string parameterName, float val);
 
-    float getAutomationVal(std::string parameterName, int index);
+    float getAutomationVal(std::string parameterName, juce::AudioPlayHead::CurrentPositionInfo& posInfo);
 
     std::vector<float> getAutomation(std::string parameterName);
     py::array_t<float> getAutomationNumpy(std::string parameterName);
