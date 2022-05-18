@@ -28,6 +28,7 @@
       ~RenderEngine.make_plugin_processor
       ~RenderEngine.make_reverb_processor
       ~RenderEngine.make_sampler_processor
+      ~RenderEngine.remove_processor
       ~RenderEngine.render
       ~RenderEngine.set_bpm
    
