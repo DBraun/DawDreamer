@@ -36,7 +36,7 @@ public:
 
     void setBPM(double bpm);
 
-    bool setBPMVec(py::array_t<float> input);
+    bool setBPMwithPPQN(py::array_t<float> input, double ppqn);
 
     py::array_t<float> getAudioFrames();
 
@@ -64,6 +64,7 @@ private:
 
     CurrentPositionInfo myCurrentPositionInfo;
     AudioSampleBuffer bpmAutomation;
+    double myBPMPPQN = 960;
 
     float getBPM(double ppqPosition);
 };

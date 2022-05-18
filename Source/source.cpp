@@ -30,7 +30,7 @@ PYBIND11_MODULE(dawdreamer, m)
     )pbdoc";
 
     py::class_<ProcessorBase>(m, "ProcessorBase")
-        .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("is_audio_rate")=true, R"pbdoc(
+        .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("ppqn")=0, R"pbdoc(
     Set a parameter's automation with a numpy array.
 
     Parameters
@@ -39,8 +39,8 @@ PYBIND11_MODULE(dawdreamer, m)
         The name of the parameter.
     data : np.array
         An array of data for the parameter automation.
-    is_audio_rate : bool
-        True if the data is at the sample-rate of the RenderEngine. Otherwise, it should be the PPQN of 960.
+    ppqn : double
+        If specified, it is the pulses-per-quarter-note rate of the automation data. If not specified or zero, the data will be interpreted at audio rate.
 
     Returns
     -------
@@ -176,7 +176,7 @@ but the filter mode cannot under automation.";
         .def("get_parameter_text", &PluginProcessorWrapper::getParameterAsText, arg("index"), "Get a parameter's value as text.")
         .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter, arg("index"), arg("value"),
             "Set a parameter's value to a constant.")
-        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"), kw_only(), arg("is_audio_rate")=true,
+        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"), kw_only(), arg("ppqn")=0,
             "Set the automation based on its index.")
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize, "Get the number of parameters.")
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
@@ -223,7 +223,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def("get_parameter", &FaustProcessor::getParamWithPath, arg("parameter_path"))
         .def("set_parameter", &FaustProcessor::setParamWithIndex, arg("parameter_index"), arg("value"))
         .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"), arg("value"))
-        .def("set_automation", &FaustProcessor::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("is_audio_rate") = true)
+        .def("set_automation", &FaustProcessor::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("ppqn") = 0)
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
@@ -248,7 +248,7 @@ Note that note-ons and note-offs are counted separately.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngineWrapper::render, arg("seconds"), "Render the most recently loaded graph.")
         .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
-        .def("set_bpm", &RenderEngineWrapper::setBPMVec, arg("bpm"), "Set the beats-per-minute of the engine using a 1D numpy array with a PPQN of 960. In other words, if the array suddenly changes every 960 samples, the tempo change will occur \"on-the-beat.\"")
+        .def("set_bpm", &RenderEngineWrapper::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
         .def("remove_processor", &RenderEngine::removeProcessor, arg("name"), "Remove a processor based on its unique name. Existing Python references to the processor will become invalid.")

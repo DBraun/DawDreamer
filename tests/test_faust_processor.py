@@ -68,9 +68,10 @@ def test_faust_automation_tempo():
         process = hslider("freq", 440., 0., 15000., 0.) : os.osc : _*.4 <: _, _;
         """)
 
-    automation = make_sine(4, duration, sr=960)
+    ppqn = 960
+    automation = make_sine(4, duration, sr=ppqn)
     automation = 220.+220.*(automation > 0).astype(np.float32)
-    faust_processor.set_automation("/MyInstrument/freq", automation, is_audio_rate=False)
+    faust_processor.set_automation("/MyInstrument/freq", automation, ppqn=ppqn)
     # print(faust_processor.get_parameters_description())
 
     graph = [

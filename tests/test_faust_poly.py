@@ -88,10 +88,11 @@ def test_faust_sine(midi_path: str, bpm_automation: bool, convert_to_sec: bool, 
 
     duration = 10.
 
-    PPQN = 960  # todo: hard coded PPQN of 960. This is hard-coded in C++ too.
+    ppqn = 960
 
     if bpm_automation:
-        engine.set_bpm(120.+60.*make_sine(1./3., duration*10., sr=PPQN))
+        bpm_data = 120.+60.*make_sine(1./3., duration*10., sr=ppqn)
+        engine.set_bpm(bpm_data, ppqn=ppqn)
 
     faust_processor = engine.make_faust_processor("faust")
     faust_processor.num_voices = 16

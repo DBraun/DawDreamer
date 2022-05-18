@@ -23,14 +23,14 @@ ProcessorBase::setStateInformation(const void* data, int sizeInBytes)
             myParameters.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-bool ProcessorBase::setAutomation(std::string parameterName, py::array input, bool is_audio_rate) {
+bool ProcessorBase::setAutomation(std::string parameterName, py::array input, double ppqn) {
 
     try
     {
         auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
         if (parameter) {
-            return parameter->setAutomation(input, is_audio_rate);
+            return parameter->setAutomation(input, ppqn);
         }
         else {
             throw std::runtime_error("Failed to find parameter: " + parameterName);

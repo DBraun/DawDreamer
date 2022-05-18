@@ -650,8 +650,8 @@ PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 }
 
 bool
-PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, bool is_audio_rate) {
-    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input, is_audio_rate);
+PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, double ppqn) {
+    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input, ppqn);
 }
 
 int

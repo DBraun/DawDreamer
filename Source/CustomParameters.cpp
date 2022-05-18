@@ -4,9 +4,13 @@
 #include <algorithm>
 
 bool
-AutomateParameter::setAutomation(py::array_t<float> input, bool is_audio_rate) {
+AutomateParameter::setAutomation(py::array_t<float> input, double newPPQN) {
 
-    m_is_audio_rate = is_audio_rate;
+    if (newPPQN < 0) {
+        throw std::runtime_error("The PPQN must be greater than or equal to zero. Received: " + std::to_string(newPPQN));
+    }
+
+    m_ppqn = newPPQN;
 
     try
     {
@@ -41,10 +45,13 @@ AutomateParameter::getAutomation() {
 float
 AutomateParameter::sample(juce::AudioPlayHead::CurrentPositionInfo& posInfo) {
 
-    size_t i = std::min(myAutomation.size() - 1,
-        size_t(this->m_is_audio_rate ?
-            posInfo.timeInSamples :
-            posInfo.ppqPosition * ProcessorBase::PPQN));
+    size_t i;
+    if (m_ppqn > 0) {
+        i = std::min(myAutomation.size() - 1, size_t(posInfo.ppqPosition * m_ppqn));
+    }
+    else {
+        i = std::min(myAutomation.size() - 1, size_t(posInfo.timeInSamples));
+    }
 
     i = std::max((size_t)0, i);
     return myAutomation.at(i);

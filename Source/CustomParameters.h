@@ -121,7 +121,7 @@ public:
 
     AutomateParameter() {}
 
-    bool setAutomation(py::array_t<float> input, bool is_audio_rate);
+    bool setAutomation(py::array_t<float> input, double newPPQN);
 
     void setAutomation(const float val);
 
@@ -134,7 +134,7 @@ public:
 protected:
 
     std::vector<float> myAutomation;
-    bool m_is_audio_rate = true;
+    double m_ppqn = 0;
 
 };
 

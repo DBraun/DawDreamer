@@ -105,10 +105,10 @@ engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 engine.set_bpm(120.)  # default is 120 beats per minute.
 
 # The BPM can also be set as a numpy array that is interpreted
-# at a PPQN (Pulses Per Quarter Note) rate of 960.
-# In other words, if the numpy array abruptly changes values every 960 samples,
+# with a fixed PPQN (Pulses Per Quarter Note).
+# If we choose ppqn=960 and the numpy array abruptly changes values every 960 samples,
 # the tempo will abruptly change "on the beat".
-engine.set_bpm(120.+60.*make_sine(1./2., duration*10., sr=960))
+engine.set_bpm(120.+60.*make_sine(1./2., duration*10., ppqn=960))
 
 DURATION = 10 # How many seconds we want to render.
 
@@ -132,7 +132,7 @@ synth.load_vst3_preset('C:/path/to/preset.vstpreset')
 
 # Get a list of dictionaries where each dictionary describes a controllable parameter.
 print(synth.get_plugin_parameters_description()) 
-print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
+print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (oscillator A's panning)
 # Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
 # We can simply set a constant value.
 synth.set_parameter(1, 0.1234)
@@ -140,12 +140,12 @@ synth.set_parameter(1, 0.1234)
 synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
 
 # It's also possible to set automation in alignment with the tempo.
-# Let's make a numpy array whose PPQN is 960. Each 960 values in the array correspond to a quarter note
-# of time progressing.
+# Let's make a numpy array whose PPQN is 960.
+# Each 960 values in the array correspond to a quarter note of time progressing.
 # Let's make a parameter alternate between 0.25 and 0.75 four times per beat.
 automation = make_sine(4, DURATION, sr=960)
 automation = 0.25+.5*(automation > 0).astype(np.float32)
-synth.set_automation(1, automation, is_audio_rate=False)
+synth.set_automation(1, automation, ppqn=960)
 
 # Load a MIDI file and convert the timing to absolute seconds. Changes to the Render Engine's BPM
 # won't affect the timing. The kwargs below are defaults.
@@ -178,7 +178,7 @@ filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.
 filter_processor.freq = 7123.  # Some parameters can be get/set like this.
 freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 w/ amp 5000.
 filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
-freq_automation = filter_processor.get_automation("freq") # You can get automation of most processor parameters.
+freq_automation = filter_processor.get_automation("freq") # Get automation of most processor parameters.
 filter_processor.record = True  # This will allow us to access the filter processor's audio after a render.
 
 # A graph is a meaningfully ordered list of tuples.
@@ -189,7 +189,7 @@ filter_processor.record = True  # This will allow us to access the filter proces
 # The audio from the last tuple's processor will be accessed automatically later by engine.get_audio()
 graph = [
   (synth, []),  # synth takes no inputs, so we give an empty list.
-  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to the synth named earlier
+  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to synth from earlier
   (engine.make_plugin_processor("more_reverb", REVERB_PLUGIN), ["reverb"]), # Apply VST reverb
   (engine.make_playback_processor("vocals", vocals), []), # Playback has no inputs.
   (filter_processor, ["vocals"]), # High-pass filter with automation set earlier.

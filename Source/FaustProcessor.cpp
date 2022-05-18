@@ -46,12 +46,12 @@ FaustProcessor::~FaustProcessor() {
 }
 
 bool
-FaustProcessor::setAutomation(std::string parameterName, py::array input, bool is_audio_rate) {
+FaustProcessor::setAutomation(std::string parameterName, py::array input, double ppqn) {
 
 	if (!m_isCompiled) {
 		this->compile();
 	}
-	return ProcessorBase::setAutomation(parameterName, input, is_audio_rate);
+	return ProcessorBase::setAutomation(parameterName, input, ppqn);
 }
 
 bool
@@ -82,6 +82,9 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 	if (m_nvoices < 1) {
 		if (m_dsp != NULL) {
 			m_dsp->compute(buffer.getNumSamples(), (float**)buffer.getArrayOfReadPointers(), buffer.getArrayOfWritePointers());
+		}
+		else {
+			throw std::runtime_error("Faust Processor: m_dsp is null");
 		}
 	}
 	else if (m_dsp_poly != NULL) {
@@ -146,6 +149,9 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			start += 1;
 			pulseStart += pulseStep;
 		}
+	}
+	else {
+		throw std::runtime_error("Faust Processor: m_dsp_poly is null");
 	}
 
 	ProcessorBase::processBlock(buffer, midiBuffer);

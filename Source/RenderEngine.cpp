@@ -144,7 +144,7 @@ RenderEngine::connectGraph() {
 
 float RenderEngine::getBPM(double ppqPosition) {
 
-    int index = int(ProcessorBase::PPQN * ppqPosition);
+    int index = int(myBPMPPQN * ppqPosition);
     index = std::min(bpmAutomation.getNumSamples() - 1, index);
 
     auto bpm = bpmAutomation.getSample(0, index);
@@ -269,7 +269,13 @@ void RenderEngine::setBPM(double bpm) {
     bpmAutomation.setSample(0, 0, bpm);
 }
 
-bool RenderEngine::setBPMVec(py::array_t<float> input) {
+bool RenderEngine::setBPMwithPPQN(py::array_t<float> input, double ppqn) {
+
+    if (ppqn <= 0) {
+        throw std::runtime_error("The BPM's PPQN cannot be less than or equal to zero.");
+    }
+
+    myBPMPPQN = ppqn;
 
     auto numSamples = input.shape(0);
 

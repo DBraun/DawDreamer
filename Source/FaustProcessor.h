@@ -117,7 +117,7 @@ public:
 
     const juce::String getName() const { return "FaustProcessor"; }
 
-    bool setAutomation(std::string parameterName, py::array input, bool is_audio_rate);
+    bool setAutomation(std::string parameterName, py::array input, double ppqn);
 
     // faust stuff
     void clear();
