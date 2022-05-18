@@ -23,7 +23,7 @@ ProcessorBase::setStateInformation(const void* data, int sizeInBytes)
             myParameters.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-bool ProcessorBase::setAutomation(std::string parameterName, py::array input, double ppqn) {
+bool ProcessorBase::setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn) {
 
     try
     {

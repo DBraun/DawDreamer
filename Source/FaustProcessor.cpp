@@ -46,7 +46,7 @@ FaustProcessor::~FaustProcessor() {
 }
 
 bool
-FaustProcessor::setAutomation(std::string parameterName, py::array input, double ppqn) {
+FaustProcessor::setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn) {
 
 	if (!m_isCompiled) {
 		this->compile();

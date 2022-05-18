@@ -650,7 +650,7 @@ PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 }
 
 bool
-PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, double ppqn) {
+PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn) {
     return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input, ppqn);
 }
 

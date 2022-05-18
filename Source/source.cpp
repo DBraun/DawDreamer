@@ -39,7 +39,7 @@ PYBIND11_MODULE(dawdreamer, m)
         The name of the parameter.
     data : np.array
         An array of data for the parameter automation.
-    ppqn : double
+    ppqn : integer
         If specified, it is the pulses-per-quarter-note rate of the automation data. If not specified or zero, the data will be interpreted at audio rate.
 
     Returns

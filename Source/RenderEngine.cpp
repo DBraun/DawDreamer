@@ -269,7 +269,7 @@ void RenderEngine::setBPM(double bpm) {
     bpmAutomation.setSample(0, 0, bpm);
 }
 
-bool RenderEngine::setBPMwithPPQN(py::array_t<float> input, double ppqn) {
+bool RenderEngine::setBPMwithPPQN(py::array_t<float> input, std::uint32_t ppqn) {
 
     if (ppqn <= 0) {
         throw std::runtime_error("The BPM's PPQN cannot be less than or equal to zero.");

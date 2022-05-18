@@ -137,7 +137,7 @@ public:
 
     bool wrapperSetParameter(int parameter, float value);
 
-    bool wrapperSetAutomation(int parameterIndex, py::array input, double ppqn);
+    bool wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn);
 
     int wrapperGetPluginParameterSize();
 

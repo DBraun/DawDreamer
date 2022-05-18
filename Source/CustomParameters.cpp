@@ -4,7 +4,7 @@
 #include <algorithm>
 
 bool
-AutomateParameter::setAutomation(py::array_t<float> input, double newPPQN) {
+AutomateParameter::setAutomation(py::array_t<float> input, std::uint32_t newPPQN) {
 
     if (newPPQN < 0) {
         throw std::runtime_error("The PPQN must be greater than or equal to zero. Received: " + std::to_string(newPPQN));

@@ -121,7 +121,7 @@ public:
 
     AutomateParameter() {}
 
-    bool setAutomation(py::array_t<float> input, double newPPQN);
+    bool setAutomation(py::array_t<float> input, std::uint32_t newPPQN);
 
     void setAutomation(const float val);
 
@@ -134,7 +134,7 @@ public:
 protected:
 
     std::vector<float> myAutomation;
-    double m_ppqn = 0;
+    std::uint32_t m_ppqn = 0;
 
 };
 

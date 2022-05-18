@@ -71,7 +71,7 @@ public:
     void getStateInformation(juce::MemoryBlock&);
     void setStateInformation(const void*, int);
 
-    bool setAutomation(std::string parameterName, py::array input, double ppqn);
+    bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
 
     virtual bool setAutomationVal(std::string parameterName, float val);
 
@@ -166,7 +166,7 @@ public:
     // There's one set of variables for keeping track of everything in absolute time (when
     // `convert_to_sec` is True), and another for relative-to-tempo timing (when note start
     // times and durations are measured in "quarter notes" (QN)).
-    const static long PPQN = 3840;
+    const static std::uint32_t PPQN = 3840;
 
 private:
     //==============================================================================
