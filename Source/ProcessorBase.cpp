@@ -23,14 +23,14 @@ ProcessorBase::setStateInformation(const void* data, int sizeInBytes)
             myParameters.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-bool ProcessorBase::setAutomation(std::string parameterName, py::array input) {
+bool ProcessorBase::setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn) {
 
     try
     {
         auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
         if (parameter) {
-            return parameter->setAutomation(input);
+            return parameter->setAutomation(input, ppqn);
         }
         else {
             throw std::runtime_error("Failed to find parameter: " + parameterName);
@@ -75,11 +75,11 @@ std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
     }
 }
 
-float ProcessorBase::getAutomationVal(std::string parameterName, int index) {
+float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::CurrentPositionInfo& posInfo) {
     auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
     if (parameter) {
-        return parameter->sample(index);
+        return parameter->sample(posInfo);
     }
     else {
         throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);

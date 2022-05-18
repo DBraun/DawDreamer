@@ -43,11 +43,11 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
-        *myRoomSize = getAutomationVal("room_size", posInfo.timeInSamples);
-        *myDamping = getAutomationVal("damping", posInfo.timeInSamples);
-        *myDryLevel = getAutomationVal("dry_level", posInfo.timeInSamples);
-        *myWetLevel = getAutomationVal("wet_level", posInfo.timeInSamples);
-        *myWidth = getAutomationVal("width", posInfo.timeInSamples);
+        *myRoomSize = getAutomationVal("room_size", posInfo);
+        *myDamping = getAutomationVal("damping", posInfo);
+        *myDryLevel = getAutomationVal("dry_level", posInfo);
+        *myWetLevel = getAutomationVal("wet_level", posInfo);
+        *myWidth = getAutomationVal("width", posInfo);
 
         updateParameters();
     }
@@ -59,19 +59,19 @@ public:
     const juce::String getName() { return "ReverbProcessor"; };
 
     void setRoomSize(float roomSize) { setAutomationVal("room_size", roomSize); }
-    float getRoomSize() { return getAutomationVal("room_size", 0); }
+    float getRoomSize() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("room_size", posInfo); }
 
     void setDamping(float damping) { setAutomationVal("damping", damping); }
-    float getDamping() { return getAutomationVal("damping", 0); }
+    float getDamping() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("damping", posInfo); }
 
     void setWetLevel(float wetLevel) { setAutomationVal("wet_level", wetLevel); }
-    float getWetLevel() { return getAutomationVal("wet_level", 0); }
+    float getWetLevel() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
 
     void setDryLevel(float dryLevel) { setAutomationVal("dry_level", dryLevel); }
-    float getDryLevel() { return getAutomationVal("dry_level", 0);  }
+    float getDryLevel() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("dry_level", posInfo);  }
 
     void setWidth(float width) { setAutomationVal("width", width); }
-    float getWidth() { return getAutomationVal("width", 0);  }
+    float getWidth() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("width", posInfo);  }
 
 
 private:

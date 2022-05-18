@@ -50,8 +50,8 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
-        *myWetLevel = getAutomationVal("wet_level", posInfo.timeInSamples);
-        *myDelaySize = getAutomationVal("delay", posInfo.timeInSamples);
+        *myWetLevel = getAutomationVal("wet_level", posInfo);
+        *myDelaySize = getAutomationVal("delay", posInfo);
         updateParameters();
     }
 
@@ -62,10 +62,10 @@ public:
     const juce::String getName() { return "DelayProcessor"; };
 
     void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
-    float getDelay() { return getAutomationVal("delay", 0); }
+    float getDelay() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("delay", posInfo); }
 
     void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
-    float getWet() { return getAutomationVal("wet_level", 0); }
+    float getWet() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
 
 
 private:

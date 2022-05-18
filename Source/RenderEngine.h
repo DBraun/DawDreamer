@@ -3,13 +3,14 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "custom_pybind_wrappers.h"
 #include "CustomParameters.h"
+
+#include "ProcessorBase.h"
+
 #include <random>
 #include <array>
 #include <iomanip>
 #include <sstream>
 #include <string>
-
-class ProcessorBase;
 
 class DAGNode {
 public:
@@ -28,10 +29,14 @@ public:
     RenderEngine(double sr, int bs);
 
     bool loadGraph(DAG dagNodes);
+
+    bool removeProcessor(const std::string& name);
     
     bool render (const double renderLength);
 
     void setBPM(double bpm);
+
+    bool setBPMwithPPQN(py::array_t<float> input, std::uint32_t ppqn);
 
     py::array_t<float> getAudioFrames();
 
@@ -47,7 +52,6 @@ protected:
 
     double mySampleRate;
     int myBufferSize;
-    double myBPM = 120.;
     std::unordered_map<std::string, juce::AudioProcessorGraph::NodeID> m_UniqueNameToNodeID;
     
     bool connectGraph();
@@ -59,4 +63,8 @@ protected:
 private:
 
     CurrentPositionInfo myCurrentPositionInfo;
+    AudioSampleBuffer bpmAutomation;
+    std::uint32_t myBPMPPQN = 960;
+
+    float getBPM(double ppqPosition);
 };

@@ -2,6 +2,7 @@ from collections import defaultdict
 from os import getenv
 from os.path import abspath, isfile, isdir, basename, splitext
 from pathlib import Path
+from itertools import product
 import pathlib
 import platform
 import random

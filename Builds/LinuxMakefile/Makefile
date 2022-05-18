@@ -35,7 +35,7 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.5" "-DJUCE_APP_VERSION_HEX=0x605" $(shell pkg-config --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.6" "-DJUCE_APP_VERSION_HEX=0x606" $(shell pkg-config --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
   JUCE_CPPFLAGS_DYNAMIC_LIBRARY :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_CFLAGS_DYNAMIC_LIBRARY := -fPIC -fvisibility=hidden
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
@@ -58,7 +58,7 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.5" "-DJUCE_APP_VERSION_HEX=0x605" $(shell pkg-config --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.6" "-DJUCE_APP_VERSION_HEX=0x606" $(shell pkg-config --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src/kissfft -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
   JUCE_CPPFLAGS_DYNAMIC_LIBRARY :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_CFLAGS_DYNAMIC_LIBRARY := -fPIC -fvisibility=hidden
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
@@ -101,8 +101,10 @@ OBJECTS_DYNAMIC_LIBRARY := \
   $(JUCE_OBJDIR)/SamplerAudioProcessorEditor_39db550d.o \
   $(JUCE_OBJDIR)/FaustProcessor_2056a3e0.o \
   $(JUCE_OBJDIR)/FilterProcessor_8755f5b.o \
+  $(JUCE_OBJDIR)/PlaybackWarpProcessor_eedba470.o \
   $(JUCE_OBJDIR)/PluginProcessor_a059e380.o \
   $(JUCE_OBJDIR)/ProcessorBase_65bf9464.o \
+  $(JUCE_OBJDIR)/CustomParameters_5970e144.o \
   $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o \
   $(JUCE_OBJDIR)/RenderEngine_d1c4d401.o \
   $(JUCE_OBJDIR)/RenderEngineWrapper_9b21dedc.o \
@@ -281,6 +283,11 @@ $(JUCE_OBJDIR)/FilterProcessor_8755f5b.o: ../../Source/FilterProcessor.cpp
 	@echo "Compiling FilterProcessor.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/PlaybackWarpProcessor_eedba470.o: ../../Source/PlaybackWarpProcessor.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling PlaybackWarpProcessor.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/PluginProcessor_a059e380.o: ../../Source/PluginProcessor.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling PluginProcessor.cpp"
@@ -289,6 +296,11 @@ $(JUCE_OBJDIR)/PluginProcessor_a059e380.o: ../../Source/PluginProcessor.cpp
 $(JUCE_OBJDIR)/ProcessorBase_65bf9464.o: ../../Source/ProcessorBase.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling ProcessorBase.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/CustomParameters_5970e144.o: ../../Source/CustomParameters.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling CustomParameters.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o: ../../Source/custom_pybind_wrappers.cpp

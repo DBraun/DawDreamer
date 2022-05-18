@@ -631,11 +631,17 @@
     <ClCompile Include="..\..\Source\FilterProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\PlaybackWarpProcessor.cpp">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\ProcessorBase.cpp">
       <Filter>DawDreamer\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\CustomParameters.cpp">
+      <Filter>DawDreamer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\custom_pybind_wrappers.cpp">
       <Filter>DawDreamer</Filter>
@@ -3076,9 +3082,6 @@
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\CompressorProcessor.h">
-      <Filter>DawDreamer\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\AllProcessors.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\FaustProcessor.h">

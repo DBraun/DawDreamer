@@ -2,6 +2,7 @@
 
 #include "ProcessorBase.h"
 #include "../Source/Sampler/Source/SamplerAudioProcessor.h"
+#include <filesystem>
 
 class SamplerProcessor : public ProcessorBase
 {
@@ -22,7 +23,10 @@ public:
         setMainBusInputsAndOutputs(0, input.shape(0));
     }
 
-    ~SamplerProcessor() {}
+    ~SamplerProcessor() {
+        delete myMidiIteratorSec;
+        delete myMidiIteratorQN;
+    }
 
     bool acceptsMidi() const { return true; }
     bool producesMidi() const { return true; }
@@ -37,7 +41,9 @@ public:
 
         auto parameterName = sampler.getParameterName(parameterIndex);
 
-        return ProcessorBase::getAutomationVal(parameterName.toStdString(), 0);
+        juce::AudioPlayHead::CurrentPositionInfo posInfo;
+
+        return ProcessorBase::getAutomationVal(parameterName.toStdString(), posInfo);
     }
 
     void
@@ -69,12 +75,16 @@ public:
     void reset() {
         sampler.reset();
 
-        if (myMidiIterator) {
-            delete myMidiIterator;
-        }
+        delete myMidiIteratorSec;
+        myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
 
-        myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
-        myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+        myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+
+        delete myMidiIteratorQN;
+        myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+
+        myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+
         myRenderMidiBuffer.clear();
     }
 
@@ -88,22 +98,33 @@ public:
 
         buffer.clear(); // todo: why did this become necessary?
         midiBuffer.clear();
+        myRenderMidiBuffer.clear();
 
-        long long int start = posInfo.timeInSamples;
-        long long int end = start + buffer.getNumSamples();
+        {
+            auto start = posInfo.timeInSamples;
+            auto end = start + buffer.getNumSamples();
 
-        myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
-        do {
-            if (myIsMessageBetween) {
-                myRenderMidiBuffer.addEvent(myMidiMessage, int(myMidiMessagePosition - start));
-                myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
-                myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
+            myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
+            while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
+                myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
+                myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+                myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
             }
-        } while (myIsMessageBetween && myMidiEventsDoRemain);
+        }
+
+        {
+            auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
+            auto pulseEnd = pulseStart + buffer.getNumSamples() * (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+
+            myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
+            while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
+                myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
+                myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+                myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
+            }
+        }
 
         sampler.processBlock(buffer, myRenderMidiBuffer);
-
-        myRenderMidiBuffer.clear();
 
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
@@ -128,25 +149,54 @@ public:
     int
     getNumMidiEvents()
     {
-        return myMidiBuffer.getNumEvents();
+        return myMidiBufferSec.getNumEvents() + myMidiBufferQN.getNumEvents();
     };
 
     bool
-    loadMidi(const std::string& path)
+    loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents)
     {
+
+        if (!std::filesystem::exists(path.c_str())) {
+            throw std::runtime_error("File not found: " + path);
+        }
+
         File file = File(path);
         FileInputStream fileStream(file);
         MidiFile midiFile;
         midiFile.readFrom(fileStream);
-        midiFile.convertTimestampTicksToSeconds();
-        myMidiBuffer.clear();
 
-        for (int t = 0; t < midiFile.getNumTracks(); t++) {
-            const MidiMessageSequence* track = midiFile.getTrack(t);
-            for (int i = 0; i < track->getNumEvents(); i++) {
-                MidiMessage& m = track->getEventPointer(i)->message;
-                int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
-                myMidiBuffer.addEvent(m, sampleOffset);
+        if (clearPrevious) {
+            myMidiBufferSec.clear();
+            myMidiBufferQN.clear();
+        }
+
+        if (convertToSeconds) {
+            midiFile.convertTimestampTicksToSeconds();
+
+            for (int t = 0; t < midiFile.getNumTracks(); t++) {
+                const MidiMessageSequence* track = midiFile.getTrack(t);
+                for (int i = 0; i < track->getNumEvents(); i++) {
+                    MidiMessage& m = track->getEventPointer(i)->message;
+                    int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
+                    if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+                        myMidiBufferSec.addEvent(m, sampleOffset);
+                    }
+                }
+            }
+        }
+        else {
+            auto timeFormat = midiFile.getTimeFormat(); // the ppqn (Ableton makes midi files with 96 ppqn)
+            for (int t = 0; t < midiFile.getNumTracks(); t++) {
+                const MidiMessageSequence* track = midiFile.getTrack(t);
+                for (int i = 0; i < track->getNumEvents(); i++) {
+                    MidiMessage& m = track->getEventPointer(i)->message;
+
+                    if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+                        // convert timestamp from its original time format to our high resolution PPQN
+                        auto timeStamp = m.getTimeStamp() * PPQN / timeFormat;
+                        myMidiBufferQN.addEvent(m, timeStamp);
+                    }
+                }
             }
         }
 
@@ -155,14 +205,16 @@ public:
 
     void
     clearMidi() {
-        myMidiBuffer.clear();
+        myMidiBufferSec.clear();
+        myMidiBufferQN.clear();
     }
 
     bool
     addMidiNote(uint8  midiNote,
             uint8  midiVelocity,
             const double noteStart,
-            const double noteLength) {
+            const double noteLength,
+            bool convert_to_sec) {
 
         if (midiNote > 255) midiNote = 255;
         if (midiNote < 0) midiNote = 0;
@@ -170,7 +222,6 @@ public:
         if (midiVelocity < 0) midiVelocity = 0;
         if (noteLength <= 0) {
             throw std::runtime_error("The note length must be greater than zero.");
-            return false;
         }
 
         // Get the note on midiBuffer.
@@ -182,11 +233,20 @@ public:
             midiNote,
             midiVelocity);
 
-        auto startTime = noteStart * mySampleRate;
-        onMessage.setTimeStamp(startTime);
-        offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
-        myMidiBuffer.addEvent(onMessage, (int)onMessage.getTimeStamp());
-        myMidiBuffer.addEvent(offMessage, (int)offMessage.getTimeStamp());
+        if (convert_to_sec) {
+            auto startTime = noteStart * mySampleRate;
+            onMessage.setTimeStamp(startTime);
+            offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
+            myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
+            myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
+        }
+        else {
+            auto startTime = noteStart * PPQN;
+            onMessage.setTimeStamp(startTime);
+            offMessage.setTimeStamp(startTime + noteLength * PPQN);
+            myMidiBufferQN.addEvent(onMessage, (int)onMessage.getTimeStamp());
+            myMidiBufferQN.addEvent(offMessage, (int)offMessage.getTimeStamp());
+        }
 
         return true;
     }
@@ -270,7 +330,7 @@ public:
 
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
             if (theParameter) {
-                sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo.timeInSamples));
+                sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo));
             }
             else {
                 std::cerr << "Error automateParameters: " << theName << std::endl;
@@ -286,11 +346,23 @@ private:
 
     SamplerAudioProcessor sampler;
 
-    MidiBuffer myMidiBuffer;
+    MidiBuffer myMidiBufferQN;
+    MidiBuffer myMidiBufferSec;
+
     MidiBuffer myRenderMidiBuffer;
-    MidiMessage myMidiMessage;
-    int myMidiMessagePosition = -1;
-    MidiBuffer::Iterator* myMidiIterator = nullptr;
-    bool myIsMessageBetween = false;
-    bool myMidiEventsDoRemain = false;
+
+    MidiMessage myMidiMessageQN;
+    MidiMessage myMidiMessageSec;
+
+    int myMidiMessagePositionQN = -1;
+    int myMidiMessagePositionSec = -1;
+
+    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
+    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+
+    bool myIsMessageBetweenQN = false;
+    bool myIsMessageBetweenSec = false;
+
+    bool myMidiEventsDoRemainQN = false;
+    bool myMidiEventsDoRemainSec = false;
 };

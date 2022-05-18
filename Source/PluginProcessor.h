@@ -64,7 +64,7 @@ public:
 
     const juce::String getName() const { return "PluginProcessor"; }
 
-    bool loadMidi(const std::string& path, bool allEvents);
+    bool loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents);
 
     void clearMidi();
 
@@ -73,7 +73,8 @@ public:
     bool addMidiNote(const uint8  midiNote,
         const uint8  midiVelocity,
         const double noteStart,
-        const double noteLength);
+        const double noteLength,
+        bool convert_to_sec);
 
     void setPlayHead(AudioPlayHead* newPlayHead);
 
@@ -91,13 +92,25 @@ private:
     std::string myPluginPath;
     double mySampleRate;
 
-    MidiBuffer myMidiBuffer;
+    MidiBuffer myMidiBufferQN;
+    MidiBuffer myMidiBufferSec;
+
     MidiBuffer myRenderMidiBuffer;
-    MidiMessage myMidiMessage;
-    int myMidiMessagePosition = -1;
-    MidiBuffer::Iterator* myMidiIterator = nullptr;
-    bool myIsMessageBetween = false;
-    bool myMidiEventsDoRemain = false;
+
+    MidiMessage myMidiMessageQN;
+    MidiMessage myMidiMessageSec;
+
+    int myMidiMessagePositionQN = -1;
+    int myMidiMessagePositionSec = -1;
+
+    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
+    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+
+    bool myIsMessageBetweenQN = false;
+    bool myIsMessageBetweenSec = false;
+
+    bool myMidiEventsDoRemainQN = false;
+    bool myMidiEventsDoRemainSec = false;
 
     void automateParameters();
 
@@ -124,7 +137,7 @@ public:
 
     bool wrapperSetParameter(int parameter, float value);
 
-    bool wrapperSetAutomation(int parameterIndex, py::array input);
+    bool wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn);
 
     int wrapperGetPluginParameterSize();
 

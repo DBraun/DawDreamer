@@ -1,14 +1,19 @@
 from dawdreamer_utils import *
 
-BUFFER_SIZE = 1
 
-def test_playbackwarp_processor1():
+@pytest.mark.parametrize("buffer_size", [1, 2048])
+def test_playbackwarp_processor1(buffer_size: int):
 
-	DURATION = 10.
+	DURATION = 15.
 
-	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
-	engine.set_bpm(140.)
+	ppqn = 960
+
+	full_measure = ppqn * 4  # four beats is a measure
+	bpm = np.concatenate([140*np.ones(full_measure), 70.*np.ones(full_measure)])
+	bpm = np.tile(bpm, (100))
+	engine.set_bpm(bpm, ppqn=ppqn)
 
 	drums = engine.make_playbackwarp_processor("drums",
 		load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=DURATION))
@@ -54,28 +59,26 @@ def test_playbackwarp_processor1():
 	]
 
 	engine.load_graph(graph)
-
-	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1a.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1a.wav', duration=DURATION)
 
 	assert(np.mean(np.abs(engine.get_audio())) > .01)
 
 	other.transpose = 2.
-
-	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1b.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1b.wav', duration=DURATION)
 
 	assert(np.mean(np.abs(engine.get_audio())) > .01)
 
 	other.set_automation('transpose', make_sine(1., DURATION))
-
-	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1c.wav')
+	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor1c.wav', duration=DURATION)
 
 	assert(np.mean(np.abs(engine.get_audio())) > .01)
 
-def test_playbackwarp_processor2():
+@pytest.mark.parametrize("buffer_size", [1])
+def test_playbackwarp_processor2(buffer_size: int):
 
 	DURATION = 10.
 
-	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
 	# Pick 120 because it's easy to analyze for timing in Audacity.
 	# 1 second is two quarter notes.
@@ -120,8 +123,8 @@ def test_playbackwarp_processor2():
 
 	assert(np.mean(np.abs(engine.get_audio())) > .01)
 
-
-def test_playbackwarp_processor3():
+@pytest.mark.parametrize("buffer_size", [1])
+def test_playbackwarp_processor3(buffer_size: int):
 
 	"""
 	Test using the playback warp processor without a clip file and therefore without warping.
@@ -132,7 +135,7 @@ def test_playbackwarp_processor3():
 
 	DURATION = 3.
 
-	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
 	drum_audio = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav")
 	drum_audio = drum_audio[:, int(SAMPLE_RATE*.267):]  # manually trim to beginning
@@ -169,8 +172,8 @@ def test_playbackwarp_processor3():
 
 	assert(np.mean(np.abs(audio)) > .01)
 
-
-def test_playbackwarp_processor4():
+@pytest.mark.parametrize("buffer_size", [1])
+def test_playbackwarp_processor4(buffer_size: int):
 
 	"""
 	Test using the playback warp processor without a clip file and therefore without warping.
@@ -180,7 +183,7 @@ def test_playbackwarp_processor4():
 
 	DURATION = 10.
 
-	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
 	drum_audio = load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav")
 	drum_audio = drum_audio[:, int(SAMPLE_RATE*.267):]  # manually trim to beginning

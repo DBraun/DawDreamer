@@ -1,16 +1,19 @@
 from dawdreamer_utils import *
 
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 128
 
-@pytest.mark.parametrize("sample_seq,output_path", [
-	(load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), "test_faust_poly_sampler_cymbal.wav")
+@pytest.mark.parametrize("audio_file_path,output_path,convert_to_sec", [
+	(ASSETS / "60988__folktelemetry__crash-fast-14.wav", "test_faust_poly_sampler_cymbal.wav", False),
+	(ASSETS / "60988__folktelemetry__crash-fast-14.wav", "test_faust_poly_sampler_cymbal_convert_to_sec.wav", True)
 	])
-def test_faust_poly_sampler(sample_seq, output_path, lagrange_order=4):
+def test_faust_poly_sampler(audio_file_path: str, output_path: str, convert_to_sec: bool, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
 	faust_processor = engine.make_faust_processor("faust")
 	faust_processor.num_voices = 8
+
+	sample_seq = load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav")
 
 	# set_soundfiles
 	if sample_seq.ndim == 1:
@@ -37,20 +40,16 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	# 	print(par)
 
 	 # (MIDI note, velocity, start sec, duration sec)
-	faust_processor.add_midi_note(60, 60, 0.0, .25)
-	faust_processor.add_midi_note(64, 80, 0.5, .5)
-	faust_processor.add_midi_note(67, 127, 0.75, .5)
-
-	assert(faust_processor.n_midi_events == 3*2)  # multiply by 2 because of the off-notes.
+	faust_processor.add_midi_note(60, 60, 0.0, .25, convert_to_sec=convert_to_sec)
+	faust_processor.add_midi_note(64, 80, 0.5, .5, convert_to_sec=convert_to_sec)
+	faust_processor.add_midi_note(67, 127, 0.75, .5, convert_to_sec=convert_to_sec)
 
 	graph = [
 	    (faust_processor, [])
 	]
 
 	engine.load_graph(graph)
-
 	render(engine, file_path=OUTPUT / output_path, duration=3.)
-
 	# check that it's non-silent
 	audio = engine.get_audio()
-	assert(np.mean(np.abs(audio)) > .01)
+	assert(np.mean(np.abs(audio)) > .001)

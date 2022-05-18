@@ -30,15 +30,17 @@ PYBIND11_MODULE(dawdreamer, m)
     )pbdoc";
 
     py::class_<ProcessorBase>(m, "ProcessorBase")
-        .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), R"pbdoc(
+        .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("ppqn")=0, R"pbdoc(
     Set a parameter's automation with a numpy array.
 
     Parameters
     ----------
     parameter_name : str
         The name of the parameter.
-    data : str
+    data : np.array
         An array of data for the parameter automation.
+    ppqn : integer
+        If specified, it is the pulses-per-quarter-note rate of the automation data. If not specified or zero, the data will be interpreted at audio rate.
 
     Returns
     -------
@@ -156,6 +158,9 @@ but the filter mode cannot under automation.";
             "A list of gain levels to apply to the corresponding inputs.")
         .doc() = "An Add Processor adds one or more stereo inputs with corresponding gain parameters.";
 
+    auto add_midi_description = "Add a single MIDI note whose note and velocity are integers between 0 and 127. By default, `convert_to_sec` is True, so the start_time and duration are measured in seconds. If `convert_to_sec` is False, they are measured in beats.";
+    auto load_midi_description = "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded. By default, `convert_to_sec` is True, so notes will be converted to absolute times and will not be affected by the Render Engine's BPM. By default `clear_previous` is True.";
+
     py::class_<PluginProcessorWrapper, ProcessorBase>(m, "PluginProcessor")
         .def("can_set_bus", &PluginProcessorWrapper::canApplyBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Return bool for whether this combination of input and output channels can be set.")
         .def("set_bus", &PluginProcessorWrapper::setMainBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Set the number of input and output channels. An error will be thrown for an unaccepted option.")
@@ -171,18 +176,17 @@ but the filter mode cannot under automation.";
         .def("get_parameter_text", &PluginProcessorWrapper::getParameterAsText, arg("index"), "Get a parameter's value as text.")
         .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter, arg("index"), arg("value"),
             "Set a parameter's value to a constant.")
-        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"),
+        .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation, arg("parameter_index"), arg("data"), kw_only(), arg("ppqn")=0,
             "Set the automation based on its index.")
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize, "Get the number of parameters.")
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
             "Get a list of dictionaries describing the plugin's parameters.")
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("all_events")=true, "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded.")
+        .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("clear_previous")=true, arg("convert_to_sec")=true, arg("all_events")=true, load_midi_description)
         .def("clear_midi", &PluginProcessorWrapper::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
-            arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
-            "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
+            arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("convert_to_sec")=true, add_midi_description)
         .doc() = "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
@@ -198,11 +202,10 @@ or effects. Some plugins such as ones that do sidechain compression can accept t
             "Get a list of dictionaries describing the plugin's parameters.")
         .def_property_readonly("n_midi_events", &SamplerProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &SamplerProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")
+        .def("load_midi", &SamplerProcessor::loadMidi, arg("filepath"), kw_only(), arg("clear_previous")=true, arg("convert_to_sec")=true, arg("all_events")=true, load_midi_description)
         .def("clear_midi", &SamplerProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &SamplerProcessor::addMidiNote,
-            arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
-            "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
+            arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("convert_to_sec")=true, add_midi_description)
         .doc() = "The Sampler Processor works like a basic Sampler instrument. It takes a typically short audio sample and can play it back \
 at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff. \
 Unlike a VST, the parameters don't need to be between 0 and 1. For example, you can set an envelope attack parameter to 50 to represent 50 milliseconds.";
@@ -220,6 +223,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def("get_parameter", &FaustProcessor::getParamWithPath, arg("parameter_path"))
         .def("set_parameter", &FaustProcessor::setParamWithIndex, arg("parameter_index"), arg("value"))
         .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"), arg("value"))
+        .def("set_automation", &FaustProcessor::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("ppqn") = 0)
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
@@ -228,10 +232,10 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def_property("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath, &FaustProcessor::setFaustLibrariesPath, "Absolute path to directory containing your custom \".lib\" files containing Faust code.")
         .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
-        .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), "Load MIDI from a file.")
+        .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), kw_only(), arg("clear_previous")=true, arg("convert_to_sec")=true, arg("all_events")=true, load_midi_description)
         .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
-        .def("add_midi_note", &FaustProcessor::addMidiNote, arg("note"), arg("velocity"), arg("start_time"), arg("duration"),
-    "Add a single MIDI note whose note and velocity are integers between 0 and 127.")
+        .def("add_midi_note", &FaustProcessor::addMidiNote,
+            arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("convert_to_sec") = true, add_midi_description)
         .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 #endif
@@ -243,9 +247,11 @@ Note that note-ons and note-offs are counted separately.")
     py::class_<RenderEngineWrapper>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngineWrapper::render, arg("seconds"), "Render the most recently loaded graph.")
-        .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine.")
+        .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
+        .def("set_bpm", &RenderEngineWrapper::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
+        .def("remove_processor", &RenderEngine::removeProcessor, arg("name"), "Remove a processor based on its unique name. Existing Python references to the processor will become invalid.")
         .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
         .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, arg("name"), arg("frequency"),
             "Make an Oscillator Processor", returnPolicy)

@@ -130,7 +130,8 @@ PluginProcessor::~PluginProcessor() {
         std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
         myPlugin.reset();
     }
-    delete myMidiIterator;
+    delete myMidiIteratorQN;
+    delete myMidiIteratorSec;
 }
 
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
@@ -174,28 +175,35 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
     myRenderMidiBuffer.clear();
-    
+
     if (!myPlugin.get() || !isLoaded) {
-        buffer.clear();
-        
-        if (posInfo.ppqPosition == 0) {
-            throw std::runtime_error("Error: no plugin was processed for processor named " + this->getUniqueName());
-        }
-        return;
+        throw std::runtime_error("Error: no plugin was processed for processor named " + this->getUniqueName());
     }
-    
+
     automateParameters();
 
-    long long int start = posInfo.timeInSamples;
-    long long int end = start + buffer.getNumSamples();
-    myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
-    do {
-        if (myIsMessageBetween) {
-            myRenderMidiBuffer.addEvent(myMidiMessage, int(myMidiMessagePosition - start));
-            myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
-            myIsMessageBetween = myMidiMessagePosition >= start && myMidiMessagePosition < end;
+    {
+        auto start = posInfo.timeInSamples;
+        auto end = start + buffer.getNumSamples();
+        myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
+        while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
+            myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
+            myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+            myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
         }
-    } while (myIsMessageBetween && myMidiEventsDoRemain);
+    }
+
+    {
+        auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
+        auto pulseEnd = pulseStart + buffer.getNumSamples() * (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+
+        myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
+        while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
+            myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
+            myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+            myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
+        }
+    }
 
     myPlugin->processBlock(buffer, myRenderMidiBuffer);
     
@@ -217,7 +225,7 @@ PluginProcessor::automateParameters() {
             auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
             if (theParameter) {
                 // todo: change to setParameterNotifyingHost?
-                myPlugin->setParameter(i, theParameter->sample(posInfo.timeInSamples));
+                myPlugin->setParameter(i, theParameter->sample(posInfo));
             }
             else {
                 throw std::runtime_error("Error automateParameters: " + myPlugin->getParameterName(i).toStdString());
@@ -233,10 +241,16 @@ PluginProcessor::reset()
         myPlugin->reset();
     }
 
-    delete myMidiIterator;
-    myMidiIterator = new MidiBuffer::Iterator(myMidiBuffer); // todo: deprecated.
+    delete myMidiIteratorSec;
+    myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
 
-    myMidiEventsDoRemain = myMidiIterator->getNextEvent(myMidiMessage, myMidiMessagePosition);
+    myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+
+    delete myMidiIteratorQN;
+    myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+
+    myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+
     myRenderMidiBuffer.clear();
 }
 
@@ -434,6 +448,8 @@ PluginProcessor::getPatch() {
     params.clear();
     params.reserve(myPlugin->getNumParameters());
 
+
+    AudioPlayHead::CurrentPositionInfo posInfo;
     for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
         auto theName = myPlugin->getParameterName(i);
@@ -444,7 +460,7 @@ PluginProcessor::getPatch() {
 
         auto parameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
         if (parameter) {
-            float val = parameter->sample(0);
+            float val = parameter->sample(posInfo);
             if (parameter) {
                 params.push_back(std::make_pair(i, val));
             }
@@ -476,26 +492,52 @@ PluginProcessor::getPluginParameterSize()
 
 int
 PluginProcessor::getNumMidiEvents() {
-    return myMidiBuffer.getNumEvents();
+    return myMidiBufferSec.getNumEvents() + myMidiBufferQN.getNumEvents();
 };
 
 bool
-PluginProcessor::loadMidi(const std::string& path, bool allEvents)
+PluginProcessor::loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents)
 {
+    if (!std::filesystem::exists(path.c_str())) {
+        throw std::runtime_error("File not found: " + path);
+    }
+
     File file = File(path);
     FileInputStream fileStream(file);
     MidiFile midiFile;
     midiFile.readFrom(fileStream);
-    midiFile.convertTimestampTicksToSeconds();
-    myMidiBuffer.clear();
 
-    for (int t = 0; t < midiFile.getNumTracks(); t++) {
-        const MidiMessageSequence* track = midiFile.getTrack(t);
-        for (int i = 0; i < track->getNumEvents(); i++) {
-            MidiMessage& m = track->getEventPointer(i)->message;
-            int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
-            if (allEvents || m.isNoteOff() || m.isNoteOn()) {
-                myMidiBuffer.addEvent(m, sampleOffset);
+    if (clearPrevious) {
+        myMidiBufferSec.clear();
+        myMidiBufferQN.clear();
+    }
+
+    if (convertToSeconds) {
+        midiFile.convertTimestampTicksToSeconds();
+
+        for (int t = 0; t < midiFile.getNumTracks(); t++) {
+            const MidiMessageSequence* track = midiFile.getTrack(t);
+            for (int i = 0; i < track->getNumEvents(); i++) {
+                MidiMessage& m = track->getEventPointer(i)->message;
+                int sampleOffset = (int)(mySampleRate * m.getTimeStamp());
+                if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+                    myMidiBufferSec.addEvent(m, sampleOffset);
+                }
+            }
+        }
+    }
+    else {
+        auto timeFormat = midiFile.getTimeFormat(); // the ppqn (Ableton makes midi files with 96 ppqn)
+
+        for (int t = 0; t < midiFile.getNumTracks(); t++) {
+            const MidiMessageSequence* track = midiFile.getTrack(t);
+            for (int i = 0; i < track->getNumEvents(); i++) {
+                MidiMessage& m = track->getEventPointer(i)->message;
+                if (allEvents || m.isNoteOff() || m.isNoteOn()) {
+                    // convert timestamp from its original time format to our high resolution PPQN
+                    auto timeStamp = m.getTimeStamp() * PPQN / timeFormat;
+                    myMidiBufferQN.addEvent(m, timeStamp);
+                }
             }
         }
     }
@@ -505,14 +547,16 @@ PluginProcessor::loadMidi(const std::string& path, bool allEvents)
 
 void
 PluginProcessor::clearMidi() {
-    myMidiBuffer.clear();
+    myMidiBufferSec.clear();
+    myMidiBufferQN.clear();
 }
 
 bool
 PluginProcessor::addMidiNote(uint8  midiNote,
     uint8  midiVelocity,
     const double noteStart,
-    const double noteLength) {
+    const double noteLength,
+    bool convert_to_sec) {
 
     if (midiNote > 255) midiNote = 255;
     if (midiNote < 0) midiNote = 0;
@@ -531,11 +575,20 @@ PluginProcessor::addMidiNote(uint8  midiNote,
         midiNote,
         midiVelocity);
 
-    auto startTime = noteStart * mySampleRate;
-    onMessage.setTimeStamp(startTime);
-    offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
-    myMidiBuffer.addEvent(onMessage, (int)onMessage.getTimeStamp());
-    myMidiBuffer.addEvent(offMessage, (int)offMessage.getTimeStamp());
+    if (convert_to_sec) {
+        auto startTime = noteStart * mySampleRate;
+        onMessage.setTimeStamp(startTime);
+        offMessage.setTimeStamp(startTime + noteLength * mySampleRate);
+        myMidiBufferSec.addEvent(onMessage, (int)onMessage.getTimeStamp());
+        myMidiBufferSec.addEvent(offMessage, (int)offMessage.getTimeStamp());
+    }
+    else {
+        auto startTime = noteStart * PPQN;
+        onMessage.setTimeStamp(startTime);
+        offMessage.setTimeStamp(startTime + noteLength * PPQN);
+        myMidiBufferQN.addEvent(onMessage, (int)onMessage.getTimeStamp());
+        myMidiBufferQN.addEvent(offMessage, (int)offMessage.getTimeStamp());
+    }
 
     return true;
 }
@@ -573,7 +626,9 @@ PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
         return 0.;
     }
 
-    return ProcessorBase::getAutomationVal(std::to_string(parameterIndex), 0);
+    AudioPlayHead::CurrentPositionInfo posInfo;
+
+    return ProcessorBase::getAutomationVal(std::to_string(parameterIndex), posInfo);
 }
 
 std::string
@@ -595,8 +650,8 @@ PluginProcessorWrapper::wrapperSetParameter(int parameter, float value)
 }
 
 bool
-PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input) {
-    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input);
+PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn) {
+    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input, ppqn);
 }
 
 int

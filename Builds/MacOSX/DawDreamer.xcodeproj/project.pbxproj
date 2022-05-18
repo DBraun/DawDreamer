@@ -11,6 +11,8 @@
 		03E7579908465C2C4C83596E /* include_juce_dsp.mm */ = {isa = PBXBuildFile; fileRef = 2AA8CBD57F5CC5B7912A192F; };
 		0C01D9069A27A2ECB0B24253 /* StretcherChannelData.cpp */ = {isa = PBXBuildFile; fileRef = 5558FF156E977213C6DE9C14; };
 		158D137D07F738CDB6AD2028 /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = 553C0A3501582EE95328719B; };
+		1B14253412716097BBB38A9B /* CustomParameters.cpp */ = {isa = PBXBuildFile; fileRef = C5A12760CCD5CE6DD270F92F; };
+		210F38443F9D77354A4B28EB /* PlaybackWarpProcessor.cpp */ = {isa = PBXBuildFile; fileRef = AB39C0017B2EE44B9E510D89; };
 		21FB7BCF683F51D403A7475D /* StretcherProcess.cpp */ = {isa = PBXBuildFile; fileRef = 1B00487B34E2B8C9A26AFA49; };
 		24E83A217028D2AEF88FF90E /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = DE2959972547E114EB1E1FCD; };
 		2706724BA659554B6F4EE85E /* include_juce_audio_formats.mm */ = {isa = PBXBuildFile; fileRef = 03BD258F06159505E43073E1; };
@@ -172,7 +174,6 @@
 		8A778A5F6395BCBDE3BE5982 /* Scavenger.h */ /* Scavenger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scavenger.h; path = ../../thirdparty/rubberband/src/base/Scavenger.h; sourceTree = SOURCE_ROOT; };
 		8B852E83502C66F8B990F051 /* SilentAudioCurve.h */ /* SilentAudioCurve.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SilentAudioCurve.h; path = ../../thirdparty/rubberband/src/audiocurves/SilentAudioCurve.h; sourceTree = SOURCE_ROOT; };
 		8D80555F3F275D566655DEC2 /* getopt.c */ /* getopt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = getopt.c; path = ../../thirdparty/rubberband/src/getopt/getopt.c; sourceTree = SOURCE_ROOT; };
-		8D88F06BD34407D802DFB597 /* AllProcessors.h */ /* AllProcessors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AllProcessors.h; path = ../../Source/AllProcessors.h; sourceTree = SOURCE_ROOT; };
 		8F78B14DAA164DE1331AD3FD /* Main.cpp */ /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Sampler/Source/Main.cpp; sourceTree = SOURCE_ROOT; };
 		8F7B057EB4717EDC7E8E8048 /* StretcherImpl.h */ /* StretcherImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StretcherImpl.h; path = ../../thirdparty/rubberband/src/StretcherImpl.h; sourceTree = SOURCE_ROOT; };
 		94091A9630E5C9649E958A16 /* kiss_fftr.h */ /* kiss_fftr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = kiss_fftr.h; path = ../../thirdparty/rubberband/src/kissfft/kiss_fftr.h; sourceTree = SOURCE_ROOT; };
@@ -195,6 +196,7 @@
 		A64A3D2EF69F5E968839751A /* sysutils.h */ /* sysutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sysutils.h; path = ../../thirdparty/rubberband/src/system/sysutils.h; sourceTree = SOURCE_ROOT; };
 		A997E92A77CDFA70A6536BBD /* MPESettingsDataModel.cpp */ /* MPESettingsDataModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MPESettingsDataModel.cpp; path = ../../Source/Sampler/Source/DataModels/MPESettingsDataModel.cpp; sourceTree = SOURCE_ROOT; };
 		AA2C7D7E9590EB6623631A35 /* CommandFifo.h */ /* CommandFifo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CommandFifo.h; path = ../../Source/Sampler/Source/CommandFifo.h; sourceTree = SOURCE_ROOT; };
+		AB39C0017B2EE44B9E510D89 /* PlaybackWarpProcessor.cpp */ /* PlaybackWarpProcessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PlaybackWarpProcessor.cpp; path = ../../Source/PlaybackWarpProcessor.cpp; sourceTree = SOURCE_ROOT; };
 		AD248A6B37034D215326CB7F /* juce_audio_processors */ /* juce_audio_processors */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors; path = ../../JuceLibraryCode/modules/juce_audio_processors; sourceTree = SOURCE_ROOT; };
 		B1FAEBBC0B8073BAE84C5665 /* PlaybackProcessor.h */ /* PlaybackProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PlaybackProcessor.h; path = ../../Source/PlaybackProcessor.h; sourceTree = SOURCE_ROOT; };
 		B2CCBF7C3614EE8B865D41C0 /* include_juce_graphics.mm */ /* include_juce_graphics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_graphics.mm; path = ../../JuceLibraryCode/include_juce_graphics.mm; sourceTree = SOURCE_ROOT; };
@@ -208,6 +210,7 @@
 		C379050966C094B7C05FEED8 /* Resampler.h */ /* Resampler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resampler.h; path = ../../thirdparty/rubberband/src/dsp/Resampler.h; sourceTree = SOURCE_ROOT; };
 		C503A9D9F3009D679DBFC556 /* FilterProcessor.h */ /* FilterProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FilterProcessor.h; path = ../../Source/FilterProcessor.h; sourceTree = SOURCE_ROOT; };
 		C519012CDDE2CA92FF58903A /* include_juce_video.mm */ /* include_juce_video.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_video.mm; path = ../../JuceLibraryCode/include_juce_video.mm; sourceTree = SOURCE_ROOT; };
+		C5A12760CCD5CE6DD270F92F /* CustomParameters.cpp */ /* CustomParameters.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CustomParameters.cpp; path = ../../Source/CustomParameters.cpp; sourceTree = SOURCE_ROOT; };
 		C5E04D72E37F04C0663E5EA6 /* CoreMIDI.framework */ /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		C6695EB398FC46133B7FAC70 /* PlaybackPositionOverlay.h */ /* PlaybackPositionOverlay.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PlaybackPositionOverlay.h; path = ../../Source/Sampler/Source/Components/PlaybackPositionOverlay.h; sourceTree = SOURCE_ROOT; };
 		C713F7F77E549E8C08771E49 /* AbletonClipInfo.h */ /* AbletonClipInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AbletonClipInfo.h; path = ../../Source/AbletonClipInfo.h; sourceTree = SOURCE_ROOT; };
@@ -410,6 +413,7 @@
 				561257822B09113041A6909C,
 				E553BE5C53ED6D87F71CC515,
 				7C90363A6D8BA8EA0D91A985,
+				C5A12760CCD5CE6DD270F92F,
 				3319047264FBD43706A45A08,
 				A2CE988FDEA16DA46477FB4B,
 				094BECA334087BBDDA1CA022,
@@ -570,13 +574,13 @@
 				C20139B2E8CF4DC6B19AC0A6,
 				8038F1D9B3CEBD503DE7AD1F,
 				4915A3C580F0DAA69FAAED98,
-				8D88F06BD34407D802DFB597,
 				9ABCCF2DBAA01DE762D8BD60,
 				BFD142EBB8AFBADC8AB04A8A,
 				7332613820553661C4FA3CD8,
 				C503A9D9F3009D679DBFC556,
 				1799B9631459052DD116F71A,
 				F7EDC034912036BE18A95734,
+				AB39C0017B2EE44B9E510D89,
 				B1FAEBBC0B8073BAE84C5665,
 				EE65D34C5FCFBF1D5F6C12D8,
 				2F962B6F6EA479E59F083A16,
@@ -736,8 +740,10 @@
 				B942805B7846AE297800EF37,
 				E358C00D8D92D35AFBC9944C,
 				7C6656C8A61187E3C9113001,
+				210F38443F9D77354A4B28EB,
 				92F6A21BA484A258A4EF5F23,
 				BD1166D575CE2FE6886E0DFC,
+				1B14253412716097BBB38A9B,
 				9D34C1F40CAD6A7617F1B60B,
 				48CA111A7776D753A8BFF02E,
 				F69DC2F3034023CA38AFFC92,
@@ -788,8 +794,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.6.5",
-					"JUCE_APP_VERSION_HEX=0x605",
+					"JUCE_APP_VERSION=0.6.6",
+					"JUCE_APP_VERSION_HEX=0x606",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -914,8 +920,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.6.5",
-					"JUCE_APP_VERSION_HEX=0x605",
+					"JUCE_APP_VERSION=0.6.6",
+					"JUCE_APP_VERSION_HEX=0x606",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",

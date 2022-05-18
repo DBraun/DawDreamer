@@ -117,6 +117,8 @@ public:
 
     const juce::String getName() const { return "FaustProcessor"; }
 
+    bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
+
     // faust stuff
     void clear();
     bool compile();
@@ -139,7 +141,7 @@ public:
     void setAutoImport(const std::string& s) { m_autoImport = s; }
     std::string getAutoImport() { return m_autoImport; }
 
-    bool loadMidi(const std::string& path);
+    bool loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents);
 
     void clearMidi();
 
@@ -148,7 +150,8 @@ public:
     bool addMidiNote(const uint8  midiNote,
         const uint8  midiVelocity,
         const double noteStart,
-        const double noteLength);
+        const double noteLength,
+        bool convert_to_sec);
 
     void setSoundfiles(py::dict);
 
@@ -199,12 +202,23 @@ protected:
     bool m_groupVoices = true;
     bool m_isCompiled = false;
 
-    MidiBuffer myMidiBuffer;
-    MidiMessage myMidiMessage;
-    int myMidiMessagePosition = -1;
-    MidiBuffer::Iterator* myMidiIterator = nullptr;
-    bool myIsMessageBetween = false;
-    bool myMidiEventsDoRemain = false;
+    MidiBuffer myMidiBufferQN;
+    MidiBuffer myMidiBufferSec;
+
+    MidiMessage myMidiMessageQN;
+    MidiMessage myMidiMessageSec;
+
+    int myMidiMessagePositionQN = -1;
+    int myMidiMessagePositionSec = -1;
+
+    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
+    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+
+    bool myIsMessageBetweenQN = false;
+    bool myIsMessageBetweenSec = false;
+
+    bool myMidiEventsDoRemainQN = false;
+    bool myMidiEventsDoRemainSec = false;
 
     juce::AudioSampleBuffer oneSampleInBuffer;
     juce::AudioSampleBuffer oneSampleOutBuffer;

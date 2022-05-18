@@ -75,7 +75,7 @@ wavfile.write('sine_demo.wav', SAMPLE_RATE, audio.transpose())
 
 ## Advanced Example
 
-Let's demonstate audio playback, graph-building, VST instruments/effects, and automation. You need to change many hard-coded paths for this to work.
+Let's demonstrate audio playback, graph-building, VST instruments/effects, and automation. You need to change many hard-coded paths for this to work.
 
 ```python
 import dawdreamer as daw
@@ -84,9 +84,9 @@ from scipy.io import wavfile
 import librosa
 
 SAMPLE_RATE = 44100
-BUFFER_SIZE = 128 # Parameters will undergo automation at this buffer/block size. It can be as small as 1 sample.
-SYNTH_PLUGIN = "C:/path/to/synth.dll"  # for instruments, DLLs work.
-REVERB_PLUGIN = "C:/path/to/reverb.dll"  # extensions: .dll, .vst3, .component
+BUFFER_SIZE = 128 # Parameters will undergo automation at this buffer/block size.
+SYNTH_PLUGIN = "C:/path/to/synth.dll"  # extensions: .dll, .vst3, .vst, .component
+REVERB_PLUGIN = "C:/path/to/reverb.dll"  # extensions: .dll, .vst3, .vst, .component
 VOCALS_PATH = "C:/path/to/vocals.wav"
 PIANO_PATH = "C:/path/to/piano.wav"
 
@@ -102,7 +102,13 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-engine.set_bpm(120.)  # default is 120.
+engine.set_bpm(120.)  # default is 120 beats per minute.
+
+# The BPM can also be set as a numpy array that is interpreted
+# with a fixed PPQN (Pulses Per Quarter Note).
+# If we choose ppqn=960 and the numpy array abruptly changes values every 960 samples,
+# the tempo will abruptly change "on the beat".
+engine.set_bpm(120.+60.*make_sine(1./2., duration*10., ppqn=960))
 
 DURATION = 10 # How many seconds we want to render.
 
@@ -126,16 +132,35 @@ synth.load_vst3_preset('C:/path/to/preset.vstpreset')
 
 # Get a list of dictionaries where each dictionary describes a controllable parameter.
 print(synth.get_plugin_parameters_description()) 
-print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (the panning of oscillator A)
+print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (oscillator A's panning)
 # Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
-# The Plugin Processor can set automation according to a parameter index.
-synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
-# We can simply use one value constantly:
+# We can simply set a constant value.
 synth.set_parameter(1, 0.1234)
+# The Plugin Processor can set automation with data at audio rate.
+synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
 
-synth.load_midi("C:/path/to/song.mid")
-# We can also add notes one at a time.
-synth.add_midi_note(67, 127, 0.5, .25) # (MIDI note, velocity, start sec, duration sec)
+# It's also possible to set automation in alignment with the tempo.
+# Let's make a numpy array whose PPQN is 960.
+# Each 960 values in the array correspond to a quarter note of time progressing.
+# Let's make a parameter alternate between 0.25 and 0.75 four times per beat.
+automation = make_sine(4, DURATION, sr=960)
+automation = 0.25+.5*(automation > 0).astype(np.float32)
+synth.set_automation(1, automation, ppqn=960)
+
+# Load a MIDI file and convert the timing to absolute seconds. Changes to the Render Engine's BPM
+# won't affect the timing. The kwargs below are defaults.
+synth.load_midi("C:/path/to/song.mid", clear_previous=True, convert_to_sec=True, all_events=True)
+
+# Load a MIDI file and keep the timing in units of beats. Changes to the Render Engine's BPM
+# will affect the timing.
+synth.load_midi("C:/path/to/song.mid", convert_to_sec=False)
+
+# We can also add one note at a time, specifying a start time and duration, both in seconds
+synth.add_midi_note(60, 127, 0.5, .25) # (MIDI note, velocity, start, duration)
+
+# With `convert_to_sec=False`, we can use beats as the unit for the start time and duration.
+# Rest for a beat and then play a note for a half beat.
+synth.add_midi_note(67, 127, 1, .5, convert_to_sec=False)
 
 # For any processor type, we can get the number of inputs and outputs
 print("synth num inputs: ", synth.get_num_input_channels())
@@ -153,7 +178,7 @@ filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.
 filter_processor.freq = 7123.  # Some parameters can be get/set like this.
 freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 w/ amp 5000.
 filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
-freq_automation = filter_processor.get_automation("freq") # You can get automation of most processor parameters.
+freq_automation = filter_processor.get_automation("freq") # Get automation of most processor parameters.
 filter_processor.record = True  # This will allow us to access the filter processor's audio after a render.
 
 # A graph is a meaningfully ordered list of tuples.
@@ -164,7 +189,7 @@ filter_processor.record = True  # This will allow us to access the filter proces
 # The audio from the last tuple's processor will be accessed automatically later by engine.get_audio()
 graph = [
   (synth, []),  # synth takes no inputs, so we give an empty list.
-  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to the synth named earlier
+  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to synth from earlier
   (engine.make_plugin_processor("more_reverb", REVERB_PLUGIN), ["reverb"]), # Apply VST reverb
   (engine.make_playback_processor("vocals", vocals), []), # Playback has no inputs.
   (filter_processor, ["vocals"]), # High-pass filter with automation set earlier.
@@ -216,7 +241,7 @@ faust_processor = engine.make_faust_processor("faust")
 faust_processor.set_dsp(DSP_PATH)  # You can do this anytime.
 
 # Using compile() isn't necessary, but it's an early warning check.
-faust_processor.compile()
+faust_processor.compile() # throws a catchable Python Runtime Error for bad Faust code
 
 print(faust_processor.get_parameters_description())
 

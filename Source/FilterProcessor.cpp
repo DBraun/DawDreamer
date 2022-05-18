@@ -48,9 +48,9 @@ void FilterProcessor::automateParameters() {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
 
-    *myFreq = getAutomationVal("freq", posInfo.timeInSamples);
-    *myQ = getAutomationVal("q", posInfo.timeInSamples);
-    *myGain = getAutomationVal("gain", posInfo.timeInSamples);
+    *myFreq = getAutomationVal("freq", posInfo);
+    *myQ = getAutomationVal("q", posInfo);
+    *myGain = getAutomationVal("gain", posInfo);
     
     switch (myMode)
     {
@@ -160,14 +160,14 @@ FilterProcessor::getMode() {
 void
 FilterProcessor::setFrequency(float freq) { setAutomationVal("freq", freq);}
 float
-FilterProcessor::getFrequency() { return getAutomationVal("freq", 0); }
+FilterProcessor::getFrequency() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("freq", posInfo); }
 
 void
 FilterProcessor::setQ(float q) { setAutomationVal("q", q);}
 float
-FilterProcessor::getQ() { return getAutomationVal("q", 0); }
+FilterProcessor::getQ() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("q", posInfo); }
 
 void
 FilterProcessor::setGain(float gain) { setAutomationVal("gain", gain);}
 float
-FilterProcessor::getGain() { return getAutomationVal("gain", 0);}
+FilterProcessor::getGain() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("gain", posInfo);}
