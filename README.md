@@ -108,7 +108,7 @@ engine.set_bpm(120.)  # default is 120 beats per minute.
 # with a fixed PPQN (Pulses Per Quarter Note).
 # If we choose ppqn=960 and the numpy array abruptly changes values every 960 samples,
 # the tempo will abruptly change "on the beat".
-engine.set_bpm(120.+60.*make_sine(1./2., duration*10., ppqn=960))
+engine.set_bpm(120.+60.*make_sine(1./2., duration*10.), ppqn=960)
 
 DURATION = 10 # How many seconds we want to render.
 
