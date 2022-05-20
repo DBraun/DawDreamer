@@ -95,7 +95,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
         .def_property("warp_markers", &PlaybackWarpProcessor::getWarpMarkers, &PlaybackWarpProcessor::setWarpMarkers, "Get/set the warp markers as an (N, 2) numpy array of time positions in samples and positions in beats.")
         .def("reset_warp_markers", &PlaybackWarpProcessor::resetWarpMarkers, arg("bpm"), "Reset the warp markers with a BPM.")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"), "Load an Ableton Live file with an \".asd\" extension")
-        .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), "Set the audio as a numpy array shaped (Channels, Samples).")
+        .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), kw_only(), arg("sr")=0,  "Set the audio as a numpy array shaped (Channels, Samples) with an optional `sr` kwarg for the sample rate of the data.")
         .def("set_clip_positions", &PlaybackWarpProcessor::setClipPositions, arg("clip_positions"), R"pbdoc(
     Set one or more positions at which the clip should play.
 
@@ -246,7 +246,7 @@ Note that note-ons and note-offs are counted separately.")
 
     py::class_<RenderEngineWrapper>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
-        .def("render", &RenderEngineWrapper::render, arg("seconds"), "Render the most recently loaded graph.")
+        .def("render", &RenderEngineWrapper::render, arg("duration"), kw_only(), arg("convert_to_sec")=true, "Render the most recently loaded graph. By default, duration is measured in seconds. If `convert_to_sec` is False, it is measured in beats.")
         .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
         .def("set_bpm", &RenderEngineWrapper::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
@@ -264,8 +264,8 @@ Note that note-ons and note-offs are counted separately.")
 #endif
         .def("make_playback_processor", &RenderEngineWrapper::makePlaybackProcessor, arg("name"), arg("data"), returnPolicy, "Make a Playback Processor")
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-        .def("make_playbackwarp_processor", &RenderEngineWrapper::makePlaybackWarpProcessor, arg("name"), arg("data"),
-            "Make a Playback Processor that can do time-stretching and pitch-shifting.", returnPolicy)
+        .def("make_playbackwarp_processor", &RenderEngineWrapper::makePlaybackWarpProcessor, arg("name"), arg("data"), kw_only(), arg("sr")=0,
+            "Make a Playback Processor that can do time-stretching and pitch-shifting. The `sr` kwarg (sample rate of the data) is optional and defaults to the engine's sample rate.", returnPolicy)
 #endif
         .def("make_filter_processor", &RenderEngineWrapper::makeFilterProcessor, returnPolicy,
             arg("name"), arg("mode") = "high", arg("freq") = 1000.f, arg("q") = .707107f, arg("gain") = 1.f, "Make a Filter Processor")

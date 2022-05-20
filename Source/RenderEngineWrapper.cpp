@@ -48,9 +48,9 @@ RenderEngineWrapper::makePlaybackProcessor(const std::string& name, py::array da
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 PlaybackWarpProcessor*
-RenderEngineWrapper::makePlaybackWarpProcessor(const std::string& name, py::array data)
+RenderEngineWrapper::makePlaybackWarpProcessor(const std::string& name, py::array data, double data_sr)
 {
-    auto processor =new PlaybackWarpProcessor{ name, data, mySampleRate };
+    auto processor = new PlaybackWarpProcessor{ name, data, mySampleRate, data_sr };
     this->prepareProcessor(processor, name);
     return processor;
 

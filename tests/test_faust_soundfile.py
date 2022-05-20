@@ -3,12 +3,14 @@ from dawdreamer_utils import *
 BUFFER_SIZE = 1024
 
 # # Load a stereo audio sample and pass it to Faust
-@pytest.mark.parametrize("sample_seq,output_path,sound_choice", [
-    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_0.wav', 0),
-    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_1.wav', 1),
-    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_2.wav', 2),
+@pytest.mark.parametrize("audio_path,output_path,sound_choice", [
+    (ASSETS / "60988__folktelemetry__crash-fast-14.wav", 'test_faust_soundfile_0.wav', 0),
+    (ASSETS / "60988__folktelemetry__crash-fast-14.wav", 'test_faust_soundfile_1.wav', 1),
+    (ASSETS / "60988__folktelemetry__crash-fast-14.wav", 'test_faust_soundfile_2.wav', 2),
     ])
-def test_faust_soundfile(sample_seq, output_path, sound_choice):
+def test_faust_soundfile(audio_path: str, output_path, sound_choice):
+
+    sample_seq = load_audio_file(str(audio_path))
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -152,12 +154,14 @@ def test_faust_soundfile_piano():
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .0001)
 
-@pytest.mark.parametrize("sample_seq,output_path", [
-    (load_audio_file(ASSETS / "60988__folktelemetry__crash-fast-14.wav"), 'test_faust_soundfile_many_notes.wav')
+@pytest.mark.parametrize("audio_path,output_path", [
+    (ASSETS / "60988__folktelemetry__crash-fast-14.wav", 'test_faust_soundfile_many_notes.wav')
     ])
-def test_faust_soundfile_many_notes(sample_seq, output_path, num_voices=10):
+def test_faust_soundfile_many_notes(audio_path: str, output_path, num_voices=10):
 
     """ Load a stereo audio sample and pass it to Faust """
+
+    sample_seq = load_audio_file(audio_path)
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 

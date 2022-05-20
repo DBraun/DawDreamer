@@ -30,7 +30,7 @@ public:
     PlaybackProcessor* makePlaybackProcessor(const std::string& name, py::array input);
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-    PlaybackWarpProcessor* makePlaybackWarpProcessor(const std::string& name, py::array input);
+    PlaybackWarpProcessor* makePlaybackWarpProcessor(const std::string& name, py::array input, double sr);
 #endif
 
     FilterProcessor* makeFilterProcessor(const std::string& name, const std::string& mode, float freq, float q, float gain);

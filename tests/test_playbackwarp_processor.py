@@ -220,3 +220,44 @@ def test_playbackwarp_processor4(buffer_size: int):
 	assert num_samples > 100
 
 	assert(np.mean(np.abs(audio)) > .01)
+
+@pytest.mark.parametrize("warp_on", [True, False])
+def test_playbackwarp_sample_rate_diff(warp_on: bool):
+
+	"""
+	Use the playback warp processor on source audio with a high sample rate (96 kHz).
+	Whether or not warp_on is on, the output should sound like the input.
+	"""
+
+	if not USE_LIBROSA:
+		return
+
+	DURATION = 10.
+
+	engine = daw.RenderEngine(SAMPLE_RATE, 128)
+
+	engine.set_bpm(110.)  # we know that this file is 110 BPM.
+
+	upsampled_rate = 96_000
+	# nb: sr=None makes it load at the native sample rate (96000 for this file)
+	audio, rate = librosa.load(abspath(ASSETS / "Music Delta - Disco" / "drums_96kHz.wav"),
+		duration=DURATION, mono=False, sr=None)
+	assert rate == upsampled_rate
+
+	drums = engine.make_playbackwarp_processor("drums", audio, sr=upsampled_rate)
+
+	drums.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "drums.wav.asd"))
+
+	drums.warp_on = warp_on
+	drums.start_marker = 0.
+	drums.loop_on = True
+	assert(drums.loop_on)
+
+	graph = [
+	    (drums, []),
+	]
+
+	engine.load_graph(graph)
+
+	warp_str = '_warp_on' if warp_on else ''
+	render(engine, file_path=OUTPUT / f'test_playbackwarp_sample_rate_diff{warp_str}.wav')

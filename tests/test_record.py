@@ -49,3 +49,34 @@ def test_record():
 	wavfile.write(OUTPUT / 'test_record_both.wav', SAMPLE_RATE, output.transpose())
 	wavfile.write(OUTPUT / 'test_record_1.wav', SAMPLE_RATE, audio1.transpose())
 	wavfile.write(OUTPUT / 'test_record_2.wav', SAMPLE_RATE, audio2.transpose())
+
+@pytest.mark.parametrize("buffer_size",
+	[1, 2, 3, 4, 6, 8, 2048]
+)
+def test_render_beats(buffer_size: int):
+
+	BPM = 140.12346
+	BEATS = 4.0131564
+	SECONDS = (BEATS / BPM) * 60.
+
+	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
+
+	engine.set_bpm(BPM)
+
+	audio_data = load_audio_file(ASSETS / "Music Delta - Disco" / "bass.wav", duration=5.1)
+	playback = engine.make_playback_processor("playback", audio_data)
+
+	graph = [
+	    (playback, []),
+	]
+
+	engine.load_graph(graph)
+
+	engine.render(BEATS, convert_to_sec=False)
+
+	output = engine.get_audio()
+
+	desired_samples = SECONDS * SAMPLE_RATE
+	actual_samples = output.shape[1]
+
+	assert abs(desired_samples - actual_samples) <= buffer_size
