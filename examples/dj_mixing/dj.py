@@ -29,8 +29,12 @@ class MyEngine(daw.RenderEngine):
 		self.playback1 = self.make_playbackwarp_processor("playback1", np.zeros((2, 0)))
 		self.playback2 = self.make_playbackwarp_processor("playback2", np.zeros((2, 0)))
 
+		# Optionally enable recording on the individual playbacks
+		# self.playback1.record = self.playback2.record = True
+
 		mixer = self.make_faust_processor("mixer")
 
+		# NB: Check out this code in the Faust IDE: https://faustide.grame.fr/
 		mixer.set_dsp_string(f"""
 			declare name "MyMixer";
 			import("stdfaust.lib");
@@ -63,14 +67,20 @@ class MyEngine(daw.RenderEngine):
 		else:
 			playback = self.playback2
 
+		# The PlaybackWarp Processor can take audio of higher sample rate,
+		# as long as you specify it with the sr kwarg.
 		playback.set_data(audio, sr=rate)
 		playback.set_clip_file(audio_path + ".asd")
 
 	def render(self, duration: float, file_path=None):
 
-		super(MyEngine, self).render(duration, convert_to_sec=False)
+		super(MyEngine, self).render(duration, beats=True)
 
 		output = self.get_audio()
+
+		# If before the render we had enabled recording of the playbacks.
+		# playback1_audio = self.playback1.get_audio()
+		# playback2_audio = self.playback2.get_audio()
 
 		if file_path is not None:
 
@@ -80,12 +90,12 @@ class MyEngine(daw.RenderEngine):
 
 def main():
 
-	# Put your own paths and BPM here	
+	# Put your own paths and BPM here
 	audio1_path = ""
 	audio2_path = ""
 	bpm1 = 120
 	bpm2 = 126
-	# bpm2 = bpm1 = (bpm1 + bpm2)*.5 # debug with this
+	# bpm2 = bpm1 = (bpm1 + bpm2)*.5 # Debug with this
 
 	if audio1_path == '' or audio2_path == '':
 		raise ValueError("You must customize the audio paths.")
@@ -93,11 +103,11 @@ def main():
 	engine = MyEngine(SAMPLE_RATE)
 
 	bpm_automation = automate(
-		(bpm1, bpm1, 8),
-		(bpm1, bpm2, 32),
-		(bpm2, bpm2, 8),
-		(bpm2, bpm1, 32),
-		(bpm1, bpm1, 8),
+		(bpm1, bpm1, 8),  # Hold bpm1 for 8 beats
+		(bpm1, bpm2, 32), # Transition from bpm1 to bpm2 over 32 beats
+		(bpm2, bpm2, 8),  # Hold bpm2 for 8 beats
+		(bpm2, bpm1, 32), # Transition from bpm2 to bpm1 over 32 beats
+		(bpm1, bpm1, 8),  # Hold bpm2 for 8 beats
 		)
 
 	engine.set_bpm(bpm_automation, ppqn=PPQN)
@@ -115,13 +125,18 @@ def main():
 	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.)  # debug with this
 	# engine.mixer.set_parameter('/MyMixer/Mixer', 1.)  # debug with this
 
+	# Load the audio files into the playback processors.
 	engine.load_audio(0, audio1_path)
 	engine.load_audio(1, audio2_path)
 
+	# Start the clips at 0 beats and have them play for 8192 beats.
+	engine.playback1.set_clip_positions([[0., 8192., 0.]])
+	engine.playback2.set_clip_positions([[0., 8192., 0.]])
+
 	num_beats = 88.
 	engine.render(num_beats, file_path=OUTPUT / 'dj_transition_output.wav')
-	# It's possible to make more calls to load_audio and re-do automation
-
+	# It's possible to make more calls to load_audio, re-do automation, and re-render.
+	# The rest is up to you!
 
 if __name__ == "__main__":
 	main()
