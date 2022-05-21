@@ -169,13 +169,8 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
 
     automateParameters();
 
-    if (m_clips.size() == 0) {
-        ProcessorBase::processBlock(buffer, midiBuffer);
-        return;
-    }
-
-    if (m_clipIndex >= m_clips.size()) {
-        // we've already passed the last clip.
+    if ((m_clips.size() == 0) || (m_clipIndex >= m_clips.size())) {
+        // There are no clips, or we've already passed the last clip.
         ProcessorBase::processBlock(buffer, midiBuffer);
         return;
     }
@@ -275,6 +270,14 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
         if (m_clipInfo.warp_on) {
             double instant_bpm;
             double _;
+            // wrap-around the ppqPosition
+            if (m_clipInfo.loop_on) {
+                if (ppqPosition > m_clipInfo.loop_end-m_clipInfo.loop_start) {
+                    auto loopSize = m_clipInfo.loop_end - m_clipInfo.loop_start;
+                    ppqPosition -= std::ceil((ppqPosition - m_clipInfo.loop_end) / loopSize) * loopSize;
+                }
+            }
+            
             m_clipInfo.beat_to_seconds(ppqPosition, _, instant_bpm);
             m_rbstretcher->setTimeRatio((instant_bpm / posInfo.bpm) * (m_sample_rate / myPlaybackDataSR));
         }

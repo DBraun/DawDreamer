@@ -8,7 +8,7 @@ import pytest
 from scipy.io import wavfile
 
 SAMPLE_RATE = 44100
-PPQN = 960
+PPQN = 960*4
 
 DIR = Path(__file__).parent.resolve()
 OUTPUT = DIR / 'output'
@@ -23,7 +23,7 @@ def automate(*args):
 
 class MyEngine(daw.RenderEngine):
 
-	def __init__(self, sr, block_size):
+	def __init__(self, sr):
 		super(MyEngine, self).__init__(sr, 1)
 
 		self.playback1 = self.make_playbackwarp_processor("playback1", np.zeros((2, 0)))
@@ -80,13 +80,17 @@ class MyEngine(daw.RenderEngine):
 
 def main():
 
-	# todo: put your own paths here
+	# Put your own paths and BPM here	
 	audio1_path = ""
 	audio2_path = ""
 	bpm1 = 120
 	bpm2 = 126
+	# bpm2 = bpm1 = (bpm1 + bpm2)*.5 # debug with this
 
-	engine = MyEngine(SAMPLE_RATE, 256)
+	if audio1_path == '' or audio2_path == '':
+		raise ValueError("You must customize the audio paths.")
+
+	engine = MyEngine(SAMPLE_RATE)
 
 	bpm_automation = automate(
 		(bpm1, bpm1, 8),
@@ -105,20 +109,20 @@ def main():
 		(1, 0, 32),
 		(0, 0, 8),
 		)
-	mixer_automation = mixer_automation*.0 + .5
 
 	engine.mixer.set_automation('/MyMixer/Mixer', mixer_automation, ppqn=PPQN)
+	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.5)  # debug with this
+	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.)  # debug with this
+	# engine.mixer.set_parameter('/MyMixer/Mixer', 1.)  # debug with this
 
 	engine.load_audio(0, audio1_path)
 	engine.load_audio(1, audio2_path)
 
 	num_beats = 88.
-	engine.render(num_beats, file_path=OUTPUT / 'test_output.wav')
-
+	engine.render(num_beats, file_path=OUTPUT / 'dj_transition_output.wav')
 	# It's possible to make more calls to load_audio and re-do automation
-
-	print('All done!')
 
 
 if __name__ == "__main__":
 	main()
+	print('All done!')
