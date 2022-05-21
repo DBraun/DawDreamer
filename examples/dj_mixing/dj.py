@@ -1,7 +1,7 @@
 import dawdreamer as daw
 
 from pathlib import Path
-
+from os.path import isfile
 import librosa
 import numpy as np
 import pytest
@@ -70,7 +70,11 @@ class MyEngine(daw.RenderEngine):
 		# The PlaybackWarp Processor can take audio of higher sample rate,
 		# as long as you specify it with the sr kwarg.
 		playback.set_data(audio, sr=rate)
-		playback.set_clip_file(audio_path + ".asd")
+		asd_path = audio_path + ".asd"
+		if isfile(asd_path):
+			playback.set_clip_file(asd_path)
+		else:
+			print('Warning: ASD file not found: ', asd_path)
 
 	def render(self, duration: float, file_path=None):
 
@@ -88,13 +92,14 @@ class MyEngine(daw.RenderEngine):
 
 		return output
 
+
 def main():
 
 	# Put your own paths and BPM here
 	audio1_path = ""
 	audio2_path = ""
-	bpm1 = 120
-	bpm2 = 126
+	bpm1 = 128
+	bpm2 = 132
 	# bpm2 = bpm1 = (bpm1 + bpm2)*.5 # Debug with this
 
 	if audio1_path == '' or audio2_path == '':
@@ -121,9 +126,9 @@ def main():
 		)
 
 	engine.mixer.set_automation('/MyMixer/Mixer', mixer_automation, ppqn=PPQN)
-	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.5)  # debug with this
-	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.)  # debug with this
-	# engine.mixer.set_parameter('/MyMixer/Mixer', 1.)  # debug with this
+	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.5)  # Listen with even mixing.
+	# engine.mixer.set_parameter('/MyMixer/Mixer', 0.)  # Listen to the first audio
+	# engine.mixer.set_parameter('/MyMixer/Mixer', 1.)  # Listen to the second audio
 
 	# Load the audio files into the playback processors.
 	engine.load_audio(0, audio1_path)
@@ -132,6 +137,21 @@ def main():
 	# Start the clips at 0 beats and have them play for 8192 beats.
 	engine.playback1.set_clip_positions([[0., 8192., 0.]])
 	engine.playback2.set_clip_positions([[0., 8192., 0.]])
+
+	# warp markers are list of pairs of (time in samples, time in beats)
+	# You can set them as a property too.
+	# print(engine.playback1.warp_markers)
+	# print(engine.playback2.warp_markers)
+
+	# These are properties measured in beats.
+	# print(engine.playback1.loop_start)
+	# print(engine.playback1.loop_end)
+	# print(engine.playback1.start_marker)
+	# print(engine.playback1.end_marker)
+
+	# other properties:
+	# print(engine.playback1.warp_on)
+	# print(engine.playback1.loop_on)
 
 	num_beats = 88.
 	engine.render(num_beats, file_path=OUTPUT / 'dj_transition_output.wav')
