@@ -664,7 +664,7 @@ FaustProcessor::getNumMidiEvents()
 };
 
 bool
-FaustProcessor::loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents)
+FaustProcessor::loadMidi(const std::string& path, bool clearPrevious, bool isBeats, bool allEvents)
 {
 	if (!std::filesystem::exists(path.c_str())) {
 		throw std::runtime_error("File not found: " + path);
@@ -680,7 +680,7 @@ FaustProcessor::loadMidi(const std::string& path, bool clearPrevious, bool conve
 		myMidiBufferQN.clear();
 	}
 
-	if (convertToSeconds) {
+	if (!isBeats) {
 		midiFile.convertTimestampTicksToSeconds();
 		
 		for (int t = 0; t < midiFile.getNumTracks(); t++) {
@@ -725,7 +725,7 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	uint8  midiVelocity,
 	const double noteStart,
 	const double noteLength,
-	bool convert_to_sec) {
+	bool isBeats) {
 
 	if (midiNote > 255) midiNote = 255;
 	if (midiNote < 0) midiNote = 0;
@@ -744,7 +744,7 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 		midiNote,
 		midiVelocity);
 
-	if (convert_to_sec) {
+	if (!isBeats) {
 		auto startTime = noteStart * mySampleRate;
 		onMessage.setTimeStamp(startTime);
 		offMessage.setTimeStamp(startTime + noteLength * mySampleRate);

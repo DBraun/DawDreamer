@@ -164,7 +164,7 @@ public:
     // Another bad design of the code is that FaustProcessor, PluginProcessor, and SamplerProcessor
     // have a lot of common code related to MIDIBuffers.
     // There's one set of variables for keeping track of everything in absolute time (when
-    // `convert_to_sec` is True), and another for relative-to-tempo timing (when note start
+    // `isBeats` is False), and another for relative-to-tempo timing (when note start
     // times and durations are measured in "quarter notes" (QN)).
     const static std::uint32_t PPQN = 3840;
 

@@ -68,12 +68,15 @@ engine.load_graph([
 faust_processor.set_parameter("/MySine/freq", 440.)  # 440 Hz
 faust_processor.set_parameter("/MySine/vol", -6.)  # -6 dB volume
 
-engine.render(1.)  # render 1 sec
+engine.set_bpm(120.)
+engine.render(4., beats=True)  # render 4 beats.
 audio = engine.get_audio()  # shaped (2, N samples)
 wavfile.write('sine_demo.wav', SAMPLE_RATE, audio.transpose())
 ```
 
 ## Advanced Example
+
+Checkout the [examples](https://github.com/DBraun/DawDreamer/tree/main/examples/).
 
 Let's demonstrate audio playback, graph-building, VST instruments/effects, and automation. You need to change many hard-coded paths for this to work.
 
@@ -108,7 +111,8 @@ engine.set_bpm(120.)  # default is 120 beats per minute.
 # with a fixed PPQN (Pulses Per Quarter Note).
 # If we choose ppqn=960 and the numpy array abruptly changes values every 960 samples,
 # the tempo will abruptly change "on the beat".
-engine.set_bpm(120.+60.*make_sine(1./2., duration*10.), ppqn=960)
+bpm_automation = 120.+60.*make_sine(1./2., duration*10.)
+engine.set_bpm(bpm_automation, ppqn=960)
 
 DURATION = 10 # How many seconds we want to render.
 
@@ -147,20 +151,20 @@ automation = make_sine(4, DURATION, sr=960)
 automation = 0.25+.5*(automation > 0).astype(np.float32)
 synth.set_automation(1, automation, ppqn=960)
 
-# Load a MIDI file and convert the timing to absolute seconds. Changes to the Render Engine's BPM
-# won't affect the timing. The kwargs below are defaults.
-synth.load_midi("C:/path/to/song.mid", clear_previous=True, convert_to_sec=True, all_events=True)
+# Load a MIDI file and convert the timing to absolute seconds (beats=False).
+# Changes to the Render Engine's BPM won't affect the timing. The kwargs below are defaults.
+synth.load_midi("C:/path/to/song.mid", clear_previous=True, beats=False, all_events=True)
 
 # Load a MIDI file and keep the timing in units of beats. Changes to the Render Engine's BPM
 # will affect the timing.
-synth.load_midi("C:/path/to/song.mid", convert_to_sec=False)
+synth.load_midi("C:/path/to/song.mid", beats=True)
 
 # We can also add one note at a time, specifying a start time and duration, both in seconds
 synth.add_midi_note(60, 127, 0.5, .25) # (MIDI note, velocity, start, duration)
 
-# With `convert_to_sec=False`, we can use beats as the unit for the start time and duration.
+# With `beats=True`, we can use beats as the unit for the start time and duration.
 # Rest for a beat and then play a note for a half beat.
-synth.add_midi_note(67, 127, 1, .5, convert_to_sec=False)
+synth.add_midi_note(67, 127, 1, .5, beats=True)
 
 # For any processor type, we can get the number of inputs and outputs
 print("synth num inputs: ", synth.get_num_input_channels())
@@ -179,7 +183,7 @@ filter_processor.freq = 7123.  # Some parameters can be get/set like this.
 freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 w/ amp 5000.
 filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
 freq_automation = filter_processor.get_automation("freq") # Get automation of most processor parameters.
-filter_processor.record = True  # This will allow us to access the filter processor's audio after a render.
+filter_processor.record = True  # This allows us to access the filter processor's audio after a render.
 
 # A graph is a meaningfully ordered list of tuples.
 # In each tuple, the first item is an audio processor.
@@ -189,7 +193,7 @@ filter_processor.record = True  # This will allow us to access the filter proces
 # The audio from the last tuple's processor will be accessed automatically later by engine.get_audio()
 graph = [
   (synth, []),  # synth takes no inputs, so we give an empty list.
-  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to synth from earlier
+  (engine.make_reverb_processor("reverb"), [synth.get_name()]), # Apply JUCE reverb to earlier synth
   (engine.make_plugin_processor("more_reverb", REVERB_PLUGIN), ["reverb"]), # Apply VST reverb
   (engine.make_playback_processor("vocals", vocals), []), # Playback has no inputs.
   (filter_processor, ["vocals"]), # High-pass filter with automation set earlier.
@@ -198,7 +202,9 @@ graph = [
 
 engine.load_graph(graph)
 
+# Two ways of rendering:
 engine.render(DURATION)  # Render 10 seconds audio.
+# engine.render(8., beats=True)  # Render 8 beats of seconds based on the engine's BPM.
 
 # Return the audio from the graph's last processor, even if its recording wasn't enabled.
 # The shape will be numpy.ndarray shaped (chans, samples)

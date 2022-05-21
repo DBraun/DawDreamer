@@ -11,9 +11,9 @@
 class PlaybackWarpProcessor : public ProcessorBase
 {
 public:
-    PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr);
+    PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr, double data_sr);
 
-    PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr);
+    PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, double data_sr);
 
     void prepareToPlay(double, int);
 
@@ -25,7 +25,7 @@ public:
 
     const juce::String getName() const { return "PlaybackWarpProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input);
+    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input, double data_sr);
 
     void setTimeRatio(double ratio) { m_time_ratio_if_warp_off = ratio; }
     double getTimeRatio() { return m_time_ratio_if_warp_off; }
@@ -59,7 +59,7 @@ public:
 
 private:
 
-    void init(double sr);
+    void init();
 
     void setClipPositionsDefault();
 
@@ -73,6 +73,7 @@ private:
         };
 
     juce::AudioSampleBuffer myPlaybackData;
+    double myPlaybackDataSR = 0;
 
     std::unique_ptr<RubberBand::RubberBandStretcher> m_rbstretcher;
 
@@ -91,7 +92,7 @@ private:
     int m_clipIndex = 0;
     Clip m_currentClip;
 
-    void setupRubberband(float sr, int numChannels);
+    void setupRubberband();
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 };

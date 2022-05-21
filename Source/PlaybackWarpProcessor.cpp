@@ -1,7 +1,7 @@
 #include "PlaybackWarpProcessor.h"
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 
-PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr) : ProcessorBase{ createParameterLayout, newUniqueName }
+PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr, double data_sr) : ProcessorBase{ createParameterLayout, newUniqueName }
 {
     m_numChannels = (int)inputData.size();
     setMainBusInputsAndOutputs(0, m_numChannels);
@@ -12,21 +12,30 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vec
         myPlaybackData.copyFrom(chan, 0, inputData.at(chan).data(), numSamples);
     }
 
-    init(sr);
+    if (data_sr) {
+        myPlaybackDataSR = data_sr;
+    }
+    else {
+        myPlaybackDataSR = sr;
+    }
+
+    m_sample_rate = sr;
+
+    init();
 }
 
-PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr) : ProcessorBase{ createParameterLayout, newUniqueName }
+PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, double data_sr) : ProcessorBase{ createParameterLayout, newUniqueName }
 {
-    setData(input);
-    init(sr);
+    m_sample_rate = sr;
+    setData(input, data_sr);
+    init();
 }
 
 void
-PlaybackWarpProcessor::init(double sr) {
-    m_sample_rate = sr;
+PlaybackWarpProcessor::init() {
     setAutomationVal("transpose", 0.);
     myTranspose = myParameters.getRawParameterValue("transpose");
-    setupRubberband(sr, m_numChannels);
+    setupRubberband();
     setClipPositionsDefault();
 }
 
@@ -54,7 +63,7 @@ PlaybackWarpProcessor::automateParameters() {
 
     *myTranspose = getAutomationVal("transpose", posInfo);
     double scale = std::pow(2., *myTranspose / 12.);
-    m_rbstretcher->setPitchScale(scale);
+    m_rbstretcher->setPitchScale(scale * myPlaybackDataSR / m_sample_rate);
 }
 
 
@@ -81,7 +90,7 @@ PlaybackWarpProcessor::resetWarpMarkers(double bpm) {
 
     m_clipInfo.warp_markers.push_back(std::make_pair(0, 0));
     double numSamples = 128;
-    double beats = bpm / (60. * numSamples / m_sample_rate);
+    double beats = bpm / (60. * numSamples / myPlaybackDataSR);
     m_clipInfo.warp_markers.push_back(std::make_pair(numSamples, beats));
 }
 
@@ -160,13 +169,8 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
 
     automateParameters();
 
-    if (m_clips.size() == 0) {
-        ProcessorBase::processBlock(buffer, midiBuffer);
-        return;
-    }
-
-    if (m_clipIndex >= m_clips.size()) {
-        // we've already passed the last clip.
+    if ((m_clips.size() == 0) || (m_clipIndex >= m_clips.size())) {
+        // There are no clips, or we've already passed the last clip.
         ProcessorBase::processBlock(buffer, midiBuffer);
         return;
     }
@@ -212,9 +216,9 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
             m_clipIndex += 1;
             if (m_clipIndex < m_clips.size()) {
                 m_currentClip = m_clips.at(m_clipIndex);
-                setupRubberband(m_sample_rate, m_numChannels);
+                setupRubberband();
                 if (m_clipInfo.warp_on) {
-                    sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
+                    sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, myPlaybackDataSR);
                 }
                 else {
                     sampleReadIndex = 0;
@@ -244,9 +248,9 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
             if (m_clipIndex < m_clips.size()) {
                 // Use the next clip position.
                 m_currentClip = m_clips.at(m_clipIndex);
-                setupRubberband(m_sample_rate, m_numChannels);
+                setupRubberband();
                 if (m_clipInfo.warp_on) {
-                    sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
+                    sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, myPlaybackDataSR);
                 }
                 else {
                     sampleReadIndex = 0;
@@ -264,29 +268,28 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
         }
 
         if (m_clipInfo.warp_on) {
-            // todo: if the playback data sample rate is different than the engine's sr
-            // then that would affect the call to setTimeRatio.
-
             double instant_bpm;
             double _;
+            // wrap-around the ppqPosition
+            if (m_clipInfo.loop_on) {
+                if (ppqPosition > m_clipInfo.loop_end-m_clipInfo.loop_start) {
+                    auto loopSize = m_clipInfo.loop_end - m_clipInfo.loop_start;
+                    ppqPosition -= std::ceil((ppqPosition - m_clipInfo.loop_end) / loopSize) * loopSize;
+                }
+            }
+            
             m_clipInfo.beat_to_seconds(ppqPosition, _, instant_bpm);
-            m_rbstretcher->setTimeRatio(instant_bpm / posInfo.bpm);
+            m_rbstretcher->setTimeRatio((instant_bpm / posInfo.bpm) * (m_sample_rate / myPlaybackDataSR));
         }
         else {
-            m_rbstretcher->setTimeRatio(m_time_ratio_if_warp_off);
+            m_rbstretcher->setTimeRatio(m_time_ratio_if_warp_off * (m_sample_rate / myPlaybackDataSR));
         }
 
         if (m_clipInfo.loop_on) {
-            int loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, m_sample_rate);
+            int loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, myPlaybackDataSR);
             if (sampleReadIndex > loop_end_sample) {
-                int loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, m_sample_rate);
+                int loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, myPlaybackDataSR);
                 sampleReadIndex = loop_start_sample;
-            }
-        }
-        else {
-            int end_marker_sample = myPlaybackData.getNumSamples() - 1;
-            if (sampleReadIndex > end_marker_sample) {
-                continue;
             }
         }
 
@@ -315,7 +318,7 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
 void
 PlaybackWarpProcessor::reset() {
 
-    setupRubberband(m_sample_rate, m_numChannels);
+    setupRubberband();
 
     m_clipIndex = 0;
     sampleReadIndex = 0;
@@ -323,7 +326,7 @@ PlaybackWarpProcessor::reset() {
     if (m_clipIndex < m_clips.size()) {
         m_currentClip = m_clips.at(0);
         if (m_clipInfo.warp_on) {
-            sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, m_sample_rate);
+            sampleReadIndex = m_clipInfo.beat_to_sample(m_clipInfo.start_marker + m_currentClip.start_marker_offset, myPlaybackDataSR);
         }
         else {
             sampleReadIndex = 0;
@@ -332,7 +335,7 @@ PlaybackWarpProcessor::reset() {
 }
 
 void
-PlaybackWarpProcessor::setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
+PlaybackWarpProcessor::setData(py::array_t<float, py::array::c_style | py::array::forcecast> input, double data_sr) {
     float* input_ptr = (float*)input.data();
 
     m_numChannels = (int)input.shape(0);
@@ -344,49 +347,70 @@ PlaybackWarpProcessor::setData(py::array_t<float, py::array::c_style | py::array
         myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
         input_ptr += numSamples;
     }
+
+    if (data_sr) {
+        myPlaybackDataSR = data_sr;
+    }
+    else {
+        myPlaybackDataSR = m_sample_rate;
+    }
 }
 
 bool
 PlaybackWarpProcessor::loadAbletonClipInfo(const char* filepath) {
-    return m_clipInfo.readWarpFile(filepath);;
+    return m_clipInfo.readWarpFile(filepath);
 }
 
 void
-PlaybackWarpProcessor::setupRubberband(float sr, int numChannels) {
+PlaybackWarpProcessor::setupRubberband() {
     // Note that we call this instead of calling m_rbstretcher->reset() because
     // that method doesn't seem to work correctly.
     // It's better to just create a whole new stretcher object.
     using namespace RubberBand;
 
     RubberBandStretcher::Options options = 0;
-    options |= RubberBandStretcher::OptionProcessRealTime;
-    options |= RubberBandStretcher::OptionStretchPrecise;
-    //options |= RubberBandStretcher::OptionPhaseIndependent;
-    //options |= RubberBandStretcher::OptionWindowLong;
-    //options |= RubberBandStretcher::OptionWindowShort;
-    //options |= RubberBandStretcher::OptionSmoothingOn;
-    //options |= RubberBandStretcher::OptionFormantPreserved;
-    options |= RubberBandStretcher::OptionPitchHighQuality;
-    options |= RubberBandStretcher::OptionChannelsTogether;  // enabling this is NOT the default
 
-    // Pick one of these:
-    //options |= RubberBandStretcher::OptionThreadingAuto;
-    options |= RubberBandStretcher::OptionThreadingNever;
-    //options |= RubberBandStretcher::OptionThreadingAlways;
+    //options |= RubberBandStretcher::OptionProcessOffline;
+    options |= RubberBandStretcher::OptionProcessRealTime;  // NOT the default
 
-    // Pick one of these:
-    options |= RubberBandStretcher::OptionTransientsSmooth;
-    //options |= RubberBandStretcher::OptionTransientsMixed;
+    //options |= RubberBandStretcher::OptionStretchElastic;
+    options |= RubberBandStretcher::OptionStretchPrecise;  // NOT the default
+
     //options |= RubberBandStretcher::OptionTransientsCrisp;
+    //options |= RubberBandStretcher::OptionTransientsMixed;
+    options |= RubberBandStretcher::OptionTransientsSmooth;  // NOT the default
 
-    // Pick one of these:
     options |= RubberBandStretcher::OptionDetectorCompound;
     //options |= RubberBandStretcher::OptionDetectorPercussive;
     //options |= RubberBandStretcher::OptionDetectorSoft;
 
+    options |= RubberBandStretcher::OptionPhaseLaminar;
+    //options |= RubberBandStretcher::OptionPhaseIndependent;
+
+    //options |= RubberBandStretcher::OptionThreadingAuto;
+    options |= RubberBandStretcher::OptionThreadingNever;  // NOT the default
+    //options |= RubberBandStretcher::OptionThreadingAlways;
+
+    options |= RubberBandStretcher::OptionWindowStandard;
+    //options |= RubberBandStretcher::OptionWindowShort;
+    //options |= RubberBandStretcher::OptionWindowLong;
+
+    options |= RubberBandStretcher::OptionSmoothingOff;
+    //options |= RubberBandStretcher::OptionSmoothingOn;
+
+    options |= RubberBandStretcher::OptionFormantShifted;
+    //options |= RubberBandStretcher::OptionFormantPreserved;
+
+    //options |= RubberBandStretcher::OptionPitchHighSpeed;
+    options |= RubberBandStretcher::OptionPitchHighQuality;  // NOT the default
+    //options |= RubberBandStretcher::OptionPitchHighConsistency;
+
+    //options |= RubberBandStretcher::OptionChannelsApart;
+    options |= RubberBandStretcher::OptionChannelsTogether;  // NOT the default
+
     m_rbstretcher = std::make_unique<RubberBand::RubberBandStretcher>(
-        sr,
-        numChannels,
+        m_sample_rate,
+        m_numChannels,
         options,
         1.,
         1.);

@@ -34,7 +34,9 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 	N = int(duration * sr) # Number of samples 
 	return np.sin(np.pi*2.*freq*np.arange(N)/sr)
 
-def load_audio_file(file_path, duration=None):
+def load_audio_file(file_path: str, duration=None):
+
+	file_path = str(file_path)
 
 	if USE_LIBROSA:
 
@@ -62,15 +64,15 @@ def render(engine, file_path=None, duration=5.):
 
 def append_if_exists(some_list, filepath):
 
-    filepath = abspath(filepath)
-    filepath = filepath.replace("\\", "/")
+	filepath = abspath(filepath)
+	filepath = filepath.replace("\\", "/")
 
-    if platform.system() == 'Darwin' and splitext(filepath)[-1] in [".component", ".vst3", ".vst"]:
-        # macOS treats .component .vst and .vst3 as directories
-        if isdir(filepath):
-            some_list.append(filepath)
-    elif isfile(filepath):
-        some_list.append(filepath)
+	if platform.system() == 'Darwin' and splitext(filepath)[-1] in [".component", ".vst3", ".vst"]:
+		# macOS treats .component .vst and .vst3 as directories
+		if isdir(filepath):
+			some_list.append(filepath)
+	elif isfile(filepath):
+		some_list.append(filepath)
 
 
 def is_pytesting():
@@ -82,52 +84,52 @@ ALL_PLUGIN_EFFECTS = []
 
 if platform.system() == "Darwin":
 
-    # append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component")   # todo: enable
-    # append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")         # todo: enable
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component")   # todo: enable
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")         # todo: enable
 
-    append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")
-    append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst3")
-    append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.component")
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst3")
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.component")
 
-    # todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
-    # append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst")
-    # append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst3")
-    append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.component")
+	# todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst")
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst3")
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.component")
 
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst")
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst3")
-    # append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.component")  # todo: enable
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST3/Dexed.vst3")  # todo: only DBraun has this
-    # append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/Components/Dexed.component")  # todo: enable, only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst")
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst3")
+	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.component")  # todo: enable
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST3/Dexed.vst3")  # todo: only DBraun has this
+	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/Components/Dexed.component")  # todo: enable, only DBraun has this
 
-    # append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/Components/helm.component")  # todo: enable, only DBraun has this
-    # append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST/helm.vst")  # todo: enable, only DBraun has this
-    # append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST3/helm.vst3")  # todo: enable, only DBraun has this
-    
+	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/Components/helm.component")  # todo: enable, only DBraun has this
+	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST/helm.vst")  # todo: enable, only DBraun has this
+	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST3/helm.vst3")  # todo: enable, only DBraun has this
+	
 elif platform.system() == "Windows":
-    append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "Dimension Expander_x64.dll")
-    append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/Bloom.dll")                   # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/CamelCrusher.dll")            # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/CHOWTapeModel.dll")           # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/Szechuan Saturator.vst3")     # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/TAL-Chorus-LX.vst3")          # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/TAL-Chorus-LX-64.dll")        # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "Dimension Expander_x64.dll")
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/Bloom.dll")                   # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/CamelCrusher.dll")            # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/CHOWTapeModel.dll")           # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/Szechuan Saturator.vst3")     # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/TAL-Chorus-LX.vst3")          # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/TAL-Chorus-LX-64.dll")        # todo: only DBraun has this
 
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker-64.dll")
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Dexed.dll")               # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Serum_x64.dll")           # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Surge.vst3")              # todo: only DBraun has this
-    append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker-64.dll")
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Dexed.dll")               # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Serum_x64.dll")           # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Surge.vst3")              # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3")  # todo: only DBraun has this
 
 else:
-    # todo: test LV2 plugins on Linux
-    pass
+	# todo: test LV2 plugins on Linux
+	pass
 
 if getenv("CIBW_TEST_REQUIRES"):
-    # Skip .component plugins on GitHub Actions workflows
-    func = lambda plugin_path: not plugin_path.endswith('.component')
-    ALL_PLUGIN_EFFECTS     = list(filter(func, ALL_PLUGIN_EFFECTS))
-    ALL_PLUGIN_INSTRUMENTS = list(filter(func, ALL_PLUGIN_INSTRUMENTS))
+	# Skip .component plugins on GitHub Actions workflows
+	func = lambda plugin_path: not plugin_path.endswith('.component')
+	ALL_PLUGIN_EFFECTS     = list(filter(func, ALL_PLUGIN_EFFECTS))
+	ALL_PLUGIN_INSTRUMENTS = list(filter(func, ALL_PLUGIN_INSTRUMENTS))
 
 
 PLUGIN_INPUT_CHANNELS = defaultdict(lambda: 2)

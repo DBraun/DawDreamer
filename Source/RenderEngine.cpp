@@ -152,14 +152,38 @@ float RenderEngine::getBPM(double ppqPosition) {
     return bpm;
 }
 
-bool
-RenderEngine::render(const double renderLength) {
+uint64_t
+RenderEngine::getRenderLength(const double renderLength, bool isBeats) {
 
-    std::uint64_t numRenderedSamples = renderLength * mySampleRate;
-    if (numRenderedSamples <= 0) {
+    if (renderLength <= 0) {
         throw std::runtime_error("Render length must be greater than zero.");
     }
-    
+
+    if (!isBeats) {
+        std::uint64_t numRenderedSamples = renderLength * mySampleRate;
+        return numRenderedSamples;
+    }
+    else {
+        std::uint64_t numRenderedSamples = 0;
+        myCurrentPositionInfo.resetToDefault();
+        auto stepInSeconds = double(myBufferSize) / mySampleRate;
+
+        while (myCurrentPositionInfo.ppqPosition < renderLength) {
+            myCurrentPositionInfo.bpm = getBPM(myCurrentPositionInfo.ppqPosition);
+            myCurrentPositionInfo.timeInSamples += myBufferSize;
+            myCurrentPositionInfo.timeInSeconds += stepInSeconds;
+            myCurrentPositionInfo.ppqPosition += (stepInSeconds / 60.) * myCurrentPositionInfo.bpm;
+        }
+        
+        return myCurrentPositionInfo.timeInSamples;
+    }
+}
+
+bool
+RenderEngine::render(const double renderLength, bool isBeats) {
+
+    std::uint64_t numRenderedSamples = getRenderLength(renderLength, isBeats);
+
     std::uint64_t numberOfBuffers = myBufferSize == 1 ? numRenderedSamples : std::uint64_t(std::ceil((numRenderedSamples -1.) / myBufferSize));
 
     bool graphIsConnected = true;

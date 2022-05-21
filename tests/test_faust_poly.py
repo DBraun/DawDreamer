@@ -74,7 +74,7 @@ def test_faust_poly():
     assert np.allclose(audio1, audio2)
 
 
-@pytest.mark.parametrize("midi_path,bpm_automation,convert_to_sec,buffer_size",
+@pytest.mark.parametrize("midi_path,bpm_automation,beats,buffer_size",
     product(
         [abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi')],
         [False, True],
@@ -82,7 +82,7 @@ def test_faust_poly():
         [1, 128]
     )
 )
-def test_faust_sine(midi_path: str, bpm_automation: bool, convert_to_sec: bool, buffer_size: int):
+def test_faust_sine(midi_path: str, bpm_automation: bool, beats: bool, buffer_size: int):
 
     engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
 
@@ -126,7 +126,7 @@ def test_faust_sine(midi_path: str, bpm_automation: bool, convert_to_sec: bool, 
     # for par in desc:
     #   print(par)
 
-    faust_processor.load_midi(midi_path, convert_to_sec=convert_to_sec, clear_previous=True, all_events=False)
+    faust_processor.load_midi(midi_path, beats=beats, clear_previous=True, all_events=False)
 
     graph = [
         (faust_processor, [])
@@ -136,7 +136,7 @@ def test_faust_sine(midi_path: str, bpm_automation: bool, convert_to_sec: bool, 
     file_path = OUTPUT / ''.join([
         'test_faust_sine_',
         'bpm_' if bpm_automation else '',
-        'conv_' if convert_to_sec else '',
+        'beats_' if beats else '',
         f'bs_{buffer_size}_',
         splitext(basename(midi_path))[0],
         '.wav'])
