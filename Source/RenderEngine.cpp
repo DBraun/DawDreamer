@@ -153,13 +153,13 @@ float RenderEngine::getBPM(double ppqPosition) {
 }
 
 uint64_t
-RenderEngine::getRenderLength(const double renderLength, bool convertToSeconds) {
+RenderEngine::getRenderLength(const double renderLength, bool isBeats) {
 
     if (renderLength <= 0) {
         throw std::runtime_error("Render length must be greater than zero.");
     }
 
-    if (convertToSeconds) {
+    if (!isBeats) {
         std::uint64_t numRenderedSamples = renderLength * mySampleRate;
         return numRenderedSamples;
     }
@@ -180,9 +180,9 @@ RenderEngine::getRenderLength(const double renderLength, bool convertToSeconds) 
 }
 
 bool
-RenderEngine::render(const double renderLength, bool convertToSeconds) {
+RenderEngine::render(const double renderLength, bool isBeats) {
 
-    std::uint64_t numRenderedSamples = getRenderLength(renderLength, convertToSeconds);
+    std::uint64_t numRenderedSamples = getRenderLength(renderLength, isBeats);
 
     std::uint64_t numberOfBuffers = myBufferSize == 1 ? numRenderedSamples : std::uint64_t(std::ceil((numRenderedSamples -1.) / myBufferSize));
 

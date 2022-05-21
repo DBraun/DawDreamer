@@ -32,9 +32,9 @@ public:
 
     bool removeProcessor(const std::string& name);
     
-    bool render(const double renderLength, bool convertToSeconds);
+    bool render(const double renderLength, bool isBeats);
 
-    uint64_t getRenderLength(const double renderLength, bool convertToSeconds);
+    uint64_t getRenderLength(const double renderLength, bool isBeats);
 
     void setBPM(double bpm);
 

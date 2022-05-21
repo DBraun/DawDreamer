@@ -72,7 +72,7 @@ def test_render_beats(buffer_size: int):
 
 	engine.load_graph(graph)
 
-	engine.render(BEATS, convert_to_sec=False)
+	engine.render(BEATS, beats=True)
 
 	output = engine.get_audio()
 

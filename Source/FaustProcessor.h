@@ -141,7 +141,7 @@ public:
     void setAutoImport(const std::string& s) { m_autoImport = s; }
     std::string getAutoImport() { return m_autoImport; }
 
-    bool loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents);
+    bool loadMidi(const std::string& path, bool clearPrevious, bool isBeats, bool allEvents);
 
     void clearMidi();
 
@@ -151,7 +151,7 @@ public:
         const uint8  midiVelocity,
         const double noteStart,
         const double noteLength,
-        bool convert_to_sec);
+        bool isBeats);
 
     void setSoundfiles(py::dict);
 

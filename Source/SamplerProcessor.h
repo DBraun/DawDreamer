@@ -153,7 +153,7 @@ public:
     };
 
     bool
-    loadMidi(const std::string& path, bool clearPrevious, bool convertToSeconds, bool allEvents)
+    loadMidi(const std::string& path, bool clearPrevious, bool isBeats, bool allEvents)
     {
 
         if (!std::filesystem::exists(path.c_str())) {
@@ -170,7 +170,7 @@ public:
             myMidiBufferQN.clear();
         }
 
-        if (convertToSeconds) {
+        if (!isBeats) {
             midiFile.convertTimestampTicksToSeconds();
 
             for (int t = 0; t < midiFile.getNumTracks(); t++) {
@@ -214,7 +214,7 @@ public:
             uint8  midiVelocity,
             const double noteStart,
             const double noteLength,
-            bool convert_to_sec) {
+            bool isBeats) {
 
         if (midiNote > 255) midiNote = 255;
         if (midiNote < 0) midiNote = 0;
@@ -233,7 +233,7 @@ public:
             midiNote,
             midiVelocity);
 
-        if (convert_to_sec) {
+        if (!isBeats) {
             auto startTime = noteStart * mySampleRate;
             onMessage.setTimeStamp(startTime);
             offMessage.setTimeStamp(startTime + noteLength * mySampleRate);

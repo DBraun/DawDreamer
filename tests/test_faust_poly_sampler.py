@@ -2,11 +2,11 @@ from dawdreamer_utils import *
 
 BUFFER_SIZE = 128
 
-@pytest.mark.parametrize("audio_file_path,output_path,convert_to_sec", [
+@pytest.mark.parametrize("audio_file_path,output_path,beats", [
 	(ASSETS / "60988__folktelemetry__crash-fast-14.wav", "test_faust_poly_sampler_cymbal.wav", False),
-	(ASSETS / "60988__folktelemetry__crash-fast-14.wav", "test_faust_poly_sampler_cymbal_convert_to_sec.wav", True)
+	(ASSETS / "60988__folktelemetry__crash-fast-14.wav", "test_faust_poly_sampler_cymbal_beats.wav", True)
 	])
-def test_faust_poly_sampler(audio_file_path: str, output_path: str, convert_to_sec: bool, lagrange_order=4):
+def test_faust_poly_sampler(audio_file_path: str, output_path: str, beats: bool, lagrange_order=4):
 
 	engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
@@ -40,9 +40,9 @@ LAGRANGE_ORDER = {LAGRANGE_ORDER}; // lagrange order. [2-4] are good choices.
 	# 	print(par)
 
 	 # (MIDI note, velocity, start sec, duration sec)
-	faust_processor.add_midi_note(60, 60, 0.0, .25, convert_to_sec=convert_to_sec)
-	faust_processor.add_midi_note(64, 80, 0.5, .5, convert_to_sec=convert_to_sec)
-	faust_processor.add_midi_note(67, 127, 0.75, .5, convert_to_sec=convert_to_sec)
+	faust_processor.add_midi_note(60, 60, 0.0, .25, beats=beats)
+	faust_processor.add_midi_note(64, 80, 0.5, .5, beats=beats)
+	faust_processor.add_midi_note(67, 127, 0.75, .5, beats=beats)
 
 	graph = [
 	    (faust_processor, [])
