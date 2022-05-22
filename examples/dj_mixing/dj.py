@@ -48,9 +48,7 @@ class MyEngine(daw.RenderEngine):
             import("stdfaust.lib");
             mixer_slider = hslider("Mixer", 0., 0., 1., 0.0001) : si.smoo;
             mixer = _, _ : it.interpolate_linear(mixer_slider);
-            stereo_mixer = par(i, 2, mixer);
-
-            process = ro.interleave(2,2) : stereo_mixer :> si.bus(2);
+            process = ro.interleave(2,2) : par(i, 2, mixer);
             """)
         # print(mixer.get_parameters_description())
 
