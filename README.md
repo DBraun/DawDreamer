@@ -365,7 +365,7 @@ engine.load_graph(graph)
 ```
 
 The `set_clip_file` method will set several properties:
-* `.warp_markers` (np.array [N, 2]) : List of pairs of (time in samples, time in beats)
+* `.warp_markers` (np.array [N, 2]) : List of pairs of (time in seconds, time in beats)
 * `.start_marker` (float) : Start marker position in beats relative to 1.1.1
 * `.end_marker` (float) : End marker position in beats relative to 1.1.1
 * `.loop_start` (float) : Loop start position in beats relative to 1.1.1
