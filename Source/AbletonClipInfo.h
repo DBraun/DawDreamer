@@ -51,7 +51,7 @@ class AbletonClipInfo {
                     bpm = (b2 - b1) / (p2 - p1) * 60.0;
          
                     // interpolate between the two warp markers
-                    float x = (beat - b1) / (b2 - b1);
+                    double x = (beat - b1) / (b2 - b1);
                     
                     seconds = p1 + x * (p2 - p1);
                     return;
@@ -71,7 +71,7 @@ class AbletonClipInfo {
             bpm = (b2 - b1) / (p2 - p1) * 60.0;
 
             // interpolate between the two warp markers
-            float x = (beat - b1) / (b2 - b1);
+            double x = (beat - b1) / (b2 - b1);
 
             seconds = p1 + x * (p2 - p1);
             return;

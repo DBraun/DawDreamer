@@ -62,11 +62,17 @@ class MyEngine(daw.RenderEngine):
 
         self.load_graph(graph)
 
-    def load_audio(self, i: int, audio_path: str, duration=None):
+    def load_audio(self, i: int, audio_path: str, bpm=120., start_sec=0.):
+
+        """
+        Load an audio file into a playback warp processor. If the `.asd` file doesn't
+        exist, you should specify a BPM kwarg to fall-back on. The `start_sec` kwarg
+        should also be the time in seconds of the first down-beat.
+        """
 
         audio_path = str(audio_path)
 
-        audio, rate = librosa.load(audio_path, duration=duration, mono=False, sr=None)
+        audio, rate = librosa.load(audio_path, duration=None, mono=False, sr=None)
 
         if i == 0:
             playback = self.playback1
@@ -81,6 +87,17 @@ class MyEngine(daw.RenderEngine):
             playback.set_clip_file(asd_path)
         else:
             print('Warning: ASD file not found: ', asd_path)
+
+            # If you don't have warp markers, you should turn warping on.
+            playback.warp_on = True
+            playback.loop_on = False  # todo: more intelligently set this
+            playback.loop_start = 0
+            playback.loop_end = 8192  # todo: more intelligently set this
+            playback.start_marker = 0
+            playback.end_marker = 8192  # todo: more intelligently set this
+
+            beats_in_one_sec_audio = bpm/60.
+            playback.warp_markers = np.array([[start_sec, 0.], [start_sec+1., beats_in_one_sec_audio]], dtype=np.float32)
 
     def render(self, duration: float, file_path=None):
 
@@ -101,11 +118,13 @@ class MyEngine(daw.RenderEngine):
 
 def main():
 
-    # Put your own paths and BPM here
+    # Put your own paths, BPM, and start seconds here
     audio1_path = ""
     audio2_path = ""
     bpm1 = 128
     bpm2 = 132
+    start_sec1 = 0  # the time in seconds of the first downbeat
+    start_sec2 = 0  # the time in seconds of the first downbeat
     # bpm1 = bpm2 = (bpm1 + bpm2)*.5 # Debug with this
 
     if audio1_path == '' or audio2_path == '':
@@ -137,27 +156,12 @@ def main():
     # engine.mixer.set_parameter('/MyMixer/Mixer', 1.)  # Listen to the second audio
 
     # Load the audio files into the playback processors.
-    engine.load_audio(0, audio1_path)
-    engine.load_audio(1, audio2_path)
+    engine.load_audio(0, audio1_path, bpm=bpm1, start_sec=start_sec1)
+    engine.load_audio(1, audio2_path, bpm=bpm2, start_sec=start_sec2)
 
     # Start the clips at 0 beats and have them play for 8192 beats.
-    engine.playback1.set_clip_positions([[0., 8192., 0.]])
-    engine.playback2.set_clip_positions([[0., 8192., 0.]])
-
-    # warp markers are list of pairs of (time in samples, time in beats)
-    # You can set them as a property too.
-    # print(engine.playback1.warp_markers)
-    # print(engine.playback2.warp_markers)
-
-    # These are properties measured in beats.
-    # print(engine.playback1.loop_start)
-    # print(engine.playback1.loop_end)
-    # print(engine.playback1.start_marker)
-    # print(engine.playback1.end_marker)
-
-    # other properties:
-    # print(engine.playback1.warp_on)
-    # print(engine.playback1.loop_on)
+    # engine.playback1.set_clip_positions([[0., 8192., 0.]])
+    # engine.playback2.set_clip_positions([[0., 8192., 0.]])
 
     num_beats = 88.
     engine.render(num_beats, file_path=OUTPUT / 'dj_transition_output.wav')

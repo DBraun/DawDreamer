@@ -25,14 +25,15 @@ def test_playbackwarp_processor1(buffer_size: int):
 
 	other.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "other.wav.asd"))
 
+	warp_markers = drums.warp_markers
+
 	print('drums.start_marker: ', drums.start_marker)
 	print('drums.end_marker: ', drums.end_marker)
 	print('drums.loop_on: ', drums.loop_on)
 	print('drums.loop_start: ', drums.loop_start)
 	print('drums.loop_end: ', drums.loop_end)
 	print('drums.warp_on: ', drums.warp_on)
-
-	warp_markers = drums.warp_markers
+	print('drums.warp_markers: ', drums.warp_markers)
 
 	# re-assign and test that it stayed the same
 	drums.warp_markers = warp_markers

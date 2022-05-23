@@ -266,6 +266,8 @@ def test_plugin_upright_piano():
     [
     "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
     "C:/VSTPlugIns/LABS (64 Bit).dll",
+    "/Library/Audio/Plug-Ins/VST/LABS.vst",
+    "/Library/Audio/Plug-Ins/VST3/LABS.vst3",
     "C:/VSTPlugIns/Kontakt.dll",
     # "C:/VSTPlugIns/Kontakt.vst3",  # not working
     ]
@@ -274,7 +276,10 @@ def test_plugin_editor(plugin_path: str):
 
     """Remember to use `-p no:faulthandler` when running this pytest."""
 
-    if not isfile(plugin_path):
+    plugin_paths = []
+    append_if_exists(plugin_paths, plugin_path)
+
+    if not plugin_paths:
         return
 
     def load_help(processor, filepath: str):
@@ -434,9 +439,3 @@ def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnc
     assert(not np.allclose(audio*0., audio, atol=1e-07))
     file_path = OUTPUT / f'test_plugin_{plugin_basename}_encoder.wav'
     wavfile.write(file_path, SAMPLE_RATE, audio.transpose())
-
-
-if __name__ == '__main__':
-    # test_plugin_iem()
-    test_plugin_editor()
-    print('All done!')
