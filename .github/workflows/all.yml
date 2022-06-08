@@ -96,6 +96,7 @@ jobs:
         - { os: windows-latest, python-version: "3.7", CIBW-BUILD: "cp37*"}
         - { os: windows-latest, python-version: "3.8", CIBW-BUILD: "cp38*"}
         - { os: windows-latest, python-version: "3.9", CIBW-BUILD: "cp39*"}
+        - { os: windows-latest, python-version: "3.10", CIBW-BUILD: "cp310*"}
 
     steps:
     - uses: actions/checkout@v2

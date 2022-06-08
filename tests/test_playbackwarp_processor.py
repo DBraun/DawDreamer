@@ -53,6 +53,16 @@ def test_playbackwarp_processor1(buffer_size: int):
 
 	assert (drums.warp_markers == warp_markers).all()
 
+	# test the RubberBand option
+	rb_option = daw.PlaybackWarpProcessor.option
+	rb_option.__members__ # just to make sure it works.
+	drums.reset_options() # just to make sure it works.
+	# set_options will totally replace anything previously done.
+	drums.set_options(
+		rb_option.OptionTransientsMixed |
+		rb_option.OptionChannelsApart
+	)
+
 	graph = [
 	    (drums, []),
 	    (other, []),
@@ -124,8 +134,8 @@ def test_playbackwarp_processor2(buffer_size: int):
 
 	assert(np.mean(np.abs(engine.get_audio())) > .01)
 
-@pytest.mark.parametrize("buffer_size", [1])
-def test_playbackwarp_processor3(buffer_size: int):
+@pytest.mark.parametrize("loop_end", [None, 1, 2, 5000])
+def test_playbackwarp_processor3(loop_end: float):
 
 	"""
 	Test using the playback warp processor without a clip file and therefore without warping.
@@ -136,24 +146,27 @@ def test_playbackwarp_processor3(buffer_size: int):
 
 	DURATION = 3.
 
-	engine = daw.RenderEngine(SAMPLE_RATE, buffer_size)
+	engine = daw.RenderEngine(SAMPLE_RATE, 1)
 
 	drum_audio = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav")
 	drum_audio = drum_audio[:, int(SAMPLE_RATE*.267):]  # manually trim to beginning
 
 	drums = engine.make_playbackwarp_processor("drums", drum_audio)
 
+	drums.reset_warp_markers(108)
+	drums.set_clip_positions([[0., i, 0.] for i in range(1, 4)])
+
 	drums.time_ratio = .7
 	assert drums.time_ratio == .7
 
 	drums.loop_on = True
-	assert(drums.loop_on)
+	assert drums.loop_on
 
 	assert not drums.warp_on
 
-	actual_bpm = 108.
-	num_beats = 2.
-	drums.loop_end = num_beats*60./actual_bpm
+	if loop_end is not None:
+		drums.loop_end = loop_end
+		assert drums.loop_end == loop_end
 
 	graph = [
 	    (drums, []),
@@ -161,7 +174,7 @@ def test_playbackwarp_processor3(buffer_size: int):
 
 	engine.load_graph(graph)
 
-	render(engine, file_path=OUTPUT / 'test_playbackwarp_processor3a.wav', duration=DURATION)
+	render(engine, file_path=OUTPUT / f'test_playbackwarp_processor3a_loop{loop_end}.wav', duration=DURATION)
 
 	audio = engine.get_audio()
 
@@ -171,7 +184,7 @@ def test_playbackwarp_processor3(buffer_size: int):
 
 	assert num_samples > 100
 
-	assert(np.mean(np.abs(audio)) > .01)
+	assert(np.mean(np.abs(audio)) > .02)
 
 @pytest.mark.parametrize("buffer_size", [1])
 def test_playbackwarp_processor4(buffer_size: int):

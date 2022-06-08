@@ -340,6 +340,14 @@ playback_processor = engine.make_playbackwarp_processor("drums", load_audio_file
 playback_processor.time_ratio = 2.  # Play back in twice the amount of time (i.e., slowed down).
 playback_processor.transpose = -5.  # Down 5 semitones.
 
+# Optionally set more options:
+# https://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html
+playback_processor.set_options(
+  daw.PlaybackWarpProcessor.option.OptionTransientsSmooth |
+  daw.PlaybackWarpProcessor.option.OptionPitchHighQuality |
+  daw.PlaybackWarpProcessor.option.OptionChannelsTogether
+)
+
 graph = [
   (playback_processor, []),
 ]

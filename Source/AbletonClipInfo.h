@@ -1,6 +1,10 @@
 #pragma once
 
 #include "portable_endian.h"
+#include <vector>
+#include <string>
+#include <iostream>
+#include <limits>
 
 class AbletonClipInfo {
     public:
@@ -13,8 +17,11 @@ class AbletonClipInfo {
         bool loop_on = true;
         bool warp_on = false;
 
-        AbletonClipInfo() : loop_start(0), loop_end(262144), start_marker(0), hidden_loop_start(0), hidden_loop_end(262144), end_marker(262144), loop_on(true), warp_on(false) {
-
+        // NB: a source of bugs (in the past only hopefully) has been overflow arithmetic mistakes related to
+        // loop_end/hidden_loop/end_marker. We initialize them with very high defaults.
+        AbletonClipInfo() : loop_start(0), loop_end(std::numeric_limits<double>::infinity()), start_marker(0),
+            hidden_loop_start(0), hidden_loop_end(std::numeric_limits<double>::infinity()),
+            end_marker(std::numeric_limits<double>::infinity()), loop_on(true), warp_on(false) {
         }
 
         std::vector<std::pair<double, double>> warp_markers;
@@ -24,20 +31,24 @@ class AbletonClipInfo {
             double seconds;
             double bpm;
             beat_to_seconds(beat, seconds, bpm);
-            return (int)(seconds * sr);
+            double samples = seconds * sr;
+
+            return samples;
         }
 
         void beat_to_seconds(double beat, double& seconds, double&bpm) {
 
+            // todo: better handle overflow cases where beat is very small or very large
+
             if (warp_markers.size() < 2) {
                 bpm = 120.;
-                seconds = 60.*beat / bpm;
+                seconds = 60.*(beat / bpm);
                 return;
             }
 
-            auto it = warp_markers.begin();
-
             double p1, b1, p2, b2;
+
+            auto it = warp_markers.begin();
 
             p1 = it->first;
             b1 = it->second;
@@ -74,6 +85,7 @@ class AbletonClipInfo {
             double x = (beat - b1) / (b2 - b1);
 
             seconds = p1 + x * (p2 - p1);
+
             return;
         }
 
