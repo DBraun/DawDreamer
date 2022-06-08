@@ -103,6 +103,8 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
   N = int(duration * sr) # Number of samples 
   return np.sin(np.pi*2.*freq*np.arange(N)/sr)
 
+DURATION = 10 # How many seconds we want to render.
+
 # Make an engine. We'll only need one.
 engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 engine.set_bpm(120.)  # default is 120 beats per minute.
@@ -111,14 +113,13 @@ engine.set_bpm(120.)  # default is 120 beats per minute.
 # with a fixed PPQN (Pulses Per Quarter Note).
 # If we choose ppqn=960 and the numpy array abruptly changes values every 960 samples,
 # the tempo will abruptly change "on the beat".
-bpm_automation = 120.+60.*make_sine(1./2., duration*10.)
+bpm_automation = make_sine(1./2., DURATION, sr=960)
+bpm_automation = 120.+30*(bpm_automation > 0).astype(np.float32)
 engine.set_bpm(bpm_automation, ppqn=960)
 
-DURATION = 10 # How many seconds we want to render.
-
 # Load audio into a numpy array shaped (Number Channels, Number Samples)
-vocals = load_audio_file(VOCALS_PATH, duration=10.)
-piano = load_audio_file(PIANO_PATH, duration=10.)
+vocals = load_audio_file(VOCALS_PATH, duration=DURATION)
+piano = load_audio_file(PIANO_PATH, duration=DURATION)
 
 # Make a processor and give it the name "my_synth", which we use later.
 synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
@@ -140,7 +141,7 @@ print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (oscillator A's 
 # Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
 # We can simply set a constant value.
 synth.set_parameter(1, 0.1234)
-# The Plugin Processor can set automation with data at audio rate.
+# The Plugin Processor can set automation with data at audio rate
 synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
 
 # It's also possible to set automation in alignment with the tempo.
@@ -180,10 +181,10 @@ ambisonics_encoder.set_bus(1, 9)
 # We can make basic signal processors such as filters and automate their parameters.
 filter_processor = engine.make_filter_processor("filter", "high", 7000.0, .5, 1.)
 filter_processor.freq = 7123.  # Some parameters can be get/set like this.
-freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 w/ amp 5000.
-filter_processor.set_automation("freq", freq_automation) # argument is single channel numpy array.
-freq_automation = filter_processor.get_automation("freq") # Get automation of most processor parameters.
-filter_processor.record = True  # This allows us to access the filter processor's audio after a render.
+freq_automation = make_sine(.5, DURATION)*5000. + 7000. # 0.5 Hz sine wave centered at 7000 w/ amp 5000
+filter_processor.set_automation("freq", freq_automation) # Argument is single channel numpy array
+freq_automation = filter_processor.get_automation("freq") # Get automation of most processor parameters
+filter_processor.record = True  # This allows us to access the filter processor's audio after a render
 
 # A graph is a meaningfully ordered list of tuples.
 # In each tuple, the first item is an audio processor.
@@ -203,13 +204,13 @@ graph = [
 engine.load_graph(graph)
 
 # Two ways of rendering:
-engine.render(DURATION)  # Render 10 seconds audio.
+engine.render(DURATION)  # Render DURATION seconds of audio.
 # engine.render(8., beats=True)  # Render 8 beats of seconds based on the engine's BPM.
 
 # Return the audio from the graph's last processor, even if its recording wasn't enabled.
 # The shape will be numpy.ndarray shaped (chans, samples)
 audio = engine.get_audio()  
-wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose()) # don't forget to transpose!
+wavfile.write('my_song.wav', SAMPLE_RATE, audio.transpose()) # Don't forget to transpose!
 
 # You can get the audio of any processor whose recording was enabled.
 filtered_audio = filter_processor.get_audio()
@@ -365,7 +366,7 @@ engine.load_graph(graph)
 ```
 
 The `set_clip_file` method will set several properties:
-* `.warp_markers` (np.array [N, 2]) : List of pairs of (time in samples, time in beats)
+* `.warp_markers` (np.array [N, 2]) : List of pairs of (time in seconds, time in beats)
 * `.start_marker` (float) : Start marker position in beats relative to 1.1.1
 * `.end_marker` (float) : End marker position in beats relative to 1.1.1
 * `.loop_start` (float) : Loop start position in beats relative to 1.1.1
