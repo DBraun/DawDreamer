@@ -81,7 +81,10 @@ PYBIND11_MODULE(dawdreamer, m)
         .doc() = "The Playback Processor can play audio data provided as an argument.";
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-    py::class_<PlaybackWarpProcessor, ProcessorBase>(m, "PlaybackWarpProcessor")
+
+    py::class_<PlaybackWarpProcessor, ProcessorBase> playbackWarpProcessor(m, "PlaybackWarpProcessor");
+
+    playbackWarpProcessor
         .def_property("time_ratio", &PlaybackWarpProcessor::getTimeRatio, &PlaybackWarpProcessor::setTimeRatio,
             "The time ratio has an effect if an Ableton ASD file hasn't been loaded or if `warp_on` is false. A value of 2.0 for the time ratio will \
 play the audio in double the amount of time, so it will sound slowed down.")
@@ -96,6 +99,8 @@ play the audio in double the amount of time, so it will sound slowed down.")
         .def("reset_warp_markers", &PlaybackWarpProcessor::resetWarpMarkers, arg("bpm"), "Reset the warp markers with a BPM.")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"), "Load an Ableton Live file with an \".asd\" extension")
         .def("set_data", &PlaybackWarpProcessor::setData, arg("data"), kw_only(), arg("sr")=0,  "Set the audio as a numpy array shaped (Channels, Samples) with an optional `sr` kwarg for the sample rate of the data.")
+        .def("set_options", &PlaybackWarpProcessor::setRubberBandOptions, arg("config"), "Config Rubber Band's stretcher with an enum option.")
+        .def("reset_options", &PlaybackWarpProcessor::defaultRubberBandOptions, "Set Rubber Band's stretcher's options to DawDreamer's default.")
         .def("set_clip_positions", &PlaybackWarpProcessor::setClipPositions, arg("clip_positions"), R"pbdoc(
     Set one or more positions at which the clip should play.
 
@@ -110,6 +115,42 @@ play the audio in double the amount of time, so it will sound slowed down.")
     None 
 )pbdoc").doc() = "The Playback Warp Processor can play audio data while time-stretching and pitch-shifting it thanks to the Rubberband library \
 (https://github.com/breakfastquay/rubberband). This processor can load Ableton Live \".asd\" files to do beat-matching.";
+
+#include "rubberband/RubberBandStretcher.h"
+    using namespace RubberBand;
+
+    py::enum_<RubberBandStretcher::Option>(playbackWarpProcessor, "option", py::arithmetic{})
+        // these four below are intentionally excluded because we always use real-time mode (unintuitively)
+        //.value("OptionProcessOffline", RubberBandStretcher::OptionProcessOffline)
+        //.value("OptionProcessRealTime", RubberBandStretcher::OptionProcessRealTime)
+        //.value("OptionStretchElastic", RubberBandStretcher::OptionStretchElastic)
+        //.value("OptionStretchPrecise", RubberBandStretcher::OptionStretchPrecise)
+        .value("OptionTransientsCrisp", RubberBandStretcher::OptionTransientsCrisp)
+        .value("OptionTransientsMixed", RubberBandStretcher::OptionTransientsMixed)
+        .value("OptionTransientsSmooth", RubberBandStretcher::OptionTransientsSmooth)
+        .value("OptionDetectorCompound", RubberBandStretcher::OptionDetectorCompound)
+        .value("OptionDetectorPercussive", RubberBandStretcher::OptionDetectorPercussive)
+        .value("OptionDetectorSoft", RubberBandStretcher::OptionDetectorSoft)
+        .value("OptionPhaseLaminar", RubberBandStretcher::OptionPhaseLaminar)
+        .value("OptionPhaseIndependent", RubberBandStretcher::OptionPhaseIndependent)
+        // these three below are intentionally excluded because we always OptionThreadingNever
+        //.value("OptionThreadingAuto", RubberBandStretcher::OptionThreadingAuto)
+        //.value("OptionThreadingNever", RubberBandStretcher::OptionThreadingNever)
+        //.value("OptionThreadingAlways", RubberBandStretcher::OptionThreadingAlways)
+        .value("OptionWindowStandard", RubberBandStretcher::OptionWindowStandard)
+        .value("OptionWindowShort", RubberBandStretcher::OptionWindowShort)
+        .value("OptionWindowLong", RubberBandStretcher::OptionWindowLong)
+        .value("OptionSmoothingOff", RubberBandStretcher::OptionSmoothingOff)
+        .value("OptionSmoothingOn", RubberBandStretcher::OptionSmoothingOn)
+        .value("OptionFormantShifted", RubberBandStretcher::OptionFormantShifted)
+        .value("OptionFormantPreserved", RubberBandStretcher::OptionFormantPreserved)
+        .value("OptionPitchHighSpeed", RubberBandStretcher::OptionPitchHighSpeed)
+        .value("OptionPitchHighQuality", RubberBandStretcher::OptionPitchHighQuality)
+        .value("OptionPitchHighConsistency", RubberBandStretcher::OptionPitchHighConsistency)
+        .value("OptionChannelsApart", RubberBandStretcher::OptionChannelsApart)
+        .value("OptionChannelsTogether", RubberBandStretcher::OptionChannelsTogether)
+        .def("__xor__", [](RubberBandStretcher::Option e1, RubberBandStretcher::Option other) { return int(e1) | int(other); });
+
 #endif
 
     py::class_<PannerProcessor, ProcessorBase>(m, "PannerProcessor")
@@ -280,4 +321,5 @@ Note that note-ons and note-offs are counted separately.")
             arg("name"), arg("rule") = "linear", arg("pan") = 0.f, "Make a Panner Processor")
         .def("make_compressor_processor", &RenderEngineWrapper::makeCompressorProcessor, returnPolicy,
             arg("name"), arg("threshold") = 0.f, arg("ratio") = 2.f, arg("attack") = 2.0f, arg("release") = 50.f, "Make a Compressor Processor");
+
 }

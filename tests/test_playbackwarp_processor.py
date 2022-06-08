@@ -53,6 +53,16 @@ def test_playbackwarp_processor1(buffer_size: int):
 
 	assert (drums.warp_markers == warp_markers).all()
 
+	# test the RubberBand option
+	rb_option = daw.PlaybackWarpProcessor.option
+	rb_option.__members__ # just to make sure it works.
+	drums.reset_options() # just to make sure it works.
+	# set_options will totally replace anything previously done.
+	drums.set_options(
+		rb_option.OptionTransientsMixed |
+		rb_option.OptionChannelsApart
+	)
+
 	graph = [
 	    (drums, []),
 	    (other, []),

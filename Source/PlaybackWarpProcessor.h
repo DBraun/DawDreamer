@@ -46,6 +46,8 @@ public:
     void setStartMarker(double startMarker) { m_clipInfo.start_marker = startMarker; }
     double getEndMarker() { return m_clipInfo.end_marker; }
     void setEndMarker(double endMarker) { m_clipInfo.end_marker = endMarker;}
+    void setRubberBandOptions(int options);
+    void defaultRubberBandOptions();
 
     py::array_t<float> getWarpMarkers();
 
@@ -95,6 +97,7 @@ private:
     void setupRubberband();
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    int m_rubberbandConfig = 0;
 };
 
 #endif

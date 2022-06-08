@@ -20,6 +20,7 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vec
     }
 
     m_sample_rate = sr;
+    defaultRubberBandOptions();
     init();
     resetWarpMarkers(120.);
 }
@@ -28,6 +29,7 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::arra
 {
     m_sample_rate = sr;
     setData(input, data_sr);
+    defaultRubberBandOptions();
     init();
     resetWarpMarkers(120.);
 }
@@ -370,23 +372,31 @@ PlaybackWarpProcessor::loadAbletonClipInfo(const char* filepath) {
 }
 
 void
-PlaybackWarpProcessor::setupRubberband() {
-    // Note that we call this instead of calling m_rbstretcher->reset() because
-    // that method doesn't seem to work correctly.
-    // It's better to just create a whole new stretcher object.
+PlaybackWarpProcessor::setRubberBandOptions(int options) {
+    using namespace RubberBand;
+
+    // these settings are non-negotiable!
+    options |= RubberBandStretcher::OptionProcessRealTime;
+    options |= RubberBandStretcher::OptionStretchPrecise;
+    options |= RubberBandStretcher::OptionThreadingNever;
+
+    m_rubberbandConfig = options;
+}
+
+void PlaybackWarpProcessor::defaultRubberBandOptions() {
     using namespace RubberBand;
 
     RubberBandStretcher::Options options = 0;
 
     //options |= RubberBandStretcher::OptionProcessOffline;
-    options |= RubberBandStretcher::OptionProcessRealTime;  // NOT the default
+    options |= RubberBandStretcher::OptionProcessRealTime;
 
-    //options |= RubberBandStretcher::OptionStretchElastic;
-    options |= RubberBandStretcher::OptionStretchPrecise;  // NOT the default
+    options |= RubberBandStretcher::OptionStretchElastic;
+    //options |= RubberBandStretcher::OptionStretchPrecise;
 
-    //options |= RubberBandStretcher::OptionTransientsCrisp;
+    options |= RubberBandStretcher::OptionTransientsCrisp;
     //options |= RubberBandStretcher::OptionTransientsMixed;
-    options |= RubberBandStretcher::OptionTransientsSmooth;  // NOT the default
+    //options |= RubberBandStretcher::OptionTransientsSmooth;
 
     options |= RubberBandStretcher::OptionDetectorCompound;
     //options |= RubberBandStretcher::OptionDetectorPercussive;
@@ -396,7 +406,7 @@ PlaybackWarpProcessor::setupRubberband() {
     //options |= RubberBandStretcher::OptionPhaseIndependent;
 
     //options |= RubberBandStretcher::OptionThreadingAuto;
-    options |= RubberBandStretcher::OptionThreadingNever;  // NOT the default
+    options |= RubberBandStretcher::OptionThreadingNever;
     //options |= RubberBandStretcher::OptionThreadingAlways;
 
     options |= RubberBandStretcher::OptionWindowStandard;
@@ -410,16 +420,25 @@ PlaybackWarpProcessor::setupRubberband() {
     //options |= RubberBandStretcher::OptionFormantPreserved;
 
     //options |= RubberBandStretcher::OptionPitchHighSpeed;
-    options |= RubberBandStretcher::OptionPitchHighQuality;  // NOT the default
+    options |= RubberBandStretcher::OptionPitchHighQuality;  // NOT the default, so remember to pass this when doing set_options in Python
     //options |= RubberBandStretcher::OptionPitchHighConsistency;
 
-    //options |= RubberBandStretcher::OptionChannelsApart;
-    options |= RubberBandStretcher::OptionChannelsTogether;  // NOT the default
+    options |= RubberBandStretcher::OptionChannelsApart;
+    //options |= RubberBandStretcher::OptionChannelsTogether;
+
+    this->setRubberBandOptions(options);
+}
+
+void
+PlaybackWarpProcessor::setupRubberband() {
+    // Note that we call this instead of calling m_rbstretcher->reset() because
+    // that method doesn't seem to work correctly.
+    // It's better to just create a whole new stretcher object.
 
     m_rbstretcher = std::make_unique<RubberBand::RubberBandStretcher>(
         m_sample_rate,
         m_numChannels,
-        options,
+        m_rubberbandConfig,
         1.,
         1.);
 }
