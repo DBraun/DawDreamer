@@ -266,6 +266,7 @@ def test_plugin_upright_piano():
     [
     "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
     "C:/VSTPlugIns/LABS (64 Bit).dll",
+    "C:/VSTPlugIns/LABS (64 Bit).vst3",
     "C:/VSTPlugIns/Kontakt.dll",
     # "C:/VSTPlugIns/Kontakt.vst3",  # not working
     ]

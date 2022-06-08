@@ -20,8 +20,8 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vec
     }
 
     m_sample_rate = sr;
-
     init();
+    resetWarpMarkers(120.);
 }
 
 PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, double data_sr) : ProcessorBase{ createParameterLayout, newUniqueName }
@@ -29,6 +29,7 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::arra
     m_sample_rate = sr;
     setData(input, data_sr);
     init();
+    resetWarpMarkers(120.);
 }
 
 void
@@ -43,9 +44,9 @@ PlaybackWarpProcessor::init() {
 void
 PlaybackWarpProcessor::setClipPositionsDefault() {
 
-    std::vector<std::tuple<float, float, float>> positions;
+    std::vector<std::tuple<double, double, double>> positions;
 
-    positions.push_back(std::tuple<float, float, float>(0.f, 65536.f, 0.f));
+    positions.push_back(std::tuple<double, double, double>(0.f, std::numeric_limits<double>::max(), 0.));
 
     setClipPositions(positions);
 }
@@ -86,12 +87,19 @@ PlaybackWarpProcessor::getWarpMarkers() {
 
 void
 PlaybackWarpProcessor::resetWarpMarkers(double bpm) {
+
+    if (bpm <= 0) {
+        throw std::runtime_error("When resetting warp markers, the BPM must be greater than zero.");
+    }
+
     m_clipInfo.warp_markers.clear();
 
     m_clipInfo.warp_markers.push_back(std::make_pair(0, 0));
-    double numSamples = 128;
-    double beats = bpm / (60. * numSamples / myPlaybackDataSR);
-    m_clipInfo.warp_markers.push_back(std::make_pair(numSamples, beats));
+    double beats = 1. / 32.;
+    double durSeconds = beats *(60. / bpm);
+    m_clipInfo.warp_markers.push_back(std::make_pair(durSeconds, beats));
+
+    m_clipInfo.end_marker = m_clipInfo.loop_end = m_clipInfo.hidden_loop_end = (bpm/60.) * (myPlaybackData.getNumSamples() / myPlaybackDataSR);
 }
 
 void
@@ -118,7 +126,7 @@ PlaybackWarpProcessor::setWarpMarkers(py::array_t<float, py::array::c_style | py
 
     double beat, new_beat;
     double pos, new_pos;
-    beat = new_beat = pos = new_pos = -999999.;
+    beat = new_beat = pos = new_pos = std::numeric_limits<float>::lowest();
 
     float* input_ptr = (float*)input.data();
 
@@ -142,7 +150,7 @@ PlaybackWarpProcessor::setWarpMarkers(py::array_t<float, py::array::c_style | py
 
 
 bool
-PlaybackWarpProcessor::setClipPositions(std::vector<std::tuple<float, float, float>> positions) {
+PlaybackWarpProcessor::setClipPositions(std::vector<std::tuple<double, double, double>> positions) {
 
     // a position is a (clip start, clip end, clip offset)
     // clip start: The position in beats relative to the engine's timeline where the clip starts
@@ -196,7 +204,9 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
         numAvailable = m_rbstretcher->available();
 
         numToRetrieve = std::min(numAvailable, numSamplesNeeded - numWritten);
-        numToRetrieve = std::min(numToRetrieve, (std::uint64_t)(std::ceil((m_currentClip.end_pos - movingPPQ) / (posInfo.bpm) * 60. * m_sample_rate)));
+        if (m_currentClip.end_pos < std::numeric_limits<double>::max()) {
+            numToRetrieve = std::min(numToRetrieve, (std::uint64_t)(std::ceil((m_currentClip.end_pos - movingPPQ) / (posInfo.bpm) * 60. * m_sample_rate)));
+        }
 
         if (numToRetrieve > 0) {
             m_nonInterleavedBuffer.setSize(m_numChannels, numToRetrieve);
@@ -276,6 +286,12 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
                     auto loopSize = m_clipInfo.loop_end - m_clipInfo.loop_start;
                     ppqPosition -= std::ceil((ppqPosition - m_clipInfo.loop_end) / loopSize) * loopSize;
                 }
+
+                int loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, myPlaybackDataSR);
+                if (sampleReadIndex > loop_end_sample) {
+                    int loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, myPlaybackDataSR);
+                    sampleReadIndex = loop_start_sample;
+                }
             }
             
             m_clipInfo.beat_to_seconds(ppqPosition, _, instant_bpm);
@@ -283,14 +299,6 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
         }
         else {
             m_rbstretcher->setTimeRatio(m_time_ratio_if_warp_off * (m_sample_rate / myPlaybackDataSR));
-        }
-
-        if (m_clipInfo.loop_on) {
-            int loop_end_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_end, myPlaybackDataSR);
-            if (sampleReadIndex > loop_end_sample) {
-                int loop_start_sample = m_clipInfo.beat_to_sample(m_clipInfo.loop_start, myPlaybackDataSR);
-                sampleReadIndex = loop_start_sample;
-            }
         }
 
         m_nonInterleavedBuffer.setSize(m_numChannels, 1);

@@ -53,7 +53,7 @@ public:
 
     void setWarpMarkers(py::array_t<float, py::array::c_style | py::array::forcecast> input);
 
-    bool setClipPositions(std::vector<std::tuple<float, float, float>> positions);
+    bool setClipPositions(std::vector<std::tuple<double, double, double>> positions);
 
     bool loadAbletonClipInfo(const char* filepath);
 
@@ -66,9 +66,9 @@ private:
     class Clip {
         public:
             Clip(double startPos, double endPos, double startMarkerOffset) : start_pos{ startPos }, end_pos{ endPos }, start_marker_offset{ startMarkerOffset } {};
-            Clip() : start_pos { 0. }, end_pos{ 4. }, start_marker_offset{ 0. } {};
+            Clip() : start_pos { 0. }, end_pos{ std::numeric_limits<double>::max() }, start_marker_offset{ 0. } {};
             double start_pos = 0.;
-            double end_pos = 4.;
+            double end_pos = std::numeric_limits<double>::max();
             double start_marker_offset = 0.;
         };
 
