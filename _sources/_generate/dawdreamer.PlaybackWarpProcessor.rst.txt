@@ -19,11 +19,13 @@
       ~PlaybackWarpProcessor.get_name
       ~PlaybackWarpProcessor.get_num_input_channels
       ~PlaybackWarpProcessor.get_num_output_channels
+      ~PlaybackWarpProcessor.reset_options
       ~PlaybackWarpProcessor.reset_warp_markers
       ~PlaybackWarpProcessor.set_automation
       ~PlaybackWarpProcessor.set_clip_file
       ~PlaybackWarpProcessor.set_clip_positions
       ~PlaybackWarpProcessor.set_data
+      ~PlaybackWarpProcessor.set_options
    
    
 
