@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.8"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.9"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
@@ -250,11 +250,11 @@
                xcodeValidArchs="arm64,x86_64">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer.so"
-                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
+                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug&#10;../../thirdparty/libsamplerate/build_debug/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer.so"
-                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;&#10;"
+                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
       </CONFIGURATIONS>
@@ -281,10 +281,10 @@
                 externalLibraries="samplerate&#10;faust">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
-                       headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
+                       headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libfaust/ubuntu-aarch64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
-                       headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src/kissfft;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
+                       headerPath="../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libfaust/ubuntu-aarch64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -306,13 +306,13 @@
     </LINUX_MAKE>
     <VS2019 targetFolder="Builds/VisualStudio2019" vst3Folder="VST3_SDK"
             vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
-            extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;HAVE_KISSFFT"
+            extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;USE_BUILTIN_FFT"
             externalLibraries="faust.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\faust\compiler\utils;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
+        <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\faust\compiler\utils;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
                        postbuildCommand="copy &quot;x64\Debug\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;&#10;copy &quot;..\..\thirdparty\libfaust\win-x64\Debug\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;"
                        libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win-x64\Debug\lib;&#10;..\..\thirdparty\libsamplerate\build_debug\src\Debug;"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\faust\compiler\utils;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src\kissfft;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
+        <CONFIGURATION isDebug="0" name="Release" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;..\..\thirdparty\faust\compiler;&#10;..\..\thirdparty\faust\compiler\utils;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
                        libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win-x64\Release\lib;&#10;..\..\thirdparty\libsamplerate\build_release\src\Release;"
                        postbuildCommand="copy &quot;x64\Release\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;&#10;copy &quot;..\..\thirdparty\libfaust\win-x64\Release\bin\faust.dll&quot; &quot;$(pythonLocation)\faust.dll&quot;;"
                        targetName="dawdreamer"/>
