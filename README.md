@@ -88,6 +88,7 @@ import librosa
 
 SAMPLE_RATE = 44100
 BUFFER_SIZE = 128 # Parameters will undergo automation at this buffer/block size.
+PPQN = 960 # Pulses per quarter note.
 SYNTH_PLUGIN = "C:/path/to/synth.dll"  # extensions: .dll, .vst3, .vst, .component
 REVERB_PLUGIN = "C:/path/to/reverb.dll"  # extensions: .dll, .vst3, .vst, .component
 VOCALS_PATH = "C:/path/to/vocals.wav"
@@ -113,15 +114,15 @@ engine.set_bpm(120.)  # default is 120 beats per minute.
 # with a fixed PPQN (Pulses Per Quarter Note).
 # If we choose ppqn=960 and the numpy array abruptly changes values every 960 samples,
 # the tempo will abruptly change "on the beat".
-bpm_automation = make_sine(1./2., DURATION, sr=960)
+bpm_automation = make_sine(1./2., DURATION, sr=PPQN)
 bpm_automation = 120.+30*(bpm_automation > 0).astype(np.float32)
-engine.set_bpm(bpm_automation, ppqn=960)
+engine.set_bpm(bpm_automation, ppqn=PPQN)
 
 # Load audio into a numpy array shaped (Number Channels, Number Samples)
 vocals = load_audio_file(VOCALS_PATH, duration=DURATION)
 piano = load_audio_file(PIANO_PATH, duration=DURATION)
 
-# Make a processor and give it the name "my_synth", which we use later.
+# Make a processor and give it the unique name "my_synth", which we use later.
 synth = engine.make_plugin_processor("my_synth", SYNTH_PLUGIN)
 assert synth.get_name() == "my_synth"
 
@@ -145,12 +146,12 @@ synth.set_parameter(1, 0.1234)
 synth.set_automation(1, 0.5+.5*make_sine(.5, DURATION)) # 0.5 Hz sine wave remapped to [0, 1]
 
 # It's also possible to set automation in alignment with the tempo.
-# Let's make a numpy array whose PPQN is 960.
+# Let's make a numpy array whose "sample rate" is PPQN. Suppose PPQN is 960.
 # Each 960 values in the array correspond to a quarter note of time progressing.
 # Let's make a parameter alternate between 0.25 and 0.75 four times per beat.
-automation = make_sine(4, DURATION, sr=960)
+automation = make_sine(4, DURATION, sr=PPQN)
 automation = 0.25+.5*(automation > 0).astype(np.float32)
-synth.set_automation(1, automation, ppqn=960)
+synth.set_automation(1, automation, ppqn=PPQN)
 
 # Load a MIDI file and convert the timing to absolute seconds (beats=False).
 # Changes to the Render Engine's BPM won't affect the timing. The kwargs below are defaults.
@@ -188,9 +189,8 @@ filter_processor.record = True  # This allows us to access the filter processor'
 
 # A graph is a meaningfully ordered list of tuples.
 # In each tuple, the first item is an audio processor.
-# The second item is this audio processor's list of input processors.
-# You must create each processor with a unique name
-# and refer to these unique names in the lists of inputs.
+# The second item is this audio processor's list of input processors by their unique names.
+# Note that you can use either hard-coded strings or `get_name()` to make this list.
 # The audio from the last tuple's processor will be accessed automatically later by engine.get_audio()
 graph = [
   (synth, []),  # synth takes no inputs, so we give an empty list.
@@ -205,7 +205,7 @@ engine.load_graph(graph)
 
 # Two ways of rendering:
 engine.render(DURATION)  # Render DURATION seconds of audio.
-# engine.render(8., beats=True)  # Render 8 beats of seconds based on the engine's BPM.
+# engine.render(8., beats=True)  # Render 8 beats of audio based on the engine's BPM.
 
 # Return the audio from the graph's last processor, even if its recording wasn't enabled.
 # The shape will be numpy.ndarray shaped (chans, samples)
@@ -219,7 +219,7 @@ filtered_audio = engine.get_audio("filter")
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")
-engine.render(DURATION)  # render audio again!
+engine.render(DURATION)  # Render audio again!
 ```
 
 ## FAUST
