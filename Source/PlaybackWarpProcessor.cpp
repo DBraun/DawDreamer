@@ -391,8 +391,8 @@ void PlaybackWarpProcessor::defaultRubberBandOptions() {
     //options |= RubberBandStretcher::OptionProcessOffline;
     options |= RubberBandStretcher::OptionProcessRealTime;
 
-    options |= RubberBandStretcher::OptionStretchElastic;
-    //options |= RubberBandStretcher::OptionStretchPrecise;
+    //options |= RubberBandStretcher::OptionStretchElastic;
+    options |= RubberBandStretcher::OptionStretchPrecise;
 
     options |= RubberBandStretcher::OptionTransientsCrisp;
     //options |= RubberBandStretcher::OptionTransientsMixed;
