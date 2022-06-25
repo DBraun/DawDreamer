@@ -83,6 +83,8 @@ public:
     void loadStateInformation(std::string filepath);
 
     void saveStateInformation(std::string filepath);
+        
+    void saveMIDI(std::string& savePath);
 
 private:
 
@@ -96,6 +98,7 @@ private:
     MidiBuffer myMidiBufferSec;
 
     MidiBuffer myRenderMidiBuffer;
+    MidiMessageSequence myRecordedMidiSequence; // for fetching by user later.
 
     MidiMessage myMidiMessageQN;
     MidiMessage myMidiMessageSec;
@@ -111,8 +114,8 @@ private:
 
     bool myMidiEventsDoRemainQN = false;
     bool myMidiEventsDoRemainSec = false;
-
-    void automateParameters();
+    
+    void automateParameters(int numParameters);
 
 protected:
 

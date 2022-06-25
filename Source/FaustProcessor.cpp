@@ -70,10 +70,11 @@ FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-	automateParameters();
-
-	AudioPlayHead::CurrentPositionInfo posInfo;
-	getPlayHead()->getCurrentPosition(posInfo);
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
+    
+    automateParameters(buffer.getNumSamples());
+    recordAutomation(posInfo, buffer.getNumSamples());
 
 	if (!m_isCompiled) {
 		throw std::runtime_error("Faust Processor called processBlock but it wasn't compiled.");
@@ -104,6 +105,8 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			{
 				myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
 				while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
+                    
+                    myRecordedMidiSequence.addEvent(myMidiMessageSec, posInfo.timeInSamples);
 
 					if (myMidiMessageSec.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
@@ -120,6 +123,8 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			{
 				myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + 1;
 				while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
+                    
+                    myRecordedMidiSequence.addEvent(myMidiMessageQN, posInfo.timeInSamples);
 
 					if (myMidiMessageQN.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
@@ -173,7 +178,7 @@ bool hasStart(std::string const& fullString, std::string const& start) {
 }
 
 void
-FaustProcessor::automateParameters() {
+FaustProcessor::automateParameters(int numSamples) {
 
 	AudioPlayHead::CurrentPositionInfo posInfo;
 	getPlayHead()->getCurrentPosition(posInfo);
@@ -189,7 +194,7 @@ FaustProcessor::automateParameters() {
 		int faustIndex = m_map_juceIndex_to_faustIndex[i];
 
 		if (theParameter) {
-			m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
+            m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
 		}
 		else {
 			auto theName = this->getParameterName(i);
@@ -234,6 +239,10 @@ FaustProcessor::reset()
 	if (!m_isCompiled) {
 		this->compile();
 	}
+    
+    myRecordedMidiSequence.clear();
+    
+    ProcessorBase::reset();
 }
 
 void
@@ -760,6 +769,21 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	}
 
 	return true;
+}
+
+void FaustProcessor::saveMIDI(std::string& savePath) {
+    
+    MidiFile file;
+    
+    file.setTicksPerQuarterNote( this->PPQN );
+    
+    File myFile(savePath);
+    
+    juce::FileOutputStream stream( myFile );
+        
+    file.addTrack( myRecordedMidiSequence );
+    
+    file.writeTo( stream );
 }
 
 #ifdef WIN32

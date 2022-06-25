@@ -98,7 +98,7 @@ RenderEngine::connectGraph() {
                 
         processor->setPlayHead(this);
         processor->prepareToPlay(mySampleRate, myBufferSize);
-        processor->automateParameters();
+        processor->automateParameters(1);  // todo: need to do this?
         int numOutputAudioChans = processor->getMainBusNumOutputChannels();
         int expectedInputChannels = processor->getMainBusNumInputChannels();
         if (numInputAudioChans > expectedInputChannels) {
@@ -210,9 +210,6 @@ RenderEngine::render(const double renderLength, bool isBeats) {
         }
     }
 
-    myMainProcessorGraph->reset();
-    myMainProcessorGraph->setPlayHead(this);
-
     myCurrentPositionInfo.resetToDefault();
     myCurrentPositionInfo.ppqPosition = 0.;
     myCurrentPositionInfo.isPlaying = true;
@@ -251,6 +248,11 @@ RenderEngine::render(const double renderLength, bool isBeats) {
             throw std::runtime_error("Unable to cast to ProcessorBase during render.");
         }
     }
+    
+    // note that it's important for setRecorderLength to be called before reset,
+    // because setRecorderLength sets `m_expectedRecordNumSamples` which is used in reset.
+    myMainProcessorGraph->reset();
+    myMainProcessorGraph->setPlayHead(this);
 
     MidiBuffer renderMidiBuffer;
 

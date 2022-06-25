@@ -42,6 +42,7 @@ public:
     reset()
     {
         myOscillator.reset();
+        ProcessorBase::reset();
     }
 
     const juce::String getName() const { return "OscillatorProcessor"; }

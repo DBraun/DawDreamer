@@ -29,7 +29,11 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
 
-        automateParameters();
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+        
+        automateParameters(buffer.getNumSamples());
+        recordAutomation(posInfo, buffer.getNumSamples());
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -37,7 +41,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters() {
+    void automateParameters(int numSamples) {
 
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
@@ -51,6 +55,7 @@ public:
 
     void reset() {
         myCompressor.reset();
+        ProcessorBase::reset();
     };
 
     const juce::String getName() { return "CompressorProcessor"; };

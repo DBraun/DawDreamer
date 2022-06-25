@@ -48,6 +48,7 @@ public:
     }
 
     void reset() {
+        ProcessorBase::reset();
     };
 
     const juce::String getName() { return "AddProcessor"; };

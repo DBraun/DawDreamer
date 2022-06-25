@@ -86,6 +86,9 @@ public:
         myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
         myRenderMidiBuffer.clear();
+        myRecordedMidiSequence.clear();
+        
+        ProcessorBase::reset();
     }
 
     void
@@ -94,7 +97,8 @@ public:
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
 
-        automateParameters();
+        automateParameters(buffer.getNumSamples());
+        recordAutomation(posInfo, buffer.getNumSamples());
 
         buffer.clear(); // todo: why did this become necessary?
         midiBuffer.clear();
@@ -106,6 +110,7 @@ public:
 
             myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
             while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
+                myRecordedMidiSequence.addEvent(myMidiMessageSec, posInfo.timeInSamples);
                 myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
                 myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
                 myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
@@ -118,6 +123,7 @@ public:
 
             myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
+                myRecordedMidiSequence.addEvent(myMidiMessageQN, posInfo.timeInSamples);
                 myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
                 myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
                 myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
@@ -250,6 +256,22 @@ public:
 
         return true;
     }
+    
+    void saveMIDI(std::string& savePath) {
+
+        MidiFile file;
+        
+        file.setTicksPerQuarterNote( this->PPQN );
+        
+        File myFile(savePath);
+        
+        juce::FileOutputStream stream( myFile );
+            
+        file.addTrack( myRecordedMidiSequence );
+        
+        file.writeTo( stream );
+        
+    }
 
     std::string
     wrapperGetParameterName(int parameter)
@@ -319,7 +341,7 @@ public:
     }
 
     void
-    automateParameters() {
+    automateParameters(int numParameters) {
 
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
@@ -365,4 +387,6 @@ private:
 
     bool myMidiEventsDoRemainQN = false;
     bool myMidiEventsDoRemainSec = false;
+    
+    MidiMessageSequence myRecordedMidiSequence;
 };

@@ -23,14 +23,18 @@ public:
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
-        automateParameters(); // do this to give a valid state to the filter.
+        automateParameters(1); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock) };
         myReverb.prepare(spec);
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
 
-        automateParameters();
+        AudioPlayHead::CurrentPositionInfo posInfo;
+        getPlayHead()->getCurrentPosition(posInfo);
+        
+        automateParameters(buffer.getNumSamples());
+        recordAutomation(posInfo, buffer.getNumSamples());
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -38,7 +42,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters() {
+    void automateParameters(int numSamples) {
 
         AudioPlayHead::CurrentPositionInfo posInfo;
         getPlayHead()->getCurrentPosition(posInfo);
@@ -54,6 +58,7 @@ public:
 
     void reset() {
         myReverb.reset();
+        ProcessorBase::reset();
     };
 
     const juce::String getName() { return "ReverbProcessor"; };

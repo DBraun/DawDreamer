@@ -168,12 +168,14 @@ public:
     }
 
     std::map<std::string, std::vector<juce::AudioSampleBuffer>> m_SoundfileMap;
+    
+    void saveMIDI(std::string& savePath);
 
 private:
 
     double mySampleRate;
 
-    void automateParameters();
+    void automateParameters(int numSamples);
 
     std::string getPathToFaustLibraries();
 
@@ -204,6 +206,8 @@ protected:
 
     MidiBuffer myMidiBufferQN;
     MidiBuffer myMidiBufferSec;
+    
+    MidiMessageSequence myRecordedMidiSequence; // for fetching by user later.
 
     MidiMessage myMidiMessageQN;
     MidiMessage myMidiMessageSec;

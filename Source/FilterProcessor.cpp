@@ -24,7 +24,7 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     mySampleRate = sampleRate;
     mySamplesPerBlock = samplesPerBlock;
 
-    automateParameters();  // this gives the filters an initial state.
+    automateParameters(1);  // this gives the filters an initial state.
 
     int numChannels = 2;
     juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), static_cast<juce::uint32> (numChannels) };
@@ -34,7 +34,11 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-    automateParameters();
+    AudioPlayHead::CurrentPositionInfo posInfo;
+    getPlayHead()->getCurrentPosition(posInfo);
+    
+    automateParameters(buffer.getNumSamples());
+    recordAutomation(posInfo, buffer.getNumSamples());
 
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
@@ -43,7 +47,7 @@ FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 }
 
 
-void FilterProcessor::automateParameters() {
+void FilterProcessor::automateParameters(int numSamples) {
 
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
@@ -86,6 +90,7 @@ void
 FilterProcessor::reset()
 {
     myFilter.reset();
+    ProcessorBase::reset();
 }
 
 std::string

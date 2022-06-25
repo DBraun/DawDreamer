@@ -51,7 +51,7 @@ private:
     std::string modeToString(FILTER_FilterFormat mode);
     FILTER_FilterFormat stringToMode(std::string s);
 
-    void automateParameters();
+    void automateParameters(int numSamples);
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     {

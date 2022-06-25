@@ -17,7 +17,7 @@ public:
 
     void prepareToPlay(double, int);
 
-    void automateParameters();
+    void automateParameters(int numSamples);
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);
 

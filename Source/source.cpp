@@ -50,7 +50,7 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 )pbdoc")
 .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"), R"pbdoc(
-    Get a parameter's automation as a numpy array.
+    Get a parameter's automation as a numpy array. It should return whatever array was passed previously to `set_automation`, whether it's PPQN-rate data or audio-rate data.
 
     Parameters
     ----------
@@ -66,9 +66,11 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 
 )pbdoc")
+.def("get_automation", &ProcessorBase::getAutomationAll, "Get all of a parameter's automation as a dict of numpy arrays. Before rendering, you should have enabled `record_automation` on the processor. This function uses the engine's BPM automation, if any, to bake the automation data into audio-rate data.")
         .def("get_num_output_channels", &ProcessorBase::getTotalNumOutputChannels, "Get the total number of output channels (2 indicates stereo output).")
         .def("get_num_input_channels", &ProcessorBase::getTotalNumInputChannels, "Get the total number of input channels (2 indicates stereo input).")
         .def_property("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable, "Whether recording of this processor is enabled." )
+        .def_property("record_automation", &ProcessorBase::getRecordAutomationEnable, &ProcessorBase::setRecordAutomationEnable, "Whether recording of this processor's automation is enabled." )
         .def("get_audio", &ProcessorBase::getAudioFrames, "Get the audio data of the processor after a render, assuming recording was enabled.")
         .def("get_name", &ProcessorBase::getUniqueName, "Get the user-defined name of a processor instance.").doc() = R"pbdoc(
     The abstract Processor Base class, which all processors subclass.
@@ -228,6 +230,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("clear_midi", &PluginProcessorWrapper::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &PluginProcessorWrapper::saveMIDI,
+            arg("filepath"), "After rendering, you can save the MIDI to a file.")
         .doc() = "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
@@ -277,6 +281,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &FaustProcessor::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &FaustProcessor::saveMIDI,
+            arg("filepath"), "After rendering, you can save the MIDI to a file.")
         .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 #endif

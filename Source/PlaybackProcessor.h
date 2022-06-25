@@ -46,7 +46,9 @@ public:
     }
 
     void
-    reset() {}
+    reset() {
+        ProcessorBase::reset();
+    }
 
     const juce::String getName() const { return "PlaybackProcessor"; }
 

@@ -219,6 +219,13 @@ filtered_audio = engine.get_audio("filter")
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")
+
+# After rendering, you can fetch PPQN-rate automation that has been baked into audio-rate data.
+all_automation = synth.get_automation()  # a dictionary of all parameters at audio-rate.
+
+# After rendering, you can save to MIDI
+synth.save_midi("my_midi_output.mid")
+
 engine.render(DURATION)  # Render audio again!
 ```
 

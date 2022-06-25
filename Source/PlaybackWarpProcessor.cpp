@@ -59,7 +59,7 @@ PlaybackWarpProcessor::prepareToPlay(double, int) {
 }
 
 void
-PlaybackWarpProcessor::automateParameters() {
+PlaybackWarpProcessor::automateParameters(int numSamples) {
 
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
@@ -176,8 +176,9 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
 {
     AudioPlayHead::CurrentPositionInfo posInfo;
     getPlayHead()->getCurrentPosition(posInfo);
-
-    automateParameters();
+    
+    automateParameters(buffer.getNumSamples());
+    recordAutomation(posInfo, buffer.getNumSamples());
 
     if ((m_clips.size() == 0) || (m_clipIndex >= m_clips.size())) {
         // There are no clips, or we've already passed the last clip.
@@ -342,6 +343,8 @@ PlaybackWarpProcessor::reset() {
             sampleReadIndex = 0;
         }
     }
+    
+    ProcessorBase::reset();
 }
 
 void
