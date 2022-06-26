@@ -86,8 +86,11 @@ public:
         myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
         myRenderMidiBuffer.clear();
+
         myRecordedMidiSequence.clear();
-        
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::timeSignatureMetaEvent(4, 4));
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::tempoMetaEvent(500*1000));
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::midiChannelMetaEvent(1));
         ProcessorBase::reset();
     }
 
@@ -110,7 +113,14 @@ public:
 
             myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
             while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
-                myRecordedMidiSequence.addEvent(myMidiMessageSec, posInfo.timeInSamples);
+                // steps for saving midi to file output
+                auto messageCopy = MidiMessage(myMidiMessageSec);
+                messageCopy.setTimeStamp(myMidiMessagePositionSec*(2400./mySampleRate));
+                if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                    myRecordedMidiSequence.addEvent(messageCopy);
+                }
+
+                // steps for playing MIDI
                 myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
                 myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
                 myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
@@ -123,7 +133,14 @@ public:
 
             myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
-                myRecordedMidiSequence.addEvent(myMidiMessageQN, posInfo.timeInSamples);
+                // steps for saving midi to file output
+                auto messageCopy = MidiMessage(myMidiMessageQN);
+                messageCopy.setTimeStamp((posInfo.timeInSeconds + (myMidiMessagePositionQN-pulseStart)*(60./posInfo.bpm)/PPQN )*(2400.));
+                if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                    myRecordedMidiSequence.addEvent(messageCopy);
+                }
+                
+                // steps for playing MIDI
                 myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
                 myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
                 myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
@@ -261,14 +278,21 @@ public:
 
         MidiFile file;
         
-        file.setTicksPerQuarterNote( this->PPQN );
-        
+        // 30*80 = 2400, so that's why the MIDI messages had their
+        // timestamp set to seconds*2400
+        file.setSmpteTimeFormat(30, 80);
+
         File myFile(savePath);
-        
-        juce::FileOutputStream stream( myFile );
-            
+                        
         file.addTrack( myRecordedMidiSequence );
         
+        juce::FileOutputStream stream( myFile );
+        if (stream.openedOk())
+        {
+            // overwrite existing file.
+            stream.setPosition(0);
+            stream.truncate();
+        }
         file.writeTo( stream );
         
     }

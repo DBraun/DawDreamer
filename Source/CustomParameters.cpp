@@ -46,11 +46,15 @@ float
 AutomateParameter::sample(juce::AudioPlayHead::CurrentPositionInfo& posInfo) {
 
     size_t i;
+    auto numSamples = myAutomation.size();
+    if (numSamples == 0) {
+        throw std::runtime_error("Can't sample parameter with no samples.");
+    }
     if (m_ppqn > 0) {
-        i = std::min(myAutomation.size() - 1, size_t(posInfo.ppqPosition * m_ppqn));
+        i = std::min(numSamples - 1, size_t(posInfo.ppqPosition * m_ppqn));
     }
     else {
-        i = std::min(myAutomation.size() - 1, size_t(posInfo.timeInSamples));
+        i = std::min(numSamples - 1, size_t(posInfo.timeInSamples));
     }
 
     i = std::max((size_t)0, i);

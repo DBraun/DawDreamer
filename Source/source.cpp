@@ -66,7 +66,7 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 
 )pbdoc")
-.def("get_automation", &ProcessorBase::getAutomationAll, "Get all of a parameter's automation as a dict of numpy arrays. Before rendering, you should have enabled `record_automation` on the processor. This function uses the engine's BPM automation, if any, to bake the automation data into audio-rate data.")
+.def("get_automation", &ProcessorBase::getAutomationAll, "After rendering, get all of a parameter's automation as a dict of multi-channel numpy arrays. Before rendering, you should have set `record_automation` to True on the processor. This function uses the engine's BPM automation, if any, to bake the automation data into audio-rate data.")
         .def("get_num_output_channels", &ProcessorBase::getTotalNumOutputChannels, "Get the total number of output channels (2 indicates stereo output).")
         .def("get_num_input_channels", &ProcessorBase::getTotalNumInputChannels, "Get the total number of input channels (2 indicates stereo input).")
         .def_property("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable, "Whether recording of this processor is enabled." )
@@ -203,6 +203,7 @@ but the filter mode cannot under automation.";
 
     auto add_midi_description = "Add a single MIDI note whose note and velocity are integers between 0 and 127. By default, when `beats` is False, the start time and duration are measured in seconds, otherwise beats.";
     auto load_midi_description = "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded. By default, when `beats` is False, notes will be converted to absolute times and will not be affected by the Render Engine's BPM. By default, `clear_previous` is True.";
+    auto save_midi_description = "After rendering, you can save the MIDI to a file using absolute times (SMPTE format).";
 
     py::class_<PluginProcessorWrapper, ProcessorBase>(m, "PluginProcessor")
         .def("can_set_bus", &PluginProcessorWrapper::canApplyBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Return bool for whether this combination of input and output channels can be set.")
@@ -231,7 +232,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
         .def("save_midi", &PluginProcessorWrapper::saveMIDI,
-            arg("filepath"), "After rendering, you can save the MIDI to a file.")
+            arg("filepath"), save_midi_description)
         .doc() = "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
@@ -251,6 +252,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("clear_midi", &SamplerProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &SamplerProcessor::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &SamplerProcessor::saveMIDI,
+            arg("filepath"), save_midi_description)
         .doc() = "The Sampler Processor works like a basic Sampler instrument. It takes a typically short audio sample and can play it back \
 at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff. \
 Unlike a VST, the parameters don't need to be between 0 and 1. For example, you can set an envelope attack parameter to 50 to represent 50 milliseconds.";
@@ -282,7 +285,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("add_midi_note", &FaustProcessor::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
         .def("save_midi", &FaustProcessor::saveMIDI,
-            arg("filepath"), "After rendering, you can save the MIDI to a file.")
+            arg("filepath"), save_midi_description)
         .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 #endif

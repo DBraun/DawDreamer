@@ -106,8 +106,14 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
 				while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
                     
-                    myRecordedMidiSequence.addEvent(myMidiMessageSec, posInfo.timeInSamples);
+                    // steps for saving midi to file output
+                    auto messageCopy = MidiMessage(myMidiMessageSec);
+                    messageCopy.setTimeStamp((posInfo.timeInSamples + i)*(2400./mySampleRate));
+                    if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                        myRecordedMidiSequence.addEvent(messageCopy);
+                    }
 
+                    // steps for playing MIDI
 					if (myMidiMessageSec.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
 					}
@@ -124,8 +130,14 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + 1;
 				while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
                     
-                    myRecordedMidiSequence.addEvent(myMidiMessageQN, posInfo.timeInSamples);
+                    // steps for saving midi to file output
+                    auto messageCopy = MidiMessage(myMidiMessageQN);
+                    messageCopy.setTimeStamp((posInfo.timeInSamples + i)*(2400./mySampleRate));
+                    if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                        myRecordedMidiSequence.addEvent(messageCopy);
+                    }
 
+                    // steps for playing MIDI
 					if (myMidiMessageQN.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
 					}
@@ -193,13 +205,7 @@ FaustProcessor::automateParameters(int numSamples) {
 
 		int faustIndex = m_map_juceIndex_to_faustIndex[i];
 
-		if (theParameter) {
-            m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
-		}
-		else {
-			auto theName = this->getParameterName(i);
-			throw std::runtime_error("Error FaustProcessor::automateParameters: " + theName.toStdString());
-		}
+        m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
 	}
 
 	// If polyphony is enabled and we're grouping voices,
@@ -241,6 +247,9 @@ FaustProcessor::reset()
 	}
     
     myRecordedMidiSequence.clear();
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::timeSignatureMetaEvent(4, 4));
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::tempoMetaEvent(500*1000));
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::midiChannelMetaEvent(1));
     
     ProcessorBase::reset();
 }
@@ -775,14 +784,21 @@ void FaustProcessor::saveMIDI(std::string& savePath) {
     
     MidiFile file;
     
-    file.setTicksPerQuarterNote( this->PPQN );
+    // 30*80 = 2400, so that's why the MIDI messages had their
+    // timestamp set to seconds*2400
+    file.setSmpteTimeFormat(30, 80);
     
     File myFile(savePath);
-    
-    juce::FileOutputStream stream( myFile );
-        
+
     file.addTrack( myRecordedMidiSequence );
     
+    juce::FileOutputStream stream( myFile );
+    if (stream.openedOk())
+    {
+        // overwrite existing file.
+        stream.setPosition(0);
+        stream.truncate();
+    }
     file.writeTo( stream );
 }
 
