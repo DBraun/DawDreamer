@@ -656,6 +656,7 @@
 				F9532586338EB324FB3D0477,
 				D55D5E0344C2869867B93269,
 				AA6FF26CF39EDBD72B8B4B32,
+				070ACC1A4CADB59B3D5E8DFA,
 			);
 			buildRules = (
 			);
@@ -701,6 +702,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		070ACC1A4CADB59B3D5E8DFA /* Post-build script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Post-build script";
+			alwaysOutOfDate = 1;
+			shellPath = /bin/sh;
+			shellScript = "install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib build/Release/dawdreamer.so.dylib ";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D55D5E0344C2869867B93269 = {

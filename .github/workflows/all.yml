@@ -226,9 +226,6 @@ jobs:
           otool -L $pythonLocation/bin/python3
           xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
           mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
-          otool -L Builds/MacOSX/build/Release/dawdreamer.so
-          install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
-          otool -L Builds/MacOSX/build/Release/dawdreamer.so
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -v ."
         CIBW_BUILD: ${{matrix.build}}
