@@ -23,18 +23,18 @@ public:
     }
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
-        automateParameters(1); // do this to give a valid state to the filter.
+        AudioPlayHead::PositionInfo posInfo;
+        automateParameters(posInfo, 1); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock) };
         myReverb.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
 
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
-        
-        automateParameters(buffer.getNumSamples());
-        recordAutomation(posInfo, buffer.getNumSamples());
+        auto posInfo = getPlayHead()->getPosition();
+                
+        automateParameters(*posInfo, buffer.getNumSamples());
+        recordAutomation(*posInfo, buffer.getNumSamples());
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -42,10 +42,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters(int numSamples) {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
         *myRoomSize = getAutomationVal("room_size", posInfo);
         *myDamping = getAutomationVal("damping", posInfo);
@@ -56,27 +53,27 @@ public:
         updateParameters();
     }
 
-    void reset() {
+    void reset() override {
         myReverb.reset();
         ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "ReverbProcessor"; };
+    const juce::String getName() const override { return "ReverbProcessor"; };
 
     void setRoomSize(float roomSize) { setAutomationVal("room_size", roomSize); }
-    float getRoomSize() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("room_size", posInfo); }
+    float getRoomSize() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("room_size", posInfo); }
 
     void setDamping(float damping) { setAutomationVal("damping", damping); }
-    float getDamping() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("damping", posInfo); }
+    float getDamping() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("damping", posInfo); }
 
     void setWetLevel(float wetLevel) { setAutomationVal("wet_level", wetLevel); }
-    float getWetLevel() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
+    float getWetLevel() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
 
     void setDryLevel(float dryLevel) { setAutomationVal("dry_level", dryLevel); }
-    float getDryLevel() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("dry_level", posInfo);  }
+    float getDryLevel() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("dry_level", posInfo);  }
 
     void setWidth(float width) { setAutomationVal("width", width); }
-    float getWidth() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("width", posInfo);  }
+    float getWidth() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("width", posInfo);  }
 
 
 private:

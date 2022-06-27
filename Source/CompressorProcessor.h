@@ -27,13 +27,12 @@ public:
         myCompressor.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
 
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+        auto posInfo = getPlayHead()->getPosition();
         
-        automateParameters(buffer.getNumSamples());
-        recordAutomation(posInfo, buffer.getNumSamples());
+        automateParameters(*posInfo, buffer.getNumSamples());
+        recordAutomation(*posInfo, buffer.getNumSamples());
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -41,10 +40,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters(int numSamples) {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
         *myThreshold = getAutomationVal("threshold", posInfo);
         *myRatio = getAutomationVal("ratio", posInfo);
@@ -53,24 +49,24 @@ public:
         updateParameters();
     }
 
-    void reset() {
+    void reset() override {
         myCompressor.reset();
         ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "CompressorProcessor"; };
+    const juce::String getName() const override { return "CompressorProcessor"; };
 
     void setThreshold(float threshold) { setAutomationVal("threshold", threshold); }
-    float getThreshold() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("threshold", posInfo); }
+    float getThreshold() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("threshold", posInfo); }
 
     void setRatio(float ratio) { setAutomationVal("ratio", ratio); }
-    float getRatio() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("ratio", posInfo); }
+    float getRatio() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("ratio", posInfo); }
 
     void setAttack(float attack) { setAutomationVal("attack", attack); }
-    float getAttack() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("attack", posInfo); }
+    float getAttack() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("attack", posInfo); }
 
     void setRelease(float release) { setAutomationVal("release", release); }
-    float getRelease() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("release", posInfo); }
+    float getRelease() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("release", posInfo); }
 
 
 private:

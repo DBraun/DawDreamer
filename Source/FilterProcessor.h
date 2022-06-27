@@ -20,11 +20,11 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock);
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) override;
 
-    void reset();
+    void reset() override;
 
-    const juce::String getName();
+    const juce::String getName() const override { return "FilterProcessor"; }
 
     void setMode(std::string mode);
     std::string getMode();
@@ -51,7 +51,7 @@ private:
     std::string modeToString(FILTER_FilterFormat mode);
     FILTER_FilterFormat stringToMode(std::string s);
 
-    void automateParameters(int numSamples);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     {

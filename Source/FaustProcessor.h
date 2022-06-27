@@ -52,7 +52,7 @@ public:
 
             total_length += (MAX_SOUNDFILE_PARTS - buffers.size()) * BUFFER_SIZE;
 
-            Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, buffers.size(), false);
+            Soundfile* soundfile = new Soundfile(numChannels, total_length, MAX_CHAN, (int) buffers.size(), false);
 
             // Manually fill in the soundfile:
             // The following code is a modification of SoundfileReader::createSoundfile and SoundfileReader::readFile
@@ -84,7 +84,7 @@ public:
             }
 
             // Complete with empty parts
-            for (int i = buffers.size(); i < MAX_SOUNDFILE_PARTS; i++) {
+            for (auto i = (int) buffers.size(); i < MAX_SOUNDFILE_PARTS; i++) {
                 soundfile->emptyFile(i, offset);
             }
 
@@ -106,16 +106,16 @@ public:
     bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
     void prepareToPlay(double sampleRate, int samplesPerBlock);
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
     bool acceptsMidi() const { return false; }
     bool producesMidi() const { return false; }
 
-    void reset();
+    void reset() override;
 
     void createParameterLayout();  // NB: this is different from other processors because it's called after a Faust DSP file is compiled.
 
-    const juce::String getName() const { return "FaustProcessor"; }
+    const juce::String getName() const override { return "FaustProcessor"; }
 
     bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
 
@@ -175,7 +175,7 @@ private:
 
     double mySampleRate;
 
-    void automateParameters(int numSamples);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 
     std::string getPathToFaustLibraries();
 

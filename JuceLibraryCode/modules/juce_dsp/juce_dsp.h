@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,7 +35,7 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            6.1.0
+  version:            7.0.0
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
@@ -93,7 +93,7 @@
 
 #ifndef JUCE_VECTOR_CALLTYPE
  // __vectorcall does not work on 64-bit due to internal compiler error in
- // release mode in both VS2015 and VS2017. Re-enable when Microsoft fixes this
+ // release mode VS2017. Re-enable when Microsoft fixes this
  #if _MSC_VER && JUCE_USE_SIMD && ! (defined(_M_X64) || defined(__amd64__))
   #define JUCE_VECTOR_CALLTYPE __vectorcall
  #else
@@ -123,10 +123,11 @@
     If this flag is set, then JUCE will use Intel's MKL for JUCE's FFT and
     convolution classes.
 
-    The folder containing the mkl_dfti.h header must be in your header
-    search paths when using this flag. You also need to add all the necessary
-    intel mkl libraries to the "External Libraries to Link" field in the
-    Projucer.
+    If you're using the Projucer's Visual Studio exporter, you should also set
+    the "Use MKL Library (oneAPI)" option in the exporter settings to
+    "Sequential" or "Parallel". If you're not using the Visual Studio exporter,
+    the folder containing the mkl_dfti.h header must be in your header search
+    paths, and you must link against all the necessary MKL libraries.
 */
 #ifndef JUCE_DSP_USE_INTEL_MKL
  #define JUCE_DSP_USE_INTEL_MKL 0

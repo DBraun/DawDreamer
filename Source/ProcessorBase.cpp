@@ -75,7 +75,7 @@ std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
     }
 }
 
-float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::CurrentPositionInfo& posInfo) {
+float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo) {
     auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
     if (parameter) {
@@ -115,7 +115,7 @@ py::dict ProcessorBase::getAutomationAll() {
 }
 
 
-void ProcessorBase::recordAutomation(juce::AudioPlayHead::CurrentPositionInfo& posInfo, int numSamples) {
+void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
     
     if (m_recordAutomation) {
         const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
@@ -131,7 +131,7 @@ void ProcessorBase::recordAutomation(juce::AudioPlayHead::CurrentPositionInfo& p
             // Note that we don't use label because it's sometimes blank. The same choice must be made in reset()
             std::string name = (processorParams[i])->getName(maximumStringLength).toStdString();
             auto val = theParameter->sample(posInfo);
-            auto writePtr = m_recordedAutomationDict[name].getWritePointer(0, posInfo.timeInSamples);
+            auto writePtr = m_recordedAutomationDict[name].getWritePointer(0, (int) (*posInfo.getTimeInSamples()));
             
             for (j=0; j < numSamples; j++) {
                 *writePtr++ = val;
@@ -163,15 +163,14 @@ ProcessorBase::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) 
     if (!m_recordEnable) {
         return;
     }
-    juce::AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
+    auto posInfo = getPlayHead()->getPosition();
 
     const int numberChannels = myRecordBuffer.getNumChannels();
-    int numSamplesToCopy = std::min(buffer.getNumSamples(), (int) myRecordBuffer.getNumSamples() -(int)posInfo.timeInSamples);
+    int numSamplesToCopy = std::min(buffer.getNumSamples(), myRecordBuffer.getNumSamples() -int(*posInfo->getTimeInSamples()));
 
     for (int chan = 0; chan < numberChannels; chan++) {
         // Write the sample to the engine's history for the correct channel.
-        myRecordBuffer.copyFrom(chan, posInfo.timeInSamples, buffer.getReadPointer(chan), numSamplesToCopy);
+        myRecordBuffer.copyFrom(chan, int(*posInfo->getTimeInSamples()), buffer.getReadPointer(chan), numSamplesToCopy);
     }
 }
 

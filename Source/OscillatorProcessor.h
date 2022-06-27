@@ -30,7 +30,7 @@ public:
     }
 
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
     {
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -39,13 +39,13 @@ public:
     }
 
     void
-    reset()
+    reset() override
     {
         myOscillator.reset();
         ProcessorBase::reset();
     }
 
-    const juce::String getName() const { return "OscillatorProcessor"; }
+    const juce::String getName() const override { return "OscillatorProcessor"; }
 
     float myFreq;
 

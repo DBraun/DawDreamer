@@ -9,23 +9,28 @@ class ProcessorBase : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") : 
+    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") :
+        AudioProcessor{},
         myUniqueName{ newUniqueName }, myParameters(*this, nullptr, "PARAMETERS", createParameterFunc()) {
         this->setNonRealtime(true);
     }
 
-    ProcessorBase(std::string newUniqueName = "") : myUniqueName{ newUniqueName }, myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
+    ProcessorBase(std::string newUniqueName = "") : AudioProcessor{}, myUniqueName{ newUniqueName }, myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
         this->setNonRealtime(true);
     }
 
     //==============================================================================
     void prepareToPlay(double, int) override {}
     void releaseResources() override {}
-    void reset();
+    void reset() override;
+    
+    //
+    void setPlayHead(AudioPlayHead* newPlayHead) override {AudioProcessor::setPlayHead(newPlayHead);}
+    //
 
     // All subclasses of ProcessorBase should implement processBlock and call ProcessorBase::processBlock at the end
     // of their implementation. The ProcessorBase implementation takes care of recording.
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override { return nullptr; }
@@ -54,14 +59,14 @@ public:
     void changeProgramName(int, const juce::String&) override {}
 
     //==============================================================================
-    void getStateInformation(juce::MemoryBlock&);
-    void setStateInformation(const void*, int);
+    void getStateInformation(juce::MemoryBlock&) override;
+    void setStateInformation(const void*, int) override;
 
     bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
 
     virtual bool setAutomationVal(std::string parameterName, float val);
 
-    float getAutomationVal(std::string parameterName, juce::AudioPlayHead::CurrentPositionInfo& posInfo);
+    float getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo);
 
     std::vector<float> getAutomation(std::string parameterName);
     py::array_t<float> getAutomationNumpy(std::string parameterName);
@@ -70,7 +75,7 @@ public:
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
 
-    void automateParameters(int numParameters) {};
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {};
     
     void setRecordEnable(bool recordEnable) { m_recordEnable = recordEnable; }
     bool getRecordEnable() { return m_recordEnable; }
@@ -94,7 +99,7 @@ public:
         return AudioProcessor::getTotalNumInputChannels();
     }
 
-    virtual void numChannelsChanged();
+    virtual void numChannelsChanged() override;
 
     bool isConnectedInGraph() { return m_isConnectedInGraph;}
     void setConnectedInGraph(bool isConnected) {
@@ -160,5 +165,5 @@ protected:
         return busesLayout;
     }
     
-    void recordAutomation(juce::AudioPlayHead::CurrentPositionInfo& posInfo, int numSamples);
+    void recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 };

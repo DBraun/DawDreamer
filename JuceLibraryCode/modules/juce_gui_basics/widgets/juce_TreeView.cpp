@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,7 +40,8 @@ static int getItemDepth (const TreeViewItem* item)
 }
 
 //==============================================================================
-class TreeView::ItemComponent  : public Component
+class TreeView::ItemComponent  : public Component,
+                                 public TooltipClient
 {
 public:
     explicit ItemComponent (TreeViewItem& itemToRepresent)
@@ -67,16 +68,21 @@ public:
         }
     }
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    void setMouseIsOverButton (bool isOver)
     {
-        if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
-            return nullptr;
-
-        return std::make_unique<ItemAccessibilityHandler> (*this);
+        mouseIsOverButton = isOver;
+        repaint();
     }
 
-    void setMouseIsOverButton (bool isOver)            { mouseIsOverButton = isOver; }
-    TreeViewItem& getRepresentedItem() const noexcept  { return item; }
+    TreeViewItem& getRepresentedItem() const noexcept
+    {
+        return item;
+    }
+
+    String getTooltip() override
+    {
+        return item.getTooltip();
+    }
 
 private:
     //==============================================================================
@@ -216,15 +222,22 @@ private:
             auto topLeft = itemComp.getRepresentedItem().getItemPosition (false).toFloat().getTopLeft();
 
             return { Desktop::getInstance().getMainMouseSource(), topLeft, mods,
-                     MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                     MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                     MouseInputSource::defaultPressure, MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                     MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                      &itemComp, &itemComp, Time::getCurrentTime(), topLeft, Time::getCurrentTime(), 0, false };
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemAccessibilityHandler)
     };
 
-    //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
+            return nullptr;
+
+        return std::make_unique<ItemAccessibilityHandler> (*this);
+    }
+
     bool hasCustomComponent() const noexcept  { return customComponent.get() != nullptr; }
 
     TreeViewItem& item;
@@ -244,7 +257,6 @@ class TreeView::ContentComponent  : public Component,
 public:
     ContentComponent (TreeView& tree)  : owner (tree)
     {
-        setAccessible (false);
     }
 
     //==============================================================================
@@ -307,6 +319,9 @@ public:
 
         if (iter != itemComponents.end())
         {
+            if (itemUnderMouse == iter->get())
+                itemUnderMouse = nullptr;
+
             if (isMouseDraggingInChildComp (*(iter->get())))
                 owner.hideDragHighlight();
 
@@ -316,50 +331,78 @@ public:
 
     void updateComponents()
     {
-        std::vector<ItemComponent*> componentsToKeep;
+        std::set<ItemComponent*> componentsToKeep;
 
         for (auto* treeItem : getAllVisibleItems())
         {
             if (auto* itemComp = getComponentForItem (treeItem))
             {
-                componentsToKeep.push_back (itemComp);
+                componentsToKeep.insert (itemComp);
             }
             else
             {
                 auto newComp = std::make_unique<ItemComponent> (*treeItem);
 
                 addAndMakeVisible (*newComp);
-                newComp->addMouseListener (this, true);
-                componentsToKeep.push_back (newComp.get());
+                newComp->addMouseListener (this, treeItem->customComponentUsesTreeViewMouseHandler());
+                componentsToKeep.insert (newComp.get());
 
                 itemComponents.push_back (std::move (newComp));
             }
         }
 
-        for (int i = (int) itemComponents.size(); --i >= 0;)
+        auto removePredicate = [&] (auto& item)
         {
-            auto& comp = itemComponents[(size_t) i];
+            if (item == nullptr)
+                return true;
 
-            if (std::find (componentsToKeep.cbegin(), componentsToKeep.cend(), comp.get())
-                  != componentsToKeep.cend())
-            {
-                auto& treeItem = comp->getRepresentedItem();
-                comp->setBounds ({ 0, treeItem.y, getWidth(), treeItem.itemHeight });
-            }
-            else
-            {
-                itemComponents.erase (itemComponents.begin() + i);
-            }
+            return componentsToKeep.find (item.get()) == componentsToKeep.end()
+                    && ! isMouseDraggingInChildComp (*item);
+        };
+
+        const auto iter = std::remove_if (itemComponents.begin(), itemComponents.end(), std::move (removePredicate));
+        itemComponents.erase (iter, itemComponents.end());
+
+        for (auto& comp : itemComponents)
+        {
+            auto& treeItem = comp->getRepresentedItem();
+            comp->setBounds ({ 0, treeItem.y, getWidth(), treeItem.itemHeight });
         }
     }
 
 private:
     //==============================================================================
+    struct ScopedDisableViewportScroll
+    {
+        explicit ScopedDisableViewportScroll (ItemComponent& c)
+            : item (&c)
+        {
+            item->setViewportIgnoreDragFlag (true);
+        }
+
+        ~ScopedDisableViewportScroll()
+        {
+            if (item != nullptr)
+                item->setViewportIgnoreDragFlag (false);
+        }
+
+        SafePointer<ItemComponent> item;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedDisableViewportScroll)
+    };
+
+    //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void mouseDownInternal (const MouseEvent& e)
     {
         updateItemUnderMouse (e);
 
         isDragging = false;
+        scopedScrollDisabler = nullptr;
         needSelectionOnMouseUp = false;
 
         if (! isEnabled())
@@ -442,14 +485,17 @@ private:
                         {
                             pos.setSize (pos.getWidth(), item.itemHeight);
 
+                            const auto additionalScale = 2.0f;
                             auto dragImage = Component::createComponentSnapshot (pos,
                                                                                  true,
-                                                                                 Component::getApproximateScaleFactorForComponent (itemComponent));
+                                                                                 Component::getApproximateScaleFactorForComponent (itemComponent) * additionalScale);
 
                             dragImage.multiplyAllAlphas (0.6f);
 
                             auto imageOffset = pos.getPosition() - e.getPosition();
-                            dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset, &e.source);
+                            dragContainer->startDragging (dragDescription, &owner, { dragImage, additionalScale }, true, &imageOffset, &e.source);
+
+                            scopedScrollDisabler = std::make_unique<ScopedDisableViewportScroll> (*itemComponent);
                         }
                         else
                         {
@@ -478,37 +524,34 @@ private:
 
     void updateItemUnderMouse (const MouseEvent& e)
     {
-        ItemComponent* newItem = nullptr;
+        if (! owner.openCloseButtonsVisible)
+            return;
 
-        if (owner.openCloseButtonsVisible)
+        auto* newItem = [this, &e]() -> ItemComponent*
         {
             if (auto* itemComponent = getItemComponentAt (e.getPosition()))
             {
                 auto& item = itemComponent->getRepresentedItem();
-                auto pos = item.getItemPosition (false);
 
-                if (e.x < pos.getX()
-                    && e.x >= pos.getX() - owner.getIndentSize()
-                    && item.mightContainSubItems())
+                if (item.mightContainSubItems())
                 {
-                    newItem = itemComponent;
+                    const auto xPos = item.getItemPosition (false).getX();
+
+                    if (xPos - owner.getIndentSize() <= e.x && e.x < xPos)
+                        return itemComponent;
                 }
             }
-        }
+
+            return nullptr;
+        }();
 
         if (itemUnderMouse != newItem)
         {
-            auto updateItem = [] (ItemComponent* itemComp, bool isMouseOverButton)
-            {
-                if (itemComp != nullptr)
-                {
-                    itemComp->setMouseIsOverButton (isMouseOverButton);
-                    itemComp->repaint();
-                }
-            };
+            if (itemUnderMouse != nullptr)
+                itemUnderMouse->setMouseIsOverButton (false);
 
-            updateItem (itemUnderMouse, false);
-            updateItem (newItem, true);
+            if (newItem != nullptr)
+                newItem->setMouseIsOverButton (true);
 
             itemUnderMouse = newItem;
         }
@@ -622,6 +665,7 @@ private:
 
     std::vector<std::unique_ptr<ItemComponent>> itemComponents;
     ItemComponent* itemUnderMouse = nullptr;
+    std::unique_ptr<ScopedDisableViewportScroll> scopedScrollDisabler;
     bool isDragging = false, needSelectionOnMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComponent)
@@ -629,36 +673,20 @@ private:
 
 //==============================================================================
 class TreeView::TreeViewport  : public Viewport,
-                                private Timer
+                                private AsyncUpdater
 {
 public:
-    TreeViewport() = default;
-
-    void updateComponents (bool triggerResize)
-    {
-        if (auto* tvc = getContentComp())
-        {
-            if (triggerResize)
-                tvc->resized();
-            else
-                tvc->updateComponents();
-        }
-
-        repaint();
-    }
+    explicit TreeViewport (TreeView& treeView)  : owner (treeView)  {}
 
     void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override
     {
         const auto hasScrolledSideways = (newVisibleArea.getX() != lastX);
+
         lastX = newVisibleArea.getX();
         updateComponents (hasScrolledSideways);
 
-        startTimer (50);
-    }
-
-    ContentComponent* getContentComp() const noexcept
-    {
-        return static_cast<ContentComponent*> (getViewedComponent());
+        structureChanged = true;
+        triggerAsyncUpdate();
     }
 
     bool keyPressed (const KeyPress& key) override
@@ -670,17 +698,76 @@ public:
         return Viewport::keyPressed (key);
     }
 
-private:
-    void timerCallback() override
+    ContentComponent* getContentComp() const noexcept
     {
-        stopTimer();
-
-        if (auto* tree = getParentComponent())
-            if (auto* handler = tree->getAccessibilityHandler())
-                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+        return static_cast<ContentComponent*> (getViewedComponent());
     }
 
+    enum class Async { yes, no };
+
+    void recalculatePositions (Async useAsyncUpdate)
+    {
+        needsRecalculating = true;
+
+        if (useAsyncUpdate == Async::yes)
+            triggerAsyncUpdate();
+        else
+            handleAsyncUpdate();
+    }
+
+private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
+    void handleAsyncUpdate() override
+    {
+        if (structureChanged)
+        {
+            if (auto* handler = owner.getAccessibilityHandler())
+                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+
+            structureChanged = false;
+        }
+
+        if (needsRecalculating)
+        {
+            if (auto* root = owner.rootItem)
+            {
+                const auto startY = owner.rootItemVisible ? 0 : -root->itemHeight;
+
+                root->updatePositions (startY);
+                getViewedComponent()->setSize (jmax (getMaximumVisibleWidth(), root->totalWidth + 50),
+                                               root->totalHeight + startY);
+            }
+            else
+            {
+                getViewedComponent()->setSize (0, 0);
+            }
+
+            updateComponents (false);
+
+            needsRecalculating = false;
+        }
+    }
+
+    void updateComponents (bool triggerResize)
+    {
+        if (auto* content = getContentComp())
+        {
+            if (triggerResize)
+                content->resized();
+            else
+                content->updateComponents();
+        }
+
+        repaint();
+    }
+
+    TreeView& owner;
     int lastX = -1;
+    bool structureChanged = false, needsRecalculating = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport)
 };
@@ -688,8 +775,7 @@ private:
 //==============================================================================
 TreeView::TreeView (const String& name)  : Component (name)
 {
-    viewport = std::make_unique<TreeViewport>();
-    viewport->setAccessible (false);
+    viewport = std::make_unique<TreeViewport> (*this);
     addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
 
@@ -730,7 +816,7 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
             rootItem->setOpen (true);
         }
 
-        updateVisibleItems();
+        viewport->recalculatePositions (TreeViewport::Async::no);
     }
 }
 
@@ -1090,20 +1176,7 @@ bool TreeView::keyPressed (const KeyPress& key)
 
 void TreeView::updateVisibleItems()
 {
-    if (rootItem != nullptr)
-    {
-        rootItem->updatePositions (rootItemVisible ? 0 : -rootItem->itemHeight);
-
-        viewport->getViewedComponent()
-            ->setSize (jmax (viewport->getMaximumVisibleWidth(), rootItem->totalWidth + 50),
-                       rootItem->totalHeight - (rootItemVisible ? 0 : rootItem->itemHeight));
-    }
-    else
-    {
-        viewport->getViewedComponent()->setSize (0, 0);
-    }
-
-    viewport->updateComponents (false);
+    viewport->recalculatePositions (TreeViewport::Async::yes);
 }
 
 //==============================================================================
@@ -1767,6 +1840,9 @@ void TreeViewItem::setOwnerView (TreeView* const newOwner) noexcept
 
 int TreeViewItem::getIndentX() const noexcept
 {
+    if (ownerView == nullptr)
+        return 0;
+
     int x = ownerView->rootItemVisible ? 1 : 0;
 
     if (! ownerView->openCloseButtonsVisible)
@@ -2046,6 +2122,9 @@ TreeViewItem::OpennessRestorer::~OpennessRestorer()
 
 void TreeViewItem::draw (Graphics& g, int width, bool isMouseOverButton)
 {
+    if (ownerView == nullptr)
+        return;
+
     const auto indent = getIndentX();
     const auto itemW = (itemWidth < 0 || drawsInRightMargin) ? width - indent : itemWidth;
 

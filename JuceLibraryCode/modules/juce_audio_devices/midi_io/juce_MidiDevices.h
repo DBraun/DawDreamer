@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -157,12 +157,14 @@ public:
     void setName (const String& newName) noexcept    { deviceInfo.name = newName; }
 
     //==============================================================================
-    /** Deprecated. */
+   #ifndef DOXYGEN
+    [[deprecated ("Use getAvailableDevices instead.")]]
     static StringArray getDevices();
-    /** Deprecated. */
+    [[deprecated ("Use getDefaultDevice instead.")]]
     static int getDefaultDeviceIndex();
-    /** Deprecated. */
+    [[deprecated ("Use openDevice that takes a device identifier instead.")]]
     static std::unique_ptr<MidiInput> openDevice (int, MidiInputCallback*);
+   #endif
 
     /** @internal */
     class Pimpl;
@@ -347,12 +349,14 @@ public:
     bool isBackgroundThreadRunning() const noexcept  { return isThreadRunning(); }
 
     //==============================================================================
-    /** Deprecated. */
+   #ifndef DOXYGEN
+    [[deprecated ("Use getAvailableDevices instead.")]]
     static StringArray getDevices();
-    /** Deprecated. */
+    [[deprecated ("Use getDefaultDevice instead.")]]
     static int getDefaultDeviceIndex();
-    /** Deprecated. */
+    [[deprecated ("Use openDevice that takes a device identifier instead.")]]
     static std::unique_ptr<MidiOutput> openDevice (int);
+   #endif
 
     /** @internal */
     class Pimpl;

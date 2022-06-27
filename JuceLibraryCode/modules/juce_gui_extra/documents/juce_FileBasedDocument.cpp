@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -72,7 +72,7 @@ public:
     }
 
     //==============================================================================
-    bool hasChangedSinceSaved()
+    bool hasChangedSinceSaved() const
     {
         return changedSinceSave;
     }
@@ -326,7 +326,7 @@ private:
         auto oldFile = documentFile;
         documentFile = newFile;
 
-        auto tidyUp = [parent, newFile, oldFile, showMessageOnFailure, showWaitCursor, completed]
+        auto tidyUp = [parent, newFile, oldFile, showMessageOnFailure, showWaitCursor, completed] (Result result)
         {
             if (parent.shouldExitAsyncCallback())
                 return;
@@ -335,8 +335,6 @@ private:
 
             if (showWaitCursor)
                 MouseCursor::hideWaitCursor();
-
-            auto result = Result::fail (TRANS ("The file doesn't exist"));
 
             if (showMessageOnFailure)
                 AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
@@ -373,7 +371,7 @@ private:
                     return;
                 }
 
-                tidyUp();
+                tidyUp (result);
             };
 
             doLoadDocument (newFile, std::move (afterLoading));
@@ -381,7 +379,7 @@ private:
             return;
         }
 
-        tidyUp();
+        tidyUp (Result::fail (TRANS ("The file doesn't exist")));
     }
 
     //==============================================================================
@@ -725,9 +723,9 @@ private:
                           warnAboutOverwritingExistingFiles,
                           [doSaveAs = std::forward<DoSaveAs> (doSaveAs),
                            doAskToOverwriteFile = std::forward<DoAskToOverwriteFile> (doAskToOverwriteFile),
-                           callback = std::move (callback)] (SafeParentPointer ptr, File chosen)
+                           callback = std::move (callback)] (SafeParentPointer parentPtr, File chosen)
         {
-            if (ptr.shouldExitAsyncCallback())
+            if (parentPtr.shouldExitAsyncCallback())
                 return;
 
             if (chosen == File{})
@@ -738,18 +736,18 @@ private:
                 return;
             }
 
-            auto updateAndSaveAs = [ptr, doSaveAs, callback] (const File& chosenFile)
+            auto updateAndSaveAs = [parentPtr, doSaveAs, callback] (const File& chosenFile)
             {
-                if (ptr.shouldExitAsyncCallback())
+                if (parentPtr.shouldExitAsyncCallback())
                     return;
 
-                ptr->document.setLastDocumentOpened (chosenFile);
-                doSaveAs (ptr, chosenFile, false, false, true, callback, false);
+                parentPtr->document.setLastDocumentOpened (chosenFile);
+                doSaveAs (parentPtr, chosenFile, false, false, true, callback, false);
             };
 
             if (chosen.getFileExtension().isEmpty())
             {
-                chosen = chosen.withFileExtension (ptr->fileExtension);
+                chosen = chosen.withFileExtension (parentPtr->fileExtension);
 
                 if (chosen.exists())
                 {
@@ -765,7 +763,7 @@ private:
                             callback (userCancelledSave);
                     };
 
-                    doAskToOverwriteFile (ptr, chosen, std::move (afterAsking));
+                    doAskToOverwriteFile (parentPtr, chosen, std::move (afterAsking));
                     return;
                 }
             }

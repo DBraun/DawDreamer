@@ -11,14 +11,14 @@ public:
     PluginProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path);
     ~PluginProcessor();
 
-    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
+    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) override;
 
     bool canApplyBusInputsAndOutputs(int inputs, int outputs) {
         BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
         return this->canApplyBusesLayout(busesLayout);
     }
 
-    bool setBusesLayout(const BusesLayout& arr);
+    bool setBusesLayout(const BusesLayout& arr) override;
 
     bool setMainBusInputsAndOutputs(int inputs, int outputs) {
         BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
@@ -32,23 +32,23 @@ public:
         }
     }
 
-    void numChannelsChanged() {
+    void numChannelsChanged() override {
         ProcessorBase::numChannelsChanged();
         if (myPlugin.get()) {
             myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
         }
     }
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock);
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
-    bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
+    //bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
-    bool acceptsMidi() const { return true; }
-    bool producesMidi() const { return true; }
+    bool acceptsMidi() const override { return true; }
+    bool producesMidi() const override { return true; }
 
-    void reset();
+    void reset() override;
 
     bool loadPreset(const std::string& path);
     bool loadVST3Preset(const std::string& path);
@@ -58,11 +58,11 @@ public:
     void setPatch(const PluginPatch patch);
 
     std::string getParameterAsText(const int parameter);
-    void setParameter(int paramIndex, float newValue);
+    void setParameter(int paramIndex, float newValue) override;
     const PluginPatch getPatch();
     const size_t getPluginParameterSize();
 
-    const juce::String getName() const { return "PluginProcessor"; }
+    const juce::String getName() const override { return "PluginProcessor"; }
 
     bool loadMidi(const std::string& path, bool clearPrevious, bool isBeats, bool allEvents);
 
@@ -76,7 +76,7 @@ public:
         const double noteLength,
         bool isBeats);
 
-    void setPlayHead(AudioPlayHead* newPlayHead);
+    void setPlayHead(AudioPlayHead* newPlayHead) override;
 
     void openEditor();
 
@@ -115,7 +115,7 @@ private:
     bool myMidiEventsDoRemainQN = false;
     bool myMidiEventsDoRemainSec = false;
     
-    void automateParameters(int numParameters);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 
 protected:
 

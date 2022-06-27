@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -159,20 +159,30 @@ namespace CoreTextTypeLayout
     //==============================================================================
     static CTTextAlignment getTextAlignment (const AttributedString& text)
     {
-        switch (text.getJustification().getOnlyHorizontalFlags())
+        const auto flags = text.getJustification().getOnlyHorizontalFlags();
+
+        if (@available (macOS 10.8, *))
         {
-           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-            case Justification::right:                  return kCTTextAlignmentRight;
-            case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
-            case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
-            default:                                    return kCTTextAlignmentLeft;
-           #else
+            switch (flags)
+            {
+                case Justification::right:                  return kCTTextAlignmentRight;
+                case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
+                case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
+                default:                                    return kCTTextAlignmentLeft;
+            }
+        }
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+        switch (flags)
+        {
             case Justification::right:                  return kCTRightTextAlignment;
             case Justification::horizontallyCentred:    return kCTCenterTextAlignment;
             case Justification::horizontallyJustified:  return kCTJustifiedTextAlignment;
             default:                                    return kCTLeftTextAlignment;
-           #endif
         }
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     static CTLineBreakMode getLineBreakMode (const AttributedString& text)
@@ -198,34 +208,75 @@ namespace CoreTextTypeLayout
     }
 
     //==============================================================================
+    // A flatmap that properly retains/releases font refs
+    class FontMap
+    {
+    public:
+        void emplace (CTFontRef ctFontRef, Font value)
+        {
+            pairs.emplace (std::lower_bound (pairs.begin(), pairs.end(), ctFontRef), ctFontRef, std::move (value));
+        }
+
+        const Font* find (CTFontRef ctFontRef) const
+        {
+            const auto iter = std::lower_bound (pairs.begin(), pairs.end(), ctFontRef);
+
+            if (iter == pairs.end())
+                return nullptr;
+
+            if (iter->key.get() != ctFontRef)
+                return nullptr;
+
+            return &iter->value;
+        }
+
+    private:
+        struct Pair
+        {
+            Pair (CTFontRef ref, Font font) : key (ref), value (std::move (font)) { CFRetain (ref); }
+
+            bool operator< (CTFontRef other) const { return key.get() < other; }
+
+            CFUniquePtr<CTFontRef> key;
+            Font value;
+        };
+
+        std::vector<Pair> pairs;
+    };
+
     struct AttributedStringAndFontMap
     {
         CFUniquePtr<CFAttributedStringRef> string;
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
     };
 
     static AttributedStringAndFontMap createCFAttributedString (const AttributedString& text)
     {
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
 
         const detail::ColorSpacePtr rgbColourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
 
         auto attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
         CFUniquePtr<CFStringRef> cfText (text.getText().toCFString());
+
         CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText.get());
 
-        auto numCharacterAttributes = text.getNumAttributes();
-        auto attribStringLen = CFAttributedStringGetLength (attribString);
+        const auto numCharacterAttributes = text.getNumAttributes();
+        const auto attribStringLen = CFAttributedStringGetLength (attribString);
+        const auto beginPtr = text.getText().toUTF16();
+        auto currentPosition = beginPtr;
 
-        for (int i = 0; i < numCharacterAttributes; ++i)
+        for (int i = 0; i < numCharacterAttributes; currentPosition += text.getAttribute (i).range.getLength(), ++i)
         {
-            auto& attr = text.getAttribute (i);
-            auto rangeStart = attr.range.getStart();
+            const auto& attr = text.getAttribute (i);
+            const auto wordBegin = currentPosition.getAddress() - beginPtr.getAddress();
 
-            if (rangeStart >= attribStringLen)
+            if (attribStringLen <= wordBegin)
                 continue;
 
-            auto range = CFRangeMake (rangeStart, jmin (attr.range.getEnd(), (int) attribStringLen) - rangeStart);
+            const auto wordEndAddress = (currentPosition + attr.range.getLength()).getAddress();
+            const auto wordEnd = jmin (attribStringLen, (CFIndex) (wordEndAddress - beginPtr.getAddress()));
+            const auto range = CFRangeMake (wordBegin, wordEnd - wordBegin);
 
             if (auto ctFontRef = getOrCreateFont (attr.font))
             {
@@ -290,7 +341,7 @@ namespace CoreTextTypeLayout
     struct FramesetterAndFontMap
     {
         CFUniquePtr<CTFramesetterRef> framesetter;
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
     };
 
     static FramesetterAndFontMap createCTFramesetter (const AttributedString& text)
@@ -314,7 +365,7 @@ namespace CoreTextTypeLayout
     struct FrameAndFontMap
     {
         CFUniquePtr<CTFrameRef> frame;
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
     };
 
     static FrameAndFontMap createCTFrame (const AttributedString& text, CGRect bounds)
@@ -466,10 +517,8 @@ namespace CoreTextTypeLayout
                 {
                     glyphRun->font = [&]
                     {
-                        auto it = frameAndMap.fontMap.find (ctRunFont);
-
-                        if (it != frameAndMap.fontMap.end())
-                            return it->second;
+                        if (auto* it = frameAndMap.fontMap.find (ctRunFont))
+                            return *it;
 
                         CFUniquePtr<CFStringRef> cfsFontName (CTFontCopyPostScriptName (ctRunFont));
                         CFUniquePtr<CTFontRef> ctFontRef (CTFontCreateWithName (cfsFontName.get(), referenceFontSize, nullptr));
@@ -572,10 +621,8 @@ public:
 
         if (fontRef != nullptr)
         {
-           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-            if (SystemStats::getOperatingSystemType() >= SystemStats::OperatingSystemType::MacOSX_10_11)
+            if (@available (macOS 10.11, *))
                 canBeUsedForLayout = CTFontManagerRegisterGraphicsFont (fontRef, nullptr);
-           #endif
 
             ctFontRef.reset (CTFontCreateWithGraphicsFont (fontRef, referenceFontSize, nullptr, nullptr));
 
@@ -618,10 +665,9 @@ public:
     {
         if (fontRef != nullptr)
         {
-           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-            if (dataCopy.getSize() != 0)
-                CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
-           #endif
+            if (@available (macOS 10.8, *))
+                if (dataCopy.getSize() != 0)
+                    CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
 
             CGFontRelease (fontRef);
         }
@@ -748,7 +794,9 @@ private:
 
 CTFontRef getCTFontFromTypeface (const Font& f)
 {
-    if (auto* tf = dynamic_cast<OSXTypeface*> (f.getTypeface()))
+    const auto typeface = f.getTypefacePtr();
+
+    if (auto* tf = dynamic_cast<OSXTypeface*> (typeface.get()))
         return tf->ctFontRef.get();
 
     return {};
@@ -848,7 +896,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     static DefaultFontNames defaultNames;
 
     auto newFont = font;
-    auto& faceName = font.getTypefaceName();
+    auto faceName = font.getTypefaceName();
 
     if (faceName == getDefaultSansSerifFontName())       newFont.setTypefaceName (defaultNames.defaultSans);
     else if (faceName == getDefaultSerifFontName())      newFont.setTypefaceName (defaultNames.defaultSerif);
@@ -866,7 +914,9 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        if (auto tf = dynamic_cast<OSXTypeface*> (text.getAttribute (i).font.getTypeface()))
+        auto typeface = text.getAttribute (i).font.getTypefacePtr();
+
+        if (auto tf = dynamic_cast<OSXTypeface*> (typeface.get()))
             if (tf->canBeUsedForLayout)
                 continue;
 

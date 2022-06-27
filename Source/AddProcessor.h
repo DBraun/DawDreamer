@@ -6,14 +6,14 @@ class AddProcessor : public ProcessorBase
 {
 public:
     AddProcessor(std::string newUniqueName, std::vector<float> gainLevels) : ProcessorBase(newUniqueName), myGainLevels{ gainLevels } {
-        setMainBusInputsAndOutputs(gainLevels.size()*2, 2);
+        setMainBusInputsAndOutputs((int)gainLevels.size()*2, 2);
     }
 
     void prepareToPlay(double, int) {
 
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
         // Buffer will be an even number of channels, assuming we're doing stereo audio.
         // Speaking in terms of zero index channels, we need to read from channels 2, 4, 6... etc
         // and add them to write channel 0.
@@ -47,15 +47,15 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void reset() {
+    void reset() override {
         ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "AddProcessor"; };
+    const juce::String getName() const override { return "AddProcessor"; };
 
     void setGainLevels(const std::vector<float> gainLevels) {
         myGainLevels = gainLevels;
-        setMainBusInputsAndOutputs(gainLevels.size()*2, 2);
+        setMainBusInputsAndOutputs((int)gainLevels.size()*2, 2);
     }
     const std::vector<float> getGainLevels() { return myGainLevels; }
 

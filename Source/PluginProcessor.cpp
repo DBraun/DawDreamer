@@ -136,7 +136,7 @@ PluginProcessor::~PluginProcessor() {
 
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
 {
-    AudioProcessor::setPlayHead(newPlayHead);
+    ProcessorBase::setPlayHead(newPlayHead);
     if (myPlugin.get()) {
         myPlugin->setPlayHead(newPlayHead);
     }
@@ -176,16 +176,15 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
         throw std::runtime_error("Error: no plugin was processed for processor named " + this->getUniqueName());
     }
 
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
+    auto posInfo = getPlayHead()->getPosition();
     
-    automateParameters(buffer.getNumSamples());
-    recordAutomation(posInfo, buffer.getNumSamples());
+    automateParameters(*posInfo, buffer.getNumSamples());
+    recordAutomation(*posInfo, buffer.getNumSamples());
     
     myRenderMidiBuffer.clear();
 
     {
-        auto start = posInfo.timeInSamples;
+        auto start = *posInfo->getTimeInSamples();
         auto end = start + buffer.getNumSamples();
         myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
         while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
@@ -196,6 +195,12 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
                 myRecordedMidiSequence.addEvent(messageCopy);
             }
             
+//            if (myMidiMessageSec.isNoteOn()) {
+//                std::cerr << "note ON at " << myMidiMessagePositionSec << " start: " << start << std::endl;
+//            } else if (myMidiMessageSec.isNoteOff()) {
+//                std::cerr << "note OFF at " << myMidiMessagePositionSec << " start: " << start << std::endl;
+//            }
+            
             // steps for playing MIDI
             myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
             myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
@@ -204,35 +209,32 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
     }
 
     {
-        auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
-        auto pulseEnd = pulseStart + buffer.getNumSamples() * (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+        auto pulseStart = std::floor(*posInfo->getPpqPosition() * PPQN);
+        auto pulseEnd = pulseStart + buffer.getNumSamples() * (*posInfo->getBpm() * PPQN) / (mySampleRate * 60.);
 
         myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
         while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
             // steps for saving midi to file output
             auto messageCopy = MidiMessage(myMidiMessageQN);
-            messageCopy.setTimeStamp((posInfo.timeInSeconds + (myMidiMessagePositionQN-pulseStart)*(60./posInfo.bpm)/PPQN )*(2400.));
+            messageCopy.setTimeStamp((*posInfo->getTimeInSeconds() + (myMidiMessagePositionQN-pulseStart)*(60./(*posInfo->getBpm()))/PPQN )*2400.);
             if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
                 myRecordedMidiSequence.addEvent(messageCopy);
             }
             
             // steps for playing MIDI
-            myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
+            myRenderMidiBuffer.addEvent(myMidiMessageQN, int( (myMidiMessagePositionQN - pulseStart)*60.*mySampleRate/(PPQN**posInfo->getBpm())));
             myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
             myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
         }
     }
-
     myPlugin->processBlock(buffer, myRenderMidiBuffer);
-    
+        
     ProcessorBase::processBlock(buffer, midiBuffer);
 }
 
-void
-PluginProcessor::automateParameters(int numSamples) {
 
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
+void
+PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
     if (myPlugin.get()) {
 
@@ -272,6 +274,7 @@ PluginProcessor::reset()
     myRenderMidiBuffer.clear();
     
     myRecordedMidiSequence.clear();
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::midiStart());
     myRecordedMidiSequence.addEvent(juce::MidiMessage::timeSignatureMetaEvent(4, 4));
     myRecordedMidiSequence.addEvent(juce::MidiMessage::tempoMetaEvent(500*1000));
     myRecordedMidiSequence.addEvent(juce::MidiMessage::midiChannelMetaEvent(1));
@@ -474,7 +477,7 @@ PluginProcessor::getPatch() {
     params.reserve(myPlugin->getNumParameters());
 
 
-    AudioPlayHead::CurrentPositionInfo posInfo;
+    AudioPlayHead::PositionInfo posInfo;
     for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
 
         auto theName = myPlugin->getParameterName(i);
@@ -674,7 +677,7 @@ PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
         return 0.;
     }
 
-    AudioPlayHead::CurrentPositionInfo posInfo;
+    AudioPlayHead::PositionInfo posInfo;
 
     return ProcessorBase::getAutomationVal(std::to_string(parameterIndex), posInfo);
 }

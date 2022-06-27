@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -66,18 +66,14 @@
  #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
 
- #if defined (__OBJC__)
-  #define JUCE_OBJC_HAS_AVAILABLE_FEATURE (__clang_major__ >= 9)
- #endif
-
 #endif
 
 //==============================================================================
 // MSVC
 #if JUCE_MSVC
 
- #if _MSC_FULL_VER < 190024210  // VS2015
-   #error "JUCE requires Visual Studio 2015 Update 3 or later"
+ #if _MSC_FULL_VER < 191025017  // VS2017
+   #error "JUCE requires Visual Studio 2017 or later"
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED
@@ -96,7 +92,7 @@
 #endif
 
 //==============================================================================
-#if ! DOXYGEN
+#ifndef DOXYGEN
  // These are old flags that are now supported on all compatible build targets
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
@@ -104,4 +100,10 @@
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #define JUCE_DELETED_FUNCTION = delete
  #define JUCE_CONSTEXPR constexpr
+#endif
+
+#if JUCE_CXX17_IS_AVAILABLE
+ #define JUCE_NODISCARD [[nodiscard]]
+#else
+ #define JUCE_NODISCARD
 #endif

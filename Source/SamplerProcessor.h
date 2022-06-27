@@ -20,7 +20,7 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         setData(input);
-        setMainBusInputsAndOutputs(0, input.shape(0));
+        setMainBusInputsAndOutputs(0, (int)input.shape(0));
     }
 
     ~SamplerProcessor() {
@@ -41,7 +41,7 @@ public:
 
         auto parameterName = sampler.getParameterName(parameterIndex);
 
-        juce::AudioPlayHead::CurrentPositionInfo posInfo;
+        juce::AudioPlayHead::PositionInfo posInfo;
 
         return ProcessorBase::getAutomationVal(parameterName.toStdString(), posInfo);
     }
@@ -72,7 +72,7 @@ public:
         sampler.prepareToPlay(sampleRate, samplesPerBlock);
     }
 
-    void reset() {
+    void reset() override {
         sampler.reset();
 
         delete myMidiIteratorSec;
@@ -95,20 +95,19 @@ public:
     }
 
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
     {
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+        auto posInfo = getPlayHead()->getPosition();
 
-        automateParameters(buffer.getNumSamples());
-        recordAutomation(posInfo, buffer.getNumSamples());
+        automateParameters(*posInfo, buffer.getNumSamples());
+        recordAutomation(*posInfo, buffer.getNumSamples());
 
         buffer.clear(); // todo: why did this become necessary?
         midiBuffer.clear();
         myRenderMidiBuffer.clear();
 
         {
-            auto start = posInfo.timeInSamples;
+            auto start = *posInfo->getTimeInSamples();
             auto end = start + buffer.getNumSamples();
 
             myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
@@ -128,20 +127,20 @@ public:
         }
 
         {
-            auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
-            auto pulseEnd = pulseStart + buffer.getNumSamples() * (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+            auto pulseStart = std::floor(*posInfo->getPpqPosition() * PPQN);
+            auto pulseEnd = pulseStart + buffer.getNumSamples() * (*posInfo->getBpm() * PPQN) / (mySampleRate * 60.);
 
             myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
                 // steps for saving midi to file output
                 auto messageCopy = MidiMessage(myMidiMessageQN);
-                messageCopy.setTimeStamp((posInfo.timeInSeconds + (myMidiMessagePositionQN-pulseStart)*(60./posInfo.bpm)/PPQN )*(2400.));
+                messageCopy.setTimeStamp((*posInfo->getTimeInSeconds() + (myMidiMessagePositionQN-pulseStart)*(60./(*posInfo->getBpm())/PPQN ))*2400.);
                 if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
                     myRecordedMidiSequence.addEvent(messageCopy);
                 }
                 
                 // steps for playing MIDI
-                myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
+                myRenderMidiBuffer.addEvent(myMidiMessageQN, int( (myMidiMessagePositionQN - pulseStart)*60.*mySampleRate/(PPQN**posInfo->getBpm())));
                 myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
                 myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             }
@@ -152,7 +151,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    const juce::String getName() const { return "SamplerProcessor"; }
+    const juce::String getName() const override { return "SamplerProcessor"; }
 
     void
     setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
@@ -365,10 +364,7 @@ public:
     }
 
     void
-    automateParameters(int numParameters) {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
         for (int i = 0; i < sampler.getNumParameters(); i++) {
 

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,7 +26,7 @@
 namespace juce
 {
 
-template<typename RowComponentType>
+template <typename RowComponentType>
 static AccessibilityActions getListRowAccessibilityActions (RowComponentType& rowComponent)
 {
     auto onFocus = [&rowComponent]
@@ -49,6 +49,19 @@ static AccessibilityActions getListRowAccessibilityActions (RowComponentType& ro
     return AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
                                  .addAction (AccessibilityActionType::press,  std::move (onPress))
                                  .addAction (AccessibilityActionType::toggle, std::move (onToggle));
+}
+
+void ListBox::checkModelPtrIsValid() const
+{
+   #if ! JUCE_DISABLE_ASSERTIONS
+    // If this is hit, the model was destroyed while the ListBox was still using it.
+    // You should ensure that the model remains alive for as long as the ListBox holds a pointer to it.
+    // If this assertion is hit in the destructor of a ListBox instance, do one of the following:
+    // - Adjust the order in which your destructors run, so that the ListBox destructor runs
+    //   before the destructor of your ListBoxModel, or
+    // - Call ListBox::setModel (nullptr) before destroying your ListBoxModel.
+    jassert ((model == nullptr) == (weakModelPtr.lock() == nullptr));
+   #endif
 }
 
 class ListBox::RowComponent  : public Component,
@@ -90,14 +103,13 @@ public:
                 addAndMakeVisible (customComponent.get());
                 customComponent->setBounds (getLocalBounds());
 
-                if (customComponent->getAccessibilityHandler() != nullptr)
-                    invalidateAccessibilityHandler();
+                setFocusContainerType (FocusContainerType::focusContainer);
+            }
+            else
+            {
+                setFocusContainerType (FocusContainerType::none);
             }
         }
-
-        if (selectionHasChanged)
-            if (auto* handler = getAccessibilityHandler())
-                isSelected ? handler->grabFocus() : handler->giveAwayFocus();
     }
 
     void performSelection (const MouseEvent& e, bool isMouseUp)
@@ -108,14 +120,6 @@ public:
             m->listBoxItemClicked (row, e);
     }
 
-    bool isInDragToScrollViewport() const noexcept
-    {
-        if (auto* vp = owner.getViewport())
-            return vp->isScrollOnDragEnabled() && (vp->canScrollVertically() || vp->canScrollHorizontally());
-
-        return false;
-    }
-
     void mouseDown (const MouseEvent& e) override
     {
         isDragging = false;
@@ -124,7 +128,7 @@ public:
 
         if (isEnabled())
         {
-            if (owner.selectOnMouseDown && ! (isSelected || isInDragToScrollViewport()))
+            if (owner.selectOnMouseDown && ! isSelected && ! viewportWouldScrollOnEvent (owner.getViewport(), e.source))
                 performSelection (e, false);
             else
                 selectRowOnMouseUp = true;
@@ -240,7 +244,16 @@ public:
             int getColumnIndex() const override      { return 0; }
             int getColumnSpan() const override       { return 1; }
 
-            int getRowIndex() const override         { return handler.rowComponent.row; }
+            int getRowIndex() const override
+            {
+                const auto index = handler.rowComponent.row;
+
+                if (handler.rowComponent.owner.hasAccessibleHeaderComponent())
+                    return index + 1;
+
+                return index;
+            }
+
             int getRowSpan() const override          { return 1; }
 
             int getDisclosureLevel() const override  { return 0; }
@@ -259,9 +272,6 @@ public:
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
-        if (customComponent != nullptr && customComponent->getAccessibilityHandler() != nullptr)
-            return nullptr;
-
         return std::make_unique<RowAccessibilityHandler> (*this);
     }
 
@@ -283,24 +293,30 @@ public:
     ListViewport (ListBox& lb)  : owner (lb)
     {
         setWantsKeyboardFocus (false);
-        setAccessible (false);
 
         auto content = std::make_unique<Component>();
         content->setWantsKeyboardFocus (false);
-        content->setAccessible (false);
 
         setViewedComponent (content.release());
     }
 
-    RowComponent* getComponentForRow (const int row) const noexcept
+    RowComponent* getComponentForRow (int row) const noexcept
     {
-        return rows [row % jmax (1, rows.size())];
+        if (isPositiveAndBelow (row, rows.size()))
+            return rows[row];
+
+        return nullptr;
     }
 
-    RowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
+    RowComponent* getComponentForRowWrapped (int row) const noexcept
+    {
+        return rows[row % jmax (1, rows.size())];
+    }
+
+    RowComponent* getComponentForRowIfOnscreen (int row) const noexcept
     {
         return (row >= firstIndex && row < firstIndex + rows.size())
-                 ? getComponentForRow (row) : nullptr;
+                 ? getComponentForRowWrapped (row) : nullptr;
     }
 
     int getRowNumberOfComponent (Component* const rowComponent) const noexcept
@@ -374,7 +390,7 @@ public:
             {
                 const int row = i + startIndex;
 
-                if (auto* rowComp = getComponentForRow (row))
+                if (auto* rowComp = getComponentForRowWrapped (row))
                 {
                     rowComp->setBounds (0, row * rowH, w, rowH);
                     rowComp->update (row, owner.isRowSelected (row));
@@ -458,6 +474,11 @@ public:
     }
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void timerCallback() override
     {
         stopTimer();
@@ -505,7 +526,7 @@ struct ListBoxMouseMoveSelector  : public MouseListener
 
 //==============================================================================
 ListBox::ListBox (const String& name, ListBoxModel* const m)
-    : Component (name), model (m)
+    : Component (name)
 {
     viewport.reset (new ListViewport (*this));
     addAndMakeVisible (viewport.get());
@@ -513,6 +534,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
     setWantsKeyboardFocus (true);
     setFocusContainerType (FocusContainerType::focusContainer);
     colourChanged();
+
+    setModel (m);
 }
 
 ListBox::~ListBox()
@@ -521,11 +544,20 @@ ListBox::~ListBox()
     viewport.reset();
 }
 
+void ListBox::assignModelPtr (ListBoxModel* const newModel)
+{
+    model = newModel;
+
+   #if ! JUCE_DISABLE_ASSERTIONS
+    weakModelPtr = model != nullptr ? model->sharedState : nullptr;
+   #endif
+}
+
 void ListBox::setModel (ListBoxModel* const newModel)
 {
     if (model != newModel)
     {
-        model = newModel;
+        assignModelPtr (newModel);
         repaint();
         updateContent();
     }
@@ -589,6 +621,7 @@ Viewport* ListBox::getViewport() const noexcept
 //==============================================================================
 void ListBox::updateContent()
 {
+    checkModelPtrIsValid();
     hasDoneInitialUpdate = true;
     totalItems = (model != nullptr) ? model->getNumRows() : 0;
 
@@ -625,6 +658,8 @@ void ListBox::selectRowInternal (const int row,
                                  bool deselectOthersFirst,
                                  bool isMouseClick)
 {
+    checkModelPtrIsValid();
+
     if (! multipleSelection)
         deselectOthersFirst = true;
 
@@ -660,6 +695,8 @@ void ListBox::selectRowInternal (const int row,
 
 void ListBox::deselectRow (const int row)
 {
+    checkModelPtrIsValid();
+
     if (selected.contains (row))
     {
         selected.removeRange ({ row, row + 1 });
@@ -678,6 +715,8 @@ void ListBox::deselectRow (const int row)
 void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
                                const NotificationType sendNotificationEventToModel)
 {
+    checkModelPtrIsValid();
+
     selected = setOfRowsToBeSelected;
     selected.removeRange ({ totalItems, std::numeric_limits<int>::max() });
 
@@ -725,6 +764,8 @@ void ListBox::flipRowSelection (const int row)
 
 void ListBox::deselectAllRows()
 {
+    checkModelPtrIsValid();
+
     if (! selected.isEmpty())
     {
         selected.clear();
@@ -854,6 +895,8 @@ void ListBox::scrollToEnsureRowIsOnscreen (const int row)
 //==============================================================================
 bool ListBox::keyPressed (const KeyPress& key)
 {
+    checkModelPtrIsValid();
+
     const int numVisibleRows = viewport->getHeight() / getRowHeight();
 
     const bool multiple = multipleSelection
@@ -959,6 +1002,8 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 
 void ListBox::mouseUp (const MouseEvent& e)
 {
+    checkModelPtrIsValid();
+
     if (e.mouseWasClicked() && model != nullptr)
         model->backgroundClicked (e);
 }
@@ -1010,6 +1055,13 @@ void ListBox::setHeaderComponent (std::unique_ptr<Component> newHeaderComponent)
     headerComponent = std::move (newHeaderComponent);
     addAndMakeVisible (headerComponent.get());
     ListBox::resized();
+    invalidateAccessibilityHandler();
+}
+
+bool ListBox::hasAccessibleHeaderComponent() const
+{
+    return headerComponent != nullptr
+            && headerComponent->getAccessibilityHandler() != nullptr;
 }
 
 void ListBox::repaintRow (const int rowNumber) noexcept
@@ -1017,7 +1069,7 @@ void ListBox::repaintRow (const int rowNumber) noexcept
     repaint (getRowPosition (rowNumber, true));
 }
 
-Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, int& imageY)
+ScaledImage ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
     auto firstRow = getRowContainingPosition (0, viewport->getY());
@@ -1039,7 +1091,8 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
     imageX = imageArea.getX();
     imageY = imageArea.getY();
 
-    auto listScale = Component::getApproximateScaleFactorForComponent (this);
+    const auto additionalScale = 2.0f;
+    const auto listScale = Component::getApproximateScaleFactorForComponent (this) * additionalScale;
     Image snapshot (Image::ARGB,
                     roundToInt ((float) imageArea.getWidth() * listScale),
                     roundToInt ((float) imageArea.getHeight() * listScale),
@@ -1052,9 +1105,9 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
             if (auto* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i))
             {
                 Graphics g (snapshot);
-                g.setOrigin (getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition());
+                g.setOrigin ((getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition()) * additionalScale);
 
-                auto rowScale = Component::getApproximateScaleFactorForComponent (rowComp);
+                const auto rowScale = Component::getApproximateScaleFactorForComponent (rowComp) * additionalScale;
 
                 if (g.reduceClipRegion (rowComp->getLocalBounds() * rowScale))
                 {
@@ -1067,7 +1120,7 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
         }
     }
 
-    return snapshot;
+    return { snapshot, additionalScale };
 }
 
 void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsToDrag, const var& dragDescription, bool allowDraggingToOtherWindows)
@@ -1100,11 +1153,17 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
 
         int getNumRows() const override
         {
-            if (listBox.model != nullptr)
-                return getHeaderHandler() != nullptr ? listBox.model->getNumRows() + 1
-                                                     : listBox.model->getNumRows();
+            listBox.checkModelPtrIsValid();
 
-            return 0;
+            if (listBox.model == nullptr)
+                return 0;
+
+            const auto numRows = listBox.model->getNumRows();
+
+            if (listBox.hasAccessibleHeaderComponent())
+                return numRows + 1;
+
+            return numRows;
         }
 
         int getNumColumns() const override
@@ -1131,7 +1190,7 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
     private:
         const AccessibilityHandler* getHeaderHandler() const
         {
-            if (listBox.headerComponent != nullptr)
+            if (listBox.hasAccessibleHeaderComponent())
                 return listBox.headerComponent->getAccessibilityHandler();
 
             return nullptr;

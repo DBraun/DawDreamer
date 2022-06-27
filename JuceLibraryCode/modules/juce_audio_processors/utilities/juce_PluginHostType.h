@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -53,6 +53,7 @@ public:
         AbletonLive8,               /**< Represents Ableton Live 8. */
         AbletonLive9,               /**< Represents Ableton Live 9. */
         AbletonLive10,              /**< Represents Ableton Live 10. */
+        AbletonLive11,              /**< Represents Ableton Live 11. */
         AbletonLiveGeneric,         /**< Represents Ableton Live. */
         AdobeAudition,              /**< Represents Adobe Audition. */
         AdobePremierePro,           /**< Represents Adobe Premiere Pro. */
@@ -116,7 +117,8 @@ public:
     //==============================================================================
     /** Returns true if the host is any version of Ableton Live. */
     bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8
-                                                      || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLiveGeneric; }
+                                                      || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLive11
+                                                      || type == AbletonLiveGeneric; }
     /** Returns true if the host is Adobe Audition. */
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     /** Returns true if the host is Ardour. */

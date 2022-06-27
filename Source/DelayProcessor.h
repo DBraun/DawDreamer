@@ -18,7 +18,9 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         mySampleRate = sampleRate;
-        automateParameters(1); // do this to give a valid state to the filter.
+        
+        AudioPlayHead::PositionInfo posInfo;
+        automateParameters(posInfo, 1); // do this to give a valid state to the filter.
 
         initDelay();
         
@@ -27,12 +29,11 @@ public:
         myDelay.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
+        auto posInfo = getPlayHead()->getPosition();
         
-        automateParameters(buffer.getNumSamples());
-        recordAutomation(posInfo, buffer.getNumSamples());
+        automateParameters(*posInfo, buffer.getNumSamples());
+        recordAutomation(*posInfo, buffer.getNumSamples());
 
         delayBuffer.makeCopyOf(buffer);
         juce::dsp::AudioBlock<float> block(delayBuffer);
@@ -48,28 +49,24 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters(int numSamples) {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
-
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
         *myWetLevel = getAutomationVal("wet_level", posInfo);
         *myDelaySize = getAutomationVal("delay", posInfo);
         updateParameters();
     }
 
-    void reset() {
+    void reset() override {
         myDelay.reset();
         ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "DelayProcessor"; };
+    const juce::String getName() const override { return "DelayProcessor"; };
 
     void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
-    float getDelay() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("delay", posInfo); }
+    float getDelay() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("delay", posInfo); }
 
     void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
-    float getWet() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
+    float getWet() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
 
 
 private:

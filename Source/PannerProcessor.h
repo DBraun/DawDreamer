@@ -17,17 +17,17 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         const int numChannels = 2;
-        automateParameters(1); // do this to give a valid state to the filter.
+        AudioPlayHead::PositionInfo posInfo;
+        automateParameters(posInfo, 1); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
         myPanner.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
+        auto posInfo = getPlayHead()->getPosition();
         
-        automateParameters(buffer.getNumSamples());
-        recordAutomation(posInfo, buffer.getNumSamples());
+        automateParameters(*posInfo, buffer.getNumSamples());
+        recordAutomation(*posInfo, buffer.getNumSamples());
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -35,24 +35,21 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters(int numSamples) {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
         *myPan = getAutomationVal("pan", posInfo);
         updateParameters();
     }
 
-    void reset() {
+    void reset() override {
         myPanner.reset();
         ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "PannerProcessor"; };
+    const juce::String getName() const override { return "PannerProcessor"; };
 
     void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
-    float getPan() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("pan", posInfo); }
+    float getPan() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("pan", posInfo); }
 
     void setRule(std::string newRule) {
         myRule = stringToRule(newRule);

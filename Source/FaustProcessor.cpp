@@ -70,11 +70,10 @@ FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
+    auto posInfo = getPlayHead()->getPosition();
     
-    automateParameters(buffer.getNumSamples());
-    recordAutomation(posInfo, buffer.getNumSamples());
+    automateParameters(*posInfo, buffer.getNumSamples());
+    recordAutomation(*posInfo, buffer.getNumSamples());
 
 	if (!m_isCompiled) {
 		throw std::runtime_error("Faust Processor called processBlock but it wasn't compiled.");
@@ -89,10 +88,10 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 		}
 	}
 	else if (m_dsp_poly != NULL) {
-		auto start = posInfo.timeInSamples;
+		auto start = *posInfo->getTimeInSamples();
 
-		auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
-		auto pulseStep = (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+		auto pulseStart = std::floor(*posInfo->getPpqPosition() * PPQN);
+		auto pulseStep = (*posInfo->getBpm() * PPQN) / (mySampleRate * 60.);
 
 		// render one sample at a time because we want accurate timing of keyOn/keyOff.
 
@@ -108,7 +107,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
                     
                     // steps for saving midi to file output
                     auto messageCopy = MidiMessage(myMidiMessageSec);
-                    messageCopy.setTimeStamp((posInfo.timeInSamples + i)*(2400./mySampleRate));
+                    messageCopy.setTimeStamp((*posInfo->getTimeInSamples() + i)*(2400./mySampleRate));
                     if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
                         myRecordedMidiSequence.addEvent(messageCopy);
                     }
@@ -132,7 +131,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
                     
                     // steps for saving midi to file output
                     auto messageCopy = MidiMessage(myMidiMessageQN);
-                    messageCopy.setTimeStamp((posInfo.timeInSamples + i)*(2400./mySampleRate));
+                    messageCopy.setTimeStamp((*posInfo->getTimeInSamples() + i)*(2400./mySampleRate));
                     if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
                         myRecordedMidiSequence.addEvent(messageCopy);
                     }
@@ -151,16 +150,16 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				}
 			}
 
-			for (size_t chan = 0; chan < m_numInputChannels; chan++)
+			for (int chan = 0; chan < m_numInputChannels; chan++)
 			{
-				oneSampleInBuffer.setSample(chan, 0, buffer.getSample(chan, i));
+				oneSampleInBuffer.setSample(chan, 0, buffer.getSample(chan, (int) i));
 			}
 
 			m_dsp_poly->compute(1, oneSampReadPtrs, oneSampWritePtrs);
 
-			for (size_t chan = 0; chan < m_numOutputChannels; chan++)
+			for (int chan = 0; chan < m_numOutputChannels; chan++)
 			{
-				buffer.setSample(chan, i, oneSampleOutBuffer.getSample(chan, 0));
+				buffer.setSample(chan, (int) i, oneSampleOutBuffer.getSample(chan, 0));
 			}
 
 			start += 1;
@@ -190,10 +189,7 @@ bool hasStart(std::string const& fullString, std::string const& start) {
 }
 
 void
-FaustProcessor::automateParameters(int numSamples) {
-
-	AudioPlayHead::CurrentPositionInfo posInfo;
-	getPlayHead()->getCurrentPosition(posInfo);
+FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
 	if (!m_ui) return;
 
@@ -527,7 +523,7 @@ FaustProcessor::getParamWithIndex(const int index)
 
 	auto& parAddress = it->second;
 
-	AudioPlayHead::CurrentPositionInfo posInfo;
+	AudioPlayHead::PositionInfo posInfo;
 
 	return this->getAutomationVal(parAddress, posInfo);
 }
@@ -541,7 +537,7 @@ FaustProcessor::getParamWithPath(const std::string& n)
 	}
 	if (!m_ui) return 0; // todo: better handling
 
-	AudioPlayHead::CurrentPositionInfo posInfo;
+	AudioPlayHead::PositionInfo posInfo;
 
 	return this->getAutomationVal(n, posInfo);
 }
@@ -661,7 +657,7 @@ FaustProcessor::getPluginParametersDescription()
 			myDictionary["min"] = m_ui->getParamMin(faustIndex);
 			myDictionary["max"] = m_ui->getParamMax(faustIndex);
 			myDictionary["step"] = m_ui->getParamStep(faustIndex);
-			AudioPlayHead::CurrentPositionInfo posInfo;
+			AudioPlayHead::PositionInfo posInfo;
 			myDictionary["value"] = this->getAutomationVal(theName, posInfo);
 
 			myList.append(myDictionary);

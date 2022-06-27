@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -38,6 +38,7 @@ public:
 
     const String& getName() const noexcept    { return name; }
 
+private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
         class ComponentHandler  : public AccessibilityHandler
@@ -70,7 +71,6 @@ public:
         return std::make_unique<ComponentHandler> (*this);
     }
 
-private:
     MenuBarComponent& owner;
     const String name;
 };
@@ -241,10 +241,16 @@ void MenuBarComponent::showMenu (int index)
 
             auto itemBounds = itemComponent->getBounds();
 
+            const auto callback = [ref = SafePointer<MenuBarComponent> (this), index] (int result)
+            {
+                if (ref != nullptr)
+                    ref->menuDismissed (index, result);
+            };
+
             m.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
                                                  .withTargetScreenArea (localAreaToGlobal (itemBounds))
                                                  .withMinimumWidth (itemBounds.getWidth()),
-                             [this, index] (int result) { menuDismissed (index, result); });
+                             callback);
         }
     }
 }

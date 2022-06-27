@@ -1,4 +1,4 @@
-#include "RenderEngineWrapper.h"
+#include "RenderEngine.h"
 
 PYBIND11_MODULE(dawdreamer, m)
 {
@@ -293,42 +293,42 @@ Note that note-ons and note-offs are counted separately.")
     std::vector<float> defaultGain;
 
     py::return_value_policy returnPolicy = py::return_value_policy::reference;
-
-    py::class_<RenderEngineWrapper>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
+    
+    py::class_<RenderEngine>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
-        .def("render", &RenderEngineWrapper::render, arg("duration"), kw_only(), arg("beats")=false, "Render the most recently loaded graph. By default, when `beats` is False, duration is measured in seconds, otherwise beats.")
-        .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
-        .def("set_bpm", &RenderEngineWrapper::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
+        .def("render", &RenderEngine::render, arg("duration"), kw_only(), arg("beats")=false, "Render the most recently loaded graph. By default, when `beats` is False, duration is measured in seconds, otherwise beats.")
+        .def("set_bpm", &RenderEngine::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
+        .def("set_bpm", &RenderEngine::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
         .def("remove_processor", &RenderEngine::removeProcessor, arg("name"), "Remove a processor based on its unique name. Existing Python references to the processor will become invalid.")
-        .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
-        .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, arg("name"), arg("frequency"),
+        .def("load_graph", &RenderEngine::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
+        .def("make_oscillator_processor", &RenderEngine::makeOscillatorProcessor, arg("name"), arg("frequency"),
             "Make an Oscillator Processor", returnPolicy)
-        .def("make_plugin_processor", &RenderEngineWrapper::makePluginProcessor, arg("name"), arg("plugin_path"),
+        .def("make_plugin_processor", &RenderEngine::makePluginProcessor, arg("name"), arg("plugin_path"),
             "Make a Plugin Processor", returnPolicy)
-        .def("make_sampler_processor", &RenderEngineWrapper::makeSamplerProcessor, arg("name"), arg("data"),
+        .def("make_sampler_processor", &RenderEngine::makeSamplerProcessor, arg("name"), arg("data"),
             "Make a Sampler Processor with audio data to be used as the sample.", returnPolicy)
 #ifdef BUILD_DAWDREAMER_FAUST
-        .def("make_faust_processor", &RenderEngineWrapper::makeFaustProcessor, arg("name"), "Make a FAUST Processor", returnPolicy)
+        .def("make_faust_processor", &RenderEngine::makeFaustProcessor, arg("name"), "Make a FAUST Processor", returnPolicy)
 #endif
-        .def("make_playback_processor", &RenderEngineWrapper::makePlaybackProcessor, arg("name"), arg("data"), returnPolicy, "Make a Playback Processor")
+        .def("make_playback_processor", &RenderEngine::makePlaybackProcessor, arg("name"), arg("data"), returnPolicy, "Make a Playback Processor")
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-        .def("make_playbackwarp_processor", &RenderEngineWrapper::makePlaybackWarpProcessor, arg("name"), arg("data"), kw_only(), arg("sr")=0,
+        .def("make_playbackwarp_processor", &RenderEngine::makePlaybackWarpProcessor, arg("name"), arg("data"), kw_only(), arg("sr")=0,
             "Make a Playback Processor that can do time-stretching and pitch-shifting. The `sr` kwarg (sample rate of the data) is optional and defaults to the engine's sample rate.", returnPolicy)
 #endif
-        .def("make_filter_processor", &RenderEngineWrapper::makeFilterProcessor, returnPolicy,
+        .def("make_filter_processor", &RenderEngine::makeFilterProcessor, returnPolicy,
             arg("name"), arg("mode") = "high", arg("freq") = 1000.f, arg("q") = .707107f, arg("gain") = 1.f, "Make a Filter Processor")
-        .def("make_reverb_processor", &RenderEngineWrapper::makeReverbProcessor, returnPolicy,
+        .def("make_reverb_processor", &RenderEngine::makeReverbProcessor, returnPolicy,
             arg("name"), arg("roomSize") = 0.5f, arg("damping") = 0.5f, arg("wetLevel") = 0.33f,
             arg("dryLevel") = 0.4f, arg("width") = 1.0f, "Make a Reverb Processor")
-        .def("make_add_processor", &RenderEngineWrapper::makeAddProcessor, returnPolicy,
+        .def("make_add_processor", &RenderEngine::makeAddProcessor, returnPolicy,
             arg("name"), arg("gain_levels") = defaultGain, "Make an Add Processor with an optional list of gain levels")
-        .def("make_delay_processor", &RenderEngineWrapper::makeDelayProcessor, returnPolicy,
+        .def("make_delay_processor", &RenderEngine::makeDelayProcessor, returnPolicy,
             arg("name"), arg("rule") = "linear", arg("delay") = 10.f, arg("wet") = .1f, "Make a Delay Processor")
-        .def("make_panner_processor", &RenderEngineWrapper::makePannerProcessor, returnPolicy,
+        .def("make_panner_processor", &RenderEngine::makePannerProcessor, returnPolicy,
             arg("name"), arg("rule") = "linear", arg("pan") = 0.f, "Make a Panner Processor")
-        .def("make_compressor_processor", &RenderEngineWrapper::makeCompressorProcessor, returnPolicy,
+        .def("make_compressor_processor", &RenderEngine::makeCompressorProcessor, returnPolicy,
             arg("name"), arg("threshold") = 0.f, arg("ratio") = 2.f, arg("attack") = 2.0f, arg("release") = 50.f, "Make a Compressor Processor");
 
 }

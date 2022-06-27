@@ -23,16 +23,17 @@
 		39AC16D539A27149CAEAEF92 /* Allocators.cpp */ = {isa = PBXBuildFile; fileRef = 6FB200D8066EC619A8D1FC74; };
 		410431C9B0A9CD5D15AFE737 /* include_juce_audio_processors.mm */ = {isa = PBXBuildFile; fileRef = A220ED8C412D2CBAF0152B24; };
 		428157405D2A574C22BF5B3D /* AudioUnit.framework */ = {isa = PBXBuildFile; fileRef = 1D609F443B08D98D397EEC1C; };
+		43CF16C66E5C10A00505A7B0 /* include_juce_audio_processors_ara.cpp */ = {isa = PBXBuildFile; fileRef = 356CE6A2709276F08338A0F7; };
 		48CA111A7776D753A8BFF02E /* RenderEngine.cpp */ = {isa = PBXBuildFile; fileRef = 58E5949DCB62BE84406F882C; };
 		4F9D459C6BC8A719CF73A1E0 /* AudioToolbox.framework */ = {isa = PBXBuildFile; fileRef = 81E1E946E734ED2D5F139566; };
 		516A7669BE79BC23CB4B86AB /* Profiler.cpp */ = {isa = PBXBuildFile; fileRef = CB1AA38CEDE7438D7F365590; };
 		516B14D8234B59D0A54345E0 /* RubberBandStretcher.cpp */ = {isa = PBXBuildFile; fileRef = 092AA38B997F3A2F636F78F5; };
 		529B60654EC2581FB95104BE /* Thread.cpp */ = {isa = PBXBuildFile; fileRef = 73B32DF95D0CAA9FD42506CD; };
 		590C8BAFBBD5D947DE4F00DB /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = A2C8C58317A62AD9BB716394; };
-		64B003F477470C317DCEF471 /* Carbon.framework */ = {isa = PBXBuildFile; fileRef = 2CD683422CC5BC8E6035C775; };
 		65455A017C5DA702A1CBF186 /* SilentAudioCurve.cpp */ = {isa = PBXBuildFile; fileRef = B99017CDF4238285E04C2297; };
 		6E2642DAD5CD9CFE0442CB4A /* PercussiveAudioCurve.cpp */ = {isa = PBXBuildFile; fileRef = 69DD217AE55B1CEB458B80D9; };
 		7C6656C8A61187E3C9113001 /* FilterProcessor.cpp */ = {isa = PBXBuildFile; fileRef = 7332613820553661C4FA3CD8; };
+		7C6BB131144A3B730811CCDD /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXBuildFile; fileRef = FEA86DE22A65D6278611157A; };
 		7EB45DC8DE6D5723CF9EB56E /* sysutils.cpp */ = {isa = PBXBuildFile; fileRef = 092B837B921581050089F848; };
 		7F31E8E6BCA6C4D063D57689 /* include_juce_gui_basics.mm */ = {isa = PBXBuildFile; fileRef = 9FDB1268E8AD800788F80B72; };
 		8CB86F722980F4262C64B7D7 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = D2350C56CE13419F5D6CF40E; };
@@ -74,7 +75,6 @@
 		EDAE68939B34523D0DB82066 /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 29DB2C710702A8342635B8DF; };
 		EDEB549D7B074BAFD0B2450F /* HighFrequencyAudioCurve.cpp */ = {isa = PBXBuildFile; fileRef = CA11143047AE83B873CC74E8; };
 		F2B685C5405CA2318DDF0273 /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = 3364D676B0400D289622EF11; };
-		F69DC2F3034023CA38AFFC92 /* RenderEngineWrapper.cpp */ = {isa = PBXBuildFile; fileRef = 1E1EB37C807FB1C249A9F414; };
 		F7A71CBC4CD144EE3AC35D54 /* AudioCurveCalculator.cpp */ = {isa = PBXBuildFile; fileRef = D4FF9DFE0AEDF26322C31077; };
 		FF43737511B767F50CC7DFFB /* StretchCalculator.cpp */ = {isa = PBXBuildFile; fileRef = F34E6B23EADFB01CDC4F4B75; };
 		FF5BA3AEF4F66A9EB375F63B /* BinaryData.cpp */ = {isa = PBXBuildFile; fileRef = 1DC1C19D0D23FF54A98B4513; };
@@ -105,19 +105,18 @@
 		1D12CA3EFF673F1417B702D9 /* RubberBandStretcherJNI.cpp */ /* RubberBandStretcherJNI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RubberBandStretcherJNI.cpp; path = ../../thirdparty/rubberband/src/jni/RubberBandStretcherJNI.cpp; sourceTree = SOURCE_ROOT; };
 		1D609F443B08D98D397EEC1C /* AudioUnit.framework */ /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		1DC1C19D0D23FF54A98B4513 /* BinaryData.cpp */ /* BinaryData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
-		1E1EB37C807FB1C249A9F414 /* RenderEngineWrapper.cpp */ /* RenderEngineWrapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderEngineWrapper.cpp; path = ../../Source/RenderEngineWrapper.cpp; sourceTree = SOURCE_ROOT; };
 		1E9DDEDC44B84AC20436D9A6 /* LoopPointMarker.h */ /* LoopPointMarker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LoopPointMarker.h; path = ../../Source/Sampler/Source/Components/LoopPointMarker.h; sourceTree = SOURCE_ROOT; };
 		23A77F04A78FE8BE62F85C95 /* Ruler.h */ /* Ruler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Ruler.h; path = ../../Source/Sampler/Source/Components/Ruler.h; sourceTree = SOURCE_ROOT; };
 		253FF1803B46DE27BAFE0B1E /* ProcessorBase.cpp */ /* ProcessorBase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ProcessorBase.cpp; path = ../../Source/ProcessorBase.cpp; sourceTree = SOURCE_ROOT; };
 		29DB2C710702A8342635B8DF /* include_juce_events.mm */ /* include_juce_events.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_events.mm; path = ../../JuceLibraryCode/include_juce_events.mm; sourceTree = SOURCE_ROOT; };
 		2AA8CBD57F5CC5B7912A192F /* include_juce_dsp.mm */ /* include_juce_dsp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_dsp.mm; path = ../../JuceLibraryCode/include_juce_dsp.mm; sourceTree = SOURCE_ROOT; };
 		2AFB20E3BF20B006326ADE78 /* CoreAudio.framework */ /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
-		2CD683422CC5BC8E6035C775 /* Carbon.framework */ /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		2F962B6F6EA479E59F083A16 /* PluginProcessor.cpp */ /* PluginProcessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PluginProcessor.cpp; path = ../../Source/PluginProcessor.cpp; sourceTree = SOURCE_ROOT; };
 		3319047264FBD43706A45A08 /* custom_pybind_wrappers.h */ /* custom_pybind_wrappers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = custom_pybind_wrappers.h; path = ../../Source/custom_pybind_wrappers.h; sourceTree = SOURCE_ROOT; };
 		3364D676B0400D289622EF11 /* include_juce_audio_devices.mm */ /* include_juce_audio_devices.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_devices.mm; path = ../../JuceLibraryCode/include_juce_audio_devices.mm; sourceTree = SOURCE_ROOT; };
 		3436E954D7321CC1A6F5F1E6 /* MovingMedian.h */ /* MovingMedian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MovingMedian.h; path = ../../thirdparty/rubberband/src/dsp/MovingMedian.h; sourceTree = SOURCE_ROOT; };
 		34A2692E7D90EA601DE8ACC6 /* StretcherChannelData.h */ /* StretcherChannelData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StretcherChannelData.h; path = ../../thirdparty/rubberband/src/StretcherChannelData.h; sourceTree = SOURCE_ROOT; };
+		356CE6A2709276F08338A0F7 /* include_juce_audio_processors_ara.cpp */ /* include_juce_audio_processors_ara.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_ara.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_ara.cpp; sourceTree = SOURCE_ROOT; };
 		395AC07199E9D2807E5186E1 /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = ../../JuceLibraryCode/modules/juce_data_structures; sourceTree = SOURCE_ROOT; };
 		3AAA87ED81FE59EA46C6FE62 /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../JuceLibraryCode/modules/juce_core; sourceTree = SOURCE_ROOT; };
 		3C4A562AA5734126DF3D041A /* SpectralDifferenceAudioCurve.cpp */ /* SpectralDifferenceAudioCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SpectralDifferenceAudioCurve.cpp; path = ../../thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.cpp; sourceTree = SOURCE_ROOT; };
@@ -254,7 +253,7 @@
 		F8BACD8C3D852EABE626834C /* SamplerPluginDemo.h */ /* SamplerPluginDemo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SamplerPluginDemo.h; path = ../../Source/Sampler/Source/SamplerPluginDemo.h; sourceTree = SOURCE_ROOT; };
 		F9B35915956DF9CA74D0E4B0 /* juce_video */ /* juce_video */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_video; path = ../../JuceLibraryCode/modules/juce_video; sourceTree = SOURCE_ROOT; };
 		FC991D8D0DF79F86509EB48F /* Thread.h */ /* Thread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../thirdparty/rubberband/src/system/Thread.h; sourceTree = SOURCE_ROOT; };
-		FE91AC31132D9AC2CC3B0A20 /* RenderEngineWrapper.h */ /* RenderEngineWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RenderEngineWrapper.h; path = ../../Source/RenderEngineWrapper.h; sourceTree = SOURCE_ROOT; };
+		FEA86DE22A65D6278611157A /* include_juce_audio_processors_lv2_libs.cpp */ /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_lv2_libs.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_lv2_libs.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,7 +266,6 @@
 				4F9D459C6BC8A719CF73A1E0,
 				A376ADE2384A37361A90737F,
 				B706959A5956C712DB69C177,
-				64B003F477470C317DCEF471,
 				D8E2F775028097109496AAA1,
 				969FB6089449B8EF662494AE,
 				E6C27C09FEC5B3BBEC75F414,
@@ -418,8 +416,6 @@
 				A2CE988FDEA16DA46477FB4B,
 				094BECA334087BBDDA1CA022,
 				58E5949DCB62BE84406F882C,
-				FE91AC31132D9AC2CC3B0A20,
-				1E1EB37C807FB1C249A9F414,
 				55A7EED856ACF66C119C1D8F,
 				4B4337E31892157AAFCBD879,
 			);
@@ -479,7 +475,6 @@
 				81E1E946E734ED2D5F139566,
 				4C016F8E9E5EB85EF51350D2,
 				63F2199F8507C7736C402439,
-				2CD683422CC5BC8E6035C775,
 				7EC708BB8670BC4B971F031E,
 				2AFB20E3BF20B006326ADE78,
 				E4E23DF360EE14C337676E2D,
@@ -528,6 +523,8 @@
 				3364D676B0400D289622EF11,
 				03BD258F06159505E43073E1,
 				A220ED8C412D2CBAF0152B24,
+				356CE6A2709276F08338A0F7,
+				FEA86DE22A65D6278611157A,
 				6FB346F5BB408E7040CFE133,
 				F77F519C38E3EA04C3309E8D,
 				DE2959972547E114EB1E1FCD,
@@ -675,7 +672,7 @@
 		4A73310BAAAEBD94149F5709 = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = "";
 			};
 			buildConfigurationList = 2DB318F4D74C3E6033F2C720;
@@ -746,13 +743,14 @@
 				1B14253412716097BBB38A9B,
 				9D34C1F40CAD6A7617F1B60B,
 				48CA111A7776D753A8BFF02E,
-				F69DC2F3034023CA38AFFC92,
 				A36633FC72AA916869FA8B33,
 				FF5BA3AEF4F66A9EB375F63B,
 				3331B6C0CCADE7C79E00AA8D,
 				F2B685C5405CA2318DDF0273,
 				2706724BA659554B6F4EE85E,
 				410431C9B0A9CD5D15AFE737,
+				43CF16C66E5C10A00505A7B0,
+				7C6BB131144A3B730811CCDD,
 				C4250D079CD4B8F0C8D5FBBA,
 				B40655DA3166083A19A8BFFE,
 				24E83A217028D2AEF88FF90E,
@@ -800,10 +798,10 @@
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
 					"JucePlugin_Build_AUv3=0",
-					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -836,7 +834,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -Wl,-undefined,dynamic_lookup";
+				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -Wl,-undefined,dynamic_lookup -weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
@@ -925,10 +923,10 @@
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
 					"JucePlugin_Build_AUv3=0",
-					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -962,7 +960,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -Wl,-undefined,dynamic_lookup";
+				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -Wl,-undefined,dynamic_lookup -weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;

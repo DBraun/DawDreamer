@@ -127,7 +127,7 @@ public:
 
     std::vector<float> getAutomation();
 
-    float sample(juce::AudioPlayHead::CurrentPositionInfo& posInfo);
+    float sample(AudioPlayHead::PositionInfo& posInfo);
 
     ~AutomateParameter() {}
 

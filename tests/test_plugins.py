@@ -39,11 +39,11 @@ def test_stereo_plugin_effect(plugin_path):
 
 
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
-def test_plugin_instrument(plugin_path):
+def test_plugin_instrument1(plugin_path):
 
     DURATION = 5.
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, 512)
 
     plugin_basename = splitext(basename(plugin_path))[0]
 
@@ -73,7 +73,11 @@ def test_plugin_instrument(plugin_path):
 
     engine.load_graph([(synth, [])])
 
+    plugin_basename = basename(plugin_path)
+
+    # print(f'start render ----- {plugin_path}')
     render(engine, file_path=OUTPUT / f'test_plugin_instrument_{plugin_basename}.wav', duration=DURATION)
+    # print(f'end render ----- {plugin_path}')
 
     # check that it's non-silent
     audio = engine.get_audio()
