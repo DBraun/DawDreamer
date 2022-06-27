@@ -236,22 +236,18 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 void
 PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
-    if (myPlugin.get()) {
-
-        for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
-
-            auto paramID = std::to_string(i);
-
-            auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
-            if (theParameter) {
-                // todo: change to setParameterNotifyingHost?
-                myPlugin->setParameter(i, theParameter->sample(posInfo));
-            }
-            else {
-                throw std::runtime_error("Error automateParameters: " + myPlugin->getParameterName(i).toStdString());
-            }
-        }
+    if (!myPlugin.get()) {
+        return;
     }
+    
+    int i = 0;
+    for (auto *parameter : myPlugin->getParameters()) {
+        auto paramID = std::to_string(i);
+        auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
+        parameter->setValue(theParameter->sample(posInfo));
+        i++;
+    }
+    
 }
 
 void
@@ -300,10 +296,11 @@ PluginProcessor::loadPreset(const std::string& path)
 
         // The VST2 way of loading preset.
         bool result = VSTPluginFormat::loadFromFXBFile(myPlugin.get(), mb.getData(), mb.getSize());
-
-        for (int i = 0; i < myPlugin->getNumParameters(); i++) {
-            // set the values on the layout.
-            setParameter(i, myPlugin.get()->getParameter(i));
+                
+        int i = 0;
+        for (auto *parameter : myPlugin->getParameters()) {
+            setParameter(i, parameter->getValue());
+            i++;
         }
 
         return result;
@@ -342,9 +339,11 @@ PluginProcessor::loadVST3Preset(const std::string& path)
         throw std::runtime_error("PluginProcessor::loadVST3Preset: unknown error.");
     }
     
-    for (int i = 0; i < myPlugin->getNumParameters(); i++) {
-        // set the values on the layout.
-        setParameter(i, myPlugin.get()->getParameter(i));
+    
+    int i = 0;
+    for (auto *parameter : myPlugin->getParameters()) {
+        setParameter(i, parameter->getValue());
+        i++;
     }
 
     return true;
@@ -362,10 +361,13 @@ PluginProcessor::loadStateInformation(std::string filepath) {
     file.loadFileAsData(state);
 
     myPlugin->setStateInformation((const char*)state.getData(), (int)state.getSize());
-
-    for (int i = 0; i < myPlugin->AudioProcessor::getNumParameters(); i++) {
+    
+    
+    int i = 0;
+    for (auto *parameter : myPlugin->getParameters()) {
         std::string paramID = std::to_string(i);
-        ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
+        ProcessorBase::setAutomationVal(paramID, parameter->getValue());
+        i++;
     }
 
     // todo: this is a little hacky. We create a window because this forces the loaded state to take effect
@@ -404,14 +406,16 @@ PluginProcessor::createParameterLayout()
     // clear existing parameters in the layout?
     ValueTree blankState;
     myParameters.replaceState(blankState);
-
-    for (int i = 0; i < myPlugin->getNumParameters(); ++i)
-    {
-        auto parameterName = myPlugin->getParameterName(i);
+    
+    int maximumStringLength = 64;
+    int i = 0;
+    for (auto *parameter : myPlugin->getParameters()) {
+        auto parameterName = parameter->getName(maximumStringLength);
         std::string paramID = std::to_string(i);
         myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(paramID, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
         // give it a valid single sample of automation.
-        ProcessorBase::setAutomationVal(paramID, myPlugin->getParameter(i));
+        ProcessorBase::setAutomationVal(paramID, parameter->getValue());
+        i++;
     }
 }
 
@@ -455,7 +459,7 @@ PluginProcessor::setParameter(const int paramIndex, const float value)
         return;
     }
 
-    myPlugin->setParameter(paramIndex, value);
+    myPlugin->setParameter(paramIndex, value); // todo: instead we need to do parameter->setValue(value)
 
     std::string paramID = std::to_string(paramIndex);
 
