@@ -247,12 +247,20 @@ PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int nu
     for (juce::AudioProcessorParameter *parameter : myPlugin->getParameters()) {
         auto paramID = std::to_string(i);
         auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
+        
+        auto name = parameter->getName(64);
+        auto isAutomatable = parameter->isAutomatable();
+        
+        // todo: consider isMeta. Maybe we don't want to automate meta parameters.
+        // auto isMeta = parameter->isMetaParameter();
 
-        const juce::ScopedLock sl2 (myPlugin->getCallbackLock());
-        parameter->beginChangeGesture();
-        parameter->setValueNotifyingHost(theParameter->sample(posInfo));  // todo: this line breaks test_plugins.py
-        parameter->endChangeGesture();
-    
+        // Only automate if name is not empty "" and isAutomatable.
+        if (name.compare("") != 0 && isAutomatable) {
+            parameter->beginChangeGesture();
+            parameter->setValueNotifyingHost(theParameter->sample(posInfo));
+            parameter->endChangeGesture();
+        }
+
         i++;
     }
 }
@@ -368,8 +376,7 @@ PluginProcessor::loadStateInformation(std::string filepath) {
     file.loadFileAsData(state);
 
     myPlugin->setStateInformation((const char*)state.getData(), (int)state.getSize());
-    
-    
+
     int i = 0;
     for (auto *parameter : myPlugin->getParameters()) {
         std::string paramID = std::to_string(i);

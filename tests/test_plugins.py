@@ -41,7 +41,7 @@ def test_stereo_plugin_effect(plugin_path):
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
 def test_plugin_instrument1(plugin_path):
 
-    DURATION = 5.
+    DURATION = 1.5
 
     engine = daw.RenderEngine(SAMPLE_RATE, 512)
 
@@ -85,7 +85,7 @@ def test_plugin_instrument1(plugin_path):
 
     # check that it's non-silent
     audio = engine.get_audio()
-    assert(np.mean(np.abs(audio)) > .01)
+    assert(np.mean(np.abs(audio)) > .003)
     assert(np.mean(np.abs(audio[:10000])) > .001)  # test that the first note wasn't silent
 
     with pytest.raises(Exception):
