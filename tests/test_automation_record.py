@@ -219,7 +219,7 @@ def test_automation_record_plugin():
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    desc = synth.get_plugin_parameters_description()
+    desc = synth.get_parameters_description()
 
     automation = 0.5+.5*make_sine(1./2., DURATION*4, sr=PPQN)
     param_index = 0

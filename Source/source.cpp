@@ -224,6 +224,8 @@ but the filter mode cannot under automation.";
             "Set the automation based on its index.")
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize, "Get the number of parameters.")
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
+            "[DEPRECATED: Use `get_parameters_description`]. Get a list of dictionaries describing the plugin's parameters.")
+        .def("get_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
             "Get a list of dictionaries describing the plugin's parameters.")
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")

@@ -18,7 +18,7 @@ def test_stereo_plugin_effect(plugin_path):
 
     effect = engine.make_plugin_processor("effect", plugin_path)
 
-    # print(effect.get_plugin_parameters_description())
+    # print(effect.get_parameters_description())
     assert(effect.get_num_input_channels() == PLUGIN_INPUT_CHANNELS[plugin_basename])
     assert(effect.get_num_output_channels() == PLUGIN_OUTPUT_CHANNELS[plugin_basename])
 
@@ -49,7 +49,7 @@ def test_plugin_instrument1(plugin_path):
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_plugin_parameters_description())
+    desc = synth.get_parameters_description()
 
     # value = synth.get_parameter(0)
     # # value = 0.1
@@ -110,7 +110,7 @@ def test_plugin_instrument_add_midi_note_beats(plugin_path):
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_plugin_parameters_description())
+    # print(synth.get_parameters_description())
 
     for i in range(16):
         synth.add_midi_note(60, 60, i*4, 2, beats=True)
@@ -136,7 +136,7 @@ def test_plugin_instrument_midi(plugin_path):
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_plugin_parameters_description())
+    # print(synth.get_parameters_description())
 
     synth.load_midi(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
     synth.clear_midi()
@@ -248,7 +248,7 @@ def test_plugin_effect_ambisonics():
     assert(proc_encoder.get_num_input_channels() == 1)
     assert(proc_encoder.get_num_output_channels() == 4)
 
-    # for par in proc_encoder.get_plugin_parameters_description():
+    # for par in proc_encoder.get_parameters_description():
     #   print(par)
 
     graph = [
@@ -364,7 +364,7 @@ def test_plugin_editor(plugin_path: str):
 
     # sleep(.5)
 
-    # print(synth.get_plugin_parameters_description())
+    # print(synth.get_parameters_description())
 
     print('synth: ', plugin_basename, ' inputs: ', synth.get_num_input_channels(), ' outputs: ', synth.get_num_output_channels())
 
@@ -439,7 +439,7 @@ def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnc
     assert ambisonics_encoder.get_num_input_channels() == num_inputs
     assert ambisonics_encoder.get_num_output_channels() == num_outputs
 
-    # print(ambisonics_encoder.get_plugin_parameters_description())
+    # print(ambisonics_encoder.get_parameters_description())
     # print('inputs: ', ambisonics_encoder.get_num_input_channels(), ' outputs: ', ambisonics_encoder.get_num_output_channels())
 
     plugin_basename = basename(plugin_path2)

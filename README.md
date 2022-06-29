@@ -142,7 +142,7 @@ synth.load_vst3_preset('C:/path/to/preset.vstpreset')
 synth.record_automation = True
 
 # Get a list of dictionaries where each dictionary describes a controllable parameter.
-print(synth.get_plugin_parameters_description()) 
+print(synth.get_parameters_description()) 
 print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (oscillator A's panning)
 # Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
 # We can simply set a constant value.
