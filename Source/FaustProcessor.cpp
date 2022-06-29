@@ -196,17 +196,23 @@ FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int num
 
     const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
 
+    bool anyAutomation = false;
     for (int i = 0; i < this->getNumParameters(); i++) {
 
         int faustIndex = m_map_juceIndex_to_faustIndex[i];
-
-        m_ui->setParamValue(faustIndex, ((AutomateParameterFloat*)processorParams[i])->sample(posInfo));
+        auto theParameter = (AutomateParameterFloat*) processorParams[i];
+        
+        bool hasAutomation = theParameter->isAutomated();
+        anyAutomation |= hasAutomation;
+        if (hasAutomation) {
+            m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
+        }
     }
 
 	// If polyphony is enabled and we're grouping voices,
 	// several voices might share the same parameters in a group.
 	// Therefore we have to call updateAllGuis to update all dependent parameters.
-	if (m_nvoices > 0 && m_groupVoices) {
+	if (anyAutomation && m_nvoices > 0 && m_groupVoices) {
 		// When you want to access shared memory:
 		if (guiUpdateMutex.Lock()) {
 			// Have Faust update all GUIs.
@@ -228,6 +234,38 @@ FaustProcessor::reset()
 	if (m_dsp_poly) {
 		m_dsp_poly->instanceClear();
 	}
+    
+    if (!m_isCompiled) {
+        this->compile();
+    }
+    
+    {
+        // update all parameters once.
+        
+        juce::AudioPlayHead::PositionInfo posInfo;
+        // It's important to initialize these.
+        posInfo.setTimeInSamples(0);
+        posInfo.setTimeInSeconds(0);
+        posInfo.setPpqPosition(0);
+        
+        const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
+
+        for (int i = 0; i < this->getNumParameters(); i++) {
+
+            int faustIndex = m_map_juceIndex_to_faustIndex[i];
+
+            m_ui->setParamValue(faustIndex, ((AutomateParameterFloat*)processorParams[i])->sample(posInfo));
+        }
+        if (m_nvoices > 0 && m_groupVoices) {
+            // When you want to access shared memory:
+            if (guiUpdateMutex.Lock()) {
+                // Have Faust update all GUIs.
+                GUI::updateAllGuis();
+
+                guiUpdateMutex.Unlock();
+            }
+        }
+    }
 
 	delete myMidiIteratorQN;
 	myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
@@ -236,10 +274,6 @@ FaustProcessor::reset()
 	delete myMidiIteratorSec;
 	myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
 	myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
-
-	if (!m_isCompiled) {
-		this->compile();
-	}
     
     myRecordedMidiSequence.clear();
     myRecordedMidiSequence.addEvent(juce::MidiMessage::midiStart());

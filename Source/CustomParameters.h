@@ -130,9 +130,12 @@ public:
     float sample(AudioPlayHead::PositionInfo& posInfo);
 
     ~AutomateParameter() {}
+    
+    bool isAutomated() { return m_hasAutomation; }
 
 protected:
 
+    bool m_hasAutomation = false;
     std::vector<float> myAutomation;
     std::uint32_t m_ppqn = 0;
 

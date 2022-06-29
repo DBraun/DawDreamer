@@ -4,6 +4,7 @@
 #include "custom_pybind_wrappers.h"
 #include "CustomParameters.h"
 
+const int DAW_PARARAMETER_MAX_NAME_LENGTH = 512;
 
 class ProcessorBase : public juce::AudioProcessor
 {

@@ -133,8 +133,6 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int n
     
     if (m_recordAutomation) {
         const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
-
-        int maximumStringLength = 64;
         
         int j = 0;
         
@@ -143,7 +141,12 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int n
             auto theParameter = (AutomateParameterFloat*)processorParams[i];
             
             // Note that we don't use label because it's sometimes blank. The same choice must be made in reset()
-            std::string name = (processorParams[i])->getName(maximumStringLength).toStdString();
+            std::string name = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+            
+            if (name.compare("") == 0) {
+                continue;
+            }
+            
             auto val = theParameter->sample(posInfo);
             auto writePtr = m_recordedAutomationDict[name].getWritePointer(0, (int) (*posInfo.getTimeInSamples()));
             
@@ -160,10 +163,12 @@ ProcessorBase::reset() {
     
     const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
     
-    int maximumStringLength = 64;
     for (int i = 0; i < this->getNumParameters(); i++) {
         // Note that we don't use label because it's sometimes blank. The same choice must be made in recordAutomation()
-        std::string name = (processorParams[i])->getName(maximumStringLength).toStdString();
+        std::string name = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        if (name.compare("") == 0) {
+            continue;
+        }
         juce::AudioSampleBuffer buffer;
         buffer.setSize(1, m_recordAutomation ? m_expectedRecordNumSamples : 0);
         

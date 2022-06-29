@@ -245,17 +245,18 @@ PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int nu
     int i = 0;
     
     for (juce::AudioProcessorParameter *parameter : myPlugin->getParameters()) {
+        
+        auto name = parameter->getName(DAW_PARARAMETER_MAX_NAME_LENGTH);
+
+        if (name.compare("") == 0 || !parameter->isAutomatable()) {
+            i++;
+            continue;
+        }
+        
         auto paramID = std::to_string(i);
         auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
-        
-        auto name = parameter->getName(64);
-        auto isAutomatable = parameter->isAutomatable();
-        
-        // todo: consider isMeta. Maybe we don't want to automate meta parameters.
-        // auto isMeta = parameter->isMetaParameter();
-
-        // Only automate if name is not empty "" and isAutomatable.
-        if (name.compare("") != 0 && isAutomatable) {
+                
+        if (theParameter->isAutomated()) {
             parameter->beginChangeGesture();
             parameter->setValueNotifyingHost(theParameter->sample(posInfo));
             parameter->endChangeGesture();
@@ -270,6 +271,28 @@ PluginProcessor::reset()
 {
     if (myPlugin.get()) {
         myPlugin->reset();
+    
+        juce::AudioPlayHead::PositionInfo posInfo;
+        // It's important to initialize these.
+        posInfo.setTimeInSamples(0);
+        posInfo.setTimeInSeconds(0);
+        posInfo.setPpqPosition(0);
+        
+        // Set all parameters, even ones which aren't automatable.
+        // Loop twice because some parameters are meta parameters.
+        for (int j=0; j<2; j++) {
+            int i = 0;
+            for (juce::AudioProcessorParameter *parameter : myPlugin->getParameters()) {
+                auto paramID = std::to_string(i);
+                auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
+
+                parameter->beginChangeGesture();
+                parameter->setValueNotifyingHost(theParameter->sample(posInfo));
+                parameter->endChangeGesture();
+
+                i++;
+            }
+        }
     }
 
     delete myMidiIteratorSec;
@@ -421,10 +444,9 @@ PluginProcessor::createParameterLayout()
     ValueTree blankState;
     myParameters.replaceState(blankState);
     
-    int maximumStringLength = 64;
     int i = 0;
     for (auto *parameter : myPlugin->getParameters()) {
-        auto parameterName = parameter->getName(maximumStringLength);
+        auto parameterName = parameter->getName(DAW_PARARAMETER_MAX_NAME_LENGTH);
         std::string paramID = std::to_string(i);
         myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(paramID, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
         // give it a valid single sample of automation.
@@ -743,10 +765,8 @@ PluginProcessorWrapper::getPluginParametersDescription()
         const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
         for (int i = 0; i < myPlugin->getNumParameters(); i++) {
 
-            int maximumStringLength = 64;
-
-            std::string theName = (processorParams[i])->getName(maximumStringLength).toStdString();
-            std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), maximumStringLength).toStdString();
+            std::string theName = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+            std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
             std::string label = processorParams[i]->getLabel().toStdString();
 
             py::dict myDictionary;
@@ -756,6 +776,8 @@ PluginProcessorWrapper::getPluginParametersDescription()
             myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
             myDictionary["label"] = label;
             myDictionary["text"] = currentText;
+            myDictionary["isMetaParameter"] = processorParams[i]->isMetaParameter();
+            myDictionary["isAutomatable"] = processorParams[i]->isAutomatable();
 
             myList.append(myDictionary);
         }

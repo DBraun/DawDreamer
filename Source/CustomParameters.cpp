@@ -21,6 +21,7 @@ AutomateParameter::setAutomation(py::array_t<float> input, std::uint32_t newPPQN
         myAutomation = std::vector<float>(numSamples, 0.f);
 
         memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
+        m_hasAutomation = numSamples > 1;
     }
     catch (const std::exception& e)
     {
@@ -35,6 +36,7 @@ void
 AutomateParameter::setAutomation(const float val) {
     myAutomation.clear();
     myAutomation.push_back(val);
+    m_hasAutomation = false;
 }
 
 std::vector<float>
