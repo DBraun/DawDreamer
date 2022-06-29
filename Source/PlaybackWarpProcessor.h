@@ -15,9 +15,9 @@ public:
 
     PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, double data_sr);
 
-    void prepareToPlay(double, int);
+    void prepareToPlay(double, int) override;
 
-    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
@@ -31,7 +31,7 @@ public:
     double getTimeRatio() { return m_time_ratio_if_warp_off; }
 
     void setTranspose(float newVal) { setAutomationVal("transpose", newVal); }
-    float getTranspose() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("transpose", posInfo); }
+    float getTranspose() { return getAutomationAtZero("transpose"); }
 
     bool getWarpOn() { return m_clipInfo.warp_on; }
     void setWarpOn(bool warpOn) { m_clipInfo.warp_on = warpOn; }

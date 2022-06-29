@@ -86,6 +86,20 @@ float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::
     }
 }
 
+float ProcessorBase::getAutomationAtZero(std::string parameterName) {
+    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
+
+    if (parameter) {
+        AudioPlayHead::PositionInfo posInfo;
+        posInfo.setTimeInSamples(0.);
+        posInfo.setTimeInSeconds(0.);
+        return parameter->sample(posInfo);
+    }
+    else {
+        throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
+    }
+}
+
 py::array_t<float> ProcessorBase::getAutomationNumpy(std::string parameterName) {
     std::vector<float> data = getAutomation(parameterName);
 

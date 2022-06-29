@@ -51,6 +51,10 @@ def test_plugin_instrument1(plugin_path):
 
     # print(synth.get_plugin_parameters_description())
 
+    # value = synth.get_parameter(0)
+    # # value = 0.1
+    # synth.set_parameter(0, value)
+    # assert abs(synth.get_parameter(0) - value) < 1e-07
     synth.get_parameter(0)
     synth.set_parameter(0, synth.get_parameter(0))
     synth.set_automation(0, np.array([synth.get_parameter(0)]))
@@ -88,6 +92,39 @@ def test_plugin_instrument1(plugin_path):
         synth.load_preset('bogus_path.fxp')
 
 
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS[:1])
+def test_plugin_instrument_add_midi_note_beats(plugin_path):
+
+    """
+    We are testing `beats=True` in `synth.add_midi_note(60, 60, i*4, 2, beats=True)`
+    Look at the output audio in Audacity. Check that the notes play every second and last for 0.5 seconds.
+    todo: automate this visual inspection.
+    """
+
+    DURATION = 9.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, 2048)
+    engine.set_bpm(240.)
+
+    plugin_basename = splitext(basename(plugin_path))[0]
+
+    synth = engine.make_plugin_processor("synth", plugin_path)
+
+    # print(synth.get_plugin_parameters_description())
+
+    for i in range(16):
+        synth.add_midi_note(60, 60, i*4, 2, beats=True)
+
+    engine.load_graph([(synth, []),])
+
+    file_path = abspath(OUTPUT / f'test_plugin_instrument_add_midi_note_beats_{plugin_basename}.wav')
+    render(engine, file_path=file_path, duration=DURATION)
+
+    # check that it's non-silent
+    audio = engine.get_audio()
+    assert(np.mean(np.abs(audio)) > .01)
+
+
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
 def test_plugin_instrument_midi(plugin_path):
 
@@ -119,6 +156,7 @@ def test_plugin_instrument_midi(plugin_path):
     # check that it's non-silent
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
+
 
 @pytest.mark.parametrize("do_sidechain", [False, True])
 def test_plugin_goodhertz_sidechain(do_sidechain):

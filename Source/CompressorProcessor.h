@@ -29,18 +29,15 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
 
-        auto posInfo = getPlayHead()->getPosition();
+        //auto posInfo = getPlayHead()->getPosition();
         
-        automateParameters(*posInfo, buffer.getNumSamples());
-        recordAutomation(*posInfo, buffer.getNumSamples());
-
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myCompressor.process(context);
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
 
         *myThreshold = getAutomationVal("threshold", posInfo);
         *myRatio = getAutomationVal("ratio", posInfo);
@@ -57,16 +54,16 @@ public:
     const juce::String getName() const override { return "CompressorProcessor"; };
 
     void setThreshold(float threshold) { setAutomationVal("threshold", threshold); }
-    float getThreshold() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("threshold", posInfo); }
+    float getThreshold() { return getAutomationAtZero("threshold"); }
 
     void setRatio(float ratio) { setAutomationVal("ratio", ratio); }
-    float getRatio() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("ratio", posInfo); }
+    float getRatio() { return getAutomationAtZero("ratio"); }
 
     void setAttack(float attack) { setAutomationVal("attack", attack); }
-    float getAttack() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("attack", posInfo); }
+    float getAttack() { return getAutomationAtZero("attack"); }
 
     void setRelease(float release) { setAutomationVal("release", release); }
-    float getRelease() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("release", posInfo); }
+    float getRelease() { return getAutomationAtZero("release"); }
 
 
 private:

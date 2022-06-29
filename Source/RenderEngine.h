@@ -48,7 +48,7 @@ public:
     
     bool render(const double renderLength, bool isBeats);
 
-    uint64_t getRenderLength(const double renderLength, bool isBeats);
+    int64_t getRenderLength(const double renderLength, bool isBeats);
 
     void setBPM(double bpm);
 
@@ -103,13 +103,14 @@ protected:
     
     bool connectGraph();
 
-    std::unique_ptr<juce::AudioProcessorGraph> myMainProcessorGraph;
+    std::unique_ptr<juce::AudioProcessorGraph> m_mainProcessorGraph;
 
     std::vector<std::pair<std::string, std::vector<std::string>>> m_stringDag;
+    std::vector<ProcessorBase*> m_connectedProcessors;
     
     PositionInfo m_positionInfo;
-    AudioSampleBuffer bpmAutomation;
-    std::uint32_t myBPMPPQN = 960;
+    AudioSampleBuffer m_bpmAutomation;
+    std::uint32_t m_BPM_PPQN = 960;
 
     float getBPM(double ppqPosition);
     

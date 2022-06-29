@@ -28,8 +28,8 @@ public:
         delete myMidiIteratorQN;
     }
 
-    bool acceptsMidi() const { return true; }
-    bool producesMidi() const { return true; }
+    bool acceptsMidi() const override { return true; }
+    bool producesMidi() const override { return true; }
 
     float
     wrapperGetParameter(int parameterIndex)
@@ -41,9 +41,7 @@ public:
 
         auto parameterName = sampler.getParameterName(parameterIndex);
 
-        juce::AudioPlayHead::PositionInfo posInfo;
-
-        return ProcessorBase::getAutomationVal(parameterName.toStdString(), posInfo);
+        return ProcessorBase::getAutomationAtZero(parameterName.toStdString());
     }
 
     void
@@ -67,7 +65,7 @@ public:
     }
    
     void
-    prepareToPlay(double sampleRate, int samplesPerBlock)
+    prepareToPlay(double sampleRate, int samplesPerBlock) override
     {
         sampler.prepareToPlay(sampleRate, samplesPerBlock);
     }
@@ -88,6 +86,7 @@ public:
         myRenderMidiBuffer.clear();
 
         myRecordedMidiSequence.clear();
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::midiStart());
         myRecordedMidiSequence.addEvent(juce::MidiMessage::timeSignatureMetaEvent(4, 4));
         myRecordedMidiSequence.addEvent(juce::MidiMessage::tempoMetaEvent(500*1000));
         myRecordedMidiSequence.addEvent(juce::MidiMessage::midiChannelMetaEvent(1));
@@ -98,9 +97,6 @@ public:
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
     {
         auto posInfo = getPlayHead()->getPosition();
-
-        automateParameters(*posInfo, buffer.getNumSamples());
-        recordAutomation(*posInfo, buffer.getNumSamples());
 
         buffer.clear(); // todo: why did this become necessary?
         midiBuffer.clear();
@@ -364,7 +360,7 @@ public:
     }
 
     void
-    automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
+    automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
 
         for (int i = 0; i < sampler.getNumParameters(); i++) {
 

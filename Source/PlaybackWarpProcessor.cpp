@@ -172,9 +172,6 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
 {
     auto posInfo = getPlayHead()->getPosition();
     
-    automateParameters(*posInfo, buffer.getNumSamples());
-    recordAutomation(*posInfo, buffer.getNumSamples());
-
     if ((m_clips.size() == 0) || (m_clipIndex >= m_clips.size())) {
         // There are no clips, or we've already passed the last clip.
         ProcessorBase::processBlock(buffer, midiBuffer);

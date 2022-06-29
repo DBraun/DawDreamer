@@ -13,31 +13,9 @@ public:
 
     bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) override;
 
-    bool canApplyBusInputsAndOutputs(int inputs, int outputs) {
-        BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
-        return this->canApplyBusesLayout(busesLayout);
-    }
-
     bool setBusesLayout(const BusesLayout& arr) override;
 
-    bool setMainBusInputsAndOutputs(int inputs, int outputs) {
-        BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
-
-        if (this->canApplyBusesLayout(busesLayout)) {
-            return this->setBusesLayout(busesLayout);
-        }
-        else {
-            throw std::invalid_argument(this->getUniqueName() + " CANNOT ApplyBusesLayout inputs: " + std::to_string(inputs) + " outputs: " + std::to_string(outputs));
-            return false;
-        }
-    }
-
-    void numChannelsChanged() override {
-        ProcessorBase::numChannelsChanged();
-        if (myPlugin.get()) {
-            myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
-        }
-    }
+    void numChannelsChanged() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
@@ -45,8 +23,10 @@ public:
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
-    bool acceptsMidi() const override { return true; }
-    bool producesMidi() const override { return true; }
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
+
+    bool acceptsMidi() const override { return myPlugin.get() && myPlugin->acceptsMidi(); }
+    bool producesMidi() const override { return myPlugin.get() && myPlugin->producesMidi(); }
 
     void reset() override;
 
@@ -58,7 +38,7 @@ public:
     void setPatch(const PluginPatch patch);
 
     std::string getParameterAsText(const int parameter);
-    void setParameter(int paramIndex, float newValue) override;
+    void setParameter(int parameterIndex, float newValue) override;
     const PluginPatch getPatch();
     const size_t getPluginParameterSize();
 
@@ -114,8 +94,6 @@ private:
 
     bool myMidiEventsDoRemainQN = false;
     bool myMidiEventsDoRemainSec = false;
-    
-    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 
 protected:
 
@@ -138,7 +116,7 @@ public:
 
     std::string wrapperGetParameterName(int parameter);
 
-    bool wrapperSetParameter(int parameter, float value);
+    bool wrapperSetParameter(int parameterIndex, float value);
 
     bool wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn);
 

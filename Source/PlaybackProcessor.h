@@ -8,14 +8,14 @@ class PlaybackProcessor : public ProcessorBase
 public:
     PlaybackProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData) : ProcessorBase{ newUniqueName }
     {
-        auto numChannels = (int) inputData.size();
+        m_numChannels = (int) inputData.size();
         auto numSamples = (int) inputData.at(0).size();
-        myPlaybackData.setSize(numChannels, numSamples);
-        for (int chan = 0; chan < numChannels; chan++) {
+        myPlaybackData.setSize(m_numChannels, numSamples);
+        for (int chan = 0; chan < m_numChannels; chan++) {
             myPlaybackData.copyFrom(chan, 0, inputData.at(chan).data(), numSamples);
         }
         
-        setMainBusInputsAndOutputs(0, numChannels);
+        setMainBusInputsAndOutputs(0, m_numChannels);
     }
 
     PlaybackProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input) : ProcessorBase{ newUniqueName }
@@ -24,7 +24,7 @@ public:
     }
 
     void
-    prepareToPlay(double, int) {}
+    prepareToPlay(double, int) override {}
 
     void
     processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
@@ -34,13 +34,12 @@ public:
         buffer.applyGain(0.);
 
         int numSamples = std::min(buffer.getNumSamples(), myPlaybackData.getNumSamples() - (int)(*posInfo->getTimeInSamples()));
-        int numChannels = buffer.getNumChannels();
-        for (int chan = 0; chan < numChannels; chan++) {
+
+        for (int chan = 0; chan < m_numChannels; chan++) {
             auto srcPtr = myPlaybackData.getReadPointer(chan);
-            srcPtr += *posInfo->getTimeInSamples();
+            srcPtr += (int)*posInfo->getTimeInSamples();
             buffer.copyFrom(chan, 0, srcPtr, numSamples);
         }
-
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
@@ -54,20 +53,22 @@ public:
     void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
         float* input_ptr = (float*)input.data();
 
-        auto numChannels = (int) input.shape(0);
+        m_numChannels = (int) input.shape(0);
         auto numSamples = (int) input.shape(1);
 
-        myPlaybackData.setSize(numChannels, numSamples);
+        myPlaybackData.setSize(m_numChannels, numSamples);
 
-        for (int chan = 0; chan < numChannels; chan++) {
+        for (int chan = 0; chan < m_numChannels; chan++) {
             myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
             input_ptr += numSamples;
         }
 
-        setMainBusInputsAndOutputs(0, numChannels);
+        setMainBusInputsAndOutputs(0, m_numChannels);
     }
 
 private:
 
     juce::AudioSampleBuffer myPlaybackData;
+    int m_numChannels = 0;
+
 };

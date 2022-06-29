@@ -28,7 +28,6 @@ def test_faust_instrument_midi_save():
         f"""
         declare name "MyInstrument";
 
-        declare options "[nvoices:8]"; // FaustProcessor has a property which will override this.
         import("stdfaust.lib");
 
         freq = hslider("freq",200,50,1000,0.01); // note pitch
@@ -47,11 +46,13 @@ def test_faust_instrument_midi_save():
         """
         )
 
+    assert faust_processor.get_num_output_channels() == 2
+
     midi_basename = 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'
 
     faust_processor.load_midi(abspath(ASSETS / midi_basename), beats=True)
 
-    engine.load_graph([(faust_processor, []),])
+    engine.load_graph([(faust_processor, [])])
 
     file_path = abspath(OUTPUT / f'test_faust_instrument_midi_save.wav')
     render(engine, file_path=file_path, duration=DURATION)
@@ -156,8 +157,9 @@ def test_automation_record_faust():
     faust_processor.record_automation = True
 
     desc = faust_processor.get_parameters_description()
+    assert len(desc) > 0
 
-    engine.load_graph([(faust_processor, []),])
+    engine.load_graph([(faust_processor, [])])
 
     file_path = abspath(OUTPUT / f'test_automation_record_faust.wav')
     render(engine, file_path=file_path, duration=DURATION)

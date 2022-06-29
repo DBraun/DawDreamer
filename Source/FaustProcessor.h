@@ -105,11 +105,27 @@ public:
 
     bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
     void prepareToPlay(double sampleRate, int samplesPerBlock);
+    
+    int
+    getTotalNumOutputChannels() override {
+        if (!m_isCompiled) {
+            this->compile();
+        }
+        return ProcessorBase::getTotalNumOutputChannels();
+    }
+    
+    int
+    getTotalNumInputChannels() override {
+        if (!m_isCompiled) {
+            this->compile();
+        }
+        return ProcessorBase::getTotalNumInputChannels();
+    }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
-    bool acceptsMidi() const { return false; }
-    bool producesMidi() const { return false; }
+    bool acceptsMidi() const override { return false; } // todo: faust should be able to play MIDI.
+    bool producesMidi() const override { return false; }
 
     void reset() override;
 
@@ -117,7 +133,8 @@ public:
 
     const juce::String getName() const override { return "FaustProcessor"; }
 
-    bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
+    bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn) override;
 
     // faust stuff
     void clear();
@@ -174,8 +191,6 @@ public:
 private:
 
     double mySampleRate;
-
-    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 
     std::string getPathToFaustLibraries();
 

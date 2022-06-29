@@ -33,10 +33,7 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-    auto posInfo = getPlayHead()->getPosition();
-        
-    automateParameters(*posInfo, buffer.getNumSamples());
-    recordAutomation(*posInfo, buffer.getNumSamples());
+//    auto posInfo = getPlayHead()->getPosition();
 
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
@@ -160,14 +157,14 @@ FilterProcessor::getMode() {
 void
 FilterProcessor::setFrequency(float freq) { setAutomationVal("freq", freq);}
 float
-FilterProcessor::getFrequency() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("freq", posInfo); }
+FilterProcessor::getFrequency() { return getAutomationAtZero("freq"); }
 
 void
 FilterProcessor::setQ(float q) { setAutomationVal("q", q);}
 float
-FilterProcessor::getQ() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("q", posInfo); }
+FilterProcessor::getQ() { return getAutomationAtZero("q"); }
 
 void
 FilterProcessor::setGain(float gain) { setAutomationVal("gain", gain);}
 float
-FilterProcessor::getGain() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("gain", posInfo);}
+FilterProcessor::getGain() { return getAutomationAtZero("gain");}

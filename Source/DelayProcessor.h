@@ -30,10 +30,7 @@ public:
     }
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
-        auto posInfo = getPlayHead()->getPosition();
-        
-        automateParameters(*posInfo, buffer.getNumSamples());
-        recordAutomation(*posInfo, buffer.getNumSamples());
+        //auto posInfo = getPlayHead()->getPosition();
 
         delayBuffer.makeCopyOf(buffer);
         juce::dsp::AudioBlock<float> block(delayBuffer);
@@ -49,7 +46,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
         *myWetLevel = getAutomationVal("wet_level", posInfo);
         *myDelaySize = getAutomationVal("delay", posInfo);
         updateParameters();
@@ -63,10 +60,10 @@ public:
     const juce::String getName() const override { return "DelayProcessor"; };
 
     void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
-    float getDelay() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("delay", posInfo); }
+    float getDelay() { return getAutomationAtZero("delay"); }
 
     void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
-    float getWet() { AudioPlayHead::PositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
+    float getWet() { return getAutomationAtZero("wet_level"); }
 
 
 private:

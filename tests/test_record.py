@@ -66,11 +66,7 @@ def test_render_beats(buffer_size: int):
 	audio_data = load_audio_file(ASSETS / "Music Delta - Disco" / "bass.wav", duration=5.1)
 	playback = engine.make_playback_processor("playback", audio_data)
 
-	graph = [
-	    (playback, []),
-	]
-
-	engine.load_graph(graph)
+	engine.load_graph([(playback, [])])
 
 	engine.render(BEATS, beats=True)
 

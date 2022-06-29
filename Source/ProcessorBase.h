@@ -62,11 +62,12 @@ public:
     void getStateInformation(juce::MemoryBlock&) override;
     void setStateInformation(const void*, int) override;
 
-    bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
+    virtual bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
 
     virtual bool setAutomationVal(std::string parameterName, float val);
 
     float getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo);
+    float getAutomationAtZero(std::string parameterName);
 
     std::vector<float> getAutomation(std::string parameterName);
     py::array_t<float> getAutomationNumpy(std::string parameterName);
@@ -75,7 +76,8 @@ public:
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
 
-    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {};
+    virtual void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {};
+    void recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples);
     
     void setRecordEnable(bool recordEnable) { m_recordEnable = recordEnable; }
     bool getRecordEnable() { return m_recordEnable; }
@@ -89,12 +91,12 @@ public:
     
     void setRecorderLength(int numSamples);
 
-    int
+    virtual int
     getTotalNumOutputChannels() {
         return AudioProcessor::getTotalNumOutputChannels();
     }
     
-    int
+    virtual int
     getTotalNumInputChannels() {
         return AudioProcessor::getTotalNumInputChannels();
     }
@@ -165,5 +167,4 @@ protected:
         return busesLayout;
     }
     
-    void recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 };
