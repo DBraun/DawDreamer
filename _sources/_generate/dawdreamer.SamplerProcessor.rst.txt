@@ -27,6 +27,7 @@
       ~SamplerProcessor.get_parameter_text
       ~SamplerProcessor.get_parameters_description
       ~SamplerProcessor.load_midi
+      ~SamplerProcessor.save_midi
       ~SamplerProcessor.set_automation
       ~SamplerProcessor.set_data
       ~SamplerProcessor.set_parameter
@@ -41,5 +42,6 @@
    
       ~SamplerProcessor.n_midi_events
       ~SamplerProcessor.record
+      ~SamplerProcessor.record_automation
    
    

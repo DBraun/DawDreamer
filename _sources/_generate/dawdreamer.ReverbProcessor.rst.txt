@@ -32,6 +32,7 @@
       ~ReverbProcessor.damping
       ~ReverbProcessor.dry_level
       ~ReverbProcessor.record
+      ~ReverbProcessor.record_automation
       ~ReverbProcessor.room_size
       ~ReverbProcessor.wet_level
       ~ReverbProcessor.width

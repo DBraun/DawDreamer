@@ -31,6 +31,7 @@
    
       ~PannerProcessor.pan
       ~PannerProcessor.record
+      ~PannerProcessor.record_automation
       ~PannerProcessor.rule
    
    

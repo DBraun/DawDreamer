@@ -25,6 +25,7 @@
       ~FaustProcessor.get_parameter
       ~FaustProcessor.get_parameters_description
       ~FaustProcessor.load_midi
+      ~FaustProcessor.save_midi
       ~FaustProcessor.set_automation
       ~FaustProcessor.set_dsp
       ~FaustProcessor.set_dsp_string
@@ -47,6 +48,7 @@
       ~FaustProcessor.n_midi_events
       ~FaustProcessor.num_voices
       ~FaustProcessor.record
+      ~FaustProcessor.record_automation
       ~FaustProcessor.release_length
    
    

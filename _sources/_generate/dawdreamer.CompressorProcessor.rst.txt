@@ -32,6 +32,7 @@
       ~CompressorProcessor.attack
       ~CompressorProcessor.ratio
       ~CompressorProcessor.record
+      ~CompressorProcessor.record_automation
       ~CompressorProcessor.release
       ~CompressorProcessor.threshold
    

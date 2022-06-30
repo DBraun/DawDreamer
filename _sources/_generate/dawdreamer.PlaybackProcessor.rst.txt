@@ -31,5 +31,6 @@
    .. autosummary::
    
       ~PlaybackProcessor.record
+      ~PlaybackProcessor.record_automation
    
    

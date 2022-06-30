@@ -31,5 +31,6 @@
    
       ~AddProcessor.gain_levels
       ~AddProcessor.record
+      ~AddProcessor.record_automation
    
    

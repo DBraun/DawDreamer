@@ -34,5 +34,6 @@
       ~FilterProcessor.mode
       ~FilterProcessor.q
       ~FilterProcessor.record
+      ~FilterProcessor.record_automation
    
    
