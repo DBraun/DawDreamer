@@ -199,7 +199,7 @@ def test_automation_record_plugin():
     """
 
     if platform.system() == "Windows":
-        plugin_path = abspath(PLUGINS / "Dimension Expander_x64.dll")
+        plugin_path = abspath(PLUGINS / "TAL-NoiseMaker-64.dll")
     elif platform.system() == "Darwin":
         plugin_path = abspath(PLUGINS / "TAL-NoiseMaker.vst")
     else:

@@ -44,6 +44,8 @@ jobs:
       run: |
         cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
+        rm thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so
+        rm thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so
 
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
