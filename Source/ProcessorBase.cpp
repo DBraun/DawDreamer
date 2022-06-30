@@ -75,10 +75,24 @@ std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
     }
 }
 
-float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::CurrentPositionInfo& posInfo) {
+float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo) {
     auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
     if (parameter) {
+        return parameter->sample(posInfo);
+    }
+    else {
+        throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
+    }
+}
+
+float ProcessorBase::getAutomationAtZero(std::string parameterName) {
+    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
+
+    if (parameter) {
+        AudioPlayHead::PositionInfo posInfo;
+        posInfo.setTimeInSamples(0.);
+        posInfo.setTimeInSeconds(0.);
         return parameter->sample(posInfo);
     }
     else {
@@ -99,4 +113,124 @@ py::array_t<float> ProcessorBase::getAutomationNumpy(std::string parameterName) 
     }
 
     return arr;
+}
+
+
+py::dict ProcessorBase::getAutomationAll() {
+    
+    py::dict outDict;
+    
+    for (auto it = m_recordedAutomationDict.begin(); it != m_recordedAutomationDict.end(); it++)
+    {
+        outDict[it->first.c_str()] = this->bufferToPyArray(it->second);
+    }
+
+    return outDict;
+}
+
+
+void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
+    
+    if (m_recordAutomation) {
+        const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
+        
+        int j = 0;
+        
+        for (int i = 0; i < this->getNumParameters(); i++) {
+            
+            auto theParameter = (AutomateParameterFloat*)processorParams[i];
+            
+            // Note that we don't use label because it's sometimes blank. The same choice must be made in reset()
+            std::string name = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+            
+            if (name.compare("") == 0) {
+                continue;
+            }
+            
+            auto val = theParameter->sample(posInfo);
+            auto writePtr = m_recordedAutomationDict[name].getWritePointer(0, (int) (*posInfo.getTimeInSamples()));
+            
+            for (j=0; j < numSamples; j++) {
+                *writePtr++ = val;
+            }
+        }
+    }
+}
+
+void
+ProcessorBase::reset() {
+    m_recordedAutomationDict.clear();
+    
+    const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
+    
+    for (int i = 0; i < this->getNumParameters(); i++) {
+        // Note that we don't use label because it's sometimes blank. The same choice must be made in recordAutomation()
+        std::string name = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        if (name.compare("") == 0) {
+            continue;
+        }
+        juce::AudioSampleBuffer buffer;
+        buffer.setSize(1, m_recordAutomation ? m_expectedRecordNumSamples : 0);
+        
+        m_recordedAutomationDict[name] = buffer;
+    }
+}
+
+void
+ProcessorBase::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
+
+    if (!m_recordEnable) {
+        return;
+    }
+    auto posInfo = getPlayHead()->getPosition();
+
+    const int numberChannels = myRecordBuffer.getNumChannels();
+    int numSamplesToCopy = std::min(buffer.getNumSamples(), myRecordBuffer.getNumSamples() -int(*posInfo->getTimeInSamples()));
+    int writePos = int(*posInfo->getTimeInSamples());
+
+    for (int chan = 0; chan < numberChannels; chan++) {
+        // Write the sample to the engine's history for the correct channel.
+        myRecordBuffer.copyFrom(chan, writePos, buffer.getReadPointer(chan), numSamplesToCopy);
+    }
+}
+
+
+py::array_t<float>
+ProcessorBase::bufferToPyArray(juce::AudioSampleBuffer& buffer) {
+    size_t num_channels = buffer.getNumChannels();
+    size_t num_samples = buffer.getNumSamples();
+
+    py::array_t<float, py::array::c_style> arr({ (int)num_channels, (int)num_samples });
+
+    auto ra = arr.mutable_unchecked();
+
+    auto chans = buffer.getArrayOfReadPointers();
+    for (size_t i = 0; i < num_channels; i++)
+    {
+        auto chanPtr = chans[i];
+
+        for (size_t j = 0; j < num_samples; j++)
+        {
+            ra(i, j) = *(chanPtr++);
+        }
+    }
+
+    return arr;
+}
+
+py::array_t<float>
+ProcessorBase::getAudioFrames()
+{
+    return bufferToPyArray(myRecordBuffer);
+}
+
+void
+ProcessorBase::setRecorderLength(int numSamples) {
+    
+    m_expectedRecordNumSamples = numSamples;
+    
+    int numChannels = this->getTotalNumOutputChannels();
+    
+    myRecordBuffer.setSize(numChannels, m_recordEnable ? numSamples : 0);
+    
 }

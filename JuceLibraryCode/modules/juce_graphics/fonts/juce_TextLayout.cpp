@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -352,31 +352,30 @@ namespace TextLayoutHelpers
                 if (currentRun == nullptr)  currentRun  = std::make_unique<TextLayout::Run>();
                 if (currentLine == nullptr) currentLine = std::make_unique<TextLayout::Line>();
 
-                if (newGlyphs.size() > 0)
+                const auto numGlyphs = newGlyphs.size();
+                charPosition += numGlyphs;
+
+                if (numGlyphs > 0
+                    && (! (t.isWhitespace || t.isNewLine) || needToSetLineOrigin))
                 {
-                    if (! t.isWhitespace && ! t.isNewLine)
+                    currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
+                    auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
+
+                    if (needToSetLineOrigin)
                     {
-                        currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
-                        auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
-
-                        if (needToSetLineOrigin)
-                        {
-                            needToSetLineOrigin = false;
-                            currentLine->lineOrigin = tokenOrigin;
-                        }
-
-                        auto glyphOffset = tokenOrigin - currentLine->lineOrigin;
-
-                        for (int j = 0; j < newGlyphs.size(); ++j)
-                        {
-                            auto x = xOffsets.getUnchecked (j);
-                            currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked (j),
-                                                                       glyphOffset.translated (x, 0),
-                                                                       xOffsets.getUnchecked (j + 1) - x));
-                        }
+                        needToSetLineOrigin = false;
+                        currentLine->lineOrigin = tokenOrigin;
                     }
 
-                    charPosition += newGlyphs.size();
+                    auto glyphOffset = tokenOrigin - currentLine->lineOrigin;
+
+                    for (int j = 0; j < newGlyphs.size(); ++j)
+                    {
+                        auto x = xOffsets.getUnchecked (j);
+                        currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked (j),
+                                                                   glyphOffset.translated (x, 0),
+                                                                   xOffsets.getUnchecked (j + 1) - x));
+                    }
                 }
 
                 if (auto* nextToken = tokens[i + 1])
@@ -497,7 +496,7 @@ namespace TextLayoutHelpers
 
             for (i = 0; i < tokens.size(); ++i)
             {
-                auto& t = *tokens.getUnchecked(i);
+                auto& t = *tokens.getUnchecked (i);
                 t.area.setPosition (x, y);
                 t.line = totalLines;
                 x += t.area.getWidth();

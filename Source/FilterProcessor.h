@@ -18,13 +18,15 @@ class FilterProcessor : public ProcessorBase
 public:
     FilterProcessor(std::string newUniqueName, std::string mode, float freq, float q, float gain);
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock);
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&);
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) override;
+    
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
 
-    void reset();
+    void reset() override;
 
-    const juce::String getName();
+    const juce::String getName() const override { return "FilterProcessor"; }
 
     void setMode(std::string mode);
     std::string getMode();
@@ -50,8 +52,6 @@ private:
 
     std::string modeToString(FILTER_FilterFormat mode);
     FILTER_FilterFormat stringToMode(std::string s);
-
-    void automateParameters();
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     {

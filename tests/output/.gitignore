@@ -1,2 +1,6 @@
 state*
 *.wav
+*.mid
+*.midi
+*.csv
+*.tsv

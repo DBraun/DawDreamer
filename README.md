@@ -136,8 +136,13 @@ synth.load_state('C:/path/to/state1')
 synth.load_preset('C:/path/to/preset.fxp')
 synth.load_vst3_preset('C:/path/to/preset.vstpreset')
 
+# We'll set automation for our synth. Later we'll want to bake this automation into
+# audio-rate data, so we must enable `record_automation`. If you don't intend to call
+# `get_automation()` later, there's no need to do this:
+synth.record_automation = True
+
 # Get a list of dictionaries where each dictionary describes a controllable parameter.
-print(synth.get_plugin_parameters_description()) 
+print(synth.get_parameters_description()) 
 print(synth.get_parameter_name(1)) # For Serum, returns "A Pan" (oscillator A's panning)
 # Note that Plugin Processor parameters are between [0, 1], even "discrete" parameters.
 # We can simply set a constant value.
@@ -219,6 +224,15 @@ filtered_audio = engine.get_audio("filter")
 
 # You can modify processors without recreating the graph.
 synth.load("C:/path/to/other_preset.fxp")
+
+# After rendering, you can fetch PPQN-rate automation that has been baked into audio-rate data.
+# Use a smaller buffer size to get more granularity in this data, otherwise there will be
+# some "steppiness"/"nearest-lookup".
+all_automation = synth.get_automation()  # a dictionary of all parameters at audio-rate.
+
+# After rendering, you can save to MIDI with absolute times, in case the BPM affected it.
+synth.save_midi("my_midi_output.mid")
+
 engine.render(DURATION)  # Render audio again!
 ```
 

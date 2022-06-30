@@ -18,7 +18,7 @@ def test_stereo_plugin_effect(plugin_path):
 
     effect = engine.make_plugin_processor("effect", plugin_path)
 
-    # print(effect.get_plugin_parameters_description())
+    # print(effect.get_parameters_description())
     assert(effect.get_num_input_channels() == PLUGIN_INPUT_CHANNELS[plugin_basename])
     assert(effect.get_num_output_channels() == PLUGIN_OUTPUT_CHANNELS[plugin_basename])
 
@@ -39,18 +39,22 @@ def test_stereo_plugin_effect(plugin_path):
 
 
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
-def test_plugin_instrument(plugin_path):
+def test_plugin_instrument1(plugin_path):
 
-    DURATION = 5.
+    DURATION = 1.5
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, 512)
 
     plugin_basename = splitext(basename(plugin_path))[0]
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_plugin_parameters_description())
+    desc = synth.get_parameters_description()
 
+    # value = synth.get_parameter(0)
+    # # value = 0.1
+    # synth.set_parameter(0, value)
+    # assert abs(synth.get_parameter(0) - value) < 1e-07
     synth.get_parameter(0)
     synth.set_parameter(0, synth.get_parameter(0))
     synth.set_automation(0, np.array([synth.get_parameter(0)]))
@@ -73,15 +77,52 @@ def test_plugin_instrument(plugin_path):
 
     engine.load_graph([(synth, [])])
 
+    plugin_basename = basename(plugin_path)
+
+    # print(f'start render ----- {plugin_path}')
     render(engine, file_path=OUTPUT / f'test_plugin_instrument_{plugin_basename}.wav', duration=DURATION)
+    # print(f'end render ----- {plugin_path}')
 
     # check that it's non-silent
     audio = engine.get_audio()
-    assert(np.mean(np.abs(audio)) > .01)
+    assert(np.mean(np.abs(audio)) > .003)
     assert(np.mean(np.abs(audio[:10000])) > .001)  # test that the first note wasn't silent
 
     with pytest.raises(Exception):
         synth.load_preset('bogus_path.fxp')
+
+
+@pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS[:1])
+def test_plugin_instrument_add_midi_note_beats(plugin_path):
+
+    """
+    We are testing `beats=True` in `synth.add_midi_note(60, 60, i*4, 2, beats=True)`
+    Look at the output audio in Audacity. Check that the notes play every second and last for 0.5 seconds.
+    todo: automate this visual inspection.
+    """
+
+    DURATION = 9.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, 2048)
+    engine.set_bpm(240.)
+
+    plugin_basename = splitext(basename(plugin_path))[0]
+
+    synth = engine.make_plugin_processor("synth", plugin_path)
+
+    # print(synth.get_parameters_description())
+
+    for i in range(16):
+        synth.add_midi_note(60, 60, i*4, 2, beats=True)
+
+    engine.load_graph([(synth, []),])
+
+    file_path = abspath(OUTPUT / f'test_plugin_instrument_add_midi_note_beats_{plugin_basename}.wav')
+    render(engine, file_path=file_path, duration=DURATION)
+
+    # check that it's non-silent
+    audio = engine.get_audio()
+    assert(np.mean(np.abs(audio)) > .01)
 
 
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
@@ -95,7 +136,7 @@ def test_plugin_instrument_midi(plugin_path):
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_plugin_parameters_description())
+    # print(synth.get_parameters_description())
 
     synth.load_midi(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
     synth.clear_midi()
@@ -115,6 +156,7 @@ def test_plugin_instrument_midi(plugin_path):
     # check that it's non-silent
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .01)
+
 
 @pytest.mark.parametrize("do_sidechain", [False, True])
 def test_plugin_goodhertz_sidechain(do_sidechain):
@@ -206,7 +248,7 @@ def test_plugin_effect_ambisonics():
     assert(proc_encoder.get_num_input_channels() == 1)
     assert(proc_encoder.get_num_output_channels() == 4)
 
-    # for par in proc_encoder.get_plugin_parameters_description():
+    # for par in proc_encoder.get_parameters_description():
     #   print(par)
 
     graph = [
@@ -322,7 +364,7 @@ def test_plugin_editor(plugin_path: str):
 
     # sleep(.5)
 
-    # print(synth.get_plugin_parameters_description())
+    # print(synth.get_parameters_description())
 
     print('synth: ', plugin_basename, ' inputs: ', synth.get_num_input_channels(), ' outputs: ', synth.get_num_output_channels())
 
@@ -397,7 +439,7 @@ def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnc
     assert ambisonics_encoder.get_num_input_channels() == num_inputs
     assert ambisonics_encoder.get_num_output_channels() == num_outputs
 
-    # print(ambisonics_encoder.get_plugin_parameters_description())
+    # print(ambisonics_encoder.get_parameters_description())
     # print('inputs: ', ambisonics_encoder.get_num_input_channels(), ' outputs: ', ambisonics_encoder.get_num_output_channels())
 
     plugin_basename = basename(plugin_path2)

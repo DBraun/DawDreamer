@@ -11,44 +11,25 @@ public:
     PluginProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock, std::string path);
     ~PluginProcessor();
 
-    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout);
+    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) override;
 
-    bool canApplyBusInputsAndOutputs(int inputs, int outputs) {
-        BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
-        return this->canApplyBusesLayout(busesLayout);
-    }
+    bool setBusesLayout(const BusesLayout& arr) override;
 
-    bool setBusesLayout(const BusesLayout& arr);
+    void numChannelsChanged() override;
 
-    bool setMainBusInputsAndOutputs(int inputs, int outputs) {
-        BusesLayout busesLayout = this->makeBusesLayout(inputs, outputs);
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
-        if (this->canApplyBusesLayout(busesLayout)) {
-            return this->setBusesLayout(busesLayout);
-        }
-        else {
-            throw std::invalid_argument(this->getUniqueName() + " CANNOT ApplyBusesLayout inputs: " + std::to_string(inputs) + " outputs: " + std::to_string(outputs));
-            return false;
-        }
-    }
+    //bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
 
-    void numChannelsChanged() {
-        ProcessorBase::numChannelsChanged();
-        if (myPlugin.get()) {
-            myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
-        }
-    }
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock);
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
 
-    bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
+    bool acceptsMidi() const override { return myPlugin.get() && myPlugin->acceptsMidi(); }
+    bool producesMidi() const override { return myPlugin.get() && myPlugin->producesMidi(); }
+    std::uint32_t getLatencySamples();
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer);
-
-    bool acceptsMidi() const { return true; }
-    bool producesMidi() const { return true; }
-
-    void reset();
+    void reset() override;
 
     bool loadPreset(const std::string& path);
     bool loadVST3Preset(const std::string& path);
@@ -58,11 +39,11 @@ public:
     void setPatch(const PluginPatch patch);
 
     std::string getParameterAsText(const int parameter);
-    void setParameter(int paramIndex, float newValue);
+    void setParameter(int parameterIndex, float newValue) override;
     const PluginPatch getPatch();
     const size_t getPluginParameterSize();
 
-    const juce::String getName() const { return "PluginProcessor"; }
+    const juce::String getName() const override { return "PluginProcessor"; }
 
     bool loadMidi(const std::string& path, bool clearPrevious, bool isBeats, bool allEvents);
 
@@ -76,18 +57,19 @@ public:
         const double noteLength,
         bool isBeats);
 
-    void setPlayHead(AudioPlayHead* newPlayHead);
+    void setPlayHead(AudioPlayHead* newPlayHead) override;
 
     void openEditor();
 
     void loadStateInformation(std::string filepath);
 
     void saveStateInformation(std::string filepath);
+        
+    void saveMIDI(std::string& savePath);
 
 private:
 
     bool loadPlugin(double sampleRate, int samplesPerBlock);
-    bool isLoaded = false;
 
     std::string myPluginPath;
     double mySampleRate;
@@ -96,6 +78,7 @@ private:
     MidiBuffer myMidiBufferSec;
 
     MidiBuffer myRenderMidiBuffer;
+    MidiMessageSequence myRecordedMidiSequence; // for fetching by user later.
 
     MidiMessage myMidiMessageQN;
     MidiMessage myMidiMessageSec;
@@ -111,8 +94,6 @@ private:
 
     bool myMidiEventsDoRemainQN = false;
     bool myMidiEventsDoRemainSec = false;
-
-    void automateParameters();
 
 protected:
 
@@ -135,7 +116,7 @@ public:
 
     std::string wrapperGetParameterName(int parameter);
 
-    bool wrapperSetParameter(int parameter, float value);
+    bool wrapperSetParameter(int parameterIndex, float value);
 
     bool wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn);
 

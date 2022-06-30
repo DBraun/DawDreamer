@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,16 +39,23 @@ static bool exeIsAvailable (String executable)
     return false;
 }
 
+static bool isSet (int flags, int toCheck)
+{
+    return (flags & toCheck) != 0;
+}
+
 class FileChooser::Native    : public FileChooser::Pimpl,
                                private Timer
 {
 public:
     Native (FileChooser& fileChooser, int flags)
         : owner (fileChooser),
-          isDirectory         ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
-          isSave              ((flags & FileBrowserComponent::saveMode)               != 0),
-          selectMultipleFiles ((flags & FileBrowserComponent::canSelectMultipleItems) != 0),
-          warnAboutOverwrite  ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0)
+          // kdialog/zenity only support opening either files or directories.
+          // Files should take precedence, if requested.
+          isDirectory         (isSet (flags, FileBrowserComponent::canSelectDirectories) && ! isSet (flags, FileBrowserComponent::canSelectFiles)),
+          isSave              (isSet (flags, FileBrowserComponent::saveMode)),
+          selectMultipleFiles (isSet (flags, FileBrowserComponent::canSelectMultipleItems)),
+          warnAboutOverwrite  (isSet (flags, FileBrowserComponent::warnAboutOverwriting))
     {
         const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
 

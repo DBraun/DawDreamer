@@ -1,4 +1,4 @@
-#include "RenderEngineWrapper.h"
+#include "RenderEngine.h"
 
 PYBIND11_MODULE(dawdreamer, m)
 {
@@ -50,7 +50,7 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 )pbdoc")
 .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"), R"pbdoc(
-    Get a parameter's automation as a numpy array.
+    Get a parameter's automation as a numpy array. It should return whatever array was passed previously to `set_automation`, whether it's PPQN-rate data or audio-rate data.
 
     Parameters
     ----------
@@ -66,9 +66,11 @@ PYBIND11_MODULE(dawdreamer, m)
     ----------
 
 )pbdoc")
+.def("get_automation", &ProcessorBase::getAutomationAll, "After rendering, get all of a parameter's automation as a dict of multi-channel numpy arrays. Before rendering, you should have set `record_automation` to True on the processor. This function uses the engine's BPM automation, if any, to bake the automation data into audio-rate data.")
         .def("get_num_output_channels", &ProcessorBase::getTotalNumOutputChannels, "Get the total number of output channels (2 indicates stereo output).")
         .def("get_num_input_channels", &ProcessorBase::getTotalNumInputChannels, "Get the total number of input channels (2 indicates stereo input).")
         .def_property("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable, "Whether recording of this processor is enabled." )
+        .def_property("record_automation", &ProcessorBase::getRecordAutomationEnable, &ProcessorBase::setRecordAutomationEnable, "Whether recording of this processor's automation is enabled." )
         .def("get_audio", &ProcessorBase::getAudioFrames, "Get the audio data of the processor after a render, assuming recording was enabled.")
         .def("get_name", &ProcessorBase::getUniqueName, "Get the user-defined name of a processor instance.").doc() = R"pbdoc(
     The abstract Processor Base class, which all processors subclass.
@@ -201,6 +203,7 @@ but the filter mode cannot under automation.";
 
     auto add_midi_description = "Add a single MIDI note whose note and velocity are integers between 0 and 127. By default, when `beats` is False, the start time and duration are measured in seconds, otherwise beats.";
     auto load_midi_description = "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded. By default, when `beats` is False, notes will be converted to absolute times and will not be affected by the Render Engine's BPM. By default, `clear_previous` is True.";
+    auto save_midi_description = "After rendering, you can save the MIDI to a file using absolute times (SMPTE format).";
 
     py::class_<PluginProcessorWrapper, ProcessorBase>(m, "PluginProcessor")
         .def("can_set_bus", &PluginProcessorWrapper::canApplyBusInputsAndOutputs, arg("inputs"), arg("outputs"), "Return bool for whether this combination of input and output channels can be set.")
@@ -221,13 +224,18 @@ but the filter mode cannot under automation.";
             "Set the automation based on its index.")
         .def("get_plugin_parameter_size", &PluginProcessorWrapper::wrapperGetPluginParameterSize, "Get the number of parameters.")
         .def("get_plugin_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
+            "[DEPRECATED: Use `get_parameters_description`]. Get a list of dictionaries describing the plugin's parameters.")
+        .def("get_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
             "Get a list of dictionaries describing the plugin's parameters.")
+        .def("get_latency_samples", &PluginProcessorWrapper::getLatencySamples, "Get the latency measured in samples of the plugin. DawDreamer doesn't compensate this, so you are encouraged to delay other processors by this amount to compensate. Also, this value depends on the plugin's parameters, so it can change over time, and the output of this function doesn't represent that.")
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("clear_previous")=true, arg("beats")=false, arg("all_events")=true, load_midi_description)
         .def("clear_midi", &PluginProcessorWrapper::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &PluginProcessorWrapper::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &PluginProcessorWrapper::saveMIDI,
+            arg("filepath"), save_midi_description)
         .doc() = "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
@@ -247,6 +255,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("clear_midi", &SamplerProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &SamplerProcessor::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &SamplerProcessor::saveMIDI,
+            arg("filepath"), save_midi_description)
         .doc() = "The Sampler Processor works like a basic Sampler instrument. It takes a typically short audio sample and can play it back \
 at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff. \
 Unlike a VST, the parameters don't need to be between 0 and 1. For example, you can set an envelope attack parameter to 50 to represent 50 milliseconds.";
@@ -264,7 +274,6 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def("get_parameter", &FaustProcessor::getParamWithPath, arg("parameter_path"))
         .def("set_parameter", &FaustProcessor::setParamWithIndex, arg("parameter_index"), arg("value"))
         .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"), arg("value"))
-        .def("set_automation", &FaustProcessor::setAutomation, arg("parameter_name"), arg("data"), kw_only(), arg("ppqn") = 0)
         .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
@@ -277,6 +286,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
         .def("add_midi_note", &FaustProcessor::addMidiNote,
             arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &FaustProcessor::saveMIDI,
+            arg("filepath"), save_midi_description)
         .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 #endif
@@ -284,42 +295,42 @@ Note that note-ons and note-offs are counted separately.")
     std::vector<float> defaultGain;
 
     py::return_value_policy returnPolicy = py::return_value_policy::reference;
-
-    py::class_<RenderEngineWrapper>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
+    
+    py::class_<RenderEngine>(m, "RenderEngine", "A Render Engine loads and runs a graph of audio processors.")
         .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
-        .def("render", &RenderEngineWrapper::render, arg("duration"), kw_only(), arg("beats")=false, "Render the most recently loaded graph. By default, when `beats` is False, duration is measured in seconds, otherwise beats.")
-        .def("set_bpm", &RenderEngineWrapper::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
-        .def("set_bpm", &RenderEngineWrapper::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
+        .def("render", &RenderEngine::render, arg("duration"), kw_only(), arg("beats")=false, "Render the most recently loaded graph. By default, when `beats` is False, duration is measured in seconds, otherwise beats.")
+        .def("set_bpm", &RenderEngine::setBPM, arg("bpm"), "Set the beats-per-minute of the engine as a constant rate.")
+        .def("set_bpm", &RenderEngine::setBPMwithPPQN, arg("bpm"), arg("ppqn"), "Set the beats-per-minute of the engine using a 1D numpy array and a constant PPQN. If the values in the array suddenly change every PPQN samples, the tempo change will occur \"on-the-beat.\"")
         .def("get_audio", &RenderEngine::getAudioFrames, "Get the most recently rendered audio as a numpy array.")
         .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"), "Get the most recently rendered audio for a specific processor.")
         .def("remove_processor", &RenderEngine::removeProcessor, arg("name"), "Remove a processor based on its unique name. Existing Python references to the processor will become invalid.")
-        .def("load_graph", &RenderEngineWrapper::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
-        .def("make_oscillator_processor", &RenderEngineWrapper::makeOscillatorProcessor, arg("name"), arg("frequency"),
+        .def("load_graph", &RenderEngine::loadGraphWrapper, arg("dag"), "Load a directed acyclic graph of processors.")
+        .def("make_oscillator_processor", &RenderEngine::makeOscillatorProcessor, arg("name"), arg("frequency"),
             "Make an Oscillator Processor", returnPolicy)
-        .def("make_plugin_processor", &RenderEngineWrapper::makePluginProcessor, arg("name"), arg("plugin_path"),
+        .def("make_plugin_processor", &RenderEngine::makePluginProcessor, arg("name"), arg("plugin_path"),
             "Make a Plugin Processor", returnPolicy)
-        .def("make_sampler_processor", &RenderEngineWrapper::makeSamplerProcessor, arg("name"), arg("data"),
+        .def("make_sampler_processor", &RenderEngine::makeSamplerProcessor, arg("name"), arg("data"),
             "Make a Sampler Processor with audio data to be used as the sample.", returnPolicy)
 #ifdef BUILD_DAWDREAMER_FAUST
-        .def("make_faust_processor", &RenderEngineWrapper::makeFaustProcessor, arg("name"), "Make a FAUST Processor", returnPolicy)
+        .def("make_faust_processor", &RenderEngine::makeFaustProcessor, arg("name"), "Make a FAUST Processor", returnPolicy)
 #endif
-        .def("make_playback_processor", &RenderEngineWrapper::makePlaybackProcessor, arg("name"), arg("data"), returnPolicy, "Make a Playback Processor")
+        .def("make_playback_processor", &RenderEngine::makePlaybackProcessor, arg("name"), arg("data"), returnPolicy, "Make a Playback Processor")
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-        .def("make_playbackwarp_processor", &RenderEngineWrapper::makePlaybackWarpProcessor, arg("name"), arg("data"), kw_only(), arg("sr")=0,
+        .def("make_playbackwarp_processor", &RenderEngine::makePlaybackWarpProcessor, arg("name"), arg("data"), kw_only(), arg("sr")=0,
             "Make a Playback Processor that can do time-stretching and pitch-shifting. The `sr` kwarg (sample rate of the data) is optional and defaults to the engine's sample rate.", returnPolicy)
 #endif
-        .def("make_filter_processor", &RenderEngineWrapper::makeFilterProcessor, returnPolicy,
+        .def("make_filter_processor", &RenderEngine::makeFilterProcessor, returnPolicy,
             arg("name"), arg("mode") = "high", arg("freq") = 1000.f, arg("q") = .707107f, arg("gain") = 1.f, "Make a Filter Processor")
-        .def("make_reverb_processor", &RenderEngineWrapper::makeReverbProcessor, returnPolicy,
+        .def("make_reverb_processor", &RenderEngine::makeReverbProcessor, returnPolicy,
             arg("name"), arg("roomSize") = 0.5f, arg("damping") = 0.5f, arg("wetLevel") = 0.33f,
             arg("dryLevel") = 0.4f, arg("width") = 1.0f, "Make a Reverb Processor")
-        .def("make_add_processor", &RenderEngineWrapper::makeAddProcessor, returnPolicy,
+        .def("make_add_processor", &RenderEngine::makeAddProcessor, returnPolicy,
             arg("name"), arg("gain_levels") = defaultGain, "Make an Add Processor with an optional list of gain levels")
-        .def("make_delay_processor", &RenderEngineWrapper::makeDelayProcessor, returnPolicy,
+        .def("make_delay_processor", &RenderEngine::makeDelayProcessor, returnPolicy,
             arg("name"), arg("rule") = "linear", arg("delay") = 10.f, arg("wet") = .1f, "Make a Delay Processor")
-        .def("make_panner_processor", &RenderEngineWrapper::makePannerProcessor, returnPolicy,
+        .def("make_panner_processor", &RenderEngine::makePannerProcessor, returnPolicy,
             arg("name"), arg("rule") = "linear", arg("pan") = 0.f, "Make a Panner Processor")
-        .def("make_compressor_processor", &RenderEngineWrapper::makeCompressorProcessor, returnPolicy,
+        .def("make_compressor_processor", &RenderEngine::makeCompressorProcessor, returnPolicy,
             arg("name"), arg("threshold") = 0.f, arg("ratio") = 2.f, arg("attack") = 2.0f, arg("release") = 50.f, "Make a Compressor Processor");
 
 }

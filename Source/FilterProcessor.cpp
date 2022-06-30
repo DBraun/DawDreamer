@@ -16,15 +16,14 @@ FilterProcessor::FilterProcessor(std::string newUniqueName, std::string mode, fl
     setMainBusInputsAndOutputs(2, 2);
 }
 
-const juce::String FilterProcessor::getName() { return "FilterProcessor"; }
-
 void
 FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     mySampleRate = sampleRate;
     mySamplesPerBlock = samplesPerBlock;
 
-    automateParameters();  // this gives the filters an initial state.
+    AudioPlayHead::PositionInfo posInfo;
+    automateParameters(posInfo, 1);  // this gives the filters an initial state.
 
     int numChannels = 2;
     juce::dsp::ProcessSpec spec{ mySampleRate, static_cast<juce::uint32> (mySamplesPerBlock), static_cast<juce::uint32> (numChannels) };
@@ -34,7 +33,7 @@ FilterProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-    automateParameters();
+//    auto posInfo = getPlayHead()->getPosition();
 
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
@@ -43,10 +42,7 @@ FilterProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 }
 
 
-void FilterProcessor::automateParameters() {
-
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
+void FilterProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
     *myFreq = getAutomationVal("freq", posInfo);
     *myQ = getAutomationVal("q", posInfo);
@@ -86,6 +82,7 @@ void
 FilterProcessor::reset()
 {
     myFilter.reset();
+    ProcessorBase::reset();
 }
 
 std::string
@@ -160,14 +157,14 @@ FilterProcessor::getMode() {
 void
 FilterProcessor::setFrequency(float freq) { setAutomationVal("freq", freq);}
 float
-FilterProcessor::getFrequency() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("freq", posInfo); }
+FilterProcessor::getFrequency() { return getAutomationAtZero("freq"); }
 
 void
 FilterProcessor::setQ(float q) { setAutomationVal("q", q);}
 float
-FilterProcessor::getQ() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("q", posInfo); }
+FilterProcessor::getQ() { return getAutomationAtZero("q"); }
 
 void
 FilterProcessor::setGain(float gain) { setAutomationVal("gain", gain);}
 float
-FilterProcessor::getGain() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("gain", posInfo);}
+FilterProcessor::getGain() { return getAutomationAtZero("gain");}

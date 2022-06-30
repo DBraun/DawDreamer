@@ -2,7 +2,7 @@
 export PYTHONMAJOR=3.9
 export pythonLocation=/Library/Frameworks/Python.framework/Versions/3.9
 
-# Below this you shouldn't need to change anything except for the part about codesigning.
+# Below this you shouldn't need to change anything.
 
 # Build Libsamplerate
 cd thirdparty/libsamplerate
@@ -12,21 +12,8 @@ make --directory=build_release
 cd ../..
 
 # build macOS release
-export MACOSX_DEPLOYMENT_TARGET=10.15
-xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
+xcodebuild ARCHS="x86_64 arm64" ONLY_ACTIVE_ARCH=NO -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
 mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
-# otool -L Builds/MacOSX/build/Release/dawdreamer.so
-install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib Builds/MacOSX/build/Release/dawdreamer.so
-# otool -L Builds/MacOSX/build/Release/dawdreamer.so
-
-# codesigning
-# Open Keychain Access. Go to "login". Look for "Apple Development".
-# run `export CODESIGN_IDENTITY="Apple Development: example@example.com (ABCDE12345)"` with your own info substituted.
-# You can put this in your ~/.zshrc file too.
-codesign --force --deep --sign "$CODESIGN_IDENTITY" Builds/MacOSX/build/Release/dawdreamer.so
-
-# # Confirm the codesigning
-codesign -vvvv Builds/MacOSX/build/Release/dawdreamer.so
 
 rm tests/dawdreamer.so
 cp Builds/MacOSX/build/Release/dawdreamer.so tests/dawdreamer.so

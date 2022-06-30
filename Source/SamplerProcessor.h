@@ -20,7 +20,7 @@ public:
         createParameterLayout();
         sampler.setNonRealtime(true);
         setData(input);
-        setMainBusInputsAndOutputs(0, input.shape(0));
+        setMainBusInputsAndOutputs(0, (int)input.shape(0));
     }
 
     ~SamplerProcessor() {
@@ -28,8 +28,8 @@ public:
         delete myMidiIteratorQN;
     }
 
-    bool acceptsMidi() const { return true; }
-    bool producesMidi() const { return true; }
+    bool acceptsMidi() const override { return true; }
+    bool producesMidi() const override { return true; }
 
     float
     wrapperGetParameter(int parameterIndex)
@@ -41,9 +41,7 @@ public:
 
         auto parameterName = sampler.getParameterName(parameterIndex);
 
-        juce::AudioPlayHead::CurrentPositionInfo posInfo;
-
-        return ProcessorBase::getAutomationVal(parameterName.toStdString(), posInfo);
+        return ProcessorBase::getAutomationAtZero(parameterName.toStdString());
     }
 
     void
@@ -67,12 +65,12 @@ public:
     }
    
     void
-    prepareToPlay(double sampleRate, int samplesPerBlock)
+    prepareToPlay(double sampleRate, int samplesPerBlock) override
     {
         sampler.prepareToPlay(sampleRate, samplesPerBlock);
     }
 
-    void reset() {
+    void reset() override {
         sampler.reset();
 
         delete myMidiIteratorSec;
@@ -86,26 +84,38 @@ public:
         myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
         myRenderMidiBuffer.clear();
+
+        myRecordedMidiSequence.clear();
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::midiStart());
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::timeSignatureMetaEvent(4, 4));
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::tempoMetaEvent(500*1000));
+        myRecordedMidiSequence.addEvent(juce::MidiMessage::midiChannelMetaEvent(1));
+        ProcessorBase::reset();
     }
 
     void
-    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
+    processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
     {
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
-
-        automateParameters();
+        auto posInfo = getPlayHead()->getPosition();
 
         buffer.clear(); // todo: why did this become necessary?
         midiBuffer.clear();
         myRenderMidiBuffer.clear();
 
         {
-            auto start = posInfo.timeInSamples;
+            auto start = *posInfo->getTimeInSamples();
             auto end = start + buffer.getNumSamples();
 
             myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
             while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
+                // steps for saving midi to file output
+                auto messageCopy = MidiMessage(myMidiMessageSec);
+                messageCopy.setTimeStamp(myMidiMessagePositionSec*(2400./mySampleRate));
+                if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                    myRecordedMidiSequence.addEvent(messageCopy);
+                }
+
+                // steps for playing MIDI
                 myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
                 myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
                 myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
@@ -113,12 +123,20 @@ public:
         }
 
         {
-            auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
-            auto pulseEnd = pulseStart + buffer.getNumSamples() * (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+            auto pulseStart = std::floor(*posInfo->getPpqPosition() * PPQN);
+            auto pulseEnd = pulseStart + buffer.getNumSamples() * (*posInfo->getBpm() * PPQN) / (mySampleRate * 60.);
 
             myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
-                myRenderMidiBuffer.addEvent(myMidiMessageQN, int(myMidiMessagePositionQN - pulseStart));
+                // steps for saving midi to file output
+                auto messageCopy = MidiMessage(myMidiMessageQN);
+                messageCopy.setTimeStamp((*posInfo->getTimeInSeconds() + (myMidiMessagePositionQN-pulseStart)*(60./(*posInfo->getBpm())/PPQN ))*2400.);
+                if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                    myRecordedMidiSequence.addEvent(messageCopy);
+                }
+                
+                // steps for playing MIDI
+                myRenderMidiBuffer.addEvent(myMidiMessageQN, int( (myMidiMessagePositionQN - pulseStart)*60.*mySampleRate/(PPQN**posInfo->getBpm())));
                 myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
                 myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             }
@@ -129,7 +147,7 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    const juce::String getName() const { return "SamplerProcessor"; }
+    const juce::String getName() const override { return "SamplerProcessor"; }
 
     void
     setData(py::array_t<float, py::array::c_style | py::array::forcecast> input) {
@@ -250,6 +268,29 @@ public:
 
         return true;
     }
+    
+    void saveMIDI(std::string& savePath) {
+
+        MidiFile file;
+        
+        // 30*80 = 2400, so that's why the MIDI messages had their
+        // timestamp set to seconds*2400
+        file.setSmpteTimeFormat(30, 80);
+
+        File myFile(savePath);
+                        
+        file.addTrack( myRecordedMidiSequence );
+        
+        juce::FileOutputStream stream( myFile );
+        if (stream.openedOk())
+        {
+            // overwrite existing file.
+            stream.setPosition(0);
+            stream.truncate();
+        }
+        file.writeTo( stream );
+        
+    }
 
     std::string
     wrapperGetParameterName(int parameter)
@@ -319,10 +360,7 @@ public:
     }
 
     void
-    automateParameters() {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
+    automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
 
         for (int i = 0; i < sampler.getNumParameters(); i++) {
 
@@ -365,4 +403,6 @@ private:
 
     bool myMidiEventsDoRemainQN = false;
     bool myMidiEventsDoRemainSec = false;
+    
+    MidiMessageSequence myRecordedMidiSequence;
 };

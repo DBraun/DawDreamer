@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -510,8 +510,6 @@ var::var() noexcept : type (&Instance::attributesVoid) {}
 var::var (const VariantType& t) noexcept  : type (&t) {}
 var::~var() noexcept  { type->cleanUp (value); }
 
-JUCE_DECLARE_DEPRECATED_STATIC (const var var::null;)
-
 //==============================================================================
 var::var (const var& valueToCopy)  : type (valueToCopy.type)
 {
@@ -894,5 +892,18 @@ var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int 
     : thisObject (t), arguments (args), numArguments (numArgs)
 {
 }
+
+//==============================================================================
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
+const var var::null;
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
+
+#endif
 
 } // namespace juce

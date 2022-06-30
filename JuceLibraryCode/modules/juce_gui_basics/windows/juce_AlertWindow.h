@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -414,9 +414,7 @@ public:
                                                 #endif
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    // This has been deprecated, use the NativeMessageBox methods instead for more options.
-
+   #if JUCE_MODAL_LOOPS_PERMITTED && ! defined (DOXYGEN)
     /** Shows an operating-system native dialog box.
 
         @param title        the title to use at the top
@@ -425,9 +423,10 @@ public:
                             it'll show a box with just an ok button
         @returns true if the ok button was pressed, false if they pressed cancel.
     */
-    JUCE_DEPRECATED (static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
-                                                                    const String& bodyText,
-                                                                    bool isOkCancel));
+    [[deprecated ("Use the NativeMessageBox methods instead for more options")]]
+    static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
+                                                   const String& bodyText,
+                                                   bool isOkCancel);
    #endif
 
 
@@ -499,9 +498,7 @@ protected:
     /** @internal */
     int getDesktopWindowStyleFlags() const override;
     /** @internal */
-    float getDesktopScaleFactor() const override { return desktopScale; }
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+    float getDesktopScaleFactor() const override { return desktopScale * Desktop::getInstance().getGlobalScaleFactor(); }
 
 private:
     //==============================================================================
@@ -524,6 +521,7 @@ private:
     bool escapeKeyCancels = true;
     float desktopScale = 1.0f;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void exitAlert (Button* button);
     void updateLayout (bool onlyIncreaseSize);
 

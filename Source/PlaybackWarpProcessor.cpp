@@ -59,11 +59,7 @@ PlaybackWarpProcessor::prepareToPlay(double, int) {
 }
 
 void
-PlaybackWarpProcessor::automateParameters() {
-
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
-
+PlaybackWarpProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
     *myTranspose = getAutomationVal("transpose", posInfo);
     double scale = std::pow(2., *myTranspose / 12.);
     m_rbstretcher->setPitchScale(scale * myPlaybackDataSR / m_sample_rate);
@@ -174,20 +170,17 @@ PlaybackWarpProcessor::setClipPositions(std::vector<std::tuple<double, double, d
 void
 PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-    AudioPlayHead::CurrentPositionInfo posInfo;
-    getPlayHead()->getCurrentPosition(posInfo);
-
-    automateParameters();
-
+    auto posInfo = getPlayHead()->getPosition();
+    
     if ((m_clips.size() == 0) || (m_clipIndex >= m_clips.size())) {
         // There are no clips, or we've already passed the last clip.
         ProcessorBase::processBlock(buffer, midiBuffer);
         return;
     }
 
-    double movingPPQ = posInfo.ppqPosition;
+    double movingPPQ = *posInfo->getPpqPosition();
 
-    double nextPPQ = posInfo.ppqPosition + (double(buffer.getNumSamples()) / m_sample_rate) * posInfo.bpm / 60.;
+    double nextPPQ = *posInfo->getPpqPosition() + (double(buffer.getNumSamples()) / m_sample_rate) * (*posInfo->getBpm()) / 60.;
 
     std::uint32_t numAvailable = 0;
     const std::uint32_t numSamplesNeeded = buffer.getNumSamples();
@@ -207,20 +200,20 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
 
         numToRetrieve = std::min(numAvailable, numSamplesNeeded - numWritten);
         if (m_currentClip.end_pos < std::numeric_limits<double>::max()) {
-            numToRetrieve = std::min(numToRetrieve, (std::uint64_t)(std::ceil((m_currentClip.end_pos - movingPPQ) / (posInfo.bpm) * 60. * m_sample_rate)));
+            numToRetrieve = std::min(numToRetrieve, (std::uint64_t)(std::ceil((m_currentClip.end_pos - movingPPQ) / (*posInfo->getBpm()) * 60. * m_sample_rate)));
         }
 
         if (numToRetrieve > 0) {
-            m_nonInterleavedBuffer.setSize(m_numChannels, numToRetrieve);
+            m_nonInterleavedBuffer.setSize(m_numChannels, (int)numToRetrieve);
             numToRetrieve = m_rbstretcher->retrieve(m_nonInterleavedBuffer.getArrayOfWritePointers(), numToRetrieve);
 
             for (int chan = 0; chan < m_numChannels; chan++) {
                 auto chanPtr = m_nonInterleavedBuffer.getReadPointer(chan);
-                buffer.copyFrom(chan, numWritten, chanPtr, numToRetrieve);
+                buffer.copyFrom(chan, numWritten, chanPtr, (int)numToRetrieve);
             }
 
             numWritten += numToRetrieve;
-            movingPPQ += double(numToRetrieve) * posInfo.bpm / (m_sample_rate * 60.);
+            movingPPQ += double(numToRetrieve) * *posInfo->getBpm() / (m_sample_rate * 60.);
             continue;
         }
 
@@ -248,7 +241,7 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
                 buffer.setSample(chan, numWritten, 0.f);
             }
             numWritten += 1;
-            movingPPQ += posInfo.bpm / (m_sample_rate * 60.);
+            movingPPQ += (*posInfo->getBpm()) / (m_sample_rate * 60.);
             continue;
         }
 
@@ -274,7 +267,7 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
                     buffer.setSample(chan, numWritten, 0.f);
                 }
                 numWritten += 1;
-                movingPPQ += posInfo.bpm / (m_sample_rate * 60.);
+                movingPPQ += (*posInfo->getBpm()) / (m_sample_rate * 60.);
                 continue;
             }
         }
@@ -297,7 +290,7 @@ PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiB
             }
             
             m_clipInfo.beat_to_seconds(ppqPosition, _, instant_bpm);
-            m_rbstretcher->setTimeRatio((instant_bpm / posInfo.bpm) * (m_sample_rate / myPlaybackDataSR));
+            m_rbstretcher->setTimeRatio((instant_bpm / (*posInfo->getBpm())) * (m_sample_rate / myPlaybackDataSR));
         }
         else {
             m_rbstretcher->setTimeRatio(m_time_ratio_if_warp_off * (m_sample_rate / myPlaybackDataSR));
@@ -342,6 +335,8 @@ PlaybackWarpProcessor::reset() {
             sampleReadIndex = 0;
         }
     }
+    
+    ProcessorBase::reset();
 }
 
 void

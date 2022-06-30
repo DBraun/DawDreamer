@@ -70,10 +70,8 @@ FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void
 FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer)
 {
-	automateParameters();
-
-	AudioPlayHead::CurrentPositionInfo posInfo;
-	getPlayHead()->getCurrentPosition(posInfo);
+    // todo: Faust should be able to use the incoming midiBuffer too.
+    auto posInfo = getPlayHead()->getPosition();
 
 	if (!m_isCompiled) {
 		throw std::runtime_error("Faust Processor called processBlock but it wasn't compiled.");
@@ -88,23 +86,32 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 		}
 	}
 	else if (m_dsp_poly != NULL) {
-		auto start = posInfo.timeInSamples;
+		auto start = *posInfo->getTimeInSamples();
 
-		auto pulseStart = std::floor(posInfo.ppqPosition * PPQN);
-		auto pulseStep = (posInfo.bpm * PPQN) / (mySampleRate * 60.);
+		auto pulseStart = std::floor(*posInfo->getPpqPosition() * PPQN);
+		auto pulseStep = (*posInfo->getBpm() * PPQN) / (mySampleRate * 60.);
 
 		// render one sample at a time because we want accurate timing of keyOn/keyOff.
 
-		auto oneSampReadPtrs = (float**)oneSampleInBuffer.getArrayOfReadPointers();
-		auto oneSampWritePtrs = (float**)oneSampleOutBuffer.getArrayOfWritePointers();
-		const int midiChannel = 0;
+        auto oneSampReadPtrs = (float**)oneSampleInBuffer.getArrayOfReadPointers();
+        auto oneSampWritePtrs = (float**)oneSampleOutBuffer.getArrayOfWritePointers();
+        const int midiChannel = 0;
+        int chan = 0;
 
-		for (size_t i = 0; i < buffer.getNumSamples(); i++)
+		for (int i = 0; i < buffer.getNumSamples(); i++)
 		{
 			{
 				myIsMessageBetweenSec = myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
 				while (myIsMessageBetweenSec && myMidiEventsDoRemainSec) {
 
+                    // steps for saving midi to file output
+                    auto messageCopy = MidiMessage(myMidiMessageSec);
+                    messageCopy.setTimeStamp((*posInfo->getTimeInSamples() + i)*(2400./mySampleRate));
+                    if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                        myRecordedMidiSequence.addEvent(messageCopy);
+                    }
+
+                    // steps for playing MIDI
 					if (myMidiMessageSec.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
 					}
@@ -121,6 +128,14 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseStart + 1;
 				while (myIsMessageBetweenQN && myMidiEventsDoRemainQN) {
 
+                    // steps for saving midi to file output
+                    auto messageCopy = MidiMessage(myMidiMessageQN);
+                    messageCopy.setTimeStamp((*posInfo->getTimeInSamples() + i)*(2400./mySampleRate));
+                    if (!(messageCopy.isEndOfTrackMetaEvent() || messageCopy.isTempoMetaEvent())) {
+                        myRecordedMidiSequence.addEvent(messageCopy);
+                    }
+
+                    // steps for playing MIDI
 					if (myMidiMessageQN.isNoteOn()) {
 						m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
 					}
@@ -134,14 +149,14 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				}
 			}
 
-			for (size_t chan = 0; chan < m_numInputChannels; chan++)
+			for (chan = 0; chan < m_numInputChannels; chan++)
 			{
 				oneSampleInBuffer.setSample(chan, 0, buffer.getSample(chan, i));
 			}
 
 			m_dsp_poly->compute(1, oneSampReadPtrs, oneSampWritePtrs);
 
-			for (size_t chan = 0; chan < m_numOutputChannels; chan++)
+			for (chan = 0; chan < m_numOutputChannels; chan++)
 			{
 				buffer.setSample(chan, i, oneSampleOutBuffer.getSample(chan, 0));
 			}
@@ -173,34 +188,31 @@ bool hasStart(std::string const& fullString, std::string const& start) {
 }
 
 void
-FaustProcessor::automateParameters() {
+FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
-	AudioPlayHead::CurrentPositionInfo posInfo;
-	getPlayHead()->getCurrentPosition(posInfo);
+    if (!m_ui) {
+        return;
+    }
 
-	if (!m_ui) return;
+    const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
 
-	const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
+    bool anyAutomation = false;
+    for (int i = 0; i < this->getNumParameters(); i++) {
 
-	for (int i = 0; i < this->getNumParameters(); i++) {
-
-		auto theParameter = (AutomateParameterFloat*)processorParams[i];
-
-		int faustIndex = m_map_juceIndex_to_faustIndex[i];
-
-		if (theParameter) {
-			m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
-		}
-		else {
-			auto theName = this->getParameterName(i);
-			throw std::runtime_error("Error FaustProcessor::automateParameters: " + theName.toStdString());
-		}
-	}
+        int faustIndex = m_map_juceIndex_to_faustIndex[i];
+        auto theParameter = (AutomateParameterFloat*) processorParams[i];
+        
+        bool hasAutomation = theParameter->isAutomated();
+        anyAutomation |= hasAutomation;
+        if (hasAutomation) {
+            m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
+        }
+    }
 
 	// If polyphony is enabled and we're grouping voices,
 	// several voices might share the same parameters in a group.
 	// Therefore we have to call updateAllGuis to update all dependent parameters.
-	if (m_nvoices > 0 && m_groupVoices) {
+	if (anyAutomation && m_nvoices > 0 && m_groupVoices) {
 		// When you want to access shared memory:
 		if (guiUpdateMutex.Lock()) {
 			// Have Faust update all GUIs.
@@ -222,6 +234,38 @@ FaustProcessor::reset()
 	if (m_dsp_poly) {
 		m_dsp_poly->instanceClear();
 	}
+    
+    if (!m_isCompiled) {
+        this->compile();
+    }
+    
+    {
+        // update all parameters once.
+        
+        juce::AudioPlayHead::PositionInfo posInfo;
+        // It's important to initialize these.
+        posInfo.setTimeInSamples(0);
+        posInfo.setTimeInSeconds(0);
+        posInfo.setPpqPosition(0);
+        
+        const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
+
+        for (int i = 0; i < this->getNumParameters(); i++) {
+
+            int faustIndex = m_map_juceIndex_to_faustIndex[i];
+
+            m_ui->setParamValue(faustIndex, ((AutomateParameterFloat*)processorParams[i])->sample(posInfo));
+        }
+        if (m_nvoices > 0 && m_groupVoices) {
+            // When you want to access shared memory:
+            if (guiUpdateMutex.Lock()) {
+                // Have Faust update all GUIs.
+                GUI::updateAllGuis();
+
+                guiUpdateMutex.Unlock();
+            }
+        }
+    }
 
 	delete myMidiIteratorQN;
 	myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
@@ -230,10 +274,14 @@ FaustProcessor::reset()
 	delete myMidiIteratorSec;
 	myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
 	myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
-
-	if (!m_isCompiled) {
-		this->compile();
-	}
+    
+    myRecordedMidiSequence.clear();
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::midiStart());
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::timeSignatureMetaEvent(4, 4));
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::tempoMetaEvent(500*1000));
+    myRecordedMidiSequence.addEvent(juce::MidiMessage::midiChannelMetaEvent(1));
+    
+    ProcessorBase::reset();
 }
 
 void
@@ -509,9 +557,7 @@ FaustProcessor::getParamWithIndex(const int index)
 
 	auto& parAddress = it->second;
 
-	AudioPlayHead::CurrentPositionInfo posInfo;
-
-	return this->getAutomationVal(parAddress, posInfo);
+	return this->getAutomationAtZero(parAddress);
 }
 
 float
@@ -523,9 +569,7 @@ FaustProcessor::getParamWithPath(const std::string& n)
 	}
 	if (!m_ui) return 0; // todo: better handling
 
-	AudioPlayHead::CurrentPositionInfo posInfo;
-
-	return this->getAutomationVal(n, posInfo);
+	return this->getAutomationAtZero(n);
 }
 
 std::string
@@ -606,18 +650,18 @@ FaustProcessor::getPluginParametersDescription()
 
 	if (m_isCompiled) {
 
-		//get the parameters as an AudioProcessorParameter array
-		const Array<AudioProcessorParameter*>& processorParams = this->getParameters();
-		for (int i = 0; i < this->AudioProcessor::getNumParameters(); i++) {
+        int i = 0;
+        for (auto *parameter : this->getParameters()) {
 
 			int maximumStringLength = 64;
 
-			std::string theName = (processorParams[i])->getName(maximumStringLength).toStdString();
-			std::string label = processorParams[i]->getLabel().toStdString();
+			std::string theName = parameter->getName(maximumStringLength).toStdString();
+			std::string label = parameter->getLabel().toStdString();
 
 			auto it = m_map_juceIndex_to_faustIndex.find(i);
 			if (it == m_map_juceIndex_to_faustIndex.end())
 			{
+                i++;
 				continue;
 			}
 
@@ -630,8 +674,8 @@ FaustProcessor::getPluginParametersDescription()
 
 			// todo: It would be better for DawDreamer to store the discrete parameters correctly,
 			// but we're still saving them all as AutomateParameterFloat.
-			//bool isDiscrete = processorParams[i]->isDiscrete();
-			//int numSteps = processorParams[i]->getNumSteps();
+			//bool isDiscrete = parameter->isDiscrete();
+			//int numSteps = processorParams->getNumSteps();
 
 			py::dict myDictionary;
 			myDictionary["index"] = i;
@@ -643,10 +687,10 @@ FaustProcessor::getPluginParametersDescription()
 			myDictionary["min"] = m_ui->getParamMin(faustIndex);
 			myDictionary["max"] = m_ui->getParamMax(faustIndex);
 			myDictionary["step"] = m_ui->getParamStep(faustIndex);
-			AudioPlayHead::CurrentPositionInfo posInfo;
-			myDictionary["value"] = this->getAutomationVal(theName, posInfo);
+			myDictionary["value"] = this->getAutomationAtZero(theName);
 
 			myList.append(myDictionary);
+            i++;
 		}
 	}
 	else
@@ -760,6 +804,28 @@ FaustProcessor::addMidiNote(uint8  midiNote,
 	}
 
 	return true;
+}
+
+void FaustProcessor::saveMIDI(std::string& savePath) {
+    
+    MidiFile file;
+    
+    // 30*80 = 2400, so that's why the MIDI messages had their
+    // timestamp set to seconds*2400
+    file.setSmpteTimeFormat(30, 80);
+    
+    File myFile(savePath);
+
+    file.addTrack( myRecordedMidiSequence );
+    
+    juce::FileOutputStream stream( myFile );
+    if (stream.openedOk())
+    {
+        // overwrite existing file.
+        stream.setPosition(0);
+        stream.truncate();
+    }
+    file.writeTo( stream );
 }
 
 #ifdef WIN32
@@ -888,7 +954,7 @@ FaustProcessor::setSoundfiles(py::dict d) {
 
 			AudioSampleBuffer buffer;
 
-			buffer.setSize(audioData.shape(0), audioData.shape(1));
+			buffer.setSize((int)audioData.shape(0), (int)audioData.shape(1));
 
 			for (int y = 0; y < audioData.shape(1); y++) {
 				for (int x = 0; x < audioData.shape(0); x++) {

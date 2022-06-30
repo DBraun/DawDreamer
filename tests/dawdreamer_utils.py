@@ -84,25 +84,29 @@ ALL_PLUGIN_EFFECTS = []
 
 if platform.system() == "Darwin":
 
-	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component")   # todo: enable
-	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")         # todo: enable
+	# # todo: error is currently "Unable to load component"
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component") 
+
+	# # todo: error is (fat file, but missing compatible architecture (have 'x86_64,i386', need 'arm64e'))
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")
 
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst3")
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.component")
 
-	# todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
+	# # todo: the Valhalla Freq Echo plugins sometimes work and sometimes just output NAN.
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst")
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst3")
-	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.component")
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.component")
 
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst")
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst3")
-	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.component")  # todo: enable
+	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.component")  # todo: error is currently "Unable to load component"
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST3/Dexed.vst3")  # todo: only DBraun has this
 	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/Components/Dexed.component")  # todo: enable, only DBraun has this
 
 	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/Components/helm.component")  # todo: enable, only DBraun has this
+	# # todo: error is error: attempt to map invalid URI `/Library/Audio/Plug-Ins/VST3/helm.vst3' etc.
 	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST/helm.vst")  # todo: enable, only DBraun has this
 	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, "/Library/Audio/Plug-Ins/VST3/helm.vst3")  # todo: enable, only DBraun has this
 	

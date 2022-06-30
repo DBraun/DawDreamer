@@ -18,7 +18,9 @@ public:
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) {
         mySampleRate = sampleRate;
-        automateParameters(); // do this to give a valid state to the filter.
+        
+        AudioPlayHead::PositionInfo posInfo;
+        automateParameters(posInfo, 1); // do this to give a valid state to the filter.
 
         initDelay();
         
@@ -27,9 +29,8 @@ public:
         myDelay.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
-
-        automateParameters();
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
+        //auto posInfo = getPlayHead()->getPosition();
 
         delayBuffer.makeCopyOf(buffer);
         juce::dsp::AudioBlock<float> block(delayBuffer);
@@ -45,27 +46,24 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters() {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
-
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
         *myWetLevel = getAutomationVal("wet_level", posInfo);
         *myDelaySize = getAutomationVal("delay", posInfo);
         updateParameters();
     }
 
-    void reset() {
+    void reset() override {
         myDelay.reset();
+        ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "DelayProcessor"; };
+    const juce::String getName() const override { return "DelayProcessor"; };
 
     void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
-    float getDelay() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("delay", posInfo); }
+    float getDelay() { return getAutomationAtZero("delay"); }
 
     void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
-    float getWet() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("wet_level", posInfo); }
+    float getWet() { return getAutomationAtZero("wet_level"); }
 
 
 private:

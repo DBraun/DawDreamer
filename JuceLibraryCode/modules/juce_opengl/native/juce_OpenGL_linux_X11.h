@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -57,7 +57,7 @@ public:
     NativeContext (Component& comp,
                    const OpenGLPixelFormat& cPixelFormat,
                    void* shareContext,
-                   bool /*useMultisampling*/,
+                   bool useMultisamplingIn,
                    OpenGLVersion)
         : component (comp), contextToShareWith (shareContext), dummy (*this)
     {
@@ -67,25 +67,13 @@ public:
 
         X11Symbols::getInstance()->xSync (display, False);
 
-        GLint attribs[] =
+        const std::vector<GLint> optionalAttribs
         {
-            GLX_RGBA,
-            GLX_DOUBLEBUFFER,
-            GLX_RED_SIZE,         cPixelFormat.redBits,
-            GLX_GREEN_SIZE,       cPixelFormat.greenBits,
-            GLX_BLUE_SIZE,        cPixelFormat.blueBits,
-            GLX_ALPHA_SIZE,       cPixelFormat.alphaBits,
-            GLX_DEPTH_SIZE,       cPixelFormat.depthBufferBits,
-            GLX_STENCIL_SIZE,     cPixelFormat.stencilBufferBits,
-            GLX_ACCUM_RED_SIZE,   cPixelFormat.accumulationBufferRedBits,
-            GLX_ACCUM_GREEN_SIZE, cPixelFormat.accumulationBufferGreenBits,
-            GLX_ACCUM_BLUE_SIZE,  cPixelFormat.accumulationBufferBlueBits,
-            GLX_ACCUM_ALPHA_SIZE, cPixelFormat.accumulationBufferAlphaBits,
-            None
+            GLX_SAMPLE_BUFFERS, useMultisamplingIn ? 1 : 0,
+            GLX_SAMPLES,        cPixelFormat.multisamplingLevel
         };
 
-        bestVisual = glXChooseVisual (display, X11Symbols::getInstance()->xDefaultScreen (display), attribs);
-        if (bestVisual == nullptr)
+        if (! tryChooseVisual (cPixelFormat, optionalAttribs) && ! tryChooseVisual (cPixelFormat, {}))
             return;
 
         auto* peer = component.getPeer();
@@ -242,6 +230,33 @@ public:
     struct Locker { Locker (NativeContext&) {} };
 
 private:
+    bool tryChooseVisual (const OpenGLPixelFormat& format, const std::vector<GLint>& optionalAttribs)
+    {
+        std::vector<GLint> allAttribs
+        {
+            GLX_RGBA,
+            GLX_DOUBLEBUFFER,
+            GLX_RED_SIZE,         format.redBits,
+            GLX_GREEN_SIZE,       format.greenBits,
+            GLX_BLUE_SIZE,        format.blueBits,
+            GLX_ALPHA_SIZE,       format.alphaBits,
+            GLX_DEPTH_SIZE,       format.depthBufferBits,
+            GLX_STENCIL_SIZE,     format.stencilBufferBits,
+            GLX_ACCUM_RED_SIZE,   format.accumulationBufferRedBits,
+            GLX_ACCUM_GREEN_SIZE, format.accumulationBufferGreenBits,
+            GLX_ACCUM_BLUE_SIZE,  format.accumulationBufferBlueBits,
+            GLX_ACCUM_ALPHA_SIZE, format.accumulationBufferAlphaBits
+        };
+
+        allAttribs.insert (allAttribs.end(), optionalAttribs.begin(), optionalAttribs.end());
+
+        allAttribs.push_back (None);
+
+        bestVisual = glXChooseVisual (display, X11Symbols::getInstance()->xDefaultScreen (display), allAttribs.data());
+
+        return bestVisual != nullptr;
+    }
+
     static constexpr int embeddedWindowEventMask = ExposureMask | StructureNotifyMask;
 
     Component& component;

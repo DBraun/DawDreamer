@@ -4,42 +4,34 @@
 #include "custom_pybind_wrappers.h"
 #include "CustomParameters.h"
 
+const int DAW_PARARAMETER_MAX_NAME_LENGTH = 512;
 
 class ProcessorBase : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") : 
+    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") :
+        AudioProcessor{},
         myUniqueName{ newUniqueName }, myParameters(*this, nullptr, "PARAMETERS", createParameterFunc()) {
         this->setNonRealtime(true);
     }
 
-    ProcessorBase(std::string newUniqueName = "") : myUniqueName{ newUniqueName }, myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
+    ProcessorBase(std::string newUniqueName = "") : AudioProcessor{}, myUniqueName{ newUniqueName }, myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
         this->setNonRealtime(true);
     }
 
     //==============================================================================
     void prepareToPlay(double, int) override {}
     void releaseResources() override {}
+    void reset() override;
+    
+    //
+    void setPlayHead(AudioPlayHead* newPlayHead) override {AudioProcessor::setPlayHead(newPlayHead);}
+    //
 
     // All subclasses of ProcessorBase should implement processBlock and call ProcessorBase::processBlock at the end
     // of their implementation. The ProcessorBase implementation takes care of recording.
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) {
-    
-        if (!m_recordEnable) {
-            return;
-        }
-        juce::AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
-
-        const int numberChannels = myRecordBuffer.getNumChannels();
-        int numSamplesToCopy = std::min(buffer.getNumSamples(), (int) myRecordBuffer.getNumSamples() -(int)posInfo.timeInSamples);
-
-        for (int chan = 0; chan < numberChannels; chan++) {
-            // Write the sample to the engine's history for the correct channel.
-            myRecordBuffer.copyFrom(chan, posInfo.timeInSamples, buffer.getReadPointer(chan), numSamplesToCopy);
-        }
-    }
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override { return nullptr; }
@@ -68,72 +60,49 @@ public:
     void changeProgramName(int, const juce::String&) override {}
 
     //==============================================================================
-    void getStateInformation(juce::MemoryBlock&);
-    void setStateInformation(const void*, int);
+    void getStateInformation(juce::MemoryBlock&) override;
+    void setStateInformation(const void*, int) override;
 
-    bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
+    virtual bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
 
     virtual bool setAutomationVal(std::string parameterName, float val);
 
-    float getAutomationVal(std::string parameterName, juce::AudioPlayHead::CurrentPositionInfo& posInfo);
+    float getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo);
+    float getAutomationAtZero(std::string parameterName);
 
     std::vector<float> getAutomation(std::string parameterName);
     py::array_t<float> getAutomationNumpy(std::string parameterName);
+    py::dict getAutomationAll();
 
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
 
-    void automateParameters() {};
-
+    virtual void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {};
+    void recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples);
+    
     void setRecordEnable(bool recordEnable) { m_recordEnable = recordEnable; }
     bool getRecordEnable() { return m_recordEnable; }
+    
+    void setRecordAutomationEnable(bool recordAutomation) { m_recordAutomation = recordAutomation; }
+    bool getRecordAutomationEnable() { return m_recordAutomation; }
+    
+    py::array_t<float> bufferToPyArray(juce::AudioSampleBuffer& buffer);
 
-    py::array_t<float>
-    getAudioFrames()
-    {
-        size_t num_channels = myRecordBuffer.getNumChannels();
-        size_t num_samples = myRecordBuffer.getNumSamples();
+    py::array_t<float> getAudioFrames();
+    
+    void setRecorderLength(int numSamples);
 
-        py::array_t<float, py::array::c_style> arr({ (int)num_channels, (int)num_samples });
-
-        auto ra = arr.mutable_unchecked();
-
-        auto chans = myRecordBuffer.getArrayOfReadPointers();
-        for (size_t i = 0; i < num_channels; i++)
-        {
-            auto chanPtr = chans[i];
-
-            for (size_t j = 0; j < num_samples; j++)
-            {
-                ra(i, j) = *(chanPtr++);
-            }
-        }
-
-        return arr;
-    }
-
-    void setRecorderLength(int numSamples) {
-        int numChannels = this->getTotalNumOutputChannels();
-        
-        if (m_recordEnable) {
-            myRecordBuffer.setSize(numChannels, numSamples);
-        }
-        else {
-            myRecordBuffer.setSize(numChannels, 0);
-        }
-    }
-
-    int
+    virtual int
     getTotalNumOutputChannels() {
         return AudioProcessor::getTotalNumOutputChannels();
     }
     
-    int
+    virtual int
     getTotalNumInputChannels() {
         return AudioProcessor::getTotalNumInputChannels();
     }
 
-    virtual void numChannelsChanged();
+    virtual void numChannelsChanged() override;
 
     bool isConnectedInGraph() { return m_isConnectedInGraph;}
     void setConnectedInGraph(bool isConnected) {
@@ -185,6 +154,10 @@ protected:
         return params;
     }
     bool m_recordEnable = false;
+    bool m_recordAutomation = false;
+    
+    int m_expectedRecordNumSamples = 0;
+    std::map<std::string,juce::AudioSampleBuffer> m_recordedAutomationDict;
 
     BusesLayout makeBusesLayout(int inputs, int outputs) {
         BusesLayout busesLayout;
@@ -194,4 +167,5 @@ protected:
         busesLayout.outputBuses.add(outputChannelSet);
         return busesLayout;
     }
+    
 };

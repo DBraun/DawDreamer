@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
@@ -27,6 +29,8 @@ namespace universal_midi_packets
 
 /**
     A base class for classes which receive Universal MIDI Packets from an input.
+
+    @tags{Audio}
 */
 struct Receiver
 {
@@ -38,3 +42,5 @@ struct Receiver
 
 }
 }
+
+#endif

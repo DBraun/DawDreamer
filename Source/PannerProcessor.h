@@ -15,16 +15,18 @@ public:
         setMainBusInputsAndOutputs(2, 2);
     }
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock) {
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override {
         const int numChannels = 2;
-        automateParameters(); // do this to give a valid state to the filter.
+        AudioPlayHead::PositionInfo posInfo;
+        posInfo.setTimeInSamples(0.);
+        posInfo.setTimeInSeconds(0.);
+        automateParameters(posInfo, 1); // do this to give a valid state to the filter.
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
         myPanner.prepare(spec);
     }
 
-    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) {
-
-        automateParameters();
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override {
+//        auto posInfo = getPlayHead()->getPosition();
 
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
@@ -32,23 +34,20 @@ public:
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
-    void automateParameters() {
-
-        AudioPlayHead::CurrentPositionInfo posInfo;
-        getPlayHead()->getCurrentPosition(posInfo);
-
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
         *myPan = getAutomationVal("pan", posInfo);
         updateParameters();
     }
 
-    void reset() {
+    void reset() override {
         myPanner.reset();
+        ProcessorBase::reset();
     };
 
-    const juce::String getName() { return "PannerProcessor"; };
+    const juce::String getName() const override { return "PannerProcessor"; };
 
     void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
-    float getPan() { AudioPlayHead::CurrentPositionInfo posInfo; return getAutomationVal("pan", posInfo); }
+    float getPan() { return getAutomationAtZero("pan"); }
 
     void setRule(std::string newRule) {
         myRule = stringToRule(newRule);

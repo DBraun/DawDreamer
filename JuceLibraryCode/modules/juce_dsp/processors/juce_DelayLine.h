@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -46,7 +46,7 @@ namespace DelayLineInterpolationTypes
 
     /**
         Successive samples in the delay line will be linearly interpolated. This
-        type of interpolation has a low compuational cost where the delay can be
+        type of interpolation has a low computational cost where the delay can be
         modulated in real time, but it also introduces a low-pass filtering effect
         into your audio signal.
 
@@ -111,6 +111,21 @@ public:
     //==============================================================================
     /** Initialises the processor. */
     void prepare (const ProcessSpec& spec);
+
+    /** Sets a new maximum delay in samples.
+
+        Also clears the delay line.
+
+        This may allocate internally, so you should never call it from the audio thread.
+    */
+    void setMaximumDelayInSamples (int maxDelayInSamples);
+
+    /** Gets the maximum possible delay in samples.
+
+        For very short delay times, the result of getMaximumDelayInSamples() may
+        differ from the last value passed to setMaximumDelayInSamples().
+    */
+    int getMaximumDelayInSamples() const noexcept       { return totalSize - 1; }
 
     /** Resets the internal state variables of the processor. */
     void reset();

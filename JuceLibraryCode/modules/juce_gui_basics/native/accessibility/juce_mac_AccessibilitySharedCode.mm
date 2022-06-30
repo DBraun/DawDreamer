@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,21 +27,23 @@ namespace juce
 {
 
 //==============================================================================
+struct AccessibleObjCClassDeleter
+{
+    template <typename ElementType>
+    void operator() (ElementType* element) const
+    {
+        juceFreeAccessibilityPlatformSpecificData (element);
+
+        object_setInstanceVariable (element, "handler", nullptr);
+        [element release];
+    }
+};
+
 template <typename Base>
 class AccessibleObjCClass  : public ObjCClass<Base>
 {
-private:
-    struct Deleter
-    {
-        void operator() (Base* element) const
-        {
-            object_setInstanceVariable (element, "handler", nullptr);
-            [element release];
-        }
-    };
-
 public:
-    using Holder = std::unique_ptr<Base, Deleter>;
+    using Holder = std::unique_ptr<Base, AccessibleObjCClassDeleter>;
 
 protected:
     AccessibleObjCClass()  : ObjCClass<Base> ("JUCEAccessibilityElement_")
@@ -69,11 +71,34 @@ protected:
     static AccessibilityTableInterface* getTableInterface (id self) noexcept  { return getInterface (self, &AccessibilityHandler::getTableInterface); }
     static AccessibilityCellInterface*  getCellInterface  (id self) noexcept  { return getInterface (self, &AccessibilityHandler::getCellInterface); }
 
+    template <typename MemberFn>
+    static auto getEnclosingInterface (AccessibilityHandler* handler, MemberFn fn) noexcept -> decltype ((std::declval<AccessibilityHandler>().*fn)())
+    {
+        if (handler == nullptr)
+            return nullptr;
+
+        if (auto* interface = (handler->*fn)())
+            return interface;
+
+        return getEnclosingInterface (handler->getParent(), fn);
+    }
+
     static bool hasEditableText (AccessibilityHandler& handler) noexcept
     {
         return handler.getRole() == AccessibilityRole::editableText
             && handler.getTextInterface() != nullptr
             && ! handler.getTextInterface()->isReadOnly();
+    }
+
+    static id getAccessibilityValueFromInterfaces (const AccessibilityHandler& handler)
+    {
+        if (auto* textInterface = handler.getTextInterface())
+            return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
+
+        if (auto* valueInterface = handler.getValueInterface())
+            return juceStringToNS (valueInterface->getCurrentValueAsString());
+
+        return nil;
     }
 
     //==============================================================================
@@ -84,30 +109,6 @@ protected:
                   && handler->getRole() != AccessibilityRole::window;
 
         return NO;
-    }
-
-    static id getAccessibilityValue (id self, SEL)
-    {
-        if (auto* handler = getHandler (self))
-        {
-            if (auto* textInterface = handler->getTextInterface())
-                return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-
-            if (handler->getCurrentState().isCheckable())
-            {
-                return handler->getCurrentState().isChecked()
-                          #if JUCE_IOS
-                           ? @"1" : @"0";
-                          #else
-                           ? @(1) : @(0);
-                          #endif
-            }
-
-            if (auto* valueInterface = handler->getValueInterface())
-                return juceStringToNS (valueInterface->getCurrentValueAsString());
-        }
-
-        return nil;
     }
 
     static void setAccessibilityValue (id self, SEL, NSString* value)
@@ -137,6 +138,10 @@ protected:
 
     static BOOL accessibilityPerformPress (id self, SEL)
     {
+        if (auto* handler = getHandler (self))
+            if (handler->getCurrentState().isCheckable() && handler->getActions().invoke (AccessibilityActionType::toggle))
+                return YES;
+
         return performActionIfSupported (self, AccessibilityActionType::press);
     }
 

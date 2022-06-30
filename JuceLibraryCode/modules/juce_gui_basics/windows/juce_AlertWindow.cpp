@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -47,7 +47,10 @@ AlertWindow::AlertWindow (const String& title,
 {
     setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
-    accessibleMessageLabel.setColour (Label::textColourId, Colours::transparentBlack);
+    accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
+    accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);
+    accessibleMessageLabel.setColour (Label::outlineColourId,    Colours::transparentBlack);
+    accessibleMessageLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (accessibleMessageLabel);
 
     if (message.isEmpty())
@@ -629,12 +632,13 @@ namespace AlertWindowMappings
 {
     using MapFn = int (*) (int);
 
-    static int noMapping (int buttonIndex)    { return buttonIndex; }
-    static int messageBox (int)               { return 0; }
-    static int okCancel (int buttonIndex)     { return buttonIndex == 0 ? 1 : 0; }
-    static int yesNoCancel (int buttonIndex)  { return buttonIndex == 2 ? 0 : buttonIndex + 1; }
+    static inline int noMapping (int buttonIndex)    { return buttonIndex; }
+    static inline int messageBox (int)               { return 0; }
+    static inline int okCancel (int buttonIndex)     { return buttonIndex == 0 ? 1 : 0; }
+    static inline int yesNoCancel (int buttonIndex)  { return buttonIndex == 2 ? 0 : buttonIndex + 1; }
 
-    static ModalComponentManager::Callback* getWrappedCallback (ModalComponentManager::Callback* callbackIn, MapFn mapFn)
+    static std::unique_ptr<ModalComponentManager::Callback> getWrappedCallback (ModalComponentManager::Callback* callbackIn,
+                                                                                MapFn mapFn)
     {
         jassert (mapFn != nullptr);
 
@@ -646,8 +650,9 @@ namespace AlertWindowMappings
             innerCallback->modalStateFinished (mapFn (buttonIndex));
         };
 
-        return ModalCallbackFunction::create (std::move (wrappedCallback));
+        return rawToUniquePtr (ModalCallbackFunction::create (std::move (wrappedCallback)));
     }
+
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED
@@ -711,9 +716,6 @@ void AlertWindow::showMessageBoxAsync (MessageBoxIconType iconType,
                                        Component* associatedComponent,
                                        ModalComponentManager::Callback* callback)
 {
-    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        callback = AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox);
-
     showAsync (MessageBoxOptions()
                  .withIconType (iconType)
                  .withTitle (title)
@@ -727,12 +729,10 @@ static int showMaybeAsync (const MessageBoxOptions& options,
                            ModalComponentManager::Callback* callbackIn,
                            AlertWindowMappings::MapFn mapFn)
 {
-    jassert (mapFn != nullptr);
-
     const auto showAsync = (callbackIn != nullptr ? Async::yes
                                                   : Async::no);
 
-    auto callback = rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
+    auto callback = AlertWindowMappings::getWrappedCallback (callbackIn, mapFn);
 
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
     {

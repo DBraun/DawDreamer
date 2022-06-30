@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,15 +40,16 @@ DelayLine<SampleType, InterpolationType>::DelayLine (int maximumDelayInSamples)
 {
     jassert (maximumDelayInSamples >= 0);
 
-    totalSize = jmax (4, maximumDelayInSamples + 1);
     sampleRate = 44100.0;
+
+    setMaximumDelayInSamples (maximumDelayInSamples);
 }
 
 //==============================================================================
 template <typename SampleType, typename InterpolationType>
 void DelayLine<SampleType, InterpolationType>::setDelay (SampleType newDelayInSamples)
 {
-    auto upperLimit = (SampleType) (totalSize - 1);
+    auto upperLimit = (SampleType) getMaximumDelayInSamples();
     jassert (isPositiveAndNotGreaterThan (newDelayInSamples, upperLimit));
 
     delay     = jlimit ((SampleType) 0, upperLimit, newDelayInSamples);
@@ -78,6 +79,15 @@ void DelayLine<SampleType, InterpolationType>::prepare (const ProcessSpec& spec)
     v.resize (spec.numChannels);
     sampleRate = spec.sampleRate;
 
+    reset();
+}
+
+template <typename SampleType, typename InterpolationType>
+void DelayLine<SampleType, InterpolationType>::setMaximumDelayInSamples (int maxDelayInSamples)
+{
+    jassert (maxDelayInSamples >= 0);
+    totalSize = jmax (4, maxDelayInSamples + 1);
+    bufferData.setSize ((int) bufferData.getNumChannels(), totalSize, false, false, true);
     reset();
 }
 

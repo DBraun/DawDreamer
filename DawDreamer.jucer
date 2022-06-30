@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.9"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.10"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
@@ -234,10 +234,6 @@
     <FILE id="oio1wd" name="RenderEngine.h" compile="0" resource="0" file="Source/RenderEngine.h"/>
     <FILE id="pWXd7a" name="RenderEngine.cpp" compile="1" resource="0"
           file="Source/RenderEngine.cpp"/>
-    <FILE id="vqKZxr" name="RenderEngineWrapper.h" compile="0" resource="0"
-          file="Source/RenderEngineWrapper.h"/>
-    <FILE id="nW1a1A" name="RenderEngineWrapper.cpp" compile="1" resource="0"
-          file="Source/RenderEngineWrapper.cpp"/>
     <FILE id="LnjjS9" name="portable_endian.h" compile="0" resource="0"
           file="thirdparty/portable_endian/include/portable_endian.h"/>
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
@@ -247,7 +243,7 @@
                vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
                extraLinkerFlags="-shared -Wl,-undefined,dynamic_lookup" externalLibraries="samplerate&#10;faust"
                extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND"
-               xcodeValidArchs="arm64,x86_64">
+               xcodeValidArchs="arm64,x86_64" postbuildCommand="install_name_tool -change @rpath/libfaust.2.dylib @loader_path/libfaust.2.dylib build/Release/dawdreamer.so.dylib ">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;../../thirdparty/pybind11/include;&#10;/usr/local/include&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;&#10;../../thirdparty/rubberband;&#10;../../thirdparty/rubberband/rubberband;&#10;../../thirdparty/rubberband/src;&#10;../../thirdparty/portable_endian/include;"
@@ -353,7 +349,7 @@
   </MODULES>
   <JUCEOPTIONS JUCE_PLUGINHOST_VST3="1" JUCE_PLUGINHOST_AU="1" JUCE_CHECK_MEMORY_LEAKS="0"
                JUCE_WEB_BROWSER="0" JUCE_PLUGINHOST_VST="1" JUCE_VST3_CAN_REPLACE_VST2="0"
-               JUCE_USE_CURL="0" JUCE_ALSA="0"/>
+               JUCE_USE_CURL="0" JUCE_ALSA="0" JUCE_PLUGINHOST_LV2="1"/>
   <LIVE_SETTINGS>
     <LINUX/>
     <WINDOWS/>
