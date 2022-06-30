@@ -180,6 +180,9 @@ def test_automation_record_faust():
 
     automation = automation.reshape(-1)
 
+    # the automation shouldn't be constant
+    assert np.std(automation-automation.mean()) > .0001
+
     np.savetxt(abspath(OUTPUT /'test_automation_record_faust.csv'), automation, delimiter=',', fmt='%f')
 
 
@@ -221,8 +224,14 @@ def test_automation_record_plugin():
 
     desc = synth.get_parameters_description()
 
-    automation = 0.5+.5*make_sine(1./2., DURATION*4, sr=PPQN)
+    # Pick a parameter to automate. It can't be named "" and it must be automatable.
     param_index = 0
+    for par in desc:
+        if par['name'] != '' and par['isAutomatable']:
+            param_index = par['index']
+
+    automation = 0.5+.5*make_sine(1./2., DURATION*4, sr=PPQN)
+    
     synth.set_automation(param_index, automation, ppqn=PPQN)
 
     # We will call get_automation() later, so we need to enable this here:
@@ -239,7 +248,7 @@ def test_automation_record_plugin():
 
     # check that it's non-silent
     audio = engine.get_audio()
-    assert(np.mean(np.abs(audio)) > .001)
+    assert(np.mean(np.abs(audio)) > .0001)
 
     all_automation = synth.get_automation()
 
@@ -247,6 +256,10 @@ def test_automation_record_plugin():
 
     automation = all_automation[desc[param_index]['name']]
     assert automation.shape[1] == int(DURATION*SAMPLE_RATE)
+
+    # the automation shouldn't be constant
+    automation = automation.reshape(-1)
+    assert np.std(automation-automation.mean()) > .01
 
 
 if __name__ == "__main__":
