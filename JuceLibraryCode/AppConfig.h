@@ -149,11 +149,11 @@
 #endif
 
 #ifndef    JUCE_PLUGINHOST_LADSPA
- //#define JUCE_PLUGINHOST_LADSPA 0
+ #define   JUCE_PLUGINHOST_LADSPA 1
 #endif
 
 #ifndef    JUCE_PLUGINHOST_LV2
- //#define JUCE_PLUGINHOST_LV2 0
+ #define   JUCE_PLUGINHOST_LV2 1
 #endif
 
 #ifndef    JUCE_PLUGINHOST_ARA
