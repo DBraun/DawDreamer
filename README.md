@@ -24,11 +24,14 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * Composing graphs of multi-channel audio processors
 * Audio playback
 * [VST instruments and effects](https://github.com/DBraun/DawDreamer/wiki/Plugin-Processor) (with UI editing and state loading/saving)
-* [FAUST](http://faust.grame.fr/) effects and [polyphonic instruments](https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters)
+* [FAUST](https://github.com/DBraun/DawDreamer/wiki/Faust-Processor) effects and polyphonic instruments
 * [Time-stretching and looping](https://github.com/DBraun/DawDreamer/wiki/Playback-Warp-Processor), optionally according to Ableton Live warp markers
 * [Pitch-warping](https://github.com/DBraun/DawDreamer/wiki/Playback-Warp-Processor)
-* Parameter automation
-* Rendering multiple processors simultaneously
+* Parameter automation at audio-rate and at pulses-per-quarter-note
+* Parameter automation saving in absolute audio-rate time
+* MIDI playback in absolute time and PPQN time
+* MIDI file export in absolute time
+* Rendering and saving multiple processors simultaneously
 * Full support on macOS, Windows, Linux, Google Colab, and Ubuntu Dockerfile
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
