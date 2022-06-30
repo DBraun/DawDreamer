@@ -27,6 +27,7 @@ public:
 
     bool acceptsMidi() const override { return myPlugin.get() && myPlugin->acceptsMidi(); }
     bool producesMidi() const override { return myPlugin.get() && myPlugin->producesMidi(); }
+    std::uint32_t getLatencySamples();
 
     void reset() override;
 
@@ -69,7 +70,6 @@ public:
 private:
 
     bool loadPlugin(double sampleRate, int samplesPerBlock);
-    bool isLoaded = false;
 
     std::string myPluginPath;
     double mySampleRate;

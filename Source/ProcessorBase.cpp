@@ -186,10 +186,11 @@ ProcessorBase::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&) 
 
     const int numberChannels = myRecordBuffer.getNumChannels();
     int numSamplesToCopy = std::min(buffer.getNumSamples(), myRecordBuffer.getNumSamples() -int(*posInfo->getTimeInSamples()));
+    int writePos = int(*posInfo->getTimeInSamples());
 
     for (int chan = 0; chan < numberChannels; chan++) {
         // Write the sample to the engine's history for the correct channel.
-        myRecordBuffer.copyFrom(chan, int(*posInfo->getTimeInSamples()), buffer.getReadPointer(chan), numSamplesToCopy);
+        myRecordBuffer.copyFrom(chan, writePos, buffer.getReadPointer(chan), numSamplesToCopy);
     }
 }
 

@@ -227,6 +227,7 @@ but the filter mode cannot under automation.";
             "[DEPRECATED: Use `get_parameters_description`]. Get a list of dictionaries describing the plugin's parameters.")
         .def("get_parameters_description", &PluginProcessorWrapper::getPluginParametersDescription,
             "Get a list of dictionaries describing the plugin's parameters.")
+        .def("get_latency_samples", &PluginProcessorWrapper::getLatencySamples, "Get the latency measured in samples of the plugin. DawDreamer doesn't compensate this, so you are encouraged to delay other processors by this amount to compensate. Also, this value depends on the plugin's parameters, so it can change over time, and the output of this function doesn't represent that.")
         .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(), arg("clear_previous")=true, arg("beats")=false, arg("all_events")=true, load_midi_description)

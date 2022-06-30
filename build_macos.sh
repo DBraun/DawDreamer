@@ -12,8 +12,7 @@ make --directory=build_release
 cd ../..
 
 # build macOS release
-export MACOSX_DEPLOYMENT_TARGET=10.15
-xcodebuild -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
+xcodebuild ARCHS="x86_64 arm64" ONLY_ACTIVE_ARCH=NO -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
 mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
 
 rm tests/dawdreamer.so

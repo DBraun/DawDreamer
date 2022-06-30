@@ -9,6 +9,8 @@
 static std::mutex PLUGIN_INSTANCE_MUTEX;
 using juce::ExtensionsVisitor;
 
+#define THROW_ERROR_IF_NO_PLUGIN if (!myPlugin) {throw std::runtime_error("Please load the plugin first!");}
+
 struct PresetVisitor : public ExtensionsVisitor {
     const std::string presetFilePath;
 
@@ -33,15 +35,12 @@ PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate, i
 {
     myPluginPath = path;
 
-    isLoaded = loadPlugin(sampleRate, samplesPerBlock);
+    loadPlugin(sampleRate, samplesPerBlock);
 }
 
 void
 PluginProcessor::openEditor() {
-    if (!myPlugin) {
-        throw std::runtime_error(
-            "Editor cannot be shown because the plugin isn't loaded.");
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     if (!juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()) {
         throw std::runtime_error(
@@ -145,36 +144,30 @@ void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
 bool
 PluginProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) {
 
-    if (!myPlugin.get()) {
-        return false;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     return myPlugin->checkBusesLayoutSupported(layout);
 }
 
 bool
 PluginProcessor::setBusesLayout(const BusesLayout& arr) {
-    if (myPlugin.get()) {
-        ProcessorBase::setBusesLayout(arr);
-        return myPlugin->setBusesLayout(arr);
-    }
-    return false;
+    THROW_ERROR_IF_NO_PLUGIN
+    ProcessorBase::setBusesLayout(arr);
+    return myPlugin->setBusesLayout(arr);
 }
 
 void
 PluginProcessor::numChannelsChanged() {
+    THROW_ERROR_IF_NO_PLUGIN
     ProcessorBase::numChannelsChanged();
-    if (myPlugin.get()) {
-        myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
-    }
+    myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
 }
 
 void
 PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    if (myPlugin.get()) {
-        myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
-    }
+    THROW_ERROR_IF_NO_PLUGIN
+    myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
 }
 
 void
@@ -182,9 +175,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 {
     // todo: PluginProcessor should be able to use the incoming midiBuffer too.
     
-    if (!myPlugin.get() || !isLoaded) {
-        throw std::runtime_error("Error: no plugin was processed for processor named " + this->getUniqueName());
-    }
+    THROW_ERROR_IF_NO_PLUGIN
     
     auto posInfo = getPlayHead()->getPosition();
 
@@ -238,9 +229,7 @@ PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer&
 void
 PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
 
-    if (!myPlugin.get()) {
-        return;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
             
     int i = 0;
     
@@ -319,9 +308,7 @@ PluginProcessor::reset()
 bool
 PluginProcessor::loadPreset(const std::string& path)
 {
-    if (!myPlugin.get()) {
-        throw std::runtime_error("You must load a plugin before loading a preset.");
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     try {
         if (!std::filesystem::exists(path.c_str())) {
@@ -352,9 +339,7 @@ PluginProcessor::loadPreset(const std::string& path)
 bool
 PluginProcessor::loadVST3Preset(const std::string& path)
 {
-    if (!myPlugin.get()) {
-        throw std::runtime_error("You must load a plugin before loading a preset.");
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     juce::File fPath(path);
 
@@ -415,9 +400,9 @@ PluginProcessor::loadStateInformation(std::string filepath) {
 
 void
 PluginProcessor::saveStateInformation(std::string filepath) {
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first");
-    }
+    
+    THROW_ERROR_IF_NO_PLUGIN
+    
     MemoryBlock state;
     myPlugin->getStateInformation(state);
 
@@ -475,14 +460,19 @@ PluginProcessor::setPatch(const PluginPatch patch)
 
 }
 
+std::uint32_t
+PluginProcessor::getLatencySamples()
+{
+    THROW_ERROR_IF_NO_PLUGIN
+    return (uint32_t) myPlugin->getLatencySamples();
+}
+
+
 //==============================================================================
 std::string
 PluginProcessor::getParameterAsText(const int parameter)
 {
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first!");
-        return "";
-    }
+    THROW_ERROR_IF_NO_PLUGIN
     return myPlugin->getParameterText(parameter).toStdString();
 }
 
@@ -490,10 +480,7 @@ PluginProcessor::getParameterAsText(const int parameter)
 void
 PluginProcessor::setParameter(const int parameterIndex, const float value)
 {
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first!");
-        return;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     myPlugin->setParameter(parameterIndex, value); // todo: instead we need to do parameter->setValue(value)
 
@@ -508,10 +495,7 @@ PluginProcessor::getPatch() {
 
     PluginPatch params;
 
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first!");
-        return params;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     params.clear();
     params.reserve(myPlugin->getNumParameters());
@@ -551,10 +535,7 @@ PluginProcessor::getPatch() {
 const size_t
 PluginProcessor::getPluginParameterSize()
 {
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first!");
-        return 0;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     return myPlugin->getNumParameters();
 }
@@ -708,10 +689,7 @@ PluginProcessorWrapper::wrapperGetPatch()
 float
 PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
 {
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first!");
-        return 0.;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     if (parameterIndex >= myPlugin->getNumParameters()) {
         throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
@@ -731,10 +709,7 @@ bool
 PluginProcessorWrapper::wrapperSetParameter(int parameterIndex, float value)
 {
     
-    if (!myPlugin) {
-        throw std::runtime_error("Please load the plugin first!");
-        return false;
-    }
+    THROW_ERROR_IF_NO_PLUGIN
 
     myPlugin->setParameter(parameterIndex, value); // todo: instead we need to do parameter->setValue(value)
 
@@ -757,34 +732,29 @@ PluginProcessorWrapper::wrapperGetPluginParameterSize()
 py::list
 PluginProcessorWrapper::getPluginParametersDescription()
 {
+    THROW_ERROR_IF_NO_PLUGIN
+    
     py::list myList;
+    
+    //get the parameters as an AudioProcessorParameter array
+    const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
+    for (int i = 0; i < myPlugin->getNumParameters(); i++) {
 
-    if (myPlugin != nullptr) {
+        std::string theName = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        std::string label = processorParams[i]->getLabel().toStdString();
 
-        //get the parameters as an AudioProcessorParameter array
-        const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
-        for (int i = 0; i < myPlugin->getNumParameters(); i++) {
+        py::dict myDictionary;
+        myDictionary["index"] = i;
+        myDictionary["name"] = theName;
+        myDictionary["numSteps"] = processorParams[i]->getNumSteps();
+        myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
+        myDictionary["label"] = label;
+        myDictionary["text"] = currentText;
+        myDictionary["isMetaParameter"] = processorParams[i]->isMetaParameter();
+        myDictionary["isAutomatable"] = processorParams[i]->isAutomatable();
 
-            std::string theName = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
-            std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
-            std::string label = processorParams[i]->getLabel().toStdString();
-
-            py::dict myDictionary;
-            myDictionary["index"] = i;
-            myDictionary["name"] = theName;
-            myDictionary["numSteps"] = processorParams[i]->getNumSteps();
-            myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
-            myDictionary["label"] = label;
-            myDictionary["text"] = currentText;
-            myDictionary["isMetaParameter"] = processorParams[i]->isMetaParameter();
-            myDictionary["isAutomatable"] = processorParams[i]->isAutomatable();
-
-            myList.append(myDictionary);
-        }
-    }
-    else
-    {
-        throw std::runtime_error("Please load the plugin first!");
+        myList.append(myDictionary);
     }
 
     return myList;
