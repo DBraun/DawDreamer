@@ -25,6 +25,7 @@ ztimedmap GUI::gTimedZoneMap;
 
 FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock) : ProcessorBase{ newUniqueName }
 {
+    createLibContext();
 	mySampleRate = sampleRate;
 
 	m_factory = NULL;
@@ -43,6 +44,7 @@ FaustProcessor::~FaustProcessor() {
 	clear();
 	delete myMidiIteratorQN;
 	delete myMidiIteratorSec;
+    destroyLibContext();
 }
 
 bool

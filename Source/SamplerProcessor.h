@@ -58,7 +58,7 @@ public:
     }
 
     void
-    setPlayHead(AudioPlayHead* newPlayHead)
+    setPlayHead(AudioPlayHead* newPlayHead) override
     {
         AudioProcessor::setPlayHead(newPlayHead);
         sampler.setPlayHead(newPlayHead);

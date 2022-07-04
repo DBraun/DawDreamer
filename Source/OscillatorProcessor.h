@@ -23,7 +23,7 @@ public:
     }
 
     void
-    prepareToPlay(double sampleRate, int samplesPerBlock)
+    prepareToPlay(double sampleRate, int samplesPerBlock) override
     {
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock) };
         myOscillator.prepare(spec);
