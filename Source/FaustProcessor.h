@@ -102,6 +102,8 @@ public:
 struct SigWrapper {
     CTree *ptr;
     SigWrapper(CTree *ptr) : ptr{ptr} {}
+    SigWrapper(float val) : ptr{sigReal(val)} {}  // todo: this ignores createLibContext();
+    SigWrapper(int val) : ptr{sigInt(val)} {}  // todo: this ignores createLibContext();
     operator CTree *() { return ptr; }
 };
 
@@ -452,7 +454,38 @@ inline void create_bindings_for_faust_signal(py::module &m) {
     auto load_midi_description = "Load MIDI from a file. If `all_events` is True, then all events (not just Note On/Off) will be loaded. By default, when `beats` is False, notes will be converted to absolute times and will not be affected by the Render Engine's BPM. By default, `clear_previous` is True.";
     auto save_midi_description = "After rendering, you can save the MIDI to a file using absolute times (SMPTE format).";
     
-    py::class_<SigWrapper>(m, "Signal");
+    py::class_<SigWrapper>(m, "Signal")
+        .def(py::init<float>(), arg("val"), "Init with a float")
+        .def(py::init<int>(), arg("val"), "Init with an int")
+    // todo: this ignores createLibContext()
+        .def("__add__", [](const SigWrapper &s1, SigWrapper &s2) { return SigWrapper(sigAdd((SigWrapper&)s1, s2)); })
+        .def("__add__", [](const SigWrapper &s1, float other) { return SigWrapper(sigAdd((SigWrapper&)s1, sigReal(other))); })
+        .def("__radd__", [](const SigWrapper &s1, float other) { return SigWrapper(sigAdd((SigWrapper&)s1, sigReal(other))); })
+        .def("__add__", [](const SigWrapper &s1, int other) { return SigWrapper(sigAdd((SigWrapper&)s1, sigInt(other))); })
+        .def("__radd__", [](const SigWrapper &s1, int other) { return SigWrapper(sigAdd((SigWrapper&)s1, sigInt(other))); })
+    
+        .def("__sub__", [](const SigWrapper &s1, SigWrapper &s2) { return SigWrapper(sigSub((SigWrapper&)s1, s2)); })
+        .def("__sub__", [](const SigWrapper &s1, float other) { return SigWrapper(sigSub((SigWrapper&)s1, sigReal(other))); })
+        .def("__rsub__", [](const SigWrapper &s1, float other) { return SigWrapper(sigSub((SigWrapper&)s1, sigReal(other))); })
+        .def("__sub__", [](const SigWrapper &s1, int other) { return SigWrapper(sigSub((SigWrapper&)s1, sigInt(other))); })
+        .def("__rsub__", [](const SigWrapper &s1, int other) { return SigWrapper(sigSub((SigWrapper&)s1, sigInt(other))); })
+    
+        .def("__mul__", [](const SigWrapper &s1, SigWrapper &s2) { return SigWrapper(sigMul((SigWrapper&)s1, s2)); })
+        .def("__mul__", [](const SigWrapper &s1, float other) { return SigWrapper(sigMul((SigWrapper&)s1, sigReal(other))); })
+        .def("__rmul__", [](const SigWrapper &s1, float other) { return SigWrapper(sigMul((SigWrapper&)s1, sigReal(other))); })
+        .def("__mul__", [](const SigWrapper &s1, int other) { return SigWrapper(sigMul((SigWrapper&)s1, sigInt(other))); })
+        .def("__rmul__", [](const SigWrapper &s1, int other) { return SigWrapper(sigMul((SigWrapper&)s1, sigInt(other))); })
+    
+        .def("__truediv__", [](const SigWrapper &s1, SigWrapper &s2) { return SigWrapper(sigDiv((SigWrapper&)s1, s2)); })
+        .def("__truediv__", [](const SigWrapper &s1, float other) { return SigWrapper(sigDiv((SigWrapper&)s1, sigReal(other))); })
+        .def("__rtruediv__", [](const SigWrapper &s1, float other) { return SigWrapper(sigDiv((SigWrapper&)s1, sigReal(other))); })
+        .def("__truediv__", [](const SigWrapper &s1, int other) { return SigWrapper(sigDiv((SigWrapper&)s1, sigInt(other))); })
+        .def("__rtruediv__", [](const SigWrapper &s1, int other) { return SigWrapper(sigDiv((SigWrapper&)s1, sigInt(other))); })
+    
+        .def("__mod__", [](const SigWrapper &s1, SigWrapper &s2) { return SigWrapper(sigFmod((SigWrapper&)s1, s2)); })
+        .def("__mod__", [](const SigWrapper &s1, float other) { return SigWrapper(sigFmod((SigWrapper&)s1, sigReal(other))); })
+        .def("__mod__", [](const SigWrapper &s1, int other) { return SigWrapper(sigFmod((SigWrapper&)s1, sigInt(other))); })
+    ;
     
     py::class_<FaustProcessor, ProcessorBase> faustProcessor(m, "FaustProcessor");
     

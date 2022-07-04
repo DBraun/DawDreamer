@@ -266,5 +266,153 @@ def test19():
     f.compile_signals("test", signals)
 
 
+def test_overload_add1():
+    """
+    //
+    process(x) = (x + .5) + (x + 1)
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = (f.sigInput(0) + f.sigReal(0.5)) + (f.sigInput(0) + f.sigInt(1))
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+def test_overload_add2():
+    """
+    //
+    process(x) = (x + .5) + (x + 1)
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = (f.sigInput(0) + 0.5) + (f.sigInput(0) + 1)
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+def test_overload_add3():
+    """
+    //
+    process(x) = (x + .5) + (x + 1)
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = sum([f.sigInput(0), f.sigReal(0.5)]) + sum([f.sigInput(0), f.sigInt(1)])
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+def test_overload_sub1():
+    """
+    //
+    process(x) = (x - .5) + (x - 1)
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = (f.sigInput(0) - f.sigReal(0.5)) + (f.sigInput(0) - f.sigInt(1))
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+def test_overload_sub2():
+    """
+    //
+    process(x) = (x - .5) + (x - 1)
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = (f.sigInput(0) - 0.5) + (f.sigInput(0) - 1)
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+
+def test_overload_mul1():
+    """
+    //
+    process = _ * 0.5
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = f.sigInput(0) * f.sigReal(0.5)
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+
+def test_overload_mul2():
+    """
+    //
+    process = _ * 0.5
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = f.sigInput(0) * 0.5
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+
+def test_overload_mul3():
+    """
+    //
+    process = _ * 2
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = f.sigInput(0) * 2
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+def test_overload_mul3():
+    """
+    //
+    process = _ * 2
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    s1 = f.sigInput(0) * f.sigInt(2)
+
+    signals.append(s1)
+
+    f.compile_signals("test", signals)
+
+
 if __name__ == "__main__":
-    test_faust_libfaust_signal7()
+    test_overload_add2()
