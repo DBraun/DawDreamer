@@ -872,8 +872,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("boxPar4", &FaustProcessor::getBoxPar4, arg("box1"), arg("box2"), arg("box3"), arg("box4"), "Blah", returnPolicy)
         .def("boxPar5", &FaustProcessor::getBoxPar5, arg("box1"), arg("box2"), arg("box3"), arg("box4"), arg("box5"), "Blah", returnPolicy)
 
-        .def("boxSplit", &FaustProcessor::getBoxSplit, arg("box1"), arg("box2"), "Blah", returnPolicy)
-        .def("boxMerge", &FaustProcessor::getBoxMerge, arg("box1"), arg("box2"), "Blah", returnPolicy)
+        .def("boxSplit", &FaustProcessor::getBoxSplit, arg("box1"), arg("box2"), "The split composition (e.g., A<:B) operator is used to distribute the outputs of A to the inputs of B. The number of inputs of B must be a multiple of the number of outputs of A: outputs(A).k=inputs(B)", returnPolicy)
+        .def("boxMerge", &FaustProcessor::getBoxMerge, arg("box1"), arg("box2"), "The merge composition (e.g., A:>B) is the dual of the split composition. The number of outputs of A must be a multiple of the number of inputs of B: outputs(A)=k.inputs(B)", returnPolicy)
              
         .def("boxRoute", &FaustProcessor::getBoxRoute, arg("box_n"), arg("box_m"), arg("box_r"), "Blah", returnPolicy)
 
@@ -943,7 +943,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("boxFmod", &FaustProcessor::getBoxFmod, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
         .def("boxAtan2", &FaustProcessor::getBoxAtan2, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
 
-        .def("boxRec", &FaustProcessor::getBoxRec, arg("box1"), arg("box2"), "Blah", returnPolicy)
+        .def("boxRec", &FaustProcessor::getBoxRec, arg("box1"), arg("box2"), "The recursive composition (e.g., A~B) is used to create cycles in the block-diagram in order to express recursive computations. It is the most complex operation in terms of connections: outputs(A)≥inputs(B) and inputs(A)≥outputs(B)", returnPolicy)
 
         .def("boxButton", &FaustProcessor::getBoxButton, arg("label"), "Blah", returnPolicy)
         .def("boxCheckbox", &FaustProcessor::getBoxCheckbox, arg("label"), "Blah", returnPolicy)
