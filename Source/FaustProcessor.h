@@ -14,6 +14,9 @@
 #include "TMutex.h"
 
 #include "faust/dsp/libfaust-signal.h"
+#include "faust/dsp/libfaust-box.h"
+//#include "faust/dsp/interpreter-dsp.h"
+//#include "faust/dsp/poly-dsp.h"
 #include "faust/misc.h"
 #include "faust/export.h"
 
@@ -99,11 +102,21 @@ public:
     }
 };
 
+
 struct SigWrapper {
     CTree *ptr;
     SigWrapper(CTree *ptr) : ptr{ptr} {}
     SigWrapper(float val) : ptr{sigReal(val)} {}  // todo: this ignores createLibContext();
     SigWrapper(int val) : ptr{sigInt(val)} {}  // todo: this ignores createLibContext();
+    operator CTree *() { return ptr; }
+};
+
+
+struct BoxWrapper {
+    CTree *ptr;
+    BoxWrapper(CTree *ptr) : ptr{ptr} {}
+    BoxWrapper(float val) : ptr{boxReal(val)} {}  // todo: this ignores createLibContext();
+    BoxWrapper(int val) : ptr{boxInt(val)} {}  // todo: this ignores createLibContext();
     operator CTree *() { return ptr; }
 };
 
@@ -402,7 +415,7 @@ public:
     
     SigWrapper getSigSampleRate() { return SigWrapper(sigMin(sigReal(192000.0),
                                                              sigMax(sigReal(1.0),
-                                                                    sigFConst(SType::kSInt, "fSamplingFreq", "<dummy.h>")))); }
+                                                                    sigFConst(SType::kSInt, "fSamplingFreq", "<math.h>")))); }
     SigWrapper getSigBufferSize() { return SigWrapper(sigFVar(SType::kSInt, "count", "<math.h>")); }
     
     
@@ -439,6 +452,229 @@ public:
         }
     }
 
+    // box API
+
+    BoxWrapper getBoxInt(int val) { return BoxWrapper(boxInt(val)); }
+    
+    BoxWrapper getBoxReal(double val) { return BoxWrapper(boxReal(val)); }
+
+    BoxWrapper getBoxWire() { return BoxWrapper(boxWire()); }
+    
+    BoxWrapper getBoxCut() { return BoxWrapper(boxCut()); }
+    
+    BoxWrapper getBoxSeq(BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxSeq(box1, box2)); }
+    
+    BoxWrapper getBoxPar(BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxPar(box1, box2)); }
+    BoxWrapper getBoxPar3(BoxWrapper &box1, BoxWrapper &box2, BoxWrapper &box3) { return BoxWrapper(boxPar3(box1, box2, box3)); }
+    BoxWrapper getBoxPar4(BoxWrapper &box1, BoxWrapper &box2, BoxWrapper &box3, BoxWrapper &box4) { return BoxWrapper(boxPar4(box1, box2, box3, box4)); }
+    BoxWrapper getBoxPar5(BoxWrapper &box1, BoxWrapper &box2, BoxWrapper &box3, BoxWrapper &box4, BoxWrapper &box5) { return BoxWrapper(boxPar5(box1, box2, box3, box4, box5)); }
+
+    BoxWrapper getBoxSplit(BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxSplit(box1, box2)); }
+    BoxWrapper getBoxMerge(BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxMerge(box1, box2)); }
+    
+    BoxWrapper getBoxRoute(BoxWrapper &box1, BoxWrapper &box2, BoxWrapper &box3) { return BoxWrapper(boxRoute(box1, box2, box3)); }
+    
+    BoxWrapper getBoxDelay(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) {
+        if (box1.has_value() && box2.has_value()) {
+            return BoxWrapper(boxDelay(*box1, *box2));
+        } else {
+            return BoxWrapper(boxDelay());
+        }
+    }
+    
+    BoxWrapper getBoxIntCast(std::optional<BoxWrapper> box1) {
+        if (box1.has_value()) {
+            return BoxWrapper(boxIntCast(*box1));
+        } else {
+            return BoxWrapper(boxIntCast());
+        }
+    }
+
+    BoxWrapper getBoxFloatCast(std::optional<BoxWrapper> box1) {
+        if (box1.has_value()) {
+            return BoxWrapper(boxFloatCast(*box1));
+        } else {
+            return BoxWrapper(boxFloatCast());
+        }
+    }
+    BoxWrapper getBoxReadOnlyTable(std::optional<BoxWrapper> n, std::optional<BoxWrapper> init, std::optional<BoxWrapper> ridx) {
+        if (n.has_value() && init.has_value() && ridx.has_value()) {
+            return BoxWrapper(boxReadOnlyTable(*n, *init, *ridx));
+        } else {
+            return BoxWrapper(boxReadOnlyTable());
+        }
+    }
+
+    BoxWrapper getBoxWriteReadTable(std::optional<BoxWrapper> n, std::optional<BoxWrapper> init, std::optional<BoxWrapper> widx, std::optional<BoxWrapper> wsig, std::optional<BoxWrapper> ridx) {
+        if (n.has_value() && init.has_value() && widx.has_value() && wsig.has_value() && ridx.has_value()) {
+            return BoxWrapper(boxWriteReadTable(*n, *init, *widx, *wsig, *ridx));
+        } else {
+            return BoxWrapper(boxWriteReadTable());
+        }
+    }
+    
+    BoxWrapper getBoxWaveform(std::vector<float> vals) {
+        tvec waveform;
+        for (auto& val : vals) {
+            waveform.push_back(boxReal(val));
+        }
+        return BoxWrapper(boxWaveform(waveform));
+    }
+
+    BoxWrapper getBoxSoundfile(std::string &label, BoxWrapper& chan, std::optional<BoxWrapper> part, std::optional<BoxWrapper> rdx) {
+        if (part.has_value() && rdx.has_value()) {
+            return BoxWrapper(boxSoundfile(label, chan, *part, *rdx));
+        } else {
+            return BoxWrapper(boxSoundfile(label, chan));
+        }
+    }
+    
+    BoxWrapper getBoxSelect2(std::optional<BoxWrapper> selector, std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) {
+        if (selector.has_value() && box1.has_value() && box2.has_value()) {
+            return BoxWrapper(boxSelect2(*selector, *box1, *box2));
+        } else {
+            return BoxWrapper(boxSelect2());
+        }
+    }
+        
+    BoxWrapper getBoxSelect3(std::optional<BoxWrapper> selector, std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2, std::optional<BoxWrapper> box3) {
+        if (selector.has_value() && box1.has_value() && box2.has_value()) {
+            return BoxWrapper(boxSelect3(*selector, *box1, *box2, *box3));
+        } else {
+            return BoxWrapper(boxSelect3());
+        }
+    }
+    
+    BoxWrapper getBoxFConst(SType type, const std::string& name, const std::string& file) {
+        return BoxWrapper(boxFConst(type, name, file));
+    }
+
+    BoxWrapper getBoxFVar(SType type, const std::string& name, const std::string& file) {
+        return BoxWrapper(boxFVar(type, name, file));
+    }
+
+    BoxWrapper getBoxBinOp(SOperator op, std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) {
+        if (box1.has_value() && box2.has_value()) {
+            return BoxWrapper(boxBinOp(op, *box1, *box2));
+        } else {
+            return BoxWrapper(boxBinOp(op));
+        }
+    }
+
+    BoxWrapper getBoxAdd(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxAdd(*box1, *box2)) : BoxWrapper(boxAdd()); }
+
+    BoxWrapper getBoxSub(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxSub(*box1, *box2)) : BoxWrapper(boxSub()); }
+
+    BoxWrapper getBoxMul(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxMul(*box1, *box2)) : BoxWrapper(boxMul()); }
+
+    BoxWrapper getBoxDiv(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxDiv(*box1, *box2)) : BoxWrapper(boxDiv()); }
+
+    BoxWrapper getBoxRem(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxRem(*box1, *box2)) : BoxWrapper(boxRem()); }
+
+    BoxWrapper getBoxLeftShift(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxLeftShift(*box1, *box2)) : BoxWrapper(boxLeftShift()); }
+
+    BoxWrapper getBoxLRightShift(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxLRightShift(*box1, *box2)) : BoxWrapper(boxLRightShift()); }
+
+    BoxWrapper getBoxARightShift(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxARightShift(*box1, *box2)) : BoxWrapper(boxARightShift()); }
+        
+    BoxWrapper getBoxGT(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxGT(*box1, *box2)) : BoxWrapper(boxGT()); }
+    BoxWrapper getBoxLT(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxLT(*box1, *box2)) : BoxWrapper(boxLT()); }
+    BoxWrapper getBoxGE(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxGE(*box1, *box2)) : BoxWrapper(boxGE()); }
+    BoxWrapper getBoxLE(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxLE(*box1, *box2)) : BoxWrapper(boxLE()); }
+    BoxWrapper getBoxEQ(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxEQ(*box1, *box2)) : BoxWrapper(boxEQ()); }
+    BoxWrapper getBoxNE(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxNE(*box1, *box2)) : BoxWrapper(boxNE()); }
+    
+    BoxWrapper getBoxAND(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxAND(*box1, *box2)) : BoxWrapper(boxAND()); }
+    BoxWrapper getBoxOR(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxOR(*box1, *box2)) : BoxWrapper(boxOR()); }
+    BoxWrapper getBoxXOR(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxXOR(*box1, *box2)) : BoxWrapper(boxXOR()); }
+            
+    BoxWrapper getBoxAbs(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxAbs(*box1) : boxAbs()); }
+    BoxWrapper getBoxAcos(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxAcos(*box1) : boxAcos()); }
+    BoxWrapper getBoxTan(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxTan(*box1) : boxTan()); }
+    BoxWrapper getBoxSqrt(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxSqrt(*box1) : boxSqrt()); }
+    BoxWrapper getBoxSin(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxSin(*box1) : boxSin()); }
+    BoxWrapper getBoxRint(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxRint(*box1) : boxRint()); }
+    BoxWrapper getBoxLog(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxLog(*box1) : boxLog()); }
+    BoxWrapper getBoxLog10(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxLog10(*box1) : boxLog10()); }
+    BoxWrapper getBoxFloor(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxFloor(*box1) : boxFloor()); }
+    BoxWrapper getBoxExp(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxExp(*box1) : boxExp()); }
+    BoxWrapper getBoxExp10(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxExp10(*box1) : boxExp10()); }
+    BoxWrapper getBoxCos(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxCos(*box1) : boxCos()); }
+    BoxWrapper getBoxCeil(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxCeil(*box1) : boxCeil()); }
+    BoxWrapper getBoxAtan(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxAtan(*box1) : boxAtan()); }
+    BoxWrapper getBoxAsin(std::optional<BoxWrapper> box1) { return BoxWrapper(box1.has_value() ? boxAsin(*box1) : boxAsin()); }
+    
+    BoxWrapper getBoxRemainder(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxRemainder(*box1, *box2)) : BoxWrapper(boxRemainder()); }
+    BoxWrapper getBoxPow(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxPow(*box1, *box2)) : BoxWrapper(boxPow()); }
+    BoxWrapper getBoxMin(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxMin(*box1, *box2)) : BoxWrapper(boxMin()); }
+    BoxWrapper getBoxMax(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxMax(*box1, *box2)) : BoxWrapper(boxMax()); }
+    BoxWrapper getBoxFmod(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxFmod(*box1, *box2)) : BoxWrapper(boxFmod()); }
+    BoxWrapper getBoxAtan2(std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2) { return box1.has_value() && box2.has_value() ? BoxWrapper(boxAtan2(*box1, *box2)) : BoxWrapper(boxAtan2()); }
+    
+    BoxWrapper getBoxRec(BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxRec(box1, box2)); }
+
+    BoxWrapper getBoxButton(std::string &label) { return BoxWrapper(boxButton(label)); }
+    
+    BoxWrapper getBoxCheckbox(std::string &label) { return BoxWrapper(boxCheckbox(label)); }
+
+    BoxWrapper getBoxVSlider(std::string &label, BoxWrapper &boxInit, BoxWrapper &boxMin, BoxWrapper &boxMax, BoxWrapper &boxStep)
+        { return BoxWrapper(boxVSlider(label, boxInit, boxMin, boxMax, boxStep)); }
+    
+    BoxWrapper getBoxHSlider(std::string &label, BoxWrapper &boxInit, BoxWrapper &boxMin, BoxWrapper &boxMax, BoxWrapper &boxStep)
+        { return BoxWrapper(boxHSlider(label, boxInit, boxMin, boxMax, boxStep)); }
+    
+    BoxWrapper getBoxNumEntry(std::string &label, BoxWrapper &boxInit, BoxWrapper &boxMin, BoxWrapper &boxMax, BoxWrapper &boxStep)
+        { return BoxWrapper(boxNumEntry(label, boxInit, boxMin, boxMax, boxStep)); }
+    
+    BoxWrapper getBoxVBargraph(std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax, BoxWrapper &box)
+        { return BoxWrapper(boxVBargraph(label, boxMin, boxMax, box)); }
+    
+    BoxWrapper getBoxHBargraph(std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax, BoxWrapper &box)
+        { return BoxWrapper(boxHBargraph(label, boxMin, boxMax, box)); }
+    
+    BoxWrapper getBoxAttach(std::optional<BoxWrapper> s1, std::optional<BoxWrapper> s2)
+        { return BoxWrapper((s1.has_value() && s2.has_value()) ? boxAttach(*s1, *s2) : boxAttach()); }
+  
+    // todo:
+//    tvec getBoxToSignals(BoxWrapper& box1)
+//        {
+//        std::string error_msg;
+//        auto signals = boxesToSignals(box1, error_msg);
+//        return signals;
+//    }
+    
+    BoxWrapper getBoxSampleRate() { return BoxWrapper(boxMin(boxReal(192000.0),
+                                                             boxMax(boxReal(1.0),
+                                                                    boxFConst(SType::kSInt, "fSamplingFreq", "<math.h>")))); }
+    BoxWrapper getBoxBufferSize() { return BoxWrapper(boxFVar(SType::kSInt, "count", "<math.h>")); }
+
+    void compileBox(const std::string& name,
+                    BoxWrapper &box,
+                    std::optional<std::vector<std::string>> in_argv)
+    {
+        int argc = 0;
+        const char** argv = new const char* [256];
+        std::string error_msg;
+        
+        if (in_argv.has_value()) {
+            for (auto v : *in_argv) {
+                argv[argc++] = v.c_str();
+            }
+        }
+        
+        dsp_factory_base* factory = createCPPDSPFactoryFromBoxes(name,
+                                                                 box,
+                                                                 argc,
+                                                                 argv,
+                                                                 error_msg);
+        if (factory) {
+            // Print the C++ class
+            factory->write(&std::cout);
+            delete(factory);
+        } else {
+            throw std::runtime_error("FaustProcessor: " + error_msg);
+        }
+    }
 };
 
 
@@ -485,6 +721,39 @@ inline void create_bindings_for_faust_signal(py::module &m) {
         .def("__mod__", [](const SigWrapper &s1, SigWrapper &s2) { return SigWrapper(sigFmod((SigWrapper&)s1, s2)); })
         .def("__mod__", [](const SigWrapper &s1, float other) { return SigWrapper(sigFmod((SigWrapper&)s1, sigReal(other))); })
         .def("__mod__", [](const SigWrapper &s1, int other) { return SigWrapper(sigFmod((SigWrapper&)s1, sigInt(other))); })
+    ;
+    
+    py::class_<BoxWrapper>(m, "Box")
+        .def(py::init<float>(), arg("val"), "Init with a float")
+        .def(py::init<int>(), arg("val"), "Init with an int")
+    // todo: this ignores createLibContext()
+        .def("__add__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxAdd((BoxWrapper&)box1, box2)); })
+        .def("__add__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxReal(other))); })
+        .def("__radd__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxReal(other))); })
+        .def("__add__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxInt(other))); })
+        .def("__radd__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxInt(other))); })
+    
+        .def("__sub__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxSub((BoxWrapper&)box1, box2)); })
+        .def("__sub__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxReal(other))); })
+        .def("__rsub__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxReal(other))); })
+        .def("__sub__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxInt(other))); })
+        .def("__rsub__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxInt(other))); })
+    
+        .def("__mul__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxMul((BoxWrapper&)box1, box2)); })
+        .def("__mul__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxReal(other))); })
+        .def("__rmul__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxReal(other))); })
+        .def("__mul__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxInt(other))); })
+        .def("__rmul__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxInt(other))); })
+    
+        .def("__truediv__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxDiv((BoxWrapper&)box1, box2)); })
+        .def("__truediv__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxReal(other))); })
+        .def("__rtruediv__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxReal(other))); })
+        .def("__truediv__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxInt(other))); })
+        .def("__rtruediv__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxInt(other))); })
+    
+        .def("__mod__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxFmod((BoxWrapper&)box1, box2)); })
+        .def("__mod__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxFmod((BoxWrapper&)box1, boxReal(other))); })
+        .def("__mod__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxFmod((BoxWrapper&)box1, boxInt(other))); })
     ;
     
     py::class_<FaustProcessor, ProcessorBase> faustProcessor(m, "FaustProcessor");
@@ -600,6 +869,138 @@ Note that note-ons and note-offs are counted separately.")
         .def("sigBufferSize", &FaustProcessor::getSigBufferSize, "Blah", returnPolicy)
 
         .def("compile_signals", &FaustProcessor::compileSignals, arg("name"), arg("signal"), arg("argv")=py::none(), "Blah")
+    
+// box api
+    
+        .def("set_dsp", &FaustProcessor::setDSPFile, arg("filepath"), "Set the FAUST box process with a file.")
+        .def("set_dsp_string", &FaustProcessor::setDSPString, arg("faust_code"),
+           "Set the FAUST box process with a string containing FAUST code.")
+        .def("compile", &FaustProcessor::compile, "Compile the FAUST object. You must have already set a dsp file path or dsp string.")
+        .def_property("auto_import", &FaustProcessor::getAutoImport, &FaustProcessor::setAutoImport, "The auto import string. Default is `import(\"stdfaust.lib\");`")
+        .def("get_parameters_description", &FaustProcessor::getPluginParametersDescription,
+           "Get a list of dictionaries describing the parameters of the most recently compiled FAUST code.")
+        .def("get_parameter", &FaustProcessor::getParamWithIndex, arg("param_index"))
+        .def("get_parameter", &FaustProcessor::getParamWithPath, arg("parameter_path"))
+        .def("set_parameter", &FaustProcessor::setParamWithIndex, arg("parameter_index"), arg("value"))
+        .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"), arg("value"))
+        .def_property_readonly("compiled", &FaustProcessor::isCompiled, "Did the most recent DSP code compile?")
+        .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
+        .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
+        .def_property("group_voices", &FaustProcessor::getGroupVoices, &FaustProcessor::setGroupVoices, "If grouped, all polyphonic voices will share the same parameters. This parameter only matters if polyphony is enabled.")
+        .def_property("release_length", &FaustProcessor::getReleaseLength, &FaustProcessor::setReleaseLength, "If using polyphony, specifying the release length accurately can help avoid warnings about voices being stolen.")
+        .def_property("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath, &FaustProcessor::setFaustLibrariesPath, "Absolute path to directory containing your custom \".lib\" files containing Faust code.")
+        .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
+        Note that note-ons and note-offs are counted separately.")
+        .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), kw_only(), arg("clear_previous")=true, arg("beats")=false, arg("all_events")=true, load_midi_description)
+        .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
+        .def("add_midi_note", &FaustProcessor::addMidiNote,
+           arg("note"), arg("velocity"), arg("start_time"), arg("duration"), kw_only(), arg("beats")=false, add_midi_description)
+        .def("save_midi", &FaustProcessor::saveMIDI,
+           arg("filepath"), save_midi_description)
+        .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
+
+        .def("boxInt", &FaustProcessor::getBoxInt, arg("val"), "Blah", returnPolicy)
+        .def("boxReal", &FaustProcessor::getBoxReal, arg("val"), "Blah", returnPolicy)
+        .def("boxWire", &FaustProcessor::getBoxWire, "Blah", returnPolicy)
+        .def("boxCut", &FaustProcessor::getBoxCut, "Blah", returnPolicy)
+    
+        .def("boxSeq", &FaustProcessor::getBoxSeq, arg("box1"), arg("box2"), "Blah", returnPolicy)
+
+        .def("boxPar", &FaustProcessor::getBoxPar, arg("box1"), arg("box2"), "Blah", returnPolicy)
+        .def("boxPar3", &FaustProcessor::getBoxPar3, arg("box1"), arg("box2"), arg("box3"), "Blah", returnPolicy)
+        .def("boxPar4", &FaustProcessor::getBoxPar4, arg("box1"), arg("box2"), arg("box3"), arg("box4"), "Blah", returnPolicy)
+        .def("boxPar5", &FaustProcessor::getBoxPar5, arg("box1"), arg("box2"), arg("box3"), arg("box4"), arg("box5"), "Blah", returnPolicy)
+
+        .def("boxSplit", &FaustProcessor::getBoxSplit, arg("box1"), arg("box2"), "Blah", returnPolicy)
+        .def("boxMerge", &FaustProcessor::getBoxMerge, arg("box1"), arg("box2"), "Blah", returnPolicy)
+             
+        .def("boxRoute", &FaustProcessor::getBoxRoute, arg("box_n"), arg("box_m"), arg("box_r"), "Blah", returnPolicy)
+
+        .def("boxDelay", &FaustProcessor::getBoxDelay, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxIntCast", &FaustProcessor::getBoxIntCast, arg("box1")=py::none(), "Blah", returnPolicy)
+
+        .def("boxFloatCast", &FaustProcessor::getBoxFloatCast, arg("box1")=py::none(), "Blah", returnPolicy)
+    
+        .def("boxReadOnlyTable", &FaustProcessor::getBoxReadOnlyTable, arg("n")=py::none(), arg("init")=py::none(), arg("ridx")=py::none(), "Blah", returnPolicy)
+    
+        .def("boxWriteReadTable", &FaustProcessor::getBoxWriteReadTable, arg("n")=py::none(), arg("init")=py::none(), arg("widx")=py::none(), arg("wsig")=py::none(), arg("ridx")=py::none(), "Blah", returnPolicy)
+
+        .def("boxWaveform", &FaustProcessor::getBoxWaveform, arg("vals"), "Blah", returnPolicy)
+        .def("boxSoundfile", &FaustProcessor::getBoxSoundfile, arg("filepath"), arg("chan"), arg("part")=py::none(), arg("ridx")=py::none(), "Blah", returnPolicy)
+
+        .def("boxSelect2", &FaustProcessor::getBoxSelect2, arg("selector")=py::none(), arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxSelect3", &FaustProcessor::getBoxSelect3, arg("selector")=py::none(), arg("box1")=py::none(), arg("box2")=py::none(), arg("box3")=py::none(), "Blah", returnPolicy)
+    
+        .def("boxFConst", &FaustProcessor::getBoxFConst, arg("type"), arg("name"), arg("file"), "Blah", returnPolicy)
+        .def("boxFVar", &FaustProcessor::getBoxFVar, arg("type"), arg("name"), arg("file"), "Blah", returnPolicy)
+
+        .def("boxBinOp", &FaustProcessor::getBoxBinOp, arg("op"), arg("x")=py::none(), arg("y")=py::none(), "Blah", returnPolicy)
+    
+        .def("boxAdd", &FaustProcessor::getBoxAdd, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxSub", &FaustProcessor::getBoxSub, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxMul", &FaustProcessor::getBoxMul, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxDiv", &FaustProcessor::getBoxDiv, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxRem", &FaustProcessor::getBoxRem, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxLeftShift", &FaustProcessor::getBoxLeftShift, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxLRightShift", &FaustProcessor::getBoxLRightShift, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxARightShift", &FaustProcessor::getBoxARightShift, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxGT", &FaustProcessor::getBoxGT, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxLT", &FaustProcessor::getBoxLT, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxGE", &FaustProcessor::getBoxGE, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxLE", &FaustProcessor::getBoxLE, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxEQ", &FaustProcessor::getBoxEQ, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxNE", &FaustProcessor::getBoxNE, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxAND", &FaustProcessor::getBoxAND, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxOR", &FaustProcessor::getBoxOR, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxXOR", &FaustProcessor::getBoxXOR, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxAbs", &FaustProcessor::getBoxAbs, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxAcos", &FaustProcessor::getBoxAcos, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxTan", &FaustProcessor::getBoxTan, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxSqrt", &FaustProcessor::getBoxSqrt, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxSin", &FaustProcessor::getBoxSin, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxRint", &FaustProcessor::getBoxRint, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxLog", &FaustProcessor::getBoxLog, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxLog10", &FaustProcessor::getBoxLog10, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxFloor", &FaustProcessor::getBoxFloor, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxExp", &FaustProcessor::getBoxExp, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxExp10", &FaustProcessor::getBoxExp10, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxCos", &FaustProcessor::getBoxCos, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxCeil", &FaustProcessor::getBoxCeil, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxAtan", &FaustProcessor::getBoxAtan, arg("box1")=py::none(), "Blah", returnPolicy)
+        .def("boxAsin", &FaustProcessor::getBoxAsin, arg("box1")=py::none(), "Blah", returnPolicy)
+
+        .def("boxRemainder", &FaustProcessor::getBoxRemainder, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxPow", &FaustProcessor::getBoxPow, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxMin", &FaustProcessor::getBoxMin, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxMax", &FaustProcessor::getBoxMax, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxFmod", &FaustProcessor::getBoxFmod, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+        .def("boxAtan2", &FaustProcessor::getBoxAtan2, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxRec", &FaustProcessor::getBoxRec, arg("box1"), arg("box2"), "Blah", returnPolicy)
+
+        .def("boxButton", &FaustProcessor::getBoxButton, arg("label"), "Blah", returnPolicy)
+        .def("boxCheckbox", &FaustProcessor::getBoxCheckbox, arg("label"), "Blah", returnPolicy)
+
+        .def("boxVSlider", &FaustProcessor::getBoxVSlider, arg("label"), arg("init"), arg("min"), arg("max"), arg("step"), "Blah", returnPolicy)
+        .def("boxHSlider", &FaustProcessor::getBoxHSlider, arg("label"), arg("init"), arg("min"), arg("max"), arg("step"), "Blah", returnPolicy)
+
+        .def("boxNumEntry", &FaustProcessor::getBoxNumEntry, arg("label"), arg("init"), arg("min"), arg("max"), arg("step"), "Blah", returnPolicy)
+
+        .def("boxVBargraph", &FaustProcessor::getBoxVBargraph, arg("label"), arg("min"), arg("max"), arg("step"), "Blah", returnPolicy)
+        .def("boxHBargraph", &FaustProcessor::getBoxHBargraph, arg("label"), arg("min"), arg("max"), arg("step"), "Blah", returnPolicy)
+
+        .def("boxAttach", &FaustProcessor::getBoxAttach, arg("box1")=py::none(), arg("box2")=py::none(), "Blah", returnPolicy)
+
+        .def("boxSampleRate", &FaustProcessor::getBoxSampleRate, "Blah", returnPolicy)
+        .def("boxBufferSize", &FaustProcessor::getBoxBufferSize, "Blah", returnPolicy)
+
+        .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"), arg("argv")=py::none(), "Blah")
     
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 

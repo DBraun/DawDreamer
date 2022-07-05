@@ -1,3 +1,6 @@
+# adapted from:
+# https://github.com/grame-cncm/faust/blob/master-dev/tools/benchmark/signal-tester.cpp
+
 from dawdreamer_utils import *
 from typing import List
 
