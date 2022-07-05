@@ -377,6 +377,33 @@ def test20():
     my_render(engine, f)
 
 
+def test24():
+    """
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    # Follow the freq/gate/gain convention, see: https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters
+    freq = f.boxNumEntry("freq", f.boxReal(100), f.boxReal(100), f.boxReal(3000), f.boxReal(0.01))
+    gate = f.boxButton("gate")
+    gain = f.boxNumEntry("gain", f.boxReal(0.5), f.boxReal(0), f.boxReal(1), f.boxReal(0.01))
+    organ = f.boxMul(gate, f.boxAdd(f.boxMul(osc(f, freq), gain), f.boxMul(osc(f, f.boxMul(freq, f.boxInt(2))), gain)))
+    organ *= 0.2
+    # Stereo
+    box = f.boxPar(organ, organ)
+
+    midi_basename = 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'
+    f.load_midi(abspath(ASSETS / midi_basename))
+
+    f.num_voices = 10
+    f.compile_box("test", box)
+
+    my_render(engine, f)
+    audio = engine.get_audio().T
+    assert np.mean(np.abs(audio)) > .01
+
+
 def test_overload_add1():
     """
     //
