@@ -250,23 +250,27 @@ def test16():
     f.compile_signals("test", signals)
 
 
-def test19():
-    """
-    // soundfile test:
-    process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
-    """
+# def test19():
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-    f = engine.make_faust_processor("my_faust")
-    signals = []
+#     # todo: 'soundfile' primitive not yet supported for interp
+#     # but we could print out the C++ code.
 
-    rdx = f.sigInt(0)
-    chan = f.sigInt(0)
-    part = f.sigInt(0)
+#     """
+#     // soundfile test:
+#     process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
+#     """
 
-    signals += f.sigSoundfile("sound[url:{'tango.wav'}]", rdx, chan, part)
+#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+#     f = engine.make_faust_processor("my_faust")
+#     signals = []
 
-    f.compile_signals("test", signals)
+#     rdx = f.sigInt(0)
+#     chan = f.sigInt(0)
+#     part = f.sigInt(0)
+
+#     signals += f.sigSoundfile("sound[url:{'tango.wav'}]", rdx, chan, part)
+
+#     f.compile_signals("test", signals)
 
 
 def test_overload_add1():

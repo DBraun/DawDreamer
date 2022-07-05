@@ -13,8 +13,9 @@
 #include "faust/midi/rt-midi.h"
 #include "TMutex.h"
 
-#include "faust/dsp/libfaust-signal.h"
 #include "faust/dsp/libfaust-box.h"
+#include "faust/dsp/libfaust-signal.h"
+//#include "faust/dsp/llvm-dsp.h"
 //#include "faust/dsp/interpreter-dsp.h"
 //#include "faust/dsp/poly-dsp.h"
 #include "faust/misc.h"
@@ -221,11 +222,13 @@ private:
 protected:
 
     llvm_dsp_factory* m_factory = nullptr;
-    dsp* m_dsp = nullptr;
-    APIUI* m_ui = nullptr;
-
     llvm_dsp_poly_factory* m_poly_factory = nullptr;
+    interpreter_dsp_factory* m_signal_factory = nullptr;
+
+    dsp* m_dsp = nullptr;
     dsp_poly* m_dsp_poly = nullptr;
+
+    APIUI* m_ui = nullptr;
     MySoundUI* m_soundUI = nullptr;
 
     rt_midi m_midi_handler;
@@ -421,36 +424,7 @@ public:
     
     void compileSignals(const std::string& name,
                         std::vector<SigWrapper> &wrappers,
-                        std::optional<std::vector<std::string>> in_argv)
-    {
-        int argc = 0;
-        const char** argv = new const char* [256];
-        std::string error_msg;
-        
-        if (in_argv.has_value()) {
-            for (auto v : *in_argv) {
-                argv[argc++] = v.c_str();
-            }
-        }
-    
-        tvec signals;
-        for (auto wrapper : wrappers) {
-            signals.push_back(wrapper);
-        }
-        
-        dsp_factory_base* factory = createCPPDSPFactoryFromSignals(name,
-                                                                   signals,
-                                                                   argc,
-                                                                   argv,
-                                                                   error_msg);
-        if (factory) {
-            // Print the C++ class
-            factory->write(&std::cout);
-            delete(factory);
-        } else {
-            throw std::runtime_error("FaustProcessor: " + error_msg);
-        }
-    }
+                        std::optional<std::vector<std::string>> in_argv);
 
     // box API
 
@@ -650,31 +624,7 @@ public:
 
     void compileBox(const std::string& name,
                     BoxWrapper &box,
-                    std::optional<std::vector<std::string>> in_argv)
-    {
-        int argc = 0;
-        const char** argv = new const char* [256];
-        std::string error_msg;
-        
-        if (in_argv.has_value()) {
-            for (auto v : *in_argv) {
-                argv[argc++] = v.c_str();
-            }
-        }
-        
-        dsp_factory_base* factory = createCPPDSPFactoryFromBoxes(name,
-                                                                 box,
-                                                                 argc,
-                                                                 argv,
-                                                                 error_msg);
-        if (factory) {
-            // Print the C++ class
-            factory->write(&std::cout);
-            delete(factory);
-        } else {
-            throw std::runtime_error("FaustProcessor: " + error_msg);
-        }
-    }
+                    std::optional<std::vector<std::string>> in_argv);
 };
 
 

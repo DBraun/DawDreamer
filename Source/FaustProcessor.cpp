@@ -22,7 +22,6 @@ ztimedmap GUI::gTimedZoneMap;
 #endif
 
 
-
 FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock) : ProcessorBase{ newUniqueName }
 {
     createLibContext();
@@ -30,6 +29,7 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 	m_factory = NULL;
 	m_poly_factory = NULL;
+    m_signal_factory = NULL;
 	m_dsp = NULL;
 	m_dsp_poly = NULL;
 	m_ui = NULL;
@@ -307,6 +307,7 @@ FaustProcessor::clear()
 	// deleteAllDSPFactories();  // don't actually do this!!
 	deleteDSPFactory(m_factory); m_factory = nullptr;
 	SAFE_DELETE(m_poly_factory);
+    deleteInterpreterDSPFactory(m_signal_factory);
 }
 
 void
@@ -485,6 +486,128 @@ FaustProcessor::compile()
 	m_isCompiled = true;
 	return true;
 }
+
+void
+FaustProcessor::compileSignals(const std::string& name,
+               std::vector<SigWrapper> &wrappers,
+               std::optional<std::vector<std::string>> in_argv)
+{
+    m_isCompiled = false;
+    clear();
+    
+    int argc = 0;
+    const char** argv = new const char* [256];
+    std::string error_msg;
+    
+    if (in_argv.has_value()) {
+        for (auto v : *in_argv) {
+            argv[argc++] = v.c_str();
+        }
+    }
+
+    tvec signals;
+    for (auto wrapper : wrappers) {
+        signals.push_back(wrapper);
+    }
+    
+    m_signal_factory = createInterpreterDSPFactoryFromSignals(name,
+                                                              signals,
+                                                              argc,
+                                                              argv,
+                                                              error_msg);
+    
+    for (int i = 0; i < argc; i++) {
+        argv[i] = NULL;
+    }
+    delete[] argv;
+    argv = nullptr;
+    
+    if (!m_signal_factory) {
+        clear();
+        throw std::runtime_error("FaustProcessor: " + error_msg);
+    }
+    
+    m_dsp = m_signal_factory->createDSPInstance();
+    assert(m_dsp);
+    
+    // create new factory
+    bool is_polyphonic = m_nvoices > 0;
+    if (is_polyphonic) {
+        // Allocate polyphonic DSP
+        m_dsp = new mydsp_poly(m_dsp, m_nvoices, true, m_groupVoices);
+        //m_dsp->setReleaseLength(m_releaseLengthSec); // todo:
+    }
+
+    // get channels
+    int inputs = m_dsp->getNumInputs();
+    int outputs = m_dsp->getNumOutputs();
+
+    m_numInputChannels = inputs;
+    m_numOutputChannels = outputs;
+
+    setMainBusInputsAndOutputs(inputs, outputs);
+
+    // make new UI
+    if (is_polyphonic)
+    {
+        m_midi_handler = rt_midi("my_midi");
+        m_midi_handler.addMidiIn(m_dsp_poly);
+
+        oneSampleInBuffer.setSize(m_numInputChannels, 1);
+        oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
+    }
+
+    m_ui = new APIUI();
+    m_dsp->buildUserInterface(m_ui);
+
+    // soundfile UI.
+    m_soundUI = new MySoundUI();
+    for (const auto& [label, buffers] : m_SoundfileMap) {
+        m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers, (int)(mySampleRate + .5));
+    }
+    m_dsp->buildUserInterface(m_soundUI);
+
+    // init
+    m_dsp->init((int)(mySampleRate + .5));
+
+    // todo:
+    //createParameterLayout();
+
+    m_isCompiled = true;
+}
+
+void
+FaustProcessor::compileBox(const std::string& name,
+                           BoxWrapper &box,
+                           std::optional<std::vector<std::string>> in_argv)
+{
+    m_isCompiled = false;
+    clear();
+
+    int argc = 0;
+    const char** argv = new const char* [256];
+    std::string error_msg;
+    
+    if (in_argv.has_value()) {
+        for (auto v : *in_argv) {
+            argv[argc++] = v.c_str();
+        }
+    }
+    
+    dsp_factory_base* factory = createCPPDSPFactoryFromBoxes(name,
+                                                             box,
+                                                             argc,
+                                                             argv,
+                                                             error_msg);
+    if (factory) {
+        // Print the C++ class
+        factory->write(&std::cout);
+        delete(factory);
+    } else {
+        throw std::runtime_error("FaustProcessor: " + error_msg);
+    }
+}
+
 
 bool
 FaustProcessor::setDSPFile(const std::string& path)
