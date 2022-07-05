@@ -15,7 +15,7 @@
 
 #include "faust/dsp/libfaust-box.h"
 #include "faust/dsp/libfaust-signal.h"
-//#include "faust/dsp/llvm-dsp.h"
+#include "faust/dsp/llvm-dsp.h"
 //#include "faust/dsp/interpreter-dsp.h"
 //#include "faust/dsp/poly-dsp.h"
 #include "faust/misc.h"
@@ -125,6 +125,7 @@ struct BoxWrapper {
 class FaustProcessor : public ProcessorBase
 {
 public:
+        
     FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock);
     ~FaustProcessor();
 
@@ -133,7 +134,7 @@ public:
     
     int
     getTotalNumOutputChannels() override {
-        if (!m_isCompiled) {
+        if (!m_compileState) {
             this->compile();
         }
         return ProcessorBase::getTotalNumOutputChannels();
@@ -141,7 +142,7 @@ public:
     
     int
     getTotalNumInputChannels() override {
-        if (!m_isCompiled) {
+        if (!m_compileState) {
             this->compile();
         }
         return ProcessorBase::getTotalNumInputChannels();
@@ -170,7 +171,7 @@ public:
     float getParamWithIndex(const int index);
     float getParamWithPath(const std::string& n);
     std::string code();
-    bool isCompiled() { return m_isCompiled; };
+    bool isCompiled() { return bool(m_compileState); };
 
     py::list getPluginParametersDescription();
 
@@ -218,12 +219,15 @@ private:
     double mySampleRate;
 
     std::string getPathToFaustLibraries();
+    
+    enum CompileState { kNotCompiled, kMono, kPoly, kSignalMono, kSignalPoly };
+    
+    CompileState m_compileState;
 
 protected:
 
     llvm_dsp_factory* m_factory = nullptr;
     llvm_dsp_poly_factory* m_poly_factory = nullptr;
-    interpreter_dsp_factory* m_signal_factory = nullptr;
 
     dsp* m_dsp = nullptr;
     dsp_poly* m_dsp_poly = nullptr;
@@ -244,7 +248,6 @@ protected:
 
     int m_nvoices = 0;
     bool m_groupVoices = true;
-    bool m_isCompiled = false;
 
     MidiBuffer myMidiBufferQN;
     MidiBuffer myMidiBufferSec;
@@ -274,6 +277,8 @@ protected:
 
     TMutex guiUpdateMutex;
     
+    std::string getTarget();
+    
     // public libfaust signal API
 public:
     SigWrapper getSigInt(int val) { return SigWrapper(sigInt(val)); }
@@ -286,11 +291,14 @@ public:
     
     SigWrapper getSigIntCast(SigWrapper &sig1) { return SigWrapper(sigIntCast(sig1)); }
     SigWrapper getSigFloatCast(SigWrapper &sig1) { return SigWrapper(sigFloatCast(sig1)); }
-
-    // todo: sigReadOnlyTable
-    // todo: sigWriteReadTable
-    // todo: sigSoundfileRate
-    // todo: sigSoundfileBuffer
+    
+    SigWrapper getSigReadOnlyTable(SigWrapper &n, SigWrapper &init, SigWrapper& ridx) {
+        return SigWrapper(sigReadOnlyTable(n, init, sigIntCast(ridx)));
+    }
+    
+    SigWrapper getSigWriteReadTable(SigWrapper &n, SigWrapper &init, SigWrapper& widx, SigWrapper& wsig, SigWrapper& ridx) {
+        return SigWrapper(sigWriteReadTable(n, init, sigIntCast(widx), sigIntCast(wsig), sigIntCast(ridx)));
+    }
     
     std::vector<SigWrapper> getSigWaveform(std::vector<float> vals) {
         tvec waveform;
@@ -744,6 +752,9 @@ Note that note-ons and note-offs are counted separately.")
         .def("sigIntCast", &FaustProcessor::getSigIntCast, arg("sig1"), "Blah", returnPolicy)
         .def("sigFloatCast", &FaustProcessor::getSigFloatCast, arg("sig1"), "Blah", returnPolicy)
     
+        .def("sigReadOnlyTable", &FaustProcessor::getSigReadOnlyTable, arg("n"), arg("init"), arg("ridx"), "Blah", returnPolicy)
+        .def("sigWriteReadTable", &FaustProcessor::getSigWriteReadTable, arg("n"), arg("init"), arg("widx"), arg("wsig"), arg("ridx"), "Blah", returnPolicy)
+
         .def("sigWaveform", &FaustProcessor::getSigWaveform, arg("vals"), "Blah", returnPolicy)
         .def("sigSoundfile", &FaustProcessor::getSigSoundfile, arg("filepath"), arg("sig_read_index"), arg("sig_chan"), arg("sig_part"), "Blah", returnPolicy)
     

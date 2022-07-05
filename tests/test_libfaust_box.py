@@ -3,9 +3,19 @@
 
 from dawdreamer_utils import *
 from typing import List
+import inspect
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
+
+
+def my_render(engine, f, duration=5.):
+
+    engine.load_graph([(f, [])])
+    test_name = inspect.stack()[1][3]
+    file_path = OUTPUT / f"test_box_{test_name}.wav"
+    
+    render(engine, file_path=file_path, duration=duration)    
 
 
 def test1():
@@ -18,6 +28,7 @@ def test1():
 
     box = f.boxPar(f.boxInt(7), f.boxReal(3.14))
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test2():
@@ -32,6 +43,7 @@ def test2():
     box = f.boxSeq(f.boxPar(f.boxWire(), f.boxReal(3.14)), f.boxAdd())
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test3():
@@ -47,6 +59,7 @@ def test3():
     box = f.boxAdd(f.boxWire(), f.boxReal(3.14))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test4():
@@ -61,6 +74,7 @@ def test4():
     box = f.boxSeq(f.boxPar(f.boxWire(), f.boxWire()), f.boxAdd())
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 # def test5():
@@ -90,6 +104,7 @@ def test6():
     box = f.boxDelay(f.boxWire(), f.boxInt(7))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 # def test7():
@@ -121,6 +136,7 @@ def test8():
                                              f.boxMul(f.boxDelay(f.boxWire(), f.boxReal(3000)), f.boxReal(1.5))))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test_equivalent1():
@@ -135,6 +151,7 @@ def test_equivalent1():
     box = f.boxPar(b1, b1)
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test_equivalent2():
@@ -149,6 +166,7 @@ def test_equivalent2():
                          f.boxAdd(f.boxDelay(f.boxWire(), f.boxReal(500)), f.boxReal(0.5)))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test9():
@@ -164,6 +182,7 @@ def test9():
         f.boxHSlider("Freq [midi:ctrl 7][style:knob]", f.boxReal(100), f.boxReal(100), f.boxReal(2000), f.boxReal(1)))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test10():
@@ -184,6 +203,7 @@ def test10():
                          f.boxVSlider("h:Oscillator/gain", f.boxReal(0), f.boxReal(0), f.boxReal(1), f.boxReal(0.01)))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test11():
@@ -199,6 +219,7 @@ def test11():
     box = f.boxPar(f.boxSampleRate(), f.boxBufferSize());
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test12():
@@ -212,6 +233,7 @@ def test12():
     box = f.boxWaveform([i*100. for i in range(5)])
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test13():
@@ -225,6 +247,7 @@ def test13():
     box = f.boxSplit(f.boxWire(), f.boxAdd())
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test14():
@@ -240,6 +263,7 @@ def test14():
                                     f.boxPar(f.boxWire(), f.boxWire())))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test15():
@@ -253,6 +277,7 @@ def test15():
     box = f.boxRec(f.boxAdd(), f.boxWire())
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 """
@@ -283,6 +308,7 @@ def test16():
     box = phasor(f, f.boxReal(440))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def osc(f, freq):
@@ -306,6 +332,7 @@ def test17():
     box = f.boxPar(osc(f, f.boxReal(440)), osc(f, f.boxReal(440)))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test18():
@@ -319,6 +346,7 @@ def test18():
     box = f.boxSoundfile("sound[url:{'tango.wav'}]", f.boxInt(2), f.boxInt(0), f.boxInt(0))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test19():
@@ -332,6 +360,7 @@ def test19():
     box = f.boxReadOnlyTable(f.boxInt(10), f.boxInt(1), f.boxIntCast(f.boxWire()))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test20():
@@ -345,6 +374,7 @@ def test20():
     box = f.boxWriteReadTable(f.boxInt(10), f.boxInt(1), f.boxIntCast(f.boxWire()), f.boxIntCast(f.boxWire()), f.boxIntCast(f.boxWire()))
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test_overload_add1():
@@ -360,6 +390,8 @@ def test_overload_add1():
     box = (in1 + f.boxReal(0.5)) + (in1+ f.boxInt(1))
 
     f.compile_box("test", box)
+    my_render(engine, f)
+
 
 def test_overload_add2():
     """
@@ -374,6 +406,8 @@ def test_overload_add2():
     box = (in1 + 0.5) + (in1 + 1)
 
     f.compile_box("test", box)
+    my_render(engine, f)
+
 
 def test_overload_add3():
     """
@@ -388,6 +422,8 @@ def test_overload_add3():
     box = sum([in1, f.boxReal(0.5)]) + sum([in1, f.boxInt(1)])
 
     f.compile_box("test", box)
+    my_render(engine, f)
+
 
 def test_overload_sub1():
     """
@@ -402,6 +438,8 @@ def test_overload_sub1():
     box = (in1 - f.boxReal(0.5)) + (in1 - f.boxInt(1))
 
     f.compile_box("test", box)
+    my_render(engine, f)
+
 
 def test_overload_sub2():
     """
@@ -416,6 +454,7 @@ def test_overload_sub2():
     box = (in1 - 0.5) + (in1 - 1)
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test_overload_mul1():
@@ -430,6 +469,7 @@ def test_overload_mul1():
     box = f.boxWire() * f.boxReal(0.5)
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test_overload_mul2():
@@ -444,6 +484,7 @@ def test_overload_mul2():
     box = f.boxWire() * 0.5
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 def test_overload_mul3():
@@ -458,6 +499,8 @@ def test_overload_mul3():
     box = f.boxWire() * 2
 
     f.compile_box("test", box)
+    my_render(engine, f)
+
 
 def test_overload_mul3():
     """
@@ -471,6 +514,7 @@ def test_overload_mul3():
     box = f.boxWire() * f.boxInt(2)
 
     f.compile_box("test", box)
+    my_render(engine, f)
 
 
 if __name__ == "__main__":

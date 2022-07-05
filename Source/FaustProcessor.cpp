@@ -21,6 +21,8 @@ ztimedmap GUI::gTimedZoneMap;
 #define SAFE_REF_ASSIGN(lhs,rhs)    do { SAFE_RELEASE(lhs); (lhs) = (rhs); SAFE_ADD_REF(lhs); } while(0)
 #endif
 
+#define COMPILE_FAUST if (!m_compileState) { this->compile(); }
+
 
 FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock) : ProcessorBase{ newUniqueName }
 {
@@ -29,7 +31,6 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 	m_factory = NULL;
 	m_poly_factory = NULL;
-    m_signal_factory = NULL;
 	m_dsp = NULL;
 	m_dsp_poly = NULL;
 	m_ui = NULL;
@@ -49,10 +50,7 @@ FaustProcessor::~FaustProcessor() {
 
 bool
 FaustProcessor::setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn) {
-
-	if (!m_isCompiled) {
-		this->compile();
-	}
+    COMPILE_FAUST
 	return ProcessorBase::setAutomation(parameterName, input, ppqn);
 }
 
@@ -64,9 +62,7 @@ FaustProcessor::canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& lay
 void
 FaustProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-	if (!m_isCompiled) {
-		this->compile();
-	}
+    COMPILE_FAUST
 }
 
 void
@@ -75,11 +71,11 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
     // todo: Faust should be able to use the incoming midiBuffer too.
     auto posInfo = getPlayHead()->getPosition();
 
-	if (!m_isCompiled) {
+	if (!m_compileState) {
 		throw std::runtime_error("Faust Processor called processBlock but it wasn't compiled.");
 	}
 
-	if (m_nvoices < 1) {
+	if (m_compileState == kMono || m_compileState == kSignalMono) {
 		if (m_dsp != NULL) {
 			m_dsp->compute(buffer.getNumSamples(), (float**)buffer.getArrayOfReadPointers(), buffer.getArrayOfWritePointers());
 		}
@@ -87,7 +83,8 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			throw std::runtime_error("Faust Processor: m_dsp is null");
 		}
 	}
-	else if (m_dsp_poly != NULL) {
+	else if (m_dsp_poly) {
+                
 		auto start = *posInfo->getTimeInSamples();
 
 		auto pulseStart = std::floor(*posInfo->getPpqPosition() * PPQN);
@@ -115,10 +112,10 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 
                     // steps for playing MIDI
 					if (myMidiMessageSec.isNoteOn()) {
-						m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
+                        m_dsp_poly->keyOn(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
 					}
 					else if (myMidiMessageSec.isNoteOff()) {
-						m_dsp_poly->keyOff(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
+                        m_dsp_poly->keyOff(midiChannel, myMidiMessageSec.getNoteNumber(), myMidiMessageSec.getVelocity());
 					}
 
 					myMidiEventsDoRemainSec = myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
@@ -139,10 +136,10 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 
                     // steps for playing MIDI
 					if (myMidiMessageQN.isNoteOn()) {
-						m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
+                        m_dsp_poly->keyOn(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
 					}
 					else if (myMidiMessageQN.isNoteOff()) {
-						m_dsp_poly->keyOff(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
+                        m_dsp_poly->keyOff(midiChannel, myMidiMessageQN.getNoteNumber(), myMidiMessageQN.getVelocity());
 					}
 
 					myMidiEventsDoRemainQN = myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
@@ -156,7 +153,7 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 				oneSampleInBuffer.setSample(chan, 0, buffer.getSample(chan, i));
 			}
 
-			m_dsp_poly->compute(1, oneSampReadPtrs, oneSampWritePtrs);
+            m_dsp_poly->compute(1, oneSampReadPtrs, oneSampWritePtrs);
 
 			for (chan = 0; chan < m_numOutputChannels; chan++)
 			{
@@ -166,11 +163,10 @@ FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& 
 			start += 1;
 			pulseStart += pulseStep;
 		}
-	}
-	else {
-		throw std::runtime_error("Faust Processor: m_dsp_poly is null");
-	}
-
+	} else {
+        throw std::runtime_error("Faust Processor: dsp is null.");
+    }
+    
 	ProcessorBase::processBlock(buffer, midiBuffer);
 }
 
@@ -237,9 +233,7 @@ FaustProcessor::reset()
 		m_dsp_poly->instanceClear();
 	}
     
-    if (!m_isCompiled) {
-        this->compile();
-    }
+    COMPILE_FAUST
     
     {
         // update all parameters once.
@@ -289,7 +283,6 @@ FaustProcessor::reset()
 void
 FaustProcessor::clear()
 {
-	m_isCompiled = false;
 	m_numInputChannels = 0;
 	m_numOutputChannels = 0;
 
@@ -302,17 +295,25 @@ FaustProcessor::clear()
 	SAFE_DELETE(m_soundUI);
 	SAFE_DELETE(m_dsp);
 	SAFE_DELETE(m_ui);
-	SAFE_DELETE(m_dsp_poly);
+    
+    if (m_compileState == kSignalPoly) {
+        // todo: need to delete m_dsp_poly
+//        std::cerr << "not deleting m_dsp_poly!" << std::endl;
+//        delete (mydsp_poly*) m_dsp_poly;
+    } else {
+        delete m_dsp_poly;
+    }
+    m_dsp_poly = nullptr;
 
-	// deleteAllDSPFactories();  // don't actually do this!!
 	deleteDSPFactory(m_factory); m_factory = nullptr;
 	SAFE_DELETE(m_poly_factory);
-    deleteInterpreterDSPFactory(m_signal_factory);
+    
+    m_compileState = kNotCompiled;
 }
 
 void
 FaustProcessor::setNumVoices(int numVoices) {
-	m_isCompiled = false;
+    m_compileState = kNotCompiled;
 	m_nvoices = std::max(0, numVoices);
 }
 
@@ -324,7 +325,7 @@ FaustProcessor::getNumVoices() {
 void
 FaustProcessor::setGroupVoices(bool groupVoices)
 {
-	m_isCompiled = false;
+	m_compileState = kNotCompiled;
 	m_groupVoices = groupVoices;
 };
 
@@ -336,7 +337,7 @@ FaustProcessor::getGroupVoices() {
 bool
 FaustProcessor::setDSPString(const std::string& code)
 {
-	m_isCompiled = false;
+	m_compileState = kNotCompiled;
 
 	if (std::strcmp(code.c_str(), "") == 0) {
 		throw std::runtime_error("DSP string is empty.");
@@ -348,10 +349,26 @@ FaustProcessor::setDSPString(const std::string& code)
 	return true;
 }
 
+std::string
+FaustProcessor::getTarget() {
+#if __APPLE__
+    // on macOS, specifying the target like this helps us handle LLVM on both x86_64 and arm64.
+    // Crucially, LLVM must have been compiled separately for each architecture.
+    // A different libfaust must have also been compiled for the corresponding LLVM architecture
+    // and the `LLVM_BUILD_UNIVERSAL` preprocessor must have been set while building libfaust.
+    // Then the two libfaust.2.dylib can get combined with
+    // `lipo x86_64.libfaust.2.dylib arm64.libfaust.2.dylib -create -output libfaust.2.dylib`
+    auto target = getDSPMachineTarget();
+#else
+    auto target = std::string("");
+#endif
+    return target;
+}
+
 bool
 FaustProcessor::compile()
 {
-	m_isCompiled = false;
+	m_compileState = kNotCompiled;
 
 	// clean up
 	clear();
@@ -380,28 +397,18 @@ FaustProcessor::compile()
 	auto theCode = m_autoImport + "\n" + m_code;
 
 	std::string m_errorString;
-
-#if __APPLE__
-	// on macOS, specifying the target like this helps us handle LLVM on both x86_64 and arm64.
-	// Crucially, LLVM must have been compiled separately for each architecture.
-	// A different libfaust must have also been compiled for the corresponding LLVM architecture
-	// and the `LLVM_BUILD_UNIVERSAL` preprocessor must have been set while building libfaust.
-	// Then the two libfaust.2.dylib can get combined with
-	// `lipo x86_64.libfaust.2.dylib arm64.libfaust.2.dylib -create -output libfaust.2.dylib`
-	auto target = getDSPMachineTarget();
-#else
-	auto target = std::string("");
-#endif
+    
+    auto target = getTarget();
 
 	// create new factory
 	bool is_polyphonic = m_nvoices > 0;
 	if (is_polyphonic) {
 		m_poly_factory = createPolyDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, target.c_str(), m_errorString, optimize);
+			argc, argv, target, m_errorString, optimize);
 	}
 	else {
 		m_factory = createDSPFactoryFromString("DawDreamer", theCode,
-			argc, argv, target.c_str(), m_errorString, optimize);
+			argc, argv, target, m_errorString, optimize);
 	}
 
 	for (int i = 0; i < argc; i++) {
@@ -483,7 +490,7 @@ FaustProcessor::compile()
 
 	createParameterLayout();
 
-	m_isCompiled = true;
+    m_compileState = is_polyphonic ? kPoly : kMono;
 	return true;
 }
 
@@ -492,12 +499,11 @@ FaustProcessor::compileSignals(const std::string& name,
                std::vector<SigWrapper> &wrappers,
                std::optional<std::vector<std::string>> in_argv)
 {
-    m_isCompiled = false;
+    m_compileState = kNotCompiled;
     clear();
     
     int argc = 0;
     const char** argv = new const char* [256];
-    std::string error_msg;
     
     if (in_argv.has_value()) {
         for (auto v : *in_argv) {
@@ -510,11 +516,10 @@ FaustProcessor::compileSignals(const std::string& name,
         signals.push_back(wrapper);
     }
     
-    m_signal_factory = createInterpreterDSPFactoryFromSignals(name,
-                                                              signals,
-                                                              argc,
-                                                              argv,
-                                                              error_msg);
+    auto target = getTarget();
+    std::string error_msg;
+    
+    m_factory = createDSPFactoryFromSignals(name, signals, argc, argv, target, error_msg);
     
     for (int i = 0; i < argc; i++) {
         argv[i] = NULL;
@@ -522,25 +527,27 @@ FaustProcessor::compileSignals(const std::string& name,
     delete[] argv;
     argv = nullptr;
     
-    if (!m_signal_factory) {
+    if (!m_factory) {
         clear();
         throw std::runtime_error("FaustProcessor: " + error_msg);
     }
     
-    m_dsp = m_signal_factory->createDSPInstance();
+    m_dsp = m_factory->createDSPInstance();
     assert(m_dsp);
     
     // create new factory
     bool is_polyphonic = m_nvoices > 0;
+    auto theDSP = m_dsp;
     if (is_polyphonic) {
         // Allocate polyphonic DSP
-        m_dsp = new mydsp_poly(m_dsp, m_nvoices, true, m_groupVoices);
-        //m_dsp->setReleaseLength(m_releaseLengthSec); // todo:
+        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, true, m_groupVoices);
+        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        theDSP = m_dsp_poly;
     }
 
     // get channels
-    int inputs = m_dsp->getNumInputs();
-    int outputs = m_dsp->getNumOutputs();
+    int inputs = theDSP->getNumInputs();
+    int outputs = theDSP->getNumOutputs();
 
     m_numInputChannels = inputs;
     m_numOutputChannels = outputs;
@@ -558,22 +565,21 @@ FaustProcessor::compileSignals(const std::string& name,
     }
 
     m_ui = new APIUI();
-    m_dsp->buildUserInterface(m_ui);
+    theDSP->buildUserInterface(m_ui);
 
     // soundfile UI.
     m_soundUI = new MySoundUI();
     for (const auto& [label, buffers] : m_SoundfileMap) {
         m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers, (int)(mySampleRate + .5));
     }
-    m_dsp->buildUserInterface(m_soundUI);
+    theDSP->buildUserInterface(m_soundUI);
 
     // init
-    m_dsp->init((int)(mySampleRate + .5));
+    theDSP->init((int)(mySampleRate + .5));
 
-    // todo:
-    //createParameterLayout();
+    createParameterLayout();
 
-    m_isCompiled = true;
+    m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 }
 
 void
@@ -581,7 +587,7 @@ FaustProcessor::compileBox(const std::string& name,
                            BoxWrapper &box,
                            std::optional<std::vector<std::string>> in_argv)
 {
-    m_isCompiled = false;
+    m_compileState = kNotCompiled;
     clear();
 
     int argc = 0;
@@ -612,7 +618,7 @@ FaustProcessor::compileBox(const std::string& name,
 bool
 FaustProcessor::setDSPFile(const std::string& path)
 {
-	m_isCompiled = false;
+	m_compileState = kNotCompiled;
 
 	if (!std::filesystem::exists(path.c_str())) {
 		throw std::runtime_error("File not found: " + path);
@@ -644,11 +650,7 @@ FaustProcessor::setDSPFile(const std::string& path)
 bool
 FaustProcessor::setParamWithIndex(const int index, float p)
 {
-	if (!m_isCompiled) {
-		if (!this->compile()) {
-			return false;
-		};
-	}
+    COMPILE_FAUST
 	if (!m_ui) {
 		throw std::runtime_error("No UI for FaustProcessor.");
 	}
@@ -667,11 +669,7 @@ FaustProcessor::setParamWithIndex(const int index, float p)
 float
 FaustProcessor::getParamWithIndex(const int index)
 {
-	if (!m_isCompiled) {
-		if (!this->compile()) {
-			return 0;
-		};
-	}
+    COMPILE_FAUST
 	if (!m_ui) return 0; // todo: better handling
 
 	auto it = m_map_juceIndex_to_parAddress.find(index);
@@ -688,10 +686,7 @@ FaustProcessor::getParamWithIndex(const int index)
 float
 FaustProcessor::getParamWithPath(const std::string& n)
 {
-
-	if (!m_isCompiled) {
-		this->compile();
-	}
+    COMPILE_FAUST
 	if (!m_ui) return 0; // todo: better handling
 
 	return this->getAutomationAtZero(n);
@@ -769,11 +764,9 @@ FaustProcessor::getPluginParametersDescription()
 {
 	py::list myList;
 
-	if (!m_isCompiled) {
-		this->compile();
-	}
+    COMPILE_FAUST
 
-	if (m_isCompiled) {
+	if (m_compileState) {
 
         int i = 0;
         for (auto *parameter : this->getParameters()) {
@@ -1047,7 +1040,7 @@ using  myaudiotype = py::array_t<float, py::array::c_style | py::array::forcecas
 void
 FaustProcessor::setSoundfiles(py::dict d) {
 
-	m_isCompiled = false;
+	m_compileState = kNotCompiled;
 
 	m_SoundfileMap.clear();
 
