@@ -293,7 +293,6 @@ FaustProcessor::clear()
 	}
 
 	SAFE_DELETE(m_soundUI);
-	SAFE_DELETE(m_dsp);
 	SAFE_DELETE(m_ui);
     
     if (m_compileState == kSignalPoly) {
@@ -301,6 +300,7 @@ FaustProcessor::clear()
 //        std::cerr << "not deleting m_dsp_poly!" << std::endl;
 //        delete (mydsp_poly*) m_dsp_poly;
     } else {
+        SAFE_DELETE(m_dsp);
         delete m_dsp_poly;
     }
     m_dsp_poly = nullptr;
@@ -592,7 +592,6 @@ FaustProcessor::compileBox(const std::string& name,
 
     int argc = 0;
     const char** argv = new const char* [256];
-    std::string error_msg;
     
     if (in_argv.has_value()) {
         for (auto v : *in_argv) {
@@ -600,18 +599,70 @@ FaustProcessor::compileBox(const std::string& name,
         }
     }
     
-    dsp_factory_base* factory = createCPPDSPFactoryFromBoxes(name,
-                                                             box,
-                                                             argc,
-                                                             argv,
-                                                             error_msg);
-    if (factory) {
-        // Print the C++ class
-        factory->write(&std::cout);
-        delete(factory);
-    } else {
+    auto target = this->getTarget();
+    std::string error_msg;
+
+    m_factory = createDSPFactoryFromBoxes(name, box, argc, argv, target, error_msg);
+
+    for (int i = 0; i < argc; i++) {
+        argv[i] = NULL;
+    }
+    delete[] argv;
+    argv = nullptr;
+    
+    if (!m_factory) {
+        clear();
         throw std::runtime_error("FaustProcessor: " + error_msg);
     }
+    
+    m_dsp = m_factory->createDSPInstance();
+    assert(m_dsp);
+    
+    // create new factory
+    bool is_polyphonic = m_nvoices > 0;
+    auto theDSP = m_dsp;
+    if (is_polyphonic) {
+        // Allocate polyphonic DSP
+        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, true, m_groupVoices);
+        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        theDSP = m_dsp_poly;
+    }
+
+    // get channels
+    int inputs = theDSP->getNumInputs();
+    int outputs = theDSP->getNumOutputs();
+
+    m_numInputChannels = inputs;
+    m_numOutputChannels = outputs;
+
+    setMainBusInputsAndOutputs(inputs, outputs);
+
+    // make new UI
+    if (is_polyphonic)
+    {
+        m_midi_handler = rt_midi("my_midi");
+        m_midi_handler.addMidiIn(m_dsp_poly);
+
+        oneSampleInBuffer.setSize(m_numInputChannels, 1);
+        oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
+    }
+
+    m_ui = new APIUI();
+    theDSP->buildUserInterface(m_ui);
+
+    // soundfile UI.
+    m_soundUI = new MySoundUI();
+    for (const auto& [label, buffers] : m_SoundfileMap) {
+        m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers, (int)(mySampleRate + .5));
+    }
+    theDSP->buildUserInterface(m_soundUI);
+
+    // init
+    theDSP->init((int)(mySampleRate + .5));
+
+    createParameterLayout();
+
+    m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 }
 
 
