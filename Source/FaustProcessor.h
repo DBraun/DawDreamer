@@ -481,7 +481,7 @@ public:
     }
     BoxWrapper getBoxReadOnlyTable(std::optional<BoxWrapper> n, std::optional<BoxWrapper> init, std::optional<BoxWrapper> ridx) {
         if (n.has_value() && init.has_value() && ridx.has_value()) {
-            return BoxWrapper(boxReadOnlyTable(*n, *init, *ridx));
+            return BoxWrapper(boxReadOnlyTable(boxIntCast(*n), *init, boxIntCast(*ridx)));
         } else {
             return BoxWrapper(boxReadOnlyTable());
         }
@@ -489,7 +489,7 @@ public:
 
     BoxWrapper getBoxWriteReadTable(std::optional<BoxWrapper> n, std::optional<BoxWrapper> init, std::optional<BoxWrapper> widx, std::optional<BoxWrapper> wsig, std::optional<BoxWrapper> ridx) {
         if (n.has_value() && init.has_value() && widx.has_value() && wsig.has_value() && ridx.has_value()) {
-            return BoxWrapper(boxWriteReadTable(*n, *init, *widx, *wsig, *ridx));
+            return BoxWrapper(boxWriteReadTable(boxIntCast(*n), *init, boxIntCast(*widx), boxIntCast(*wsig), boxIntCast(*ridx)));
         } else {
             return BoxWrapper(boxWriteReadTable());
         }
@@ -505,7 +505,7 @@ public:
 
     BoxWrapper getBoxSoundfile(std::string &label, BoxWrapper& chan, std::optional<BoxWrapper> part, std::optional<BoxWrapper> rdx) {
         if (part.has_value() && rdx.has_value()) {
-            return BoxWrapper(boxSoundfile(label, chan, *part, *rdx));
+            return BoxWrapper(boxSoundfile(label, boxIntCast(chan), boxIntCast(*part), boxIntCast(*rdx)));
         } else {
             return BoxWrapper(boxSoundfile(label, chan));
         }
@@ -633,6 +633,19 @@ public:
     void compileBox(const std::string& name,
                     BoxWrapper &box,
                     std::optional<std::vector<std::string>> in_argv);
+    
+    std::tuple<BoxWrapper, int, int> dspToBox(const std::string& dsp_content) {
+        int inputs = 0;
+        int outputs = 0;
+        std::string error_msg = "";
+        Box box = DSPToBoxes(dsp_content, inputs, outputs, error_msg);
+        if (error_msg != "") {
+            throw std::runtime_error(error_msg);
+        }
+        
+        return std::tuple<BoxWrapper, int, int>(BoxWrapper(box), inputs, outputs);
+        
+    }
 };
 
 
@@ -865,12 +878,12 @@ Note that note-ons and note-offs are counted separately.")
         .def("boxWire", &FaustProcessor::getBoxWire, "Blah", returnPolicy)
         .def("boxCut", &FaustProcessor::getBoxCut, "Blah", returnPolicy)
     
-        .def("boxSeq", &FaustProcessor::getBoxSeq, arg("box1"), arg("box2"), "Blah", returnPolicy)
+        .def("boxSeq", &FaustProcessor::getBoxSeq, arg("box1"), arg("box2"), "The sequential composition of two blocks (e.g., A:B) expects: outputs(A)=inputs(B)", returnPolicy)
 
-        .def("boxPar", &FaustProcessor::getBoxPar, arg("box1"), arg("box2"), "Blah", returnPolicy)
-        .def("boxPar3", &FaustProcessor::getBoxPar3, arg("box1"), arg("box2"), arg("box3"), "Blah", returnPolicy)
-        .def("boxPar4", &FaustProcessor::getBoxPar4, arg("box1"), arg("box2"), arg("box3"), arg("box4"), "Blah", returnPolicy)
-        .def("boxPar5", &FaustProcessor::getBoxPar5, arg("box1"), arg("box2"), arg("box3"), arg("box4"), arg("box5"), "Blah", returnPolicy)
+        .def("boxPar", &FaustProcessor::getBoxPar, arg("box1"), arg("box2"), "The parallel composition of two blocks (e.g., A,B). It places the two block-diagrams one on top of the other, without connections.", returnPolicy)
+        .def("boxPar3", &FaustProcessor::getBoxPar3, arg("box1"), arg("box2"), arg("box3"), "The parallel composition of three blocks (e.g., A,B,C).", returnPolicy)
+        .def("boxPar4", &FaustProcessor::getBoxPar4, arg("box1"), arg("box2"), arg("box3"), arg("box4"), "The parallel composition of four blocks (e.g., A,B,C,D).", returnPolicy)
+        .def("boxPar5", &FaustProcessor::getBoxPar5, arg("box1"), arg("box2"), arg("box3"), arg("box4"), arg("box5"), "The parallel composition of five blocks (e.g., A,B,C,D,E).", returnPolicy)
 
         .def("boxSplit", &FaustProcessor::getBoxSplit, arg("box1"), arg("box2"), "The split composition (e.g., A<:B) operator is used to distribute the outputs of A to the inputs of B. The number of inputs of B must be a multiple of the number of outputs of A: outputs(A).k=inputs(B)", returnPolicy)
         .def("boxMerge", &FaustProcessor::getBoxMerge, arg("box1"), arg("box2"), "The merge composition (e.g., A:>B) is the dual of the split composition. The number of outputs of A must be a multiple of the number of inputs of B: outputs(A)=k.inputs(B)", returnPolicy)
@@ -963,6 +976,8 @@ Note that note-ons and note-offs are counted separately.")
 
         .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"), arg("argv")=py::none(), "Blah")
     
+        .def("dsp_to_box", &FaustProcessor::dspToBox, arg("dsp_code"), "Convert Faust DSP code to a Box.")
+        
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 
 }
