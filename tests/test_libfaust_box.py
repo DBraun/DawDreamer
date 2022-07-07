@@ -5,6 +5,11 @@ from dawdreamer_utils import *
 from typing import List
 import inspect
 
+from scipy import signal
+import numpy as np
+from enum import Enum
+import warnings
+
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
 
@@ -497,16 +502,27 @@ def test28():
 
     ###### compile time constants ######
 
+    class FilterChoice(Enum):
+        LOWPASS_12 = 1
+        LOWPASS_24 = 2
+        HIGH_PASS_12 = 3
+        HIGH_PASS_24 = 4
+
+    class OscChoice(Enum):
+        SAWTOOTH = 1
+        SINE = 2
+        TRIANGLE = 3
+
     OSC_A_TOGGLE = True
-    OSC_A_CHOICE = 0
+    OSC_A_CHOICE = OscChoice.SAWTOOTH
     OSC_A_UNISON = 1
 
     OSC_B_TOGGLE = False
-    OSC_B_CHOICE = 0
+    OSC_B_CHOICE = OscChoice.SAWTOOTH
     OSC_B_UNISON = 1
 
     FILTER_TOGGLE = False
-    FILTER_CHOICE = 0
+    FILTER_CHOICE = FilterChoice.LOWPASS_12
     FILTER_OSC_A = True
     FILTER_OSC_B = True
     FILTER_NOISE = True
@@ -518,7 +534,7 @@ def test28():
     NUM_VOICES = 12
 
     MACRO_MODULATIONS = [
-        # source should be macro, gain, freq
+        # source should be macro, gain, gate, freq
         ("macro1", "env1_A", 1, False),
         ("macro2", "oscA_gain", .3, False),
         # ("gain", "oscA_gain", .1, False),
@@ -554,16 +570,24 @@ def test28():
 
     def process_modulations(modulations):
         for source, dst, amt, symmetric in modulations:
+
+            if source not in MODS:
+                warnings.warn(f"""warning: source "{source}" was modulated but isn't used for DSP.""")
+                continue
+            if dst not in MODS:
+                warnings.warn(f"""warning: destination "{dst}" was modulated but isn't used for DSP.""")
+                continue
+
             if symmetric:
-                MODS[dst] += (MODS[source]-.5)*amt
+                MODS[dst] += (MODS[source]-.5)*amt*2.
             else:
                 MODS[dst] += MODS[source]*amt
 
-    def make_macro(i):
+    def make_macro(i: int):
 
         MODS[f'macro{i}'] = f.boxHSlider(f"[{i}]Macro {i}", f.boxReal(0.01), f.boxReal(-1.), f.boxReal(1.), f.boxReal(.001))
 
-    def make_env(i):
+    def make_env(i: int):
 
         MODS[f'env{i}_A'] = f.boxWire() + f.boxHSlider(f"Env {i} [0]Attack", f.boxReal(0.05), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
         MODS[f'env{i}_D'] = f.boxWire() + f.boxHSlider(f"Env {i} [1]Decay", f.boxReal(0.05), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
@@ -573,7 +597,7 @@ def test28():
         env = f.boxFromDSP(f"""process = en.adsr;""")
         MODS[f'env{i}'] = env
 
-    def make_lfo(i):
+    def make_lfo(i: int):
 
         MODS[f'lfo{i}_gain'] = f.boxWire() + f.boxHSlider(f"LFO {i} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
         MODS[f'lfo{i}_freq'] = f.boxWire() + f.boxHSlider(f"LFO {i} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
@@ -583,14 +607,36 @@ def test28():
         # MODS[f'lfo{i}'] = f.boxMerge(f.boxPar(f.boxWire(), f.boxWire()), f.boxWire())
         MODS[f'lfo{i}'] = f.boxWire() * osc(f, f.boxWire())
 
-    def make_osc(x, choice, unison):
+    def make_osc(x: str, choice, unison: int):
 
-        MODS[f'osc{x}_gain'] = f.boxWire()+f.boxHSlider(f"Osc {x} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_freq'] = MODS['freq'] + f.boxWire()+f.boxHSlider(f"Osc {x} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_detune_amt'] = f.boxWire()+f.boxHSlider(f"Osc {x} [2]Detune", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_gain']       = f.boxWire()                + f.boxHSlider(f"Osc {x} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_freq']       = f.boxWire() + MODS['freq'] + f.boxHSlider(f"Osc {x} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_detune_amt'] = f.boxWire()                + f.boxHSlider(f"Osc {x} [2]Detune", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+
+        TABLE_SIZE = 16_384
+        if choice == OscChoice.SINE:
+            # sine wave
+            wavecycle_data = np.sin(np.pi*2*np.linspace(0, 1, TABLE_SIZE, endpoint=False))
+        elif choice == OscChoice.SAWTOOTH:
+            # sawtooth
+            wavecycle_data = -1. + 2.*np.linspace(0, 1, TABLE_SIZE, endpoint=False)
+        elif choice == OscChoice.TRIANGLE:
+            # triangle
+            t = np.linspace(0, 1, TABLE_SIZE, endpoint=False)
+            t = np.concatenate([t[TABLE_SIZE//4:], t[:TABLE_SIZE//4]])
+            assert t.shape[0] == TABLE_SIZE
+            wavecycle_data = signal.sawtooth(2 * np.pi * t, 0.5)
+        else:
+            raise ValueError(f"Unexpected oscillator choice: {choice}.")
+
+        waveform_content = f.boxSeq(f.boxWaveform(wavecycle_data.tolist()), f.boxPar(f.boxCut(), f.boxWire()))
+
+        readTable = f.boxWire() * f.boxReadOnlyTable(f.boxInt(TABLE_SIZE), waveform_content, phasor(f, f.boxWire() + f.boxWire())*TABLE_SIZE)
+
+        MODS[f'osc{x}'] = f.boxSplit(readTable, f.boxPar(f.boxWire(), f.boxWire())) # split to stereo
 
         # MODS[f'osc{x}'] = f.boxFromDSP("process(gain, freq, detune_amt) = gain* os.sawtooth(freq) + detune_amt <: _, _;")
-        MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(f.boxPar3(f.boxWire(), f.boxWire(), f.boxWire()), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()))
+        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(f.boxPar3(f.boxWire(), f.boxWire(), f.boxWire()), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()))
         # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(f.boxPar3(f.boxWire(), f.boxWire(), f.boxWire()), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()*f.boxHSlider(f"Osc {x} Blah", f.boxReal(1.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))))
 
         # if unison == 1:
@@ -620,17 +666,21 @@ def test28():
         MODS['filter_gain']      = f.boxWire()+f.boxHSlider(f"Filter Gain", f.boxReal(0.), f.boxReal(-80.), f.boxReal(24.), f.boxReal(.001))
         MODS['filter_resonance'] = f.boxWire()+f.boxHSlider(f"Filter Resonance", f.boxReal(0.), f.boxReal(0.), f.boxReal(1.), f.boxReal(.001))
 
-        if choice == 0:
+        if choice == FilterChoice.LOWPASS_12:
             dsp = "process(cutoff, gain, res, sig) = fi.lowpass(5, cutoff, sig);"
-        elif choice == 1:
+        elif choice == FilterChoice.LOWPASS_24:
             dsp = "process(cutoff, gain, res, sig) = fi.lowpass(15, cutoff, sig);"
-        elif choice == 2:
+        elif choice == FilterChoice.HIGHPASS_12:
             dsp = "process(cutoff, gain, res, sig) = fi.highpass(5, cutoff, sig);"
-        else:
+        elif choice == FilterChoice.HIGHPASS_24:
             dsp = "process(cutoff, gain, res, sig) = fi.highpass(15, cutoff, sig);"
+        else:
+            raise ValueError(f"Unexpected filter choice: {choice}.")
+
         # mono_filter = f.boxWire() * f.boxWire() * f.boxWire() * f.boxWire()
         mono_filter = f.boxFromDSP(dsp)
-        return mono_filter
+
+        MODS['filter'] = mono_filter
 
     for i in range(NUM_MACROS):
         make_macro(i+1)
@@ -641,10 +691,13 @@ def test28():
     for i in range(NUM_LFOS):
         make_lfo(i+1)
 
-    make_osc('A', OSC_A_CHOICE, OSC_A_UNISON)
-    make_osc('B', OSC_B_CHOICE, OSC_B_UNISON)
+    if OSC_A_TOGGLE:
+        make_osc('A', OSC_A_CHOICE, OSC_A_UNISON)
+    if OSC_B_TOGGLE:
+        make_osc('B', OSC_B_CHOICE, OSC_B_UNISON)
 
-    mono_filter = make_filter(FILTER_CHOICE)
+    if FILTER_TOGGLE:
+        make_filter(FILTER_CHOICE)
 
     process_modulations(MACRO_MODULATIONS)
 
@@ -660,9 +713,9 @@ def test28():
 
     process_modulations(OTHER_MODULATIONS)
 
-    for x in ['A', 'B']:
-        # MODS[f'osc{x}'] = f.boxSeq(f.boxPar3(MODS[f'osc{x}_gain'], MODS[f'osc{x}_freq'], MODS[f'osc{x}_detune_amt']), MODS[f'osc{x}'])
-        MODS[f'osc{x}'] = f.boxSplit(osc(f, MODS[f'osc{x}_freq']+MODS[f'osc{x}_detune_amt'])*MODS[f'osc{x}_gain'], f.boxPar(f.boxWire(), f.boxWire()))
+    for x in ['A'][:OSC_A_TOGGLE] + ['B'][:OSC_B_TOGGLE]:
+        MODS[f'osc{x}'] = f.boxSeq(f.boxPar3(MODS[f'osc{x}_gain'], MODS[f'osc{x}_freq'], MODS[f'osc{x}_detune_amt']), MODS[f'osc{x}'])
+        # MODS[f'osc{x}'] = f.boxSplit(osc(f, MODS[f'osc{x}_freq']+MODS[f'osc{x}_detune_amt'])*MODS[f'osc{x}_gain'], f.boxPar(f.boxWire(), f.boxWire()))
 
     to_filter = f.boxPar(f.boxWire(), f.boxWire())
     after_filter = f.boxPar(f.boxWire(), f.boxWire())
@@ -687,8 +740,8 @@ def test28():
         to_filter_L = f.boxSeq(to_filter, f.boxPar(f.boxWire(), f.boxCut()))
         to_filter_R = f.boxSeq(to_filter, f.boxPar(f.boxCut(), f.boxWire()))
 
-        L = f.boxSeq(f.boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_L), mono_filter)
-        R = f.boxSeq(f.boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_R), mono_filter)
+        L = f.boxSeq(f.boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_L), MODS['filter'])
+        R = f.boxSeq(f.boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_R), MODS['filter'])
 
         after_filter = f.boxSeq(f.boxPar(after_filter, f.boxPar(L, R)), parallel_add)
     
