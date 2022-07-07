@@ -634,17 +634,46 @@ public:
                     BoxWrapper &box,
                     std::optional<std::vector<std::string>> in_argv);
     
+    BoxWrapper getBoxFromDSP(const std::string& dsp_content) {
+        int inputs = 0;
+        int outputs = 0;
+        std::string error_msg = "";
+        std::string dsp_content2 = std::string("import(\"stdfaust.lib\");\n") + dsp_content;
+        Box box = DSPToBoxes(dsp_content2, inputs, outputs, error_msg);
+        if (error_msg != "") {
+            throw std::runtime_error(error_msg);
+        }
+        
+        return BoxWrapper(box);
+    }
+    
     std::tuple<BoxWrapper, int, int> dspToBox(const std::string& dsp_content) {
         int inputs = 0;
         int outputs = 0;
         std::string error_msg = "";
-        Box box = DSPToBoxes(dsp_content, inputs, outputs, error_msg);
+        std::string dsp_content2 = std::string("import(\"stdfaust.lib\");\n") + dsp_content;
+        Box box = DSPToBoxes(dsp_content2, inputs, outputs, error_msg);
         if (error_msg != "") {
             throw std::runtime_error(error_msg);
         }
         
         return std::tuple<BoxWrapper, int, int>(BoxWrapper(box), inputs, outputs);
-        
+    }
+    
+    void boxToCPP(BoxWrapper& box) {
+            std::string error_msg;
+            dsp_factory_base* factory = createCPPDSPFactoryFromBoxes("test",
+                                                                     box,
+                                                                     0,
+                                                                     nullptr,
+                                                                     error_msg);
+            if (factory) {
+                // Print the C++ class
+                factory->write(&std::cout);
+                delete(factory);
+            } else {
+                throw std::runtime_error(error_msg);
+            }
     }
 };
 
@@ -695,36 +724,36 @@ inline void create_bindings_for_faust_signal(py::module &m) {
     ;
     
     py::class_<BoxWrapper>(m, "Box")
-        .def(py::init<float>(), arg("val"), "Init with a float")
-        .def(py::init<int>(), arg("val"), "Init with an int")
+        .def(py::init<float>(), arg("val"), "Init with a float", returnPolicy)
+        .def(py::init<int>(), arg("val"), "Init with an int", returnPolicy)
     // todo: this ignores createLibContext()
-        .def("__add__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxAdd((BoxWrapper&)box1, box2)); })
-        .def("__add__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxReal(other))); })
-        .def("__radd__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxReal(other))); })
-        .def("__add__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxInt(other))); })
-        .def("__radd__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxInt(other))); })
+        .def("__add__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxAdd((BoxWrapper&)box1, box2)); }, returnPolicy)
+        .def("__add__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__radd__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__add__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
+        .def("__radd__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxAdd((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
     
-        .def("__sub__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxSub((BoxWrapper&)box1, box2)); })
-        .def("__sub__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxReal(other))); })
-        .def("__rsub__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxReal(other))); })
-        .def("__sub__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxInt(other))); })
-        .def("__rsub__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxInt(other))); })
+        .def("__sub__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxSub((BoxWrapper&)box1, box2)); }, returnPolicy)
+        .def("__sub__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__rsub__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__sub__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
+        .def("__rsub__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxSub((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
     
-        .def("__mul__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxMul((BoxWrapper&)box1, box2)); })
-        .def("__mul__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxReal(other))); })
-        .def("__rmul__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxReal(other))); })
-        .def("__mul__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxInt(other))); })
-        .def("__rmul__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxInt(other))); })
+        .def("__mul__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxMul((BoxWrapper&)box1, box2)); }, returnPolicy)
+        .def("__mul__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__rmul__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__mul__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
+        .def("__rmul__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxMul((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
     
-        .def("__truediv__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxDiv((BoxWrapper&)box1, box2)); })
-        .def("__truediv__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxReal(other))); })
-        .def("__rtruediv__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxReal(other))); })
-        .def("__truediv__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxInt(other))); })
-        .def("__rtruediv__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxInt(other))); })
+        .def("__truediv__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxDiv((BoxWrapper&)box1, box2)); }, returnPolicy)
+        .def("__truediv__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__rtruediv__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__truediv__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
+        .def("__rtruediv__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxDiv((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
     
-        .def("__mod__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxFmod((BoxWrapper&)box1, box2)); })
-        .def("__mod__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxFmod((BoxWrapper&)box1, boxReal(other))); })
-        .def("__mod__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxFmod((BoxWrapper&)box1, boxInt(other))); })
+        .def("__mod__", [](const BoxWrapper &box1, BoxWrapper &box2) { return BoxWrapper(boxFmod((BoxWrapper&)box1, box2)); }, returnPolicy)
+        .def("__mod__", [](const BoxWrapper &box1, float other) { return BoxWrapper(boxFmod((BoxWrapper&)box1, boxReal(other))); }, returnPolicy)
+        .def("__mod__", [](const BoxWrapper &box1, int other) { return BoxWrapper(boxFmod((BoxWrapper&)box1, boxInt(other))); }, returnPolicy)
     ;
     
     py::class_<FaustProcessor, ProcessorBase> faustProcessor(m, "FaustProcessor");
@@ -756,6 +785,8 @@ Note that note-ons and note-offs are counted separately.")
         .def("save_midi", &FaustProcessor::saveMIDI,
             arg("filepath"), save_midi_description)
         .def("set_soundfiles", &FaustProcessor::setSoundfiles, arg("soundfile_dict"), "Set the audio data that the FaustProcessor can use with the `soundfile` primitive.")
+    
+    // signal API
     
         .def("sigInt", &FaustProcessor::getSigInt, arg("val"), "Blah", returnPolicy)
         .def("sigReal", &FaustProcessor::getSigReal, arg("val"), "Blah", returnPolicy)
@@ -842,7 +873,7 @@ Note that note-ons and note-offs are counted separately.")
         .def("sigSampleRate", &FaustProcessor::getSigSampleRate, "Blah", returnPolicy)
         .def("sigBufferSize", &FaustProcessor::getSigBufferSize, "Blah", returnPolicy)
 
-        .def("compile_signals", &FaustProcessor::compileSignals, arg("name"), arg("signal"), arg("argv")=py::none(), "Blah")
+        .def("compile_signals", &FaustProcessor::compileSignals, arg("name"), arg("signal"), arg("argv")=py::none(), "Blah", returnPolicy)
     
 // box api
     
@@ -974,9 +1005,11 @@ Note that note-ons and note-offs are counted separately.")
         .def("boxSampleRate", &FaustProcessor::getBoxSampleRate, "Blah", returnPolicy)
         .def("boxBufferSize", &FaustProcessor::getBoxBufferSize, "Blah", returnPolicy)
 
-        .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"), arg("argv")=py::none(), "Blah")
+        .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"), arg("argv")=py::none(), "Blah", returnPolicy)
     
-        .def("dsp_to_box", &FaustProcessor::dspToBox, arg("dsp_code"), "Convert Faust DSP code to a Box.")
+        .def("boxFromDSP", &FaustProcessor::getBoxFromDSP, arg("dsp_code"), "Convert Faust DSP code to a Box.", returnPolicy)
+        .def("boxToCPP", &FaustProcessor::boxToCPP, arg("box"), "Print C++ code of a box.", returnPolicy)
+        .def("dsp_to_box", &FaustProcessor::dspToBox, arg("dsp_code"), "Convert Faust DSP code to a tuple containing a Box, number of inputs, and outputs.", returnPolicy)
         
         .doc() = "A Faust Processor can compile and execute FAUST code. See https://faust.grame.fr for more information.";
 
