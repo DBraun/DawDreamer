@@ -570,7 +570,7 @@ def test28():
 
     ##### No need to modify below.  #####
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, 512)
     f = engine.make_faust_processor("my_faust")
 
     MODS = {
@@ -579,7 +579,7 @@ def test28():
         'gain': f.boxHSlider("gain", f.boxReal(0.5), f.boxReal(0), f.boxReal(1), f.boxReal(0.01))
     }
 
-    def semiToRatio(box) -> daw.Box:
+    def semiToRatio(box: daw.Box) -> daw.Box:
         return f.boxSeq(box, f.boxPow(f.boxReal(2.), f.boxWire()/12.))
 
     def process_modulations(modulations):
@@ -648,7 +648,7 @@ def test28():
 
     def make_noise():
 
-        MODS['noise_gain'] = f.boxWire() + f.boxHSlider(f"Noise [0]Gain", f.boxReal(0.01), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS['noise_gain'] = f.boxWire() + f.boxHSlider(f"Noise [0]Gain", f.boxReal(0.0), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
 
         wavecycle_data = get_wavecycle_data(OscChoice.WHITE_NOISE)
 
@@ -845,6 +845,7 @@ def test28():
     f.load_midi(abspath(ASSETS / midi_basename))
 
     f.num_voices = NUM_VOICES
+    # f.dynamic_voices = False
     f.compile_box("test", instrument)
 
     my_render(engine, f)

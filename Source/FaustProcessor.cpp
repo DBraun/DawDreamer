@@ -334,6 +334,18 @@ FaustProcessor::getGroupVoices() {
 	return m_groupVoices;
 };
 
+void
+FaustProcessor::setDynamicVoices(bool dynamicVoices)
+{
+    m_compileState = kNotCompiled;
+    m_dynamicVoices = dynamicVoices;
+};
+
+int
+FaustProcessor::getDynamicVoices() {
+    return m_dynamicVoices;
+};
+
 bool
 FaustProcessor::setDSPString(const std::string& code)
 {
@@ -438,7 +450,7 @@ FaustProcessor::compile()
 
 	if (is_polyphonic) {
 		// (false, true) works
-		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, true, m_groupVoices);
+		m_dsp_poly = m_poly_factory->createPolyDSPInstance(m_nvoices, m_dynamicVoices, m_groupVoices);
 		if (!m_dsp_poly) {
 			clear();
 			throw std::runtime_error("FaustProcessor::compile(): Cannot create Poly DSP instance.");
@@ -540,7 +552,7 @@ FaustProcessor::compileSignals(const std::string& name,
     auto theDSP = m_dsp;
     if (is_polyphonic) {
         // Allocate polyphonic DSP
-        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, true, m_groupVoices);
+        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
         m_dsp_poly->setReleaseLength(m_releaseLengthSec);
         theDSP = m_dsp_poly;
     }
@@ -623,7 +635,7 @@ FaustProcessor::compileBox(const std::string& name,
     auto theDSP = m_dsp;
     if (is_polyphonic) {
         // Allocate polyphonic DSP
-        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, true, m_groupVoices);
+        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
         m_dsp_poly->setReleaseLength(m_releaseLengthSec);
         theDSP = m_dsp_poly;
     }

@@ -180,6 +180,9 @@ public:
 
     void setGroupVoices(bool groupVoices);
     int getGroupVoices();
+    
+    void setDynamicVoices(bool dynamicVoices);
+    int getDynamicVoices();
 
     void setAutoImport(const std::string& s) { m_autoImport = s; }
     std::string getAutoImport() { return m_autoImport; }
@@ -247,6 +250,7 @@ protected:
     std::string m_faustLibrariesPath = "";
 
     int m_nvoices = 0;
+    bool m_dynamicVoices = true;
     bool m_groupVoices = true;
 
     MidiBuffer myMidiBufferQN;
@@ -800,6 +804,7 @@ inline void create_bindings_for_faust_signal(py::module &m) {
         .def_property_readonly("code", &FaustProcessor::code, "Get the most recently compiled Faust DSP code.")
         .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices, "The number of voices for polyphony. Set to zero to disable polyphony. One or more enables polyphony.")
         .def_property("group_voices", &FaustProcessor::getGroupVoices, &FaustProcessor::setGroupVoices, "If grouped, all polyphonic voices will share the same parameters. This parameter only matters if polyphony is enabled.")
+        .def_property("dynamic_voices", &FaustProcessor::getDynamicVoices, &FaustProcessor::setDynamicVoices, "If enabled (default), voices are dynamically enabled and disabled to save computation. This parameter only matters if polyphony is enabled.")
         .def_property("release_length", &FaustProcessor::getReleaseLength, &FaustProcessor::setReleaseLength, "If using polyphony, specifying the release length accurately can help avoid warnings about voices being stolen.")
         .def_property("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath, &FaustProcessor::setFaustLibrariesPath, "Absolute path to directory containing your custom \".lib\" files containing Faust code.")
         .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents, "The number of MIDI events stored in the buffer. \
