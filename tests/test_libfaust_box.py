@@ -416,85 +416,71 @@ def test25a():
     f = engine.make_faust_processor("my_faust")
 
     filter, inputs, outputs = f.dsp_to_box('process = si.smooth;');
-    # filter, inputs, outputs = f.dsp_to_box('process = fi.lowpass3e(1);')
-    # filter, inputs, outputs = f.dsp_to_box('process = _,_;');
-
-    # assert inputs == 1
-    # assert outputs == 1
-    # print(f'inputs: {inputs}, outputs: {outputs}')
-
-    cutoff = f.boxHSlider("cutoff", f.boxReal(300), f.boxReal(100), f.boxReal(2000), f.boxReal(0.01))
-    cutoffAndInput = f.boxPar(cutoff, f.boxWire())
-    # cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
-    # cutoffAndInput, inputs, outputs = f.dsp_to_box('process = _, _, _;')
-
-    # print(f'inputs: {inputs}, outputs: {outputs}')
+    assert inputs == 2
+    assert outputs == 1
+    cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
+    assert inputs == 1
+    assert outputs == 2
 
     filteredInput = f.boxSeq(cutoffAndInput, filter)
     f.compile_box("test", filteredInput)
     my_render(engine, f)
 
 
-# def test25b():
+def test25b():
 
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
 
-#     filter, inputs, outputs = f.dsp_to_box('process = si.smooth;');
-#     cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
+    filter, inputs, outputs = f.dsp_to_box('process = si.smooth;');
+    cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
 
-#     filteredInput = f.boxSeq(cutoffAndInput, filter)
-#     f.compile_box("test", filteredInput)
-#     my_render(engine, f)
-
-
-# def test25c():
-
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
-
-#     bus_size = 2
-#     box, inputs, outputs = f.dsp_to_box(f'process = si.bus({bus_size});');
-#     print(f'1) inputs: {inputs}, outputs: {outputs}')
-
-#     assert inputs ==  bus_size and outputs == bus_size
+    filteredInput = f.boxSeq(cutoffAndInput, filter)
+    f.compile_box("test", filteredInput)
+    my_render(engine, f)
 
 
-#     bus_size = 3
-#     box, inputs, outputs = f.dsp_to_box(f'process = si.bus({bus_size});');
-#     print(f'2) inputs: {inputs}, outputs: {outputs}')
+def test25c():
 
-#     assert inputs ==  bus_size and outputs == bus_size
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
 
-#     f.compile_box("test", box)
-#     my_render(engine, f)
+    def test_bus(n):
+        box, inputs, outputs = f.dsp_to_box(f'process = si.bus({n});');
+        print(f'exepcted {n}, and got inputs: {inputs}, outputs: {outputs}')
+        assert inputs ==  n and outputs == n
 
-
-# def test26():
-
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
-
-#     box1 = f.boxWire()
-
-#     box2 = f.boxMul(box1, f.boxReal(0.5))
-#     box3 = f.boxRem(box1, f.boxReal(0.8))
-
-#     box4 = f.boxSeq(box2, box1)
-#     box5 = f.boxSeq(box3, box1)
-
-#     box6 = f.boxPar3(box4, box5, box3)
+    # test ascending and then descending.
+    test_bus(3)
+    test_bus(4)
+    test_bus(2)
 
 
-# def test27():
+def test26():
 
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
 
-#     box4 = f.boxFromDSP('process = os.osc;')
-#     box5 = f.boxFromDSP('process = en.adsr;')
-#     box6 = f.boxFromDSP('process = en.adsr;')
-#     box7 = f.boxFromDSP('process = fi.lowpass(5);')
+    box1 = f.boxWire()
+
+    box2 = f.boxMul(box1, f.boxReal(0.5))
+    box3 = f.boxRem(box1, f.boxReal(0.8))
+
+    box4 = f.boxSeq(box2, box1)
+    box5 = f.boxSeq(box3, box1)
+
+    box6 = f.boxPar3(box4, box5, box3)
+
+
+def test27():
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    box4 = f.boxFromDSP('process = os.osc;')
+    box5 = f.boxFromDSP('process = en.adsr;')
+    box6 = f.boxFromDSP('process = en.adsre;')
+    box7 = f.boxFromDSP('process = fi.lowpass(5);')
 
 def test28():
 
@@ -514,7 +500,8 @@ def test28():
         SAWTOOTH    = 1
         SINE        = 2
         TRIANGLE    = 3
-        WHITE_NOISE = 4
+        SQUARE      = 4
+        WHITE_NOISE = 5
 
     OSC_A_TOGGLE = True
     OSC_A_CHOICE = OscChoice.SAWTOOTH
@@ -634,6 +621,18 @@ def test28():
     def parallel_add(box1: daw.Box, box2: daw.Box) -> daw.Box:
         return boxSeq(boxPar(box1, box2), boxMerge(bus(4), bus(2)))
 
+
+    def boxParN(boxes: List[daw.Box]):
+        N = len(boxes)
+        if N == 1:
+            return boxes[0]
+        else:
+            box = boxes.pop(0)
+            while boxes:
+                box = boxPar(box, boxes.pop(0))
+
+            return box
+
     #################################################
 
     MODS = {
@@ -660,7 +659,7 @@ def test28():
 
     def make_macro(i: int):
 
-        MODS[f'macro{i}'] = boxHSlider(f"[{i}]Macro {i}", 0, -1, 1, .001)
+        MODS[f'macro{i}'] = boxHSlider(f"[{i}]Macro {i}", 0, 0, 1, .001)
 
 
     def make_env(i: int):
@@ -698,6 +697,9 @@ def test28():
             t = np.concatenate([t[TABLE_SIZE//4:], t[:TABLE_SIZE//4]])
             assert t.shape[0] == TABLE_SIZE
             wavecycle_data = signal.sawtooth(2 * np.pi * t, 0.5)
+        elif choicoe == OscChoice.SQUARE:
+            t = np.linspace(0, 1, TABLE_SIZE, endpoint=False)
+            wavecycle_data = -1.+2.*(t > .5).astype(np.float32)
         elif choice == OscChoice.WHITE_NOISE:
             wavecycle_data = -1.+2.*np.random.rand(TABLE_SIZE)
         else:
@@ -721,9 +723,9 @@ def test28():
 
     def make_sub(choice):
 
-        MODS[f'sub_gain']       = boxWire()                + boxHSlider(f"Sub [0]Gain", 0, 0, 10, .001)
+        MODS[f'sub_gain']       = boxWire()             + boxHSlider(f"Sub [0]Gain", 0, 0, 10, .001)
         MODS[f'sub_freq']       = semiToRatio(boxWire() + boxHSlider(f"Sub [1]Freq", 0, 0, 10, .001)) * MODS['freq']
-        MODS[f'sub_pan']        = boxWire()                + boxHSlider(f"Sub [2]Pan", 0, 0, 10, .001)
+        MODS[f'sub_pan']        = boxWire()             + boxHSlider(f"Sub [2]Pan", 0, 0, 10, .001)
 
         wavecycle_data = get_wavecycle_data(choice)
 
@@ -851,11 +853,9 @@ def test28():
     # cook the envelopes
     for i in range(1, NUM_ENVS+1):
         MODS[f'env{i}'] = boxSeq(
-            boxPar(
-                boxPar3(MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D']), 
-                boxPar3(MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate'])
-            ),
-            MODS[f'env{i}'])
+            boxParN([MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D'], MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate']]),
+            MODS[f'env{i}']
+            )
 
     # cook the LFOs
     for i in range(1, NUM_LFOS+1):
