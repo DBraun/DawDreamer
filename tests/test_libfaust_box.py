@@ -636,13 +636,11 @@ def test28():
 
     #################################################
 
-
     MODS = {
         'freq': boxHSlider("freq", 100, 100, 20000, .001),
         'gate': f.boxButton("gate"),
         'gain': boxHSlider("gain", .5, 0, 1, .001)
     }
-
 
     def process_modulations(modulations):
         for source, dst, amt, symmetric in modulations:
@@ -743,6 +741,10 @@ def test28():
         MODS[f'osc{x}_detune_amt'] = boxWire() + boxHSlider(f"Osc {x} [2]Detune", 0, 0, 10, .001)
         MODS[f'osc{x}_blend']      = boxWire() + boxHSlider(f"Osc {x} [3]Blend", 0, 0, 10, .001)
         MODS[f'osc{x}_pan']        = boxWire() + boxHSlider(f"Osc {x} [4]Pan", 0, 0, 10, .001)
+        MODS[f'osc{x}_wt_pos']     = boxWire() + boxHSlider(f"Osc {x} [5]WT Pos", 0., 0, 1, .001)
+        MODS[f'osc{x}_wt_bend']    = boxWire() + boxHSlider(f"Osc {x} [6]WT Bend", 0., 0, 1, .001)
+        MODS[f'osc{x}_phase']      = boxWire() + boxHSlider(f"Osc {x} [7]Phase", 0, 0, 1, .001)
+        MODS[f'osc{x}_rand']       = boxWire() + boxHSlider(f"Osc {x} [8]Rand", 0, 0, 1, .001)
 
         wavecycle_data = get_wavecycle_data(choice)
 
