@@ -505,8 +505,10 @@ def test28():
     class FilterChoice(Enum):
         LOWPASS_12   = 1
         LOWPASS_24   = 2
-        HIGH_PASS_12 = 3
-        HIGH_PASS_24 = 4
+        HIGHPASS_12 = 3
+        HIGHPASS_24 = 4
+        LOWSHELF_12  = 5
+        HIGHSHELF_12 = 6
 
     class OscChoice(Enum):
         SAWTOOTH    = 1
@@ -726,6 +728,10 @@ def test28():
             dsp = "process(cutoff, gain, res, sig) = fi.highpass(5, cutoff, sig);"
         elif choice == FilterChoice.HIGHPASS_24:
             dsp = "process(cutoff, gain, res, sig) = fi.highpass(15, cutoff, sig);"
+        elif choice == FilterChoice.LOWSHELF_12:
+            dsp = "process(cutoff, gain, res, sig) = fi.lowshelf(3, gain, cutoff, sig);"
+        elif choice == FilterChoice.HIGHSHELF_12:
+            dsp = "process(cutoff, gain, res, sig) = fi.highshelf(3, gain, cutoff, sig);"
         else:
             raise ValueError(f"Unexpected filter choice: {choice}.")
 
