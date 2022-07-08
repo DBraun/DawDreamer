@@ -561,7 +561,8 @@ def test28():
     ]
 
     # ordered list of post-fx to use
-    EFFECTS = ['reverb', 'chorus']  # todo: add these as features
+    EFFECTS = []
+    # EFFECTS = ['reverb', 'chorus']  # todo: add these as features
     EFFECTS_MODULATIONS = []  # todo:
 
     TABLE_SIZE = 16_384
@@ -573,14 +574,75 @@ def test28():
     engine = daw.RenderEngine(SAMPLE_RATE, 512)
     f = engine.make_faust_processor("my_faust")
 
-    MODS = {
-        'freq': f.boxHSlider("freq", f.boxReal(100), f.boxReal(100), f.boxReal(3000), f.boxReal(0.01)),
-        'gate': f.boxButton("gate"),
-        'gain': f.boxHSlider("gain", f.boxReal(0.5), f.boxReal(0), f.boxReal(1), f.boxReal(0.01))
-    }
+    def boxWire() -> daw.Box:
+        return f.boxWire()
+
+    def boxCut() -> daw.Box:
+        return f.boxCut()
+
+    def boxReal(val: float) -> daw.Box:
+        return f.boxReal(val)
+
+    def boxInt(val: int) -> daw.Box:
+        return f.boxInt(val)
+
+    def boxPow(box1: daw.Box, box2: daw.Box) -> daw.Box:
+        return f.boxPow(box1, box2)
+
+    def boxSeq(box1: daw.Box, box2: daw.Box) -> daw.Box:
+        return f.boxSeq(box1, box2)
+
+    def boxSplit(box1: daw.Box, box2: daw.Box) -> daw.Box:
+        return f.boxSplit(box1, box2)
+
+    def boxMerge(box1: daw.Box, box2: daw.Box) -> daw.Box:
+        return f.boxMerge(box1, box2)
+
+    def boxPar(box1: daw.Box, box2: daw.Box) -> daw.Box:
+        return f.boxPar(box1, box2)
+
+    def boxPar3(box1: daw.Box, box2: daw.Box, box3: daw.Box) -> daw.Box:
+        return f.boxPar3(box1, box2, box3)
+
+    def boxPar4(box1: daw.Box, box2: daw.Box, box3: daw.Box, box4: daw.Box) -> daw.Box:
+        return f.boxPar4(box1, box2, box3, box4)
+
+    def boxPar5(box1: daw.Box, box2: daw.Box, box3: daw.Box, box4: daw.Box, box5: daw.Box) -> daw.Box:
+        return f.boxPar5(box1, box2, box3, box4, box5)
+
+    def boxHSlider(label: str, default: float, minVal: float, maxVal: float, step: float):
+        return f.boxHSlider(label, boxReal(default), boxReal(minVal), boxReal(maxVal), boxReal(step))
+
+    ### convenience functions like faust libraries:
 
     def semiToRatio(box: daw.Box) -> daw.Box:
-        return f.boxSeq(box, f.boxPow(f.boxReal(2.), f.boxWire()/12.))
+        return boxSeq(box, boxPow(boxReal(2.), boxWire()/12.))
+
+    def bus(n: int) -> daw.Box:
+        if n == 0:
+            raise ValueError("Can't make a bus of size zero.")
+        elif n == 1:
+            return boxWire()
+        else:
+            box = boxWire()
+            for i in range(n-1):
+                box = boxPar(box, boxWire())
+
+            return box
+
+
+    def parallel_add(box1: daw.Box, box2: daw.Box) -> daw.Box:
+        return boxSeq(boxPar(box1, box2), boxMerge(bus(4), bus(2)))
+
+    #################################################
+
+
+    MODS = {
+        'freq': boxHSlider("freq", 100, 100, 20000, .001),
+        'gate': f.boxButton("gate"),
+        'gain': boxHSlider("gain", .5, 0, 1, .001)
+    }
+
 
     def process_modulations(modulations):
         for source, dst, amt, symmetric in modulations:
@@ -600,28 +662,28 @@ def test28():
 
     def make_macro(i: int):
 
-        MODS[f'macro{i}'] = f.boxHSlider(f"[{i}]Macro {i}", f.boxReal(0.01), f.boxReal(-1.), f.boxReal(1.), f.boxReal(.001))
+        MODS[f'macro{i}'] = boxHSlider(f"[{i}]Macro {i}", 0, -1, 1, .001)
 
 
     def make_env(i: int):
 
         # time units are milliseconds
-        MODS[f'env{i}_A'] = (f.boxWire() + f.boxHSlider(f"Env {i} [0]Attack", f.boxReal(5), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
-        MODS[f'env{i}_H'] = (f.boxWire() + f.boxHSlider(f"Env {i} [1]Hold", f.boxReal(0), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
-        MODS[f'env{i}_D'] = (f.boxWire() + f.boxHSlider(f"Env {i} [2]Decay", f.boxReal(20), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
-        MODS[f'env{i}_S'] = (f.boxWire() + f.boxHSlider(f"Env {i} [3]Sustain", f.boxReal(0.5), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001)))
-        MODS[f'env{i}_R'] = (f.boxWire() + f.boxHSlider(f"Env {i} [4]Release", f.boxReal(200), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
+        MODS[f'env{i}_A'] = (boxWire() + boxHSlider(f"Env {i} [0]Attack", 5, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_H'] = (boxWire() + boxHSlider(f"Env {i} [1]Hold", 0, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_D'] = (boxWire() + boxHSlider(f"Env {i} [2]Decay", 20, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_S'] = (boxWire() + boxHSlider(f"Env {i} [3]Sustain", 0.5, 0., 10_000, .001))
+        MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"Env {i} [4]Release", 200, 0., 10_000, .001)) / 1_000
         MODS[f'env{i}'] = f.boxFromDSP(f"process = en.ahdsre;")
 
     def make_lfo(i: int):
 
-        MODS[f'lfo{i}_gain'] = f.boxWire() + f.boxHSlider(f"LFO {i} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'lfo{i}_freq'] = f.boxWire() + f.boxHSlider(f"LFO {i} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"LFO {i} [0]Gain", 0, 0, 10, .001)
+        MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"LFO {i} [1]Freq", 0, 0, 10, .001)
 
         # todo: use boxFromDSP
         # lfo = f.boxFromDSP(f"""process(gain, freq) = (gain + hslider("[{i}]LFO %{i} gain",  0., 0., 10., .001)) * os.osc(freq);""")
         # MODS[f'lfo{i}'] = f.boxMerge(f.boxPar(f.boxWire(), f.boxWire()), f.boxWire())
-        MODS[f'lfo{i}'] = f.boxWire() * osc(f, f.boxWire())
+        MODS[f'lfo{i}'] = boxWire() * osc(f, boxWire())
 
 
     def get_wavecycle_data(choice):
@@ -648,51 +710,51 @@ def test28():
 
     def make_noise():
 
-        MODS['noise_gain'] = f.boxWire() + f.boxHSlider(f"Noise [0]Gain", f.boxReal(0.0), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS['noise_gain'] = boxWire() + boxHSlider(f"Noise [0]Gain", 0, 0, 10., .001)
 
         wavecycle_data = get_wavecycle_data(OscChoice.WHITE_NOISE)
 
-        waveform_content = f.boxSeq(f.boxWaveform(wavecycle_data), f.boxPar(f.boxCut(), f.boxWire()))
+        waveform_content = boxSeq(f.boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
 
-        readTable = f.boxWire() * f.boxReadOnlyTable(f.boxInt(TABLE_SIZE), waveform_content, phasor(f, TABLE_SIZE/f.boxSampleRate())*TABLE_SIZE)
+        readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, TABLE_SIZE/f.boxSampleRate())*TABLE_SIZE)
 
-        MODS['noise'] = f.boxSplit(readTable, f.boxPar(f.boxWire(), f.boxWire())) # split to stereo
+        MODS['noise'] = boxSplit(readTable, bus(2)) # split to stereo
 
 
     def make_sub(choice):
 
-        MODS[f'sub_gain']       = f.boxWire()                + f.boxHSlider(f"Sub [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'sub_freq']       = semiToRatio(f.boxWire() + f.boxHSlider(f"Sub [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))) * MODS['freq']
-        MODS[f'sub_pan']        = f.boxWire()                + f.boxHSlider(f"Sub [2]Pan", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'sub_gain']       = boxWire()                + boxHSlider(f"Sub [0]Gain", 0, 0, 10, .001)
+        MODS[f'sub_freq']       = semiToRatio(boxWire() + boxHSlider(f"Sub [1]Freq", 0, 0, 10, .001)) * MODS['freq']
+        MODS[f'sub_pan']        = boxWire()                + boxHSlider(f"Sub [2]Pan", 0, 0, 10, .001)
 
         wavecycle_data = get_wavecycle_data(choice)
 
-        waveform_content = f.boxSeq(f.boxWaveform(wavecycle_data), f.boxPar(f.boxCut(), f.boxWire()))
+        waveform_content = boxSeq(f.boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
 
-        readTable = f.boxWire() * f.boxReadOnlyTable(f.boxInt(TABLE_SIZE), waveform_content, phasor(f, f.boxWire() + f.boxWire())*TABLE_SIZE)
+        readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, boxWire() + boxWire())*TABLE_SIZE)
 
-        MODS[f'sub'] = f.boxSplit(readTable, f.boxPar(f.boxWire(), f.boxWire())) # split to stereo
+        MODS[f'sub'] = boxSplit(readTable, bus(2)) # split to stereo
 
 
     def make_osc(x: str, choice, unison: int):
 
-        MODS[f'osc{x}_gain']       = f.boxWire() + f.boxHSlider(f"Osc {x} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_freq']       = semiToRatio(f.boxWire() + f.boxHSlider(f"Osc {x} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))) * MODS['freq']
-        MODS[f'osc{x}_detune_amt'] = f.boxWire() + f.boxHSlider(f"Osc {x} [2]Detune", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_blend']      = f.boxWire() + f.boxHSlider(f"Osc {x} [3]Blend", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_pan']        = f.boxWire() + f.boxHSlider(f"Osc {x} [4]Pan", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_gain']       = boxWire() + boxHSlider(f"Osc {x} [0]Gain", 0, 0, 10, .001)
+        MODS[f'osc{x}_freq']       = semiToRatio(boxWire() + boxHSlider(f"Osc {x} [1]Freq", 0, 0, 10, .001)) * MODS['freq']
+        MODS[f'osc{x}_detune_amt'] = boxWire() + boxHSlider(f"Osc {x} [2]Detune", 0, 0, 10, .001)
+        MODS[f'osc{x}_blend']      = boxWire() + boxHSlider(f"Osc {x} [3]Blend", 0, 0, 10, .001)
+        MODS[f'osc{x}_pan']        = boxWire() + boxHSlider(f"Osc {x} [4]Pan", 0, 0, 10, .001)
 
         wavecycle_data = get_wavecycle_data(choice)
 
-        waveform_content = f.boxSeq(f.boxWaveform(wavecycle_data), f.boxPar(f.boxCut(), f.boxWire()))
+        waveform_content = boxSeq(f.boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
 
-        readTable = f.boxWire() * f.boxReadOnlyTable(f.boxInt(TABLE_SIZE), waveform_content, phasor(f, f.boxWire() + f.boxWire())*TABLE_SIZE)
+        readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, boxWire() + boxWire())*TABLE_SIZE)
 
-        MODS[f'osc{x}'] = f.boxSplit(readTable, f.boxPar(f.boxWire(), f.boxWire())) # split to stereo
+        MODS[f'osc{x}'] = boxSplit(readTable, bus(2)) # split to stereo
 
         # MODS[f'osc{x}'] = f.boxFromDSP("process(gain, freq, detune_amt) = gain* os.sawtooth(freq) + detune_amt <: _, _;")
-        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(f.boxPar3(f.boxWire(), f.boxWire(), f.boxWire()), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()))
-        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(f.boxPar3(f.boxWire(), f.boxWire(), f.boxWire()), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()*f.boxHSlider(f"Osc {x} Blah", f.boxReal(1.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))))
+        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(bus(3), f.boxWire()), bus(2))
+        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(bus(3), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()*f.boxHSlider(f"Osc {x} Blah", f.boxReal(1.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))))
 
         # if unison == 1:
         #     # no detune
@@ -716,9 +778,9 @@ def test28():
 
     def make_filter(choice):
 
-        MODS['filter_cutoff']    = f.boxWire()+f.boxHSlider(f"Filter Cutoff", f.boxReal(5000.), f.boxReal(20.), f.boxReal(20000.), f.boxReal(.001))
-        MODS['filter_gain']      = f.boxWire()+f.boxHSlider(f"Filter Gain", f.boxReal(0.), f.boxReal(-80.), f.boxReal(24.), f.boxReal(.001))
-        MODS['filter_resonance'] = f.boxWire()+f.boxHSlider(f"Filter Resonance", f.boxReal(0.), f.boxReal(0.), f.boxReal(1.), f.boxReal(.001))
+        MODS['filter_cutoff']    = boxWire()+boxHSlider(f"Filter Cutoff", 5000., 20., 20000, .001)
+        MODS['filter_gain']      = boxWire()+boxHSlider(f"Filter Gain", 0., -80, 24, .001)
+        MODS['filter_resonance'] = boxWire()+boxHSlider(f"Filter Resonance", 1, 0, 2, .001)
 
         if choice == FilterChoice.LOWPASS_12:
             dsp = "process(cutoff, gain, res, sig) = fi.lowpass(5, cutoff, sig);"
@@ -737,6 +799,18 @@ def test28():
 
         # todo: note that this is just a mono filter!
         MODS['filter'] = f.boxFromDSP(dsp)
+
+
+    def make_reverb():
+        pass  # todo:
+        MODS['reverb_cutoff']  = boxWire()+boxHSlider(f"Reverb Filter Cutoff", 5000., 20., 20000, .001)
+        MODS['reverb_size']    = boxWire()+boxHSlider(f"Reverb Size", 0, 0, 1, .001)
+        MODS['reverb_mix']     = boxWire()+boxHSlider(f"Reverb Mix", 0, 0, 1, .001)
+
+        MODS['reverb'] = boxMerge(bus(3), boxWire())
+
+    def make_chorus():
+        pass  # todo:
 
 
     for i in range(NUM_MACROS):
@@ -763,79 +837,89 @@ def test28():
     if NOISE_TOGGLE:
         make_noise()
 
+    if 'reverb' in EFFECTS:
+        make_reverb()
+
+    if 'chorus' in EFFECTS:
+        make_chorus()
+
     # modulate the destinations we just made.
     process_modulations(MACRO_MODULATIONS)
 
     # cook the envelopes
     for i in range(1, NUM_ENVS+1):
-        MODS[f'env{i}'] = f.boxSeq(
-            f.boxPar(
-                f.boxPar3(MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D']), 
-                f.boxPar3(MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate'])
+        MODS[f'env{i}'] = boxSeq(
+            boxPar(
+                boxPar3(MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D']), 
+                boxPar3(MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate'])
             ),
             MODS[f'env{i}'])
 
     # cook the LFOs
     for i in range(1, NUM_LFOS+1):
-        MODS[f'lfo{i}'] = f.boxSeq(
-            f.boxPar(MODS[f'lfo{i}_gain'], MODS[f'lfo{i}_freq']),
+        MODS[f'lfo{i}'] = boxSeq(
+            boxPar(MODS[f'lfo{i}_gain'], MODS[f'lfo{i}_freq']),
             MODS[f'lfo{i}'])
 
     # modulate the destinations that have envelopes and LFOs as a source.
     process_modulations(OTHER_MODULATIONS)
         
-    to_filter = f.boxPar(f.boxWire(), f.boxWire())
-    after_filter = f.boxPar(f.boxWire(), f.boxWire())
-    parallel_add = f.boxMerge(f.boxPar4(f.boxWire(), f.boxWire(),f.boxWire(),f.boxWire()), f.boxPar(f.boxWire(),f.boxWire()))
+    to_filter = bus(2)
+    after_filter = bus(2)
 
     # cook the noise
     if NOISE_TOGGLE:
-        MODS['noise'] = f.boxSeq(MODS['noise_gain'], MODS['noise'])
+        MODS['noise'] = boxSeq(MODS['noise_gain'], MODS['noise'])
         if FILTER_TOGGLE and FILTER_NOISE:
-            to_filter = f.boxSeq(f.boxPar(to_filter, MODS['noise']), parallel_add)
+            to_filter = parallel_add(to_filter, MODS['noise'])
         else:
-            after_filter = f.boxSeq(f.boxPar(after_filter, MODS['noise']), parallel_add)
+            after_filter = parallel_add(after_filter, MODS['noise'])
 
     # cook the sub
     if SUB_TOGGLE:
-        MODS['sub'] = f.boxSeq(f.boxPar3(MODS['sub_gain'], MODS[f'sub_freq'], f.boxReal(0)), MODS['sub'])
+        MODS['sub'] = boxSeq(boxPar3(MODS['sub_gain'], MODS[f'sub_freq'], boxReal(0)), MODS['sub'])
         if FILTER_TOGGLE and FILTER_SUB:
-            to_filter = f.boxSeq(f.boxPar(to_filter, MODS['sub']), parallel_add)
+            to_filter = parallel_add(to_filter, MODS['sub'])
         else:
-            after_filter = f.boxSeq(f.boxPar(after_filter, MODS['sub']), parallel_add)
+            after_filter = parallel_add(after_filter, MODS['sub'])
 
     # cook the oscillators
     for name, osc_toggle, filter_osc_toggle in [('oscA', OSC_A_TOGGLE, FILTER_OSC_A), ('oscB', OSC_B_TOGGLE, FILTER_OSC_B)]:
         if osc_toggle:
 
-            MODS[name] = f.boxSeq(f.boxPar3(MODS[f'{name}_gain'], MODS[f'{name}_freq'], MODS[f'{name}_detune_amt']), MODS[name])
+            MODS[name] = boxSeq(boxPar3(MODS[f'{name}_gain'], MODS[f'{name}_freq'], MODS[f'{name}_detune_amt']), MODS[name])
 
             if FILTER_TOGGLE and filter_osc_toggle:
-                to_filter = f.boxSeq(f.boxPar(to_filter, MODS[name]), parallel_add)
+                to_filter = parallel_add(to_filter, MODS[name])
             else:
-                after_filter = f.boxSeq(f.boxPar(after_filter, MODS[name]), parallel_add)
+                after_filter = parallel_add(after_filter, MODS[name])
 
     if FILTER_TOGGLE:
         # todo: more elegant way that doesn't split channels like this.
         # It would be easier if the *stereo* filter actually came from boxFromDSP.
-        to_filter_L = f.boxSeq(to_filter, f.boxPar(f.boxWire(), f.boxCut()))
-        to_filter_R = f.boxSeq(to_filter, f.boxPar(f.boxCut(), f.boxWire()))
+        to_filter_L = boxSeq(to_filter, boxPar(boxWire(), boxCut()))
+        to_filter_R = boxSeq(to_filter, boxPar(boxCut(), boxWire()))
 
-        L = f.boxSeq(f.boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_L), MODS['filter'])
-        R = f.boxSeq(f.boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_R), MODS['filter'])
+        L = boxSeq(boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_L), MODS['filter'])
+        R = boxSeq(boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_R), MODS['filter'])
 
-        after_filter = f.boxSeq(f.boxPar(after_filter, f.boxPar(L, R)), parallel_add)
+        after_filter = parallel_add(after_filter, boxPar(L, R))
     
     # plug up the leftover inputs with zero
-    after_filter = f.boxSplit(f.boxReal(0.), after_filter)
+    instrument = boxSplit(boxReal(0.), after_filter)
 
     # todo: use post fx
     process_modulations(EFFECTS_MODULATIONS)
 
     for effect in EFFECTS:
-        pass
+        
+        if effect == 'reverb':
+            pass
+        elif effect == 'chorus':
+            pass
+        else:
+            raise ValueError(f'Unexpected effect named "{effect}".')
 
-    instrument = after_filter
 
     # Done building the instrument.
     # f.boxToCPP(instrument)
