@@ -661,12 +661,38 @@ public:
     }
     
     void boxToCPP(BoxWrapper& box) {
+        
+            auto pathToFaustLibraries = getPathToFaustLibraries();
+
+            if (pathToFaustLibraries == "") {
+                throw std::runtime_error("FaustProcessor::compile(): Error for path for faust libraries: " + pathToFaustLibraries);
+            }
+        
+            int argc = 0;
+            const char** argv = new const char* [256];
+
+            argv[argc++] = "-I";
+            argv[argc++] = pathToFaustLibraries.c_str();
+
+            if (m_faustLibrariesPath != "") {
+                argv[argc++] = "-I";
+                argv[argc++] = m_faustLibrariesPath.c_str();
+            }
+
             std::string error_msg;
+
             dsp_factory_base* factory = createCPPDSPFactoryFromBoxes("test",
                                                                      box,
-                                                                     0,
-                                                                     nullptr,
+                                                                     argc,
+                                                                     argv,
                                                                      error_msg);
+        
+            for (int i = 0; i < argc; i++) {
+                argv[i] = NULL;
+            }
+            delete[] argv;
+            argv = nullptr;
+        
             if (factory) {
                 // Print the C++ class
                 factory->write(&std::cout);

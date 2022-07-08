@@ -294,11 +294,11 @@ with {
 };
 """
 
-def decimalpart(f):
+def decimalpart(f) -> daw.Box:
 
     return f.boxSub(f.boxWire(), f.boxIntCast(f.boxWire()))
 
-def phasor(f, freq):
+def phasor(f, freq: daw.Box) -> daw.Box:
 
     return f.boxSeq(f.boxDiv(freq, f.boxSampleRate()), f.boxRec(f.boxSplit(f.boxAdd(), decimalpart(f)), f.boxWire()))
 
@@ -316,7 +316,7 @@ def test16():
     my_render(engine, f)
 
 
-def osc(f, freq):
+def osc(f, freq: daw.Box) -> daw.Box:
     return f.boxSin(f.boxMul(f.boxMul(f.boxReal(2.0), f.boxReal(3.141592653)), phasor(f, freq)))
 
 
@@ -552,7 +552,7 @@ def test28():
         # source must be env or LFO
         # todo: what if env is connected to LFO or vice versa?
         ("env1", "oscA_gain", .1, False),
-        # ("env2", "oscA_freq", 1., True),
+        # ("env2", "oscA_freq", 12., False),  # semitone units
         # ("lfo1", "oscB_gain", .5, False),
         # ("lfo1", "oscB_gain", .5, False),
         # ("env3", "filter_cutoff", 0.2, False)
@@ -577,6 +577,8 @@ def test28():
         'gain': f.boxHSlider("gain", f.boxReal(0.5), f.boxReal(0), f.boxReal(1), f.boxReal(0.01))
     }
 
+    def semiToRatio(box) -> daw.Box:
+        return f.boxSeq(box, f.boxPow(f.boxReal(2.), f.boxWire()/12.))
 
     def process_modulations(modulations):
         for source, dst, amt, symmetric in modulations:
@@ -601,14 +603,13 @@ def test28():
 
     def make_env(i: int):
 
-        MODS[f'env{i}_A'] = f.boxWire() + f.boxHSlider(f"Env {i} [0]Attack", f.boxReal(0.05), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'env{i}_D'] = f.boxWire() + f.boxHSlider(f"Env {i} [1]Decay", f.boxReal(0.05), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'env{i}_S'] = f.boxWire() + f.boxHSlider(f"Env {i} [2]Sustain", f.boxReal(0.5), f.boxReal(0.), f.boxReal(1.), f.boxReal(.001))
-        MODS[f'env{i}_R'] = f.boxWire() + f.boxHSlider(f"Env {i} [3]Release", f.boxReal(0.1), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-
-        env = f.boxFromDSP(f"""process = en.adsr;""")
-        MODS[f'env{i}'] = env
-
+        # time units are milliseconds
+        MODS[f'env{i}_A'] = (f.boxWire() + f.boxHSlider(f"Env {i} [0]Attack", f.boxReal(5), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
+        MODS[f'env{i}_H'] = (f.boxWire() + f.boxHSlider(f"Env {i} [1]Hold", f.boxReal(0), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
+        MODS[f'env{i}_D'] = (f.boxWire() + f.boxHSlider(f"Env {i} [2]Decay", f.boxReal(20), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
+        MODS[f'env{i}_S'] = (f.boxWire() + f.boxHSlider(f"Env {i} [3]Sustain", f.boxReal(0.5), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001)))
+        MODS[f'env{i}_R'] = (f.boxWire() + f.boxHSlider(f"Env {i} [4]Release", f.boxReal(200), f.boxReal(0.), f.boxReal(10000.), f.boxReal(.001))) / 1000.
+        MODS[f'env{i}'] = f.boxFromDSP(f"process = en.ahdsre;")
 
     def make_lfo(i: int):
 
@@ -659,7 +660,7 @@ def test28():
     def make_sub(choice):
 
         MODS[f'sub_gain']       = f.boxWire()                + f.boxHSlider(f"Sub [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'sub_freq']       = f.boxWire() + MODS['freq'] + f.boxHSlider(f"Sub [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'sub_freq']       = semiToRatio(f.boxWire() + f.boxHSlider(f"Sub [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))) * MODS['freq']
         MODS[f'sub_pan']        = f.boxWire()                + f.boxHSlider(f"Sub [2]Pan", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
 
         wavecycle_data = get_wavecycle_data(choice)
@@ -673,10 +674,11 @@ def test28():
 
     def make_osc(x: str, choice, unison: int):
 
-        MODS[f'osc{x}_gain']       = f.boxWire()                + f.boxHSlider(f"Osc {x} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_freq']       = f.boxWire() + MODS['freq'] + f.boxHSlider(f"Osc {x} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_detune_amt'] = f.boxWire()                + f.boxHSlider(f"Osc {x} [2]Detune", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
-        MODS[f'osc{x}_pan']        = f.boxWire()                + f.boxHSlider(f"Osc {x} [3]Pan", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_gain']       = f.boxWire() + f.boxHSlider(f"Osc {x} [0]Gain", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_freq']       = semiToRatio(f.boxWire() + f.boxHSlider(f"Osc {x} [1]Freq", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))) * MODS['freq']
+        MODS[f'osc{x}_detune_amt'] = f.boxWire() + f.boxHSlider(f"Osc {x} [2]Detune", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_blend']      = f.boxWire() + f.boxHSlider(f"Osc {x} [3]Blend", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
+        MODS[f'osc{x}_pan']        = f.boxWire() + f.boxHSlider(f"Osc {x} [4]Pan", f.boxReal(0.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))
 
         wavecycle_data = get_wavecycle_data(choice)
 
@@ -761,7 +763,10 @@ def test28():
     # cook the envelopes
     for i in range(1, NUM_ENVS+1):
         MODS[f'env{i}'] = f.boxSeq(
-            f.boxPar5(MODS[f'env{i}_A'], MODS[f'env{i}_D'], MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate']),
+            f.boxPar(
+                f.boxPar3(MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D']), 
+                f.boxPar3(MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate'])
+            ),
             MODS[f'env{i}'])
 
     # cook the LFOs
@@ -839,6 +844,24 @@ def test28():
     my_render(engine, f)
     audio = engine.get_audio().T
     assert np.mean(np.abs(audio)) > .01
+
+def test29():
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    box, inputs, outputs = f.dsp_to_box(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    assert inputs == 2
+    assert outputs == 1
+
+
+def test30():
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    box = f.boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    f.boxToCPP(box)
 
 
 def test_overload_add1():
