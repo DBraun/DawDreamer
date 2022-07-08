@@ -486,8 +486,7 @@ def test28():
 
     """Serum-like synthesizer"""
 
-    ###### compile time constants ######
-
+    # <enums>
     class FilterChoice(Enum):
         LOWPASS_12   = 1
         LOWPASS_24   = 2
@@ -502,6 +501,9 @@ def test28():
         TRIANGLE    = 3
         SQUARE      = 4
         WHITE_NOISE = 5
+    # </enums>
+
+    # <compile time constants>
 
     OSC_A_TOGGLE = True
     OSC_A_CHOICE = OscChoice.SAWTOOTH
@@ -516,7 +518,7 @@ def test28():
 
     NOISE_TOGGLE = False
 
-    FILTER_TOGGLE = False
+    FILTER_TOGGLE = True
     FILTER_CHOICE = FilterChoice.LOWPASS_12
     FILTER_OSC_A = True
     FILTER_OSC_B = True
@@ -527,6 +529,9 @@ def test28():
     NUM_ENVS = 4
     NUM_LFOS = 4
     NUM_VOICES = 12
+
+    TABLE_SIZE = 16_384
+    BLOCK_SIZE = 512  # only really matters for automation
 
     MACRO_MODULATIONS = [
         # source should be macro, gain, gate, freq
@@ -541,24 +546,26 @@ def test28():
         # source must be env or LFO
         # todo: what if env is connected to LFO or vice versa?
         ("env1", "oscA_gain", .1, False),
+        ("env2", "filter_cutoff", 10_000, False)
         # ("env2", "oscA_freq", 12., False),  # semitone units
         # ("lfo1", "oscB_gain", .5, False),
         # ("lfo1", "oscB_gain", .5, False),
-        # ("env3", "filter_cutoff", 0.2, False)
     ]
 
     # ordered list of post-fx to use
-    EFFECTS = []
-    # EFFECTS = ['reverb', 'chorus']  # todo: add these as features
-    EFFECTS_MODULATIONS = []  # todo:
+    EFFECTS = [
+        'delay'
+        ]
 
-    TABLE_SIZE = 16_384
+    EFFECTS_MODULATIONS = [
 
-    #####################################
+    ]
+
+    # </compile time constants>
 
     ##### No need to modify below.  #####
 
-    engine = daw.RenderEngine(SAMPLE_RATE, 512)
+    engine = daw.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
     f = engine.make_faust_processor("my_faust")
 
     def boxWire() -> daw.Box:
@@ -597,7 +604,7 @@ def test28():
     def boxPar5(box1: daw.Box, box2: daw.Box, box3: daw.Box, box4: daw.Box, box5: daw.Box) -> daw.Box:
         return f.boxPar5(box1, box2, box3, box4, box5)
 
-    def boxHSlider(label: str, default: float, minVal: float, maxVal: float, step: float):
+    def boxHSlider(label: str, default: float, minVal: float, maxVal: float, step: float) -> daw.Box:
         return f.boxHSlider(label, boxReal(default), boxReal(minVal), boxReal(maxVal), boxReal(step))
 
     ### convenience functions like faust libraries:
@@ -605,33 +612,23 @@ def test28():
     def semiToRatio(box: daw.Box) -> daw.Box:
         return boxSeq(box, boxPow(boxReal(2.), boxWire()/12.))
 
+    def boxParN(boxes: List[daw.Box]):
+        N = len(boxes)
+        assert N > 0
+        box = boxes.pop(0)
+        while boxes:
+            box = boxPar(box, boxes.pop(0))
+
+        return box
+
     def bus(n: int) -> daw.Box:
         if n == 0:
             raise ValueError("Can't make a bus of size zero.")
-        elif n == 1:
-            return boxWire()
         else:
-            box = boxWire()
-            for i in range(n-1):
-                box = boxPar(box, boxWire())
-
-            return box
-
+            return boxParN([boxWire() for _ in range(n)])
 
     def parallel_add(box1: daw.Box, box2: daw.Box) -> daw.Box:
         return boxSeq(boxPar(box1, box2), boxMerge(bus(4), bus(2)))
-
-
-    def boxParN(boxes: List[daw.Box]):
-        N = len(boxes)
-        if N == 1:
-            return boxes[0]
-        else:
-            box = boxes.pop(0)
-            while boxes:
-                box = boxPar(box, boxes.pop(0))
-
-            return box
 
     #################################################
 
@@ -672,6 +669,7 @@ def test28():
         MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"Env {i} [4]Release", 200, 0., 10_000, .001)) / 1_000
         MODS[f'env{i}'] = f.boxFromDSP(f"process = en.ahdsre;")
 
+
     def make_lfo(i: int):
 
         MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"LFO {i} [0]Gain", 0, 0, 10, .001)
@@ -690,6 +688,9 @@ def test28():
             wavecycle_data = np.sin(np.pi*2*np.linspace(0, 1, TABLE_SIZE, endpoint=False))
         elif choice == OscChoice.SAWTOOTH:
             # sawtooth
+            t = np.linspace(0, 1, TABLE_SIZE, endpoint=False)
+            t = np.concatenate([t[TABLE_SIZE//2:], t[:TABLE_SIZE//2]])
+            assert t.shape[0] == TABLE_SIZE
             wavecycle_data = -1. + 2.*np.linspace(0, 1, TABLE_SIZE, endpoint=False)
         elif choice == OscChoice.TRIANGLE:
             # triangle
@@ -787,21 +788,20 @@ def test28():
         MODS['filter_resonance'] = boxWire()+boxHSlider(f"Filter Resonance", 1, 0, 2, .001)
 
         if choice == FilterChoice.LOWPASS_12:
-            dsp = "process(cutoff, gain, res, sig) = fi.lowpass(5, cutoff, sig);"
+            dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.lowpass(5, cutoff));"
         elif choice == FilterChoice.LOWPASS_24:
-            dsp = "process(cutoff, gain, res, sig) = fi.lowpass(15, cutoff, sig);"
+            dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.lowpass(15, cutoff));"
         elif choice == FilterChoice.HIGHPASS_12:
-            dsp = "process(cutoff, gain, res, sig) = fi.highpass(5, cutoff, sig);"
+            dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.highpass(5, cutoff));"
         elif choice == FilterChoice.HIGHPASS_24:
-            dsp = "process(cutoff, gain, res, sig) = fi.highpass(15, cutoff, sig);"
+            dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.highpass(15, cutoff));"
         elif choice == FilterChoice.LOWSHELF_12:
-            dsp = "process(cutoff, gain, res, sig) = fi.lowshelf(3, gain, cutoff, sig);"
+            dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.lowshelf(3, gain, cutoff));"
         elif choice == FilterChoice.HIGHSHELF_12:
-            dsp = "process(cutoff, gain, res, sig) = fi.highshelf(3, gain, cutoff, sig);"
+            dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.highshelf(3, gain, cutoff));"
         else:
             raise ValueError(f"Unexpected filter choice: {choice}.")
 
-        # todo: note that this is just a mono filter!
         MODS['filter'] = f.boxFromDSP(dsp)
 
 
@@ -813,8 +813,75 @@ def test28():
 
         MODS['reverb'] = boxMerge(bus(3), boxWire())
 
+
     def make_chorus():
         pass  # todo:
+
+
+    def make_delay():
+
+        MAXDELAY = 1.
+        DELAYORDER = 5;
+
+        MODS['delay_dtime']    = boxHSlider("Delay Time", .125, 0., MAXDELAY, 0);
+        MODS['delay_level']    = boxHSlider("Delay Level", 1, 0, 1, 0)
+        MODS['delay_feedback'] = boxHSlider("Delay Feedback", 0.8, 0, 1, 0)
+        MODS['delay_stereo']   = boxHSlider("Delay Stereo", 1, 0, 1, 0)
+        MODS['delay_wet']      = boxHSlider("Delay Wet", .5, 0, 1, 0)
+
+        dsp_code = f"""
+
+        /* Stereo delay with feedback. */
+
+        declare name "echo -- stereo delay effect";
+        declare author "Albert Graef";
+        declare version "1.0";
+        import("stdfaust.lib");
+
+        // revised by David Braun
+        MAXDELAY = {MAXDELAY};
+        DELAYORDER = {DELAYORDER};
+
+        // do not change:
+        MINDELAY = (DELAYORDER-1)/2+1;
+
+        /* The stereo parameter controls the amount of stereo spread. For stereo=0 you
+           get a plain delay, without crosstalk between the channels. For stereo=1 you
+           get a pure ping-pong delay where the echos from the left first appear on
+           the right channel and vice versa. Note that you'll hear the stereo effects
+           only if the input signal already has some stereo spread to begin with; if
+           necessary, you can just pan the input signal to the left or the right to
+           achieve that. */
+           
+        echo(dtime,level,feedback,stereo,x,y)
+                = f(x,y) // the echo loop
+                // mix
+                : (\\(u,v).(x+level*(d(u)+c(v)),
+                       y+level*(d(v)+c(u))))
+                // compensate for gain level
+                : (/(1+level), /(1+level))
+        with {{
+            f   = g ~ (*(feedback),*(feedback));
+            g(u,v,x,y)
+                = h(x+d(u)+c(v)), h(y+d(v)+c(u));
+                dtimeSafe = max(MINDELAY, ma.SR*dtime);
+            h   = de.fdelayltv(DELAYORDER, ma.SR*MAXDELAY, dtimeSafe);
+            c(x)    = x*stereo;
+            d(x)    = x*(1-stereo);
+        }};
+
+        wet_dry_mixer(wet_amt, fx, x, y) = result
+        with {{
+          wet = x, y : fx :> _, _;
+          dry_amt = 1.-wet_amt;
+          result = (wet : sp.stereoize(_*wet_amt)), (x, y : sp.stereoize(_*dry_amt)) :> _, _;
+        }};
+
+        process(dtime, level, feedback, stereo, wet) = si.bus(2) : wet_dry_mixer(wet, echo(dtime, level, feedback, stereo)); 
+
+        """
+
+        MODS['delay'] = f.boxFromDSP(dsp_code)
 
 
     for i in range(NUM_MACROS):
@@ -846,6 +913,9 @@ def test28():
 
     if 'chorus' in EFFECTS:
         make_chorus()
+
+    if 'delay' in EFFECTS:
+        make_delay()
 
     # modulate the destinations we just made.
     process_modulations(MACRO_MODULATIONS)
@@ -897,15 +967,9 @@ def test28():
                 after_filter = parallel_add(after_filter, MODS[name])
 
     if FILTER_TOGGLE:
-        # todo: more elegant way that doesn't split channels like this.
-        # It would be easier if the *stereo* filter actually came from boxFromDSP.
-        to_filter_L = boxSeq(to_filter, boxPar(boxWire(), boxCut()))
-        to_filter_R = boxSeq(to_filter, boxPar(boxCut(), boxWire()))
+        to_filter = boxSeq(boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter), MODS['filter'])
 
-        L = boxSeq(boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_L), MODS['filter'])
-        R = boxSeq(boxPar4(MODS['filter_cutoff'], MODS['filter_gain'], MODS['filter_resonance'], to_filter_R), MODS['filter'])
-
-        after_filter = parallel_add(after_filter, boxPar(L, R))
+        after_filter = parallel_add(after_filter, to_filter)
     
     # plug up the leftover inputs with zero
     instrument = boxSplit(boxReal(0.), after_filter)
@@ -919,6 +983,10 @@ def test28():
             pass
         elif effect == 'chorus':
             pass
+        elif effect == 'delay':
+            instrument = boxSeq(
+                boxParN([MODS['delay_dtime'], MODS['delay_level'], MODS['delay_feedback'], MODS['delay_stereo'], MODS['delay_wet'], instrument]),
+                MODS['delay'])
         else:
             raise ValueError(f'Unexpected effect named "{effect}".')
 
@@ -934,9 +1002,34 @@ def test28():
     # f.dynamic_voices = False
     f.compile_box("test", instrument)
 
+    desc = f.get_parameters_description()
+    for parameter in desc:
+        print(parameter)
+
+    # todo: figure out why this prefix is dummy
+    prefix = '/Polyphonic/Voices/dummy/'
+    settings = [
+    ('Env_1_Attack', 3),
+    ('Env_1_Hold', 0),
+    ('Env_1_Decay', 1000),
+    ('Env_1_Sustain', 0.8),
+    ('Env_1_Release', 200),
+
+    ('Env_2_Attack', 20),
+    ('Env_2_Hold', 0),
+    ('Env_2_Decay', 125),
+    ('Env_2_Sustain', 0),
+    ('Env_2_Release', 200),
+
+    ('Filter_Cutoff', 100),
+    ]
+    for parname, val in settings:
+        f.set_parameter(prefix + parname, val)
+
     my_render(engine, f)
     audio = engine.get_audio().T
     assert np.mean(np.abs(audio)) > .01
+
 
 def test29():
 
