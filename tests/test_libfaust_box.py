@@ -502,6 +502,9 @@ def test28(num_voices=12, dynamic_voices=True):
 
         "NOISE_TOGGLE": False,
 
+        "LFO_1_TRIGGER": TriggerChoice.RETRIGGER,
+        "LFO_2_TRIGGER": TriggerChoice.RETRIGGER,
+
         "FILTER_TOGGLE": True,
         "FILTER_CHOICE": FilterChoice.LOWPASS_12,
         "FILTER_OSC_A": True,
@@ -523,6 +526,7 @@ def test28(num_voices=12, dynamic_voices=True):
             # ("env2", "oscA_freq", 12., False),
             # ("lfo1", "oscA_freq", 12, True),
             # ("lfo1", "oscB_gain", .5, False),
+            ("lfo2", "oscA_pan", .5, True),
         ],
 
         "EFFECTS": [
@@ -546,7 +550,8 @@ def test28(num_voices=12, dynamic_voices=True):
         ('Filter/Cutoff', 100),
 
         ('Sub/Freq', -12),
-        # ('LFO_1/Freq', 20),
+        ('LFO_1/Freq', 20),
+        ('LFO_2/Freq', 4),
     ]
 
     #############

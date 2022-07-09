@@ -29,6 +29,12 @@ class OscChoice(Enum):
     WHITE_NOISE = 5
 
 
+class TriggerChoice(Enum):
+    RETRIGGER = 1
+    FREE      = 2
+    ONCE      = 3
+
+
 ### convenience functions like faust libraries:
 
 def semiToRatio(box: Box) -> Box:
@@ -78,7 +84,7 @@ class ModularSynth:
         self._MODS = {}
         self._NUM_MACROS = 4
         self._NUM_ENVS = 4
-        self._NUM_LFOS = 4
+        self._NUM_LFOS = 2
 
         self._TABLE_SIZE = 16_384 # for saving wavecycles
         self._LAGRANGE_ORDER = 2  # for quality of anti-aliasing oscillators
@@ -112,7 +118,9 @@ class ModularSynth:
         self._MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"h:Env {i}/[4]Release", 200, 0., 10_000, .001)) / 1_000
         self._MODS[f'env{i}'] = boxFromDSP(f"process = en.ahdsre;")
 
-    def _make_lfo(self, i: int):
+    def _make_lfo(self, i: int, trigger_choice):
+
+        # todo: use the trigger_choice
 
         self._MODS[f'lfo{i}_gain'] = boxMax(boxReal(0), boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 1, 0, 10, .001))
         self._MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 2, 0, 10, .001)
@@ -406,6 +414,9 @@ class ModularSynth:
 
         NOISE_TOGGLE = cfg['NOISE_TOGGLE']
 
+        LFO_1_TRIGGER = cfg['LFO_1_TRIGGER']
+        LFO_2_TRIGGER = cfg['LFO_2_TRIGGER']
+
         FILTER_TOGGLE = cfg['FILTER_TOGGLE']
         FILTER_CHOICE = cfg['FILTER_CHOICE']
         FILTER_OSC_A = cfg['FILTER_OSC_A']
@@ -429,7 +440,7 @@ class ModularSynth:
             self._make_env(i+1)
 
         for i in range(self._NUM_LFOS):
-            self._make_lfo(i+1)
+            self._make_lfo(i+1, cfg[f'LFO_{i+1}_TRIGGER'])
 
         if OSC_A_TOGGLE:
             self._make_osc('A', OSC_A_CHOICE, OSC_A_UNISON)
