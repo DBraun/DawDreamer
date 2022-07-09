@@ -46,14 +46,16 @@ def boxParN(boxes: List[Box]):
 
 
 def bus(n: int) -> Box:
+    # si.bus(n) in Faust
     if n == 0:
         raise ValueError("Can't make a bus of size zero.")
     else:
         return boxParN([boxWire() for _ in range(n)])
 
 
-def parallel_add(box1: Box, box2: Box) -> Box:
-    return boxSeq(boxPar(box1, box2), boxMerge(bus(4), bus(2)))
+def parallel_add(box1: Box, box2: Box, num_chans=2) -> Box:
+    # By default, parallel add two stereo inputs.
+    return boxSeq(boxPar(box1, box2), boxMerge(bus(num_chans*2), bus(num_chans)))
 
 
 def decimalpart() -> Box:
@@ -303,9 +305,9 @@ class ModularSynth:
     def _make_delay(self):
 
         MAXDELAY = 1.
-        DELAYORDER = 5;
+        DELAYORDER = 5
 
-        self._MODS['delay_dtime']    = boxHSlider("h:Delay/Time", .125, 0., MAXDELAY, 0);
+        self._MODS['delay_dtime']    = boxHSlider("h:Delay/Time", .125, 0., MAXDELAY, 0)
         self._MODS['delay_level']    = boxHSlider("h:Delay/Level", 1, 0, 1, 0)
         self._MODS['delay_feedback'] = boxHSlider("h:Delay/Feedback", 0.8, 0, 1, 0)
         self._MODS['delay_stereo']   = boxHSlider("h:Delay/Stereo", 1, 0, 1, 0)
