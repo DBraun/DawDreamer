@@ -690,11 +690,10 @@ def test28():
                 warnings.warn(f"""warning: destination "{dst}" was modulated but isn't used for DSP.""")
                 continue
 
-            # note that there's a bug preventing us from using +=.
             if symmetric:
-                MODS[dst] = MODS[dst] + (MODS[source]-.5)*amt*2.
+                MODS[dst] += (MODS[source]-.5)*amt*2.
             else:
-                MODS[dst] = MODS[dst] + MODS[source]*amt
+                MODS[dst] += MODS[source]*amt
 
 
     def make_macro(i: int):
