@@ -643,6 +643,9 @@ def test28():
     def boxHSlider(label: str, default: float, minVal: float, maxVal: float, step: float) -> daw.Box:
         return f.boxHSlider(label, boxReal(default), boxReal(minVal), boxReal(maxVal), boxReal(step))
 
+    def boxButton(label: str):
+        return f.boxButton(label)
+
     ### convenience functions like faust libraries:
 
     def semiToRatio(box: daw.Box) -> daw.Box:
@@ -670,7 +673,7 @@ def test28():
 
     MODS = {
         'freq': boxHSlider("freq", 100, 100, 20000, .001),
-        'gate': f.boxButton("gate"),
+        'gate': boxButton("gate"),
         'gain': boxHSlider("gain", .5, 0, 1, .001)
     }
 
@@ -996,7 +999,8 @@ def test28():
     # cook the envelopes
     for i in range(1, NUM_ENVS+1):
         MODS[f'env{i}'] = boxSeq(
-            boxParN([MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D'], MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate']]),
+            boxParN([MODS[f'env{i}_A'],MODS[f'env{i}_H'], MODS[f'env{i}_D'], 
+                MODS[f'env{i}_S'], MODS[f'env{i}_R'], MODS['gate']]),
             MODS[f'env{i}']
             )
 
@@ -1034,10 +1038,9 @@ def test28():
 
             MODS[name] = boxSplit(
                 boxParN([
-                    MODS[f'{name}_waveform'],
-                    MODS[f'{name}_gain'],
-                    MODS[f'{name}_stereo_width'], MODS[f'{name}_detune_amt'], MODS[f'{name}_blend'], MODS[f'{name}_freq'], MODS[f'{name}_pan'],
-                    MODS['gate']
+                    MODS[f'{name}_waveform'], MODS[f'{name}_gain'], MODS[f'{name}_stereo_width'],
+                    MODS[f'{name}_detune_amt'], MODS[f'{name}_blend'], MODS[f'{name}_freq'],
+                    MODS[f'{name}_pan'], MODS['gate']
                     ]),
                 MODS[name])
 
