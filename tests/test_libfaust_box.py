@@ -547,6 +547,7 @@ def test28():
 
     TABLE_SIZE = 16_384
     BLOCK_SIZE = 512  # only really matters for automation
+    LAGRANGE_ORDER = 2  # for quality of anti-aliasing oscillators
 
     settings = [
         ('Env_1/Attack', 3),
@@ -563,7 +564,8 @@ def test28():
 
         ('Filter/Cutoff', 100),
 
-        ('Sub/Freq', -12)
+        ('Sub/Freq', -12),
+        # ('LFO_1/Freq', 20),
     ]
 
     MACRO_MODULATIONS = [
@@ -580,24 +582,24 @@ def test28():
         # todo: what if env is connected to LFO or vice versa?
         ("env1", "oscA_gain", .5, False),
         ("env1", "sub_gain", .2, False),
-        ("env2", "filter_cutoff", 10_000, False)
+        ("env2", "filter_cutoff", 10_000, False),
         # ("env2", "oscA_freq", 12., False),  # semitone units
-        # ("lfo1", "oscB_gain", .5, False),
+        # ("lfo1", "oscA_freq", 12, True),
         # ("lfo1", "oscB_gain", .5, False),
     ]
-
-    # ordered list of post-fx to use
-    EFFECTS = [
-        # 'delay'
-        ]
 
     EFFECTS_MODULATIONS = [
 
     ]
 
+    # ordered list of post-fx to use
+    EFFECTS = [
+        'delay'
+    ]
+
     # </compile time constants>
 
-    ##### No need to modify below.  #####
+    ##### No need to modify below. #####
 
     engine = daw.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
     f = engine.make_faust_processor("my_faust")
@@ -707,14 +709,10 @@ def test28():
 
     def make_lfo(i: int):
 
-        MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 0, 0, 10, .001)
-        MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 0, 0, 10, .001)
+        MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 1, 0, 10, .001)
+        MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 2, 0, 10, .001)
 
-        # todo: use boxFromDSP
-        # lfo = f.boxFromDSP(f"""process(gain, freq) = (gain + hslider("[{i}]LFO %{i} gain",  0., 0., 10., .001)) * os.osc(freq);""")
-        # MODS[f'lfo{i}'] = f.boxMerge(f.boxPar(f.boxWire(), f.boxWire()), f.boxWire())
-        MODS[f'lfo{i}'] = boxWire() * osc(f, boxWire())
-
+        MODS[f'lfo{i}'] = f.boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")
 
     def get_wavecycle_data(choice):
 
@@ -787,8 +785,6 @@ def test28():
 
         MODS[f'osc{x}_waveform'] = f.boxWaveform(get_wavecycle_data(choice))
 
-        LAGRANGE_ORDER = 2
-
         dsp_code = f"""
 
         NUM_UNISON = {unison};
@@ -800,7 +796,7 @@ def test28():
         // #### Usage
         //
         // ```
-        // unisonHelper(nUnison, i, tablefunc, freq1, stereoWidth, detuneAmt, blendAmt, pan) : _, _
+        // unisonHelper(nUnison, i, S, waveform_data, stereoWidth, detuneAmt, blendAmt, freq, pan, gate) : _, _
         // ```
         //
         // Where:
@@ -1007,7 +1003,7 @@ def test28():
     # cook the LFOs
     for i in range(1, NUM_LFOS+1):
         MODS[f'lfo{i}'] = boxSeq(
-            boxPar(MODS[f'lfo{i}_gain'], MODS[f'lfo{i}_freq']),
+            boxPar3(MODS[f'lfo{i}_gain'], MODS[f'lfo{i}_freq'], MODS['gate']),
             MODS[f'lfo{i}'])
 
     # modulate the destinations that have envelopes and LFOs as a source.
