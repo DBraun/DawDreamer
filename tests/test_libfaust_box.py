@@ -2,6 +2,7 @@
 # https://github.com/grame-cncm/faust/blob/master-dev/tools/benchmark/box-tester.cpp
 
 from dawdreamer_utils import *
+from dawdreamer.faust import *
 from typing import List
 import inspect
 
@@ -31,7 +32,7 @@ def test1():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("faust")
 
-    box = f.boxPar(f.boxInt(7), f.boxReal(3.14))
+    box = boxPar(boxInt(7), boxReal(3.14))
     f.compile_box("test", box)
     my_render(engine, f)
 
@@ -45,7 +46,7 @@ def test2():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("faust")
 
-    box = f.boxSeq(f.boxPar(f.boxWire(), f.boxReal(3.14)), f.boxAdd())
+    box = boxSeq(boxPar(boxWire(), boxReal(3.14)), boxAdd())
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -61,7 +62,7 @@ def test3():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxAdd(f.boxWire(), f.boxReal(3.14))
+    box = boxAdd(boxWire(), boxReal(3.14))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -76,7 +77,7 @@ def test4():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxSeq(f.boxPar(f.boxWire(), f.boxWire()), f.boxAdd())
+    box = boxSeq(boxPar(boxWire(), boxWire()), boxAdd())
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -92,7 +93,7 @@ def test4():
 #     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 #     f = engine.make_faust_processor("my_faust")
 
-#     box = f.boxSeq(f.boxWire(), f.boxMul())
+#     box = boxSeq(boxWire(), boxMul())
 
 #     f.compile_box("test", box)
 
@@ -106,7 +107,7 @@ def test6():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = f.boxDelay(f.boxWire(), f.boxInt(7))
+    box = boxDelay(boxWire(), boxInt(7))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -121,7 +122,7 @@ def test6():
 #     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 #     f = engine.make_faust_processor("my_faust")
     
-#     box = f.boxDelay(f.boxWire(), f.boxInt(7))
+#     box = boxDelay(boxWire(), boxInt(7))
      
 #     argv = ["-vec", "-lv", "1"]
 
@@ -137,8 +138,8 @@ def test8():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = f.boxSplit(f.boxWire(), f.boxPar(f.boxAdd(f.boxDelay(f.boxWire(), f.boxReal(500)), f.boxReal(0.5)),
-                                             f.boxMul(f.boxDelay(f.boxWire(), f.boxReal(3000)), f.boxReal(1.5))))
+    box = boxSplit(boxWire(), boxPar(boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)),
+                                             boxMul(boxDelay(boxWire(), boxReal(3000)), boxReal(1.5))))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -152,8 +153,8 @@ def test_equivalent1():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    b1 = f.boxAdd(f.boxDelay(f.boxWire(), f.boxReal(500)), f.boxReal(0.5))
-    box = f.boxPar(b1, b1)
+    b1 = boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5))
+    box = boxPar(b1, b1)
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -167,8 +168,8 @@ def test_equivalent2():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = f.boxPar(f.boxAdd(f.boxDelay(f.boxWire(), f.boxReal(500)), f.boxReal(0.5)),
-                         f.boxAdd(f.boxDelay(f.boxWire(), f.boxReal(500)), f.boxReal(0.5)))
+    box = boxPar(boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)),
+                         boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -183,8 +184,8 @@ def test9():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = f.boxMul(f.boxWire(),
-        f.boxHSlider("Freq [midi:ctrl 7][style:knob]", f.boxReal(100), f.boxReal(100), f.boxReal(2000), f.boxReal(1)))
+    box = boxMul(boxWire(),
+        boxHSlider("Freq [midi:ctrl 7][style:knob]", boxReal(100), boxReal(100), boxReal(2000), boxReal(1)))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -204,8 +205,8 @@ def test10():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = f.boxMul(f.boxVSlider("h:Oscillator/freq", f.boxReal(440), f.boxReal(50), f.boxReal(1000), f.boxReal(0.1)),
-                         f.boxVSlider("h:Oscillator/gain", f.boxReal(0), f.boxReal(0), f.boxReal(1), f.boxReal(0.01)))
+    box = boxMul(boxVSlider("h:Oscillator/freq", boxReal(440), boxReal(50), boxReal(1000), boxReal(0.1)),
+                         boxVSlider("h:Oscillator/gain", boxReal(0), boxReal(0), boxReal(1), boxReal(0.01)))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -221,7 +222,7 @@ def test11():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = f.boxPar(f.boxSampleRate(), f.boxBufferSize());
+    box = boxPar(boxSampleRate(), boxBufferSize());
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -235,7 +236,7 @@ def test12():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxWaveform([i*100. for i in range(5)])
+    box = boxWaveform([i*100. for i in range(5)])
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -249,7 +250,7 @@ def test13():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxSplit(f.boxWire(), f.boxAdd())
+    box = boxSplit(boxWire(), boxAdd())
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -263,9 +264,9 @@ def test14():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxSplit(f.boxPar(f.boxWire(), f.boxWire()),
-                           f.boxMerge(f.boxPar4(f.boxCut(), f.boxWire(), f.boxWire(), f.boxCut()),
-                                    f.boxPar(f.boxWire(), f.boxWire())))
+    box = boxSplit(boxPar(boxWire(), boxWire()),
+                           boxMerge(boxPar4(boxCut(), boxWire(), boxWire(), boxCut()),
+                                    boxPar(boxWire(), boxWire())))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -279,7 +280,7 @@ def test15():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxRec(f.boxAdd(), f.boxWire())
+    box = boxRec(boxAdd(), boxWire())
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -294,13 +295,13 @@ with {
 };
 """
 
-def decimalpart(f) -> daw.Box:
+def decimalpart(f) -> Box:
 
-    return f.boxSub(f.boxWire(), f.boxIntCast(f.boxWire()))
+    return boxSub(boxWire(), boxIntCast(boxWire()))
 
-def phasor(f, freq: daw.Box) -> daw.Box:
+def phasor(f, freq: Box) -> Box:
 
-    return f.boxSeq(f.boxDiv(freq, f.boxSampleRate()), f.boxRec(f.boxSplit(f.boxAdd(), decimalpart(f)), f.boxWire()))
+    return boxSeq(boxDiv(freq, boxSampleRate()), boxRec(boxSplit(boxAdd(), decimalpart(f)), boxWire()))
 
 
 def test16():
@@ -310,14 +311,14 @@ def test16():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = phasor(f, f.boxReal(440))
+    box = phasor(f, boxReal(440))
 
     f.compile_box("test", box)
     my_render(engine, f)
 
 
-def osc(f, freq: daw.Box) -> daw.Box:
-    return f.boxSin(f.boxMul(f.boxMul(f.boxReal(2.0), f.boxReal(3.141592653)), phasor(f, freq)))
+def osc(f, freq: Box) -> Box:
+    return boxSin(boxMul(boxMul(boxReal(2.0), boxReal(3.141592653)), phasor(f, freq)))
 
 
 def test17():
@@ -334,7 +335,7 @@ def test17():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxPar(osc(f, f.boxReal(440)), osc(f, f.boxReal(440)))
+    box = boxPar(osc(f, boxReal(440)), osc(f, boxReal(440)))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -349,7 +350,7 @@ def test17():
 #     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 #     f = engine.make_faust_processor("my_faust")
 
-#     box = f.boxSoundfile("sound[url:{'tango.wav'}]", f.boxInt(2), f.boxInt(0), f.boxInt(0))
+#     box = boxSoundfile("sound[url:{'tango.wav'}]", boxInt(2), boxInt(0), boxInt(0))
 
 #     f.compile_box("test", box)
 #     my_render(engine, f)
@@ -363,7 +364,7 @@ def test19():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxReadOnlyTable(f.boxInt(10), f.boxInt(1), f.boxIntCast(f.boxWire()))
+    box = boxReadOnlyTable(boxInt(10), boxInt(1), boxIntCast(boxWire()))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -377,9 +378,9 @@ def test19b():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    waveform_content = f.boxSeq(f.boxWaveform([-1., 0., 1., 0.]), f.boxPar(f.boxCut(), f.boxWire()))
+    waveform_content = boxSeq(boxWaveform([-1., 0., 1., 0.]), boxPar(boxCut(), boxWire()))
 
-    box = f.boxReadOnlyTable(f.boxInt(4), waveform_content, f.boxWire())
+    box = boxReadOnlyTable(boxInt(4), waveform_content, boxWire())
 
     f.boxToCPP(box)
 
@@ -392,7 +393,7 @@ def test20():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxWriteReadTable(f.boxInt(10), f.boxInt(1), f.boxIntCast(f.boxWire()), f.boxIntCast(f.boxWire()), f.boxIntCast(f.boxWire()))
+    box = boxWriteReadTable(boxInt(10), boxInt(1), boxIntCast(boxWire()), boxIntCast(boxWire()), boxIntCast(boxWire()))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -406,13 +407,13 @@ def test24():
     f = engine.make_faust_processor("my_faust")
 
     # Follow the freq/gate/gain convention, see: https://faustdoc.grame.fr/manual/midi/#standard-polyphony-parameters
-    freq = f.boxNumEntry("freq", f.boxReal(100), f.boxReal(100), f.boxReal(3000), f.boxReal(0.01))
-    gate = f.boxButton("gate")
-    gain = f.boxNumEntry("gain", f.boxReal(0.5), f.boxReal(0), f.boxReal(1), f.boxReal(0.01))
-    organ = f.boxMul(gate, f.boxAdd(f.boxMul(osc(f, freq), gain), f.boxMul(osc(f, f.boxMul(freq, f.boxInt(2))), gain)))
+    freq = boxNumEntry("freq", boxReal(100), boxReal(100), boxReal(3000), boxReal(0.01))
+    gate = boxButton("gate")
+    gain = boxNumEntry("gain", boxReal(0.5), boxReal(0), boxReal(1), boxReal(0.01))
+    organ = boxMul(gate, boxAdd(boxMul(osc(f, freq), gain), boxMul(osc(f, boxMul(freq, boxInt(2))), gain)))
     organ *= 0.2
     # Stereo
-    box = f.boxPar(organ, organ)
+    box = boxPar(organ, organ)
 
     midi_basename = 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'
     f.load_midi(abspath(ASSETS / midi_basename))
@@ -437,7 +438,7 @@ def test25a():
     assert inputs == 1
     assert outputs == 2
 
-    filteredInput = f.boxSeq(cutoffAndInput, filter)
+    filteredInput = boxSeq(cutoffAndInput, filter)
     f.compile_box("test", filteredInput)
     my_render(engine, f)
 
@@ -450,7 +451,7 @@ def test25b():
     filter, inputs, outputs = f.dsp_to_box('process = si.smooth;');
     cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
 
-    filteredInput = f.boxSeq(cutoffAndInput, filter)
+    filteredInput = boxSeq(cutoffAndInput, filter)
     f.compile_box("test", filteredInput)
     my_render(engine, f)
 
@@ -476,15 +477,15 @@ def test26():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box1 = f.boxWire()
+    box1 = boxWire()
 
-    box2 = f.boxMul(box1, f.boxReal(0.5))
-    box3 = f.boxRem(box1, f.boxReal(0.8))
+    box2 = boxMul(box1, boxReal(0.5))
+    box3 = boxRem(box1, boxReal(0.8))
 
-    box4 = f.boxSeq(box2, box1)
-    box5 = f.boxSeq(box3, box1)
+    box4 = boxSeq(box2, box1)
+    box5 = boxSeq(box3, box1)
 
-    box6 = f.boxPar3(box4, box5, box3)
+    box6 = boxPar3(box4, box5, box3)
 
 
 def test27():
@@ -492,10 +493,10 @@ def test27():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box4 = f.boxFromDSP('process = os.osc;')
-    box5 = f.boxFromDSP('process = en.adsr;')
-    box6 = f.boxFromDSP('process = en.adsre;')
-    box7 = f.boxFromDSP('process = fi.lowpass(5);')
+    box4 = boxFromDSP('process = os.osc;')
+    box5 = boxFromDSP('process = en.adsr;')
+    box6 = boxFromDSP('process = en.adsre;')
+    box7 = boxFromDSP('process = fi.lowpass(5);')
 
 def test28():
 
@@ -604,57 +605,12 @@ def test28():
     engine = daw.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    def boxWire() -> daw.Box:
-        return f.boxWire()
-
-    def boxCut() -> daw.Box:
-        return f.boxCut()
-
-    def boxReal(val: float) -> daw.Box:
-        return f.boxReal(val)
-
-    def boxInt(val: int) -> daw.Box:
-        return f.boxInt(val)
-
-    def boxPow(box1: daw.Box, box2: daw.Box) -> daw.Box:
-        return f.boxPow(box1, box2)
-
-    def boxSeq(box1: daw.Box, box2: daw.Box) -> daw.Box:
-        return f.boxSeq(box1, box2)
-
-    def boxSplit(box1: daw.Box, box2: daw.Box) -> daw.Box:
-        return f.boxSplit(box1, box2)
-
-    def boxMerge(box1: daw.Box, box2: daw.Box) -> daw.Box:
-        return f.boxMerge(box1, box2)
-
-    def boxPar(box1: daw.Box, box2: daw.Box) -> daw.Box:
-        return f.boxPar(box1, box2)
-
-    def boxPar3(box1: daw.Box, box2: daw.Box, box3: daw.Box) -> daw.Box:
-        return f.boxPar3(box1, box2, box3)
-
-    def boxPar4(box1: daw.Box, box2: daw.Box, box3: daw.Box, box4: daw.Box) -> daw.Box:
-        return f.boxPar4(box1, box2, box3, box4)
-
-    def boxPar5(box1: daw.Box, box2: daw.Box, box3: daw.Box, box4: daw.Box, box5: daw.Box) -> daw.Box:
-        return f.boxPar5(box1, box2, box3, box4, box5)
-
-    def boxWaveform(vals: List[float]):
-        return f.boxWaveform(vals)
-
-    def boxHSlider(label: str, default: float, minVal: float, maxVal: float, step: float) -> daw.Box:
-        return f.boxHSlider(label, boxReal(default), boxReal(minVal), boxReal(maxVal), boxReal(step))
-
-    def boxButton(label: str):
-        return f.boxButton(label)
-
     ### convenience functions like faust libraries:
 
-    def semiToRatio(box: daw.Box) -> daw.Box:
+    def semiToRatio(box: Box) -> Box:
         return boxSeq(box, boxPow(boxReal(2.), boxWire()/12.))
 
-    def boxParN(boxes: List[daw.Box]):
+    def boxParN(boxes: List[Box]):
         N = len(boxes)
         assert N > 0
         box = boxes.pop(0)
@@ -663,13 +619,13 @@ def test28():
 
         return box
 
-    def bus(n: int) -> daw.Box:
+    def bus(n: int) -> Box:
         if n == 0:
             raise ValueError("Can't make a bus of size zero.")
         else:
             return boxParN([boxWire() for _ in range(n)])
 
-    def parallel_add(box1: daw.Box, box2: daw.Box) -> daw.Box:
+    def parallel_add(box1: Box, box2: Box) -> Box:
         return boxSeq(boxPar(box1, box2), boxMerge(bus(4), bus(2)))
 
     #################################################
@@ -709,7 +665,7 @@ def test28():
         MODS[f'env{i}_D'] = (boxWire() + boxHSlider(f"h:Env {i}/[2]Decay", 20, 0., 10_000, .001)) / 1_000
         MODS[f'env{i}_S'] = (boxWire() + boxHSlider(f"h:Env {i}/[3]Sustain", 0.5, 0., 10_000, .001))
         MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"h:Env {i}/[4]Release", 200, 0., 10_000, .001)) / 1_000
-        MODS[f'env{i}'] = f.boxFromDSP(f"process = en.ahdsre;")
+        MODS[f'env{i}'] = boxFromDSP(f"process = en.ahdsre;")
 
 
     def make_lfo(i: int):
@@ -717,7 +673,7 @@ def test28():
         MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 1, 0, 10, .001)
         MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 2, 0, 10, .001)
 
-        MODS[f'lfo{i}'] = f.boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")
+        MODS[f'lfo{i}'] = boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")
 
     def get_wavecycle_data(choice):
 
@@ -755,7 +711,7 @@ def test28():
 
         waveform_content = boxSeq(boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
 
-        readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, TABLE_SIZE/f.boxSampleRate())*TABLE_SIZE)
+        readTable = boxWire() * boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, TABLE_SIZE/boxSampleRate())*TABLE_SIZE)
 
         MODS['noise'] = boxSplit(readTable, bus(2)) # split to stereo
 
@@ -775,7 +731,7 @@ def test28():
           result = it.frdtable(LAGRANGE_ORDER, S, waveform_data, ridx) * gain : sp.panner(pan);
         }};
         """
-        MODS[f'sub'] = f.boxFromDSP(dsp_code)
+        MODS[f'sub'] = boxFromDSP(dsp_code)
 
 
     def make_osc(x: str, choice, unison: int):
@@ -860,7 +816,7 @@ def test28():
         }};
         """
 
-        MODS[f'osc{x}'] = f.boxFromDSP(dsp_code)
+        MODS[f'osc{x}'] = boxFromDSP(dsp_code)
 
     def make_filter(choice):
 
@@ -883,7 +839,7 @@ def test28():
         else:
             raise ValueError(f"Unexpected filter choice: {choice}.")
 
-        MODS['filter'] = f.boxFromDSP(dsp)
+        MODS['filter'] = boxFromDSP(dsp)
 
 
     def make_reverb():
@@ -962,7 +918,7 @@ def test28():
 
         """
 
-        MODS['delay'] = f.boxFromDSP(dsp_code)
+        MODS['delay'] = boxFromDSP(dsp_code)
 
 
     for i in range(NUM_MACROS):
@@ -1122,7 +1078,7 @@ def test30():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    box = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
     f.boxToCPP(box)
 
 
@@ -1135,8 +1091,8 @@ def test_overload_add1():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    in1 = f.boxWire()
-    box = (in1 + f.boxReal(0.5)) + (in1+ f.boxInt(1))
+    in1 = boxWire()
+    box = (in1 + boxReal(0.5)) + (in1+ boxInt(1))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -1151,7 +1107,7 @@ def test_overload_add2():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    in1 = f.boxWire()
+    in1 = boxWire()
     box = (in1 + 0.5) + (in1 + 1)
 
     f.compile_box("test", box)
@@ -1167,8 +1123,8 @@ def test_overload_add3():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    in1 = f.boxWire()
-    box = sum([in1, f.boxReal(0.5)]) + sum([in1, f.boxInt(1)])
+    in1 = boxWire()
+    box = sum([in1, boxReal(0.5)]) + sum([in1, boxInt(1)])
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -1183,8 +1139,8 @@ def test_overload_sub1():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    in1 = f.boxWire()
-    box = (in1 - f.boxReal(0.5)) + (in1 - f.boxInt(1))
+    in1 = boxWire()
+    box = (in1 - boxReal(0.5)) + (in1 - boxInt(1))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -1199,7 +1155,7 @@ def test_overload_sub2():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    in1 = f.boxWire()
+    in1 = boxWire()
     box = (in1 - 0.5) + (in1 - 1)
 
     f.compile_box("test", box)
@@ -1215,7 +1171,7 @@ def test_overload_mul1():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxWire() * f.boxReal(0.5)
+    box = boxWire() * boxReal(0.5)
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -1230,7 +1186,7 @@ def test_overload_mul2():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxWire() * 0.5
+    box = boxWire() * 0.5
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -1245,7 +1201,7 @@ def test_overload_mul3():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxWire() * 2
+    box = boxWire() * 2
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -1260,7 +1216,7 @@ def test_overload_mul3():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = f.boxWire() * f.boxInt(2)
+    box = boxWire() * boxInt(2)
 
     f.compile_box("test", box)
     my_render(engine, f)
