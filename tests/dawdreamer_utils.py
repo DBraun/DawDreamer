@@ -84,11 +84,8 @@ ALL_PLUGIN_EFFECTS = []
 
 if platform.system() == "Darwin":
 
-	# # todo: error is currently "Unable to load component"
-	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component") 
-
-	# # todo: error is (fat file, but missing compatible architecture (have 'x86_64,i386', need 'arm64e'))
-	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component") 
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")
 
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst3")
