@@ -96,6 +96,14 @@ if platform.system() == "Darwin":
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst3")
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.component")
 
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST/ValhallaSupermassive.vst")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST3/ValhallaSupermassive.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/Components/ValhallaSupermassive.component")  # todo: only DBraun has this
+
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST/ValhallaSpaceModulator.vst.vst")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST3/ValhallaSpaceModulator.vst.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/Components/ValhallaSpaceModulator.vst.component")  # todo: only DBraun has this
+
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst")
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst3")
 	# append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.component")  # todo: error is currently "Unable to load component"
