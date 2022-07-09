@@ -1,5 +1,4 @@
-#
-pragma once
+#pragma once
 #include "ProcessorBase.h"
 
 # ifdef BUILD_DAWDREAMER_FAUST
