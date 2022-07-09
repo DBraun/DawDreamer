@@ -114,7 +114,7 @@ class ModularSynth:
 
     def _make_lfo(self, i: int):
 
-        self._MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 1, 0, 10, .001)
+        self._MODS[f'lfo{i}_gain'] = boxMax(boxReal(0), boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 1, 0, 10, .001))
         self._MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 2, 0, 10, .001)
 
         self._MODS[f'lfo{i}'] = boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")
@@ -153,7 +153,7 @@ class ModularSynth:
 
         TABLE_SIZE = self._TABLE_SIZE
 
-        self._MODS['noise_gain'] = boxWire() + boxHSlider(f"h:Noise/[0]Gain", 0, 0, 10., .001)
+        self._MODS['noise_gain'] = boxMax(boxReal(0), boxWire() + boxHSlider(f"h:Noise/[0]Gain", 0, 0, 10., .001))
 
         wavecycle_data = self._get_wavecycle_data(OscChoice.WHITE_NOISE)
 
@@ -166,7 +166,7 @@ class ModularSynth:
 
     def _make_sub(self, choice):
 
-        self._MODS[f'sub_gain']       = boxWire()             + boxHSlider(f"h:Sub/[0]Gain", 0, 0, 10, .001)
+        self._MODS[f'sub_gain']       = boxMax(boxReal(0), boxWire() + boxHSlider(f"h:Sub/[0]Gain", 0, 0, 10, .001))
         self._MODS[f'sub_freq']       = semiToRatio(boxWire() + boxHSlider(f"h:Sub/[1]Freq", 0, -72, 72, .001)) * self._MODS['freq']
         self._MODS[f'sub_pan']        = boxWire() + boxHSlider(f"h:Sub/[2]Pan", .5, 0, 1, .001)
         self._MODS[f'sub_waveform']   = boxWaveform(self._get_wavecycle_data(choice))
@@ -184,7 +184,7 @@ class ModularSynth:
 
     def _make_osc(self, x: str, choice, unison: int):
 
-        self._MODS[f'osc{x}_gain']         = boxWire() + boxHSlider(f"h:Osc {x}/[0]Gain", 0, 0, 10, .001)
+        self._MODS[f'osc{x}_gain']         = boxMax(boxReal(0), boxWire() + boxHSlider(f"h:Osc {x}/[0]Gain", 0, 0, 10, .001))
         self._MODS[f'osc{x}_freq']         = semiToRatio(boxWire() + boxHSlider(f"Osc {x} [1]Freq", 0, 0, 10, .001)) * self._MODS['freq']
         self._MODS[f'osc{x}_detune_amt']   = boxWire() + boxHSlider(f"h:Osc {x}/[2]Detune", 0.5, 0, 10, .001)
         self._MODS[f'osc{x}_blend']        = boxWire() + boxHSlider(f"h:Osc {x}/[3]Blend", 0.5, 0, 10, .001)
@@ -269,7 +269,7 @@ class ModularSynth:
     def _make_filter(self, choice):
 
         self._MODS['filter_cutoff']    = boxWire()+boxHSlider(f"h:Filter/Cutoff", 5000., 20., 20000, .001)
-        self._MODS['filter_gain']      = boxWire()+boxHSlider(f"h:Filter/Gain", 0., -80, 24, .001)
+        self._MODS['filter_gain']      = boxWire()+boxHSlider(f"h:Filter/Gain", 0., -80, 24, .001)  # todo: dB to gain
         self._MODS['filter_resonance'] = boxWire()+boxHSlider(f"h:Filter/Resonance", 1, 0, 2, .001)
 
         if choice == FilterChoice.LOWPASS_12:
