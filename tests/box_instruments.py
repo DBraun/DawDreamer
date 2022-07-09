@@ -158,7 +158,7 @@ class ModularSynth:
         LAGRANGE_ORDER = {self._LAGRANGE_ORDER};
         process(S, waveform_data, gain, freq, pan, gate) = result         
         with {{
-          ridx = os.hs_phasor(S, freq, 0 );  // (gate : ba.impulsify)
+          ridx = os.hs_phasor(S, freq, (gate:ba.impulsify) );
           result = it.frdtable(LAGRANGE_ORDER, S, waveform_data, ridx) * gain : sp.panner(pan);
         }};
         """
@@ -237,7 +237,7 @@ class ModularSynth:
                                  centerVolume)    
               );
 
-          ridx = os.hs_phasor(S, freq*ratio, 0 );  // (gate : ba.impulsify)
+          ridx = os.hs_phasor(S, freq*ratio, (gate:ba.impulsify) );
           result = it.frdtable(LAGRANGE_ORDER, S, waveform_data, ridx) * gain <: sp.panner(panOut);
         }};
 
