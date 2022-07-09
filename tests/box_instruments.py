@@ -5,6 +5,7 @@ from dawdreamer.faust import *
 from enum import Enum
 import warnings
 from typing import List
+import math
 
 # other modules
 from scipy import signal
@@ -53,6 +54,20 @@ def bus(n: int) -> Box:
 
 def parallel_add(box1: Box, box2: Box) -> Box:
     return boxSeq(boxPar(box1, box2), boxMerge(bus(4), bus(2)))
+
+
+def decimalpart() -> Box:
+
+    return boxSub(boxWire(), boxIntCast(boxWire()))
+
+
+def phasor(freq: Box) -> Box:
+
+    return boxSeq(boxDiv(freq, boxSampleRate()), boxRec(boxSplit(boxAdd(), decimalpart()), boxWire()))
+
+
+def osc(freq: Box) -> Box:
+    return boxSin(boxMul(boxMul(boxReal(2.0), boxReal(math.pi)), phasor(freq)))
 
 
 class ModularSynth:

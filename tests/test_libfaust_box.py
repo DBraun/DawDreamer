@@ -297,15 +297,6 @@ with {
 };
 """
 
-def decimalpart(f) -> Box:
-
-    return boxSub(boxWire(), boxIntCast(boxWire()))
-
-def phasor(f, freq: Box) -> Box:
-
-    return boxSeq(boxDiv(freq, boxSampleRate()), boxRec(boxSplit(boxAdd(), decimalpart(f)), boxWire()))
-
-
 def test16():
     """
     """
@@ -313,15 +304,10 @@ def test16():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = phasor(f, boxReal(440))
+    box = phasor(boxReal(440))
 
     f.compile_box("test", box)
     my_render(engine, f)
-
-
-def osc(f, freq: Box) -> Box:
-    return boxSin(boxMul(boxMul(boxReal(2.0), boxReal(3.141592653)), phasor(f, freq)))
-
 
 def test17():
     """
@@ -337,7 +323,7 @@ def test17():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = boxPar(osc(f, boxReal(440)), osc(f, boxReal(440)))
+    box = boxPar(osc(boxReal(440)), osc(boxReal(440)))
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -412,7 +398,7 @@ def test24():
     freq = boxNumEntry("freq", boxReal(100), boxReal(100), boxReal(3000), boxReal(0.01))
     gate = boxButton("gate")
     gain = boxNumEntry("gain", boxReal(0.5), boxReal(0), boxReal(1), boxReal(0.01))
-    organ = boxMul(gate, boxAdd(boxMul(osc(f, freq), gain), boxMul(osc(f, boxMul(freq, boxInt(2))), gain)))
+    organ = boxMul(gate, boxAdd(boxMul(osc(freq), gain), boxMul(osc(boxMul(freq, boxInt(2))), gain)))
     organ *= 0.2
     # Stereo
     box = boxPar(organ, organ)
