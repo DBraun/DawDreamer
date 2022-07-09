@@ -545,10 +545,6 @@ def test28():
     NUM_LFOS = 4
     NUM_VOICES = 12
 
-    TABLE_SIZE = 16_384
-    BLOCK_SIZE = 512  # only really matters for automation
-    LAGRANGE_ORDER = 2  # for quality of anti-aliasing oscillators
-
     settings = [
         ('Env_1/Attack', 3),
         ('Env_1/Hold', 0),
@@ -570,7 +566,7 @@ def test28():
 
     MACRO_MODULATIONS = [
         # source should be macro, gain, gate, freq
-        ("macro1", "env1_A", 0, False),
+        ("macro1", "env1_A", 0.1, False),
         ("macro2", "oscA_gain", 0, False),
         # ("gain", "oscA_gain", .1, False),
         # ("gain", "oscB_gain", .1, False),
@@ -596,6 +592,10 @@ def test28():
     EFFECTS = [
         'delay'
     ]
+
+    TABLE_SIZE = 16_384
+    BLOCK_SIZE = 512  # only really matters for automation
+    LAGRANGE_ORDER = 2  # for quality of anti-aliasing oscillators
 
     # </compile time constants>
 
@@ -639,6 +639,9 @@ def test28():
 
     def boxPar5(box1: daw.Box, box2: daw.Box, box3: daw.Box, box4: daw.Box, box5: daw.Box) -> daw.Box:
         return f.boxPar5(box1, box2, box3, box4, box5)
+
+    def boxWaveform(vals: List[float]):
+        return f.boxWaveform(vals)
 
     def boxHSlider(label: str, default: float, minVal: float, maxVal: float, step: float) -> daw.Box:
         return f.boxHSlider(label, boxReal(default), boxReal(minVal), boxReal(maxVal), boxReal(step))
@@ -751,7 +754,7 @@ def test28():
 
         wavecycle_data = get_wavecycle_data(OscChoice.WHITE_NOISE)
 
-        waveform_content = boxSeq(f.boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
+        waveform_content = boxSeq(boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
 
         readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, TABLE_SIZE/f.boxSampleRate())*TABLE_SIZE)
 
@@ -762,31 +765,34 @@ def test28():
 
         MODS[f'sub_gain']       = boxWire()             + boxHSlider(f"h:Sub/[0]Gain", 0, 0, 10, .001)
         MODS[f'sub_freq']       = semiToRatio(boxWire() + boxHSlider(f"h:Sub/[1]Freq", 0, -72, 72, .001)) * MODS['freq']
-        MODS[f'sub_pan']        = boxWire()             + boxHSlider(f"h:Sub/[2]Pan", 0, 0, 10, .001)
+        MODS[f'sub_pan']        = boxWire() + boxHSlider(f"h:Sub/[2]Pan", .5, 0, 1, .001)
+        MODS[f'sub_waveform']   = boxWaveform(get_wavecycle_data(choice))
 
-        wavecycle_data = get_wavecycle_data(choice)
-
-        waveform_content = boxSeq(f.boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
-
-        readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, boxWire() + boxWire())*TABLE_SIZE)
-
-        MODS[f'sub'] = boxSplit(readTable, bus(2)) # split to stereo
+        dsp_code = f"""
+        LAGRANGE_ORDER = {LAGRANGE_ORDER};
+        process(S, waveform_data, gain, freq, pan, gate) = result         
+        with {{
+          ridx = os.hs_phasor(S, freq, 0 );  // (gate : ba.impulsify)
+          result = it.frdtable(LAGRANGE_ORDER, S, waveform_data, ridx) * gain : sp.panner(pan);
+        }};
+        """
+        MODS[f'sub'] = f.boxFromDSP(dsp_code)
 
 
     def make_osc(x: str, choice, unison: int):
 
-        MODS[f'osc{x}_gain']       = boxWire() + boxHSlider(f"h:Osc {x}/[0]Gain", 0, 0, 10, .001)
-        MODS[f'osc{x}_freq']       = semiToRatio(boxWire() + boxHSlider(f"Osc {x} [1]Freq", 0, 0, 10, .001)) * MODS['freq']
-        MODS[f'osc{x}_detune_amt'] = boxWire() + boxHSlider(f"h:Osc {x}/[2]Detune", 0.5, 0, 10, .001)
-        MODS[f'osc{x}_blend']      = boxWire() + boxHSlider(f"h:Osc {x}/[3]Blend", 0.5, 0, 10, .001)
-        MODS[f'osc{x}_pan']        = (boxWire() + boxHSlider(f"h:Osc {x}/[4]Pan", .5, 0, 1, .001))*2.-1
-        MODS[f'osc{x}_wt_pos']     = boxWire() + boxHSlider(f"h:Osc {x}/[5]WT Pos", 0., 0, 1, .001)
-        MODS[f'osc{x}_wt_bend']    = boxWire() + boxHSlider(f"h:Osc {x}/[6]WT Bend", 0., 0, 1, .001)
-        MODS[f'osc{x}_phase']      = boxWire() + boxHSlider(f"h:Osc {x}/[7]Phase", 0, 0, 1, .001)
-        MODS[f'osc{x}_rand']       = boxWire() + boxHSlider(f"h:Osc {x}/[8]Rand", 0, 0, 1, .001)
+        MODS[f'osc{x}_gain']         = boxWire() + boxHSlider(f"h:Osc {x}/[0]Gain", 0, 0, 10, .001)
+        MODS[f'osc{x}_freq']         = semiToRatio(boxWire() + boxHSlider(f"Osc {x} [1]Freq", 0, 0, 10, .001)) * MODS['freq']
+        MODS[f'osc{x}_detune_amt']   = boxWire() + boxHSlider(f"h:Osc {x}/[2]Detune", 0.5, 0, 10, .001)
+        MODS[f'osc{x}_blend']        = boxWire() + boxHSlider(f"h:Osc {x}/[3]Blend", 0.5, 0, 10, .001)
+        MODS[f'osc{x}_pan']          = (boxWire() + boxHSlider(f"h:Osc {x}/[4]Pan", .5, 0, 1, .001))*2.-1
+        MODS[f'osc{x}_wt_pos']       = boxWire() + boxHSlider(f"h:Osc {x}/[5]WT Pos", 0., 0, 1, .001)
+        MODS[f'osc{x}_wt_bend']      = boxWire() + boxHSlider(f"h:Osc {x}/[6]WT Bend", 0., 0, 1, .001)
+        MODS[f'osc{x}_phase']        = boxWire() + boxHSlider(f"h:Osc {x}/[7]Phase", 0, 0, 1, .001)
+        MODS[f'osc{x}_rand']         = boxWire() + boxHSlider(f"h:Osc {x}/[8]Rand", 0, 0, 1, .001)
         MODS[f'osc{x}_stereo_width'] = boxWire() + boxHSlider(f"h:Osc {x}/[9]Stereo Width", 1, 0, 1, .001)
 
-        MODS[f'osc{x}_waveform'] = f.boxWaveform(get_wavecycle_data(choice))
+        MODS[f'osc{x}_waveform']     = boxWaveform(get_wavecycle_data(choice))
 
         dsp_code = f"""
 
@@ -1026,7 +1032,8 @@ def test28():
 
     # cook the sub
     if SUB_TOGGLE:
-        MODS['sub'] = boxSeq(boxPar3(MODS['sub_gain'], MODS[f'sub_freq'], boxReal(0)), MODS['sub'])
+        MODS['sub'] = boxSeq(
+            boxPar5(MODS['sub_waveform'], MODS['sub_gain'], MODS[f'sub_freq'], MODS[f'sub_pan'], MODS[f'gate']), MODS['sub'])
         if FILTER_TOGGLE and FILTER_SUB:
             to_filter = parallel_add(to_filter, MODS['sub'])
         else:
