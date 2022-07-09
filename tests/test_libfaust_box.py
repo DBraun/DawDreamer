@@ -369,6 +369,21 @@ def test19():
     my_render(engine, f)
 
 
+def test19b():
+    """
+    process = 10,1,int(_) : rdtable;
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    waveform_content = f.boxSeq(f.boxWaveform([-1., 0., 1., 0.]), f.boxPar(f.boxCut(), f.boxWire()))
+
+    box = f.boxReadOnlyTable(f.boxInt(4), waveform_content, f.boxWire())
+
+    f.boxToCPP(box)
+
+
 def test20():
     """
     process = 10,1,int(_),int(_),int(_) : rwtable;
@@ -507,7 +522,7 @@ def test28():
 
     OSC_A_TOGGLE = True
     OSC_A_CHOICE = OscChoice.SAWTOOTH
-    OSC_A_UNISON = 1
+    OSC_A_UNISON = 7
 
     OSC_B_TOGGLE = False
     OSC_B_CHOICE = OscChoice.SAWTOOTH
@@ -533,10 +548,28 @@ def test28():
     TABLE_SIZE = 16_384
     BLOCK_SIZE = 512  # only really matters for automation
 
+    settings = [
+        ('Env_1/Attack', 3),
+        ('Env_1/Hold', 0),
+        ('Env_1/Decay', 1000),
+        ('Env_1/Sustain', 0.8),
+        ('Env_1/Release', 200),
+
+        ('Env_2/Attack', 20),
+        ('Env_2/Hold', 0),
+        ('Env_2/Decay', 125),
+        ('Env_2/Sustain', 0),
+        ('Env_2/Release', 200),
+
+        ('Filter/Cutoff', 100),
+
+        ('Sub/Freq', -12)
+    ]
+
     MACRO_MODULATIONS = [
         # source should be macro, gain, gate, freq
-        ("macro1", "env1_A", 1, False),
-        ("macro2", "oscA_gain", .3, False),
+        ("macro1", "env1_A", 0, False),
+        ("macro2", "oscA_gain", 0, False),
         # ("gain", "oscA_gain", .1, False),
         # ("gain", "oscB_gain", .1, False),
         # ("gain", "oscA_detune_amt", 1., False),
@@ -545,7 +578,8 @@ def test28():
     OTHER_MODULATIONS = [
         # source must be env or LFO
         # todo: what if env is connected to LFO or vice versa?
-        ("env1", "oscA_gain", .1, False),
+        ("env1", "oscA_gain", .5, False),
+        ("env1", "sub_gain", .2, False),
         ("env2", "filter_cutoff", 10_000, False)
         # ("env2", "oscA_freq", 12., False),  # semitone units
         # ("lfo1", "oscB_gain", .5, False),
@@ -554,7 +588,7 @@ def test28():
 
     # ordered list of post-fx to use
     EFFECTS = [
-        'delay'
+        # 'delay'
         ]
 
     EFFECTS_MODULATIONS = [
@@ -648,32 +682,33 @@ def test28():
                 warnings.warn(f"""warning: destination "{dst}" was modulated but isn't used for DSP.""")
                 continue
 
+            # note that there's a bug preventing us from using +=.
             if symmetric:
-                MODS[dst] += (MODS[source]-.5)*amt*2.
+                MODS[dst] = MODS[dst] + (MODS[source]-.5)*amt*2.
             else:
-                MODS[dst] += MODS[source]*amt
+                MODS[dst] = MODS[dst] + MODS[source]*amt
 
 
     def make_macro(i: int):
 
-        MODS[f'macro{i}'] = boxHSlider(f"[{i}]Macro {i}", 0, 0, 1, .001)
+        MODS[f'macro{i}'] = boxHSlider(f"h:Macro/Macro {i}", 0, 0, 1, .001)
 
 
     def make_env(i: int):
 
         # time units are milliseconds
-        MODS[f'env{i}_A'] = (boxWire() + boxHSlider(f"Env {i} [0]Attack", 5, 0., 10_000, .001)) / 1_000
-        MODS[f'env{i}_H'] = (boxWire() + boxHSlider(f"Env {i} [1]Hold", 0, 0., 10_000, .001)) / 1_000
-        MODS[f'env{i}_D'] = (boxWire() + boxHSlider(f"Env {i} [2]Decay", 20, 0., 10_000, .001)) / 1_000
-        MODS[f'env{i}_S'] = (boxWire() + boxHSlider(f"Env {i} [3]Sustain", 0.5, 0., 10_000, .001))
-        MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"Env {i} [4]Release", 200, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_A'] = (boxWire() + boxHSlider(f"h:Env {i}/[0]Attack", 5, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_H'] = (boxWire() + boxHSlider(f"h:Env {i}/[1]Hold", 0, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_D'] = (boxWire() + boxHSlider(f"h:Env {i}/[2]Decay", 20, 0., 10_000, .001)) / 1_000
+        MODS[f'env{i}_S'] = (boxWire() + boxHSlider(f"h:Env {i}/[3]Sustain", 0.5, 0., 10_000, .001))
+        MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"h:Env {i}/[4]Release", 200, 0., 10_000, .001)) / 1_000
         MODS[f'env{i}'] = f.boxFromDSP(f"process = en.ahdsre;")
 
 
     def make_lfo(i: int):
 
-        MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"LFO {i} [0]Gain", 0, 0, 10, .001)
-        MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"LFO {i} [1]Freq", 0, 0, 10, .001)
+        MODS[f'lfo{i}_gain'] = boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 0, 0, 10, .001)
+        MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 0, 0, 10, .001)
 
         # todo: use boxFromDSP
         # lfo = f.boxFromDSP(f"""process(gain, freq) = (gain + hslider("[{i}]LFO %{i} gain",  0., 0., 10., .001)) * os.osc(freq);""")
@@ -711,7 +746,7 @@ def test28():
 
     def make_noise():
 
-        MODS['noise_gain'] = boxWire() + boxHSlider(f"Noise [0]Gain", 0, 0, 10., .001)
+        MODS['noise_gain'] = boxWire() + boxHSlider(f"h:Noise/[0]Gain", 0, 0, 10., .001)
 
         wavecycle_data = get_wavecycle_data(OscChoice.WHITE_NOISE)
 
@@ -724,9 +759,9 @@ def test28():
 
     def make_sub(choice):
 
-        MODS[f'sub_gain']       = boxWire()             + boxHSlider(f"Sub [0]Gain", 0, 0, 10, .001)
-        MODS[f'sub_freq']       = semiToRatio(boxWire() + boxHSlider(f"Sub [1]Freq", 0, 0, 10, .001)) * MODS['freq']
-        MODS[f'sub_pan']        = boxWire()             + boxHSlider(f"Sub [2]Pan", 0, 0, 10, .001)
+        MODS[f'sub_gain']       = boxWire()             + boxHSlider(f"h:Sub/[0]Gain", 0, 0, 10, .001)
+        MODS[f'sub_freq']       = semiToRatio(boxWire() + boxHSlider(f"h:Sub/[1]Freq", 0, -72, 72, .001)) * MODS['freq']
+        MODS[f'sub_pan']        = boxWire()             + boxHSlider(f"h:Sub/[2]Pan", 0, 0, 10, .001)
 
         wavecycle_data = get_wavecycle_data(choice)
 
@@ -739,53 +774,95 @@ def test28():
 
     def make_osc(x: str, choice, unison: int):
 
-        MODS[f'osc{x}_gain']       = boxWire() + boxHSlider(f"Osc {x} [0]Gain", 0, 0, 10, .001)
+        MODS[f'osc{x}_gain']       = boxWire() + boxHSlider(f"h:Osc {x}/[0]Gain", 0, 0, 10, .001)
         MODS[f'osc{x}_freq']       = semiToRatio(boxWire() + boxHSlider(f"Osc {x} [1]Freq", 0, 0, 10, .001)) * MODS['freq']
-        MODS[f'osc{x}_detune_amt'] = boxWire() + boxHSlider(f"Osc {x} [2]Detune", 0, 0, 10, .001)
-        MODS[f'osc{x}_blend']      = boxWire() + boxHSlider(f"Osc {x} [3]Blend", 0, 0, 10, .001)
-        MODS[f'osc{x}_pan']        = boxWire() + boxHSlider(f"Osc {x} [4]Pan", 0, 0, 10, .001)
-        MODS[f'osc{x}_wt_pos']     = boxWire() + boxHSlider(f"Osc {x} [5]WT Pos", 0., 0, 1, .001)
-        MODS[f'osc{x}_wt_bend']    = boxWire() + boxHSlider(f"Osc {x} [6]WT Bend", 0., 0, 1, .001)
-        MODS[f'osc{x}_phase']      = boxWire() + boxHSlider(f"Osc {x} [7]Phase", 0, 0, 1, .001)
-        MODS[f'osc{x}_rand']       = boxWire() + boxHSlider(f"Osc {x} [8]Rand", 0, 0, 1, .001)
+        MODS[f'osc{x}_detune_amt'] = boxWire() + boxHSlider(f"h:Osc {x}/[2]Detune", 0.5, 0, 10, .001)
+        MODS[f'osc{x}_blend']      = boxWire() + boxHSlider(f"h:Osc {x}/[3]Blend", 0.5, 0, 10, .001)
+        MODS[f'osc{x}_pan']        = (boxWire() + boxHSlider(f"h:Osc {x}/[4]Pan", .5, 0, 1, .001))*2.-1
+        MODS[f'osc{x}_wt_pos']     = boxWire() + boxHSlider(f"h:Osc {x}/[5]WT Pos", 0., 0, 1, .001)
+        MODS[f'osc{x}_wt_bend']    = boxWire() + boxHSlider(f"h:Osc {x}/[6]WT Bend", 0., 0, 1, .001)
+        MODS[f'osc{x}_phase']      = boxWire() + boxHSlider(f"h:Osc {x}/[7]Phase", 0, 0, 1, .001)
+        MODS[f'osc{x}_rand']       = boxWire() + boxHSlider(f"h:Osc {x}/[8]Rand", 0, 0, 1, .001)
+        MODS[f'osc{x}_stereo_width'] = boxWire() + boxHSlider(f"h:Osc {x}/[9]Stereo Width", 1, 0, 1, .001)
 
-        wavecycle_data = get_wavecycle_data(choice)
+        MODS[f'osc{x}_waveform'] = f.boxWaveform(get_wavecycle_data(choice))
 
-        waveform_content = boxSeq(f.boxWaveform(wavecycle_data), boxPar(boxCut(), boxWire()))
+        LAGRANGE_ORDER = 2
 
-        readTable = boxWire() * f.boxReadOnlyTable(boxInt(TABLE_SIZE), waveform_content, phasor(f, boxWire() + boxWire())*TABLE_SIZE)
+        dsp_code = f"""
 
-        MODS[f'osc{x}'] = boxSplit(readTable, bus(2)) # split to stereo
+        NUM_UNISON = {unison};
+        LAGRANGE_ORDER = {LAGRANGE_ORDER};
 
-        # MODS[f'osc{x}'] = f.boxFromDSP("process(gain, freq, detune_amt) = gain* os.sawtooth(freq) + detune_amt <: _, _;")
-        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(bus(3), f.boxWire()), bus(2))
-        # MODS[f'osc{x}'] = f.boxSplit(f.boxMerge(bus(3), f.boxWire()), f.boxPar(f.boxWire(), f.boxWire()*f.boxHSlider(f"Osc {x} Blah", f.boxReal(1.), f.boxReal(0.), f.boxReal(10.), f.boxReal(.001))))
+        //-----------------------`unisonHelper`------------------------
+        // A helper function for creating a detuned and panned unison voice.
+        //
+        // #### Usage
+        //
+        // ```
+        // unisonHelper(nUnison, i, tablefunc, freq1, stereoWidth, detuneAmt, blendAmt, pan) : _, _
+        // ```
+        //
+        // Where:
+        //
+        // * `nVoices`: int. Must be fixed at compile time and greater than 0
+        // * `i`: int. The index of this unison voices among all of the voices
+        // * `S`: int. The waveform size
+        // * `waveform_data`: The waveform data
+        // * `stereoWidth`: float [0-1]. Stereo width of all unison voices
+        // * `detuneAmt`: float [0-1]. Detune in semitones. The most detuned voice will have this much detuning
+        // * `blendAmt`: float [0-1]. The mixing between the detuned voices and the non-detuned voices. 1 means only detuned
+        // * `freq`: Hertz to play
+        // * `pan`: float [-1, 1]. Stereo panning where -1 is left and 1 is right.
+        // * `gate`: float [0, 1]. Gate of note.
+        //------------------------------------------------------------
+        unisonHelper(nUnison, i, S, waveform_data, stereoWidth, detuneAmt, blendAmt, freq, pan, gate) = result          
+        with {{
 
-        # if unison == 1:
-        #     # no detune
-        #     detune_calc = "detune_calc(i, freq, detuneAmt, blendAmt) = freq;"
-        # elif unison % 2 == 0:
-        #     # even: todo
-        #     detune_calc = "detune_calc(i, freq, detuneAmt, blendAmt) = freq;"
-        # else:
-        #     # odd: todo
-        #     detune_calc = "detune_calc(i, freq, detuneAmt, blendAmt) = freq;" 
+          unisonGt1 = nUnison > 1;        
+          // symmetricVal is now [-1, 1]      
+          symmetricVal = -1.+2.*float(i) / float(max(1, nUnison-1));      
+                  
+          numVoicesOdd = nUnison%2;       
+                  
+          cond = (numVoicesOdd & (i % 2)) | ((1-numVoicesOdd) & ((i >= nUnison/2) xor (i%2)));            
+                  
+          panOut = select2(unisonGt1, 0.5, select2(cond, 1., -1.) *symmetricVal*.5*stereoWidth+.5) + pan : max(0.) : min(1.);       
+                  
+          ratio = select2(unisonGt1, 1., ba.semi2ratio(symmetricVal * detuneAmt));        
+                  
+          // gain related things          
+          sideVolume = blendAmt / select2(numVoicesOdd, float(max(nUnison-2, 1)), float(max(nUnison-1, 1)));      
+          centerVolume = select2(numVoicesOdd, (1.-blendAmt)/ 2., 1.-blendAmt);       
+                  
+          centerIndex = int((nUnison)/2);     
+                  
+          gain = select2(nUnison > 2, 1./float(nUnison),      
+                         select2( 
+                                 select2(numVoicesOdd,    
+                                         (i+1==centerIndex)|(i==centerIndex),
+                                         i==((nUnison-1)/2)),
+                                 sideVolume,  
+                                 centerVolume)    
+              );
 
-        # osc_gain = f.boxFromDSP(f"""process = _ * hslider("OSC {X} Gain", 0, 0., 10., .001);""")
-        # osc_freq = f.boxFromDSP(f"""process = _ + hslider("OSC {X} Octave", 0, -12., 12., .001) : ba.semi2ratio;""") * freq
-        # osc_detune_amt = f.boxFromDSP(f"""process = _ + hslider("OSC {X} Detune Amt", 0, 0., 1., .001);""")           
+          ridx = os.hs_phasor(S, freq*ratio, 0 );  // (gate : ba.impulsify)
+          result = it.frdtable(LAGRANGE_ORDER, S, waveform_data, ridx) * gain <: sp.panner(panOut);
+        }};
 
-        # if choice == 0:
-        #     oscA = f.boxFromDSP(f"{detune_calc} process(gain, freq, detuneAmt, blendAmt) = gain * par(i, {unison}, (detune_calc(i, freq, detuneAmt, blendAmt) : os.sawtooth)) :> _ / {unison} <: _, _;")
-        # else:
-        #     oscA = f.boxFromDSP(f"{detune_calc} process(gain, freq, detuneAmt, blendAmt) = gain * par(i, {unison}, (detune_calc(i, freq, detuneAmt, blendAmt) : os.osc)) :> _ / {unison} <: _, _;")
+        process(waveform_N, waveform_data, gain, width, amount, blend, freq, pan, gate) = result         
+        with {{
+          result = par(i, NUM_UNISON, unisonHelper(NUM_UNISON, i, waveform_N, waveform_data, width, amount, blend, freq, pan, gate)) :> sp.stereoize( _ * gain);  
+        }};
+        """
 
+        MODS[f'osc{x}'] = f.boxFromDSP(dsp_code)
 
     def make_filter(choice):
 
-        MODS['filter_cutoff']    = boxWire()+boxHSlider(f"Filter Cutoff", 5000., 20., 20000, .001)
-        MODS['filter_gain']      = boxWire()+boxHSlider(f"Filter Gain", 0., -80, 24, .001)
-        MODS['filter_resonance'] = boxWire()+boxHSlider(f"Filter Resonance", 1, 0, 2, .001)
+        MODS['filter_cutoff']    = boxWire()+boxHSlider(f"h:Filter/Cutoff", 5000., 20., 20000, .001)
+        MODS['filter_gain']      = boxWire()+boxHSlider(f"h:Filter/Gain", 0., -80, 24, .001)
+        MODS['filter_resonance'] = boxWire()+boxHSlider(f"h:Filter/Resonance", 1, 0, 2, .001)
 
         if choice == FilterChoice.LOWPASS_12:
             dsp = "process(cutoff, gain, res) = si.bus(2) : sp.stereoize(fi.lowpass(5, cutoff));"
@@ -807,9 +884,9 @@ def test28():
 
     def make_reverb():
         pass  # todo:
-        MODS['reverb_cutoff']  = boxWire()+boxHSlider(f"Reverb Filter Cutoff", 5000., 20., 20000, .001)
-        MODS['reverb_size']    = boxWire()+boxHSlider(f"Reverb Size", 0, 0, 1, .001)
-        MODS['reverb_mix']     = boxWire()+boxHSlider(f"Reverb Mix", 0, 0, 1, .001)
+        MODS['reverb_cutoff']  = boxWire()+boxHSlider(f"h:Reverb/Filter Cutoff", 5000., 20., 20000, .001)
+        MODS['reverb_size']    = boxWire()+boxHSlider(f"h:Reverb/Size", 0, 0, 1, .001)
+        MODS['reverb_mix']     = boxWire()+boxHSlider(f"h:Reverb/Mix", 0, 0, 1, .001)
 
         MODS['reverb'] = boxMerge(bus(3), boxWire())
 
@@ -823,11 +900,11 @@ def test28():
         MAXDELAY = 1.
         DELAYORDER = 5;
 
-        MODS['delay_dtime']    = boxHSlider("Delay Time", .125, 0., MAXDELAY, 0);
-        MODS['delay_level']    = boxHSlider("Delay Level", 1, 0, 1, 0)
-        MODS['delay_feedback'] = boxHSlider("Delay Feedback", 0.8, 0, 1, 0)
-        MODS['delay_stereo']   = boxHSlider("Delay Stereo", 1, 0, 1, 0)
-        MODS['delay_wet']      = boxHSlider("Delay Wet", .5, 0, 1, 0)
+        MODS['delay_dtime']    = boxHSlider("h:Delay/Time", .125, 0., MAXDELAY, 0);
+        MODS['delay_level']    = boxHSlider("h:Delay/Level", 1, 0, 1, 0)
+        MODS['delay_feedback'] = boxHSlider("h:Delay/Feedback", 0.8, 0, 1, 0)
+        MODS['delay_stereo']   = boxHSlider("h:Delay/Stereo", 1, 0, 1, 0)
+        MODS['delay_wet']      = boxHSlider("h:Delay/Wet", .5, 0, 1, 0)
 
         dsp_code = f"""
 
@@ -959,7 +1036,14 @@ def test28():
     for name, osc_toggle, filter_osc_toggle in [('oscA', OSC_A_TOGGLE, FILTER_OSC_A), ('oscB', OSC_B_TOGGLE, FILTER_OSC_B)]:
         if osc_toggle:
 
-            MODS[name] = boxSeq(boxPar3(MODS[f'{name}_gain'], MODS[f'{name}_freq'], MODS[f'{name}_detune_amt']), MODS[name])
+            MODS[name] = boxSplit(
+                boxParN([
+                    MODS[f'{name}_waveform'],
+                    MODS[f'{name}_gain'],
+                    MODS[f'{name}_stereo_width'], MODS[f'{name}_detune_amt'], MODS[f'{name}_blend'], MODS[f'{name}_freq'], MODS[f'{name}_pan'],
+                    MODS['gate']
+                    ]),
+                MODS[name])
 
             if FILTER_TOGGLE and filter_osc_toggle:
                 to_filter = parallel_add(to_filter, MODS[name])
@@ -990,7 +1074,6 @@ def test28():
         else:
             raise ValueError(f'Unexpected effect named "{effect}".')
 
-
     # Done building the instrument.
     # f.boxToCPP(instrument)
     # return
@@ -1008,27 +1091,15 @@ def test28():
 
     # todo: figure out why this prefix is dummy
     prefix = '/Polyphonic/Voices/dummy/'
-    settings = [
-    ('Env_1_Attack', 3),
-    ('Env_1_Hold', 0),
-    ('Env_1_Decay', 1000),
-    ('Env_1_Sustain', 0.8),
-    ('Env_1_Release', 200),
-
-    ('Env_2_Attack', 20),
-    ('Env_2_Hold', 0),
-    ('Env_2_Decay', 125),
-    ('Env_2_Sustain', 0),
-    ('Env_2_Release', 200),
-
-    ('Filter_Cutoff', 100),
-    ]
     for parname, val in settings:
-        f.set_parameter(prefix + parname, val)
+        try:
+            f.set_parameter(prefix + parname, val)
+        except:
+            warnings.warn("Unable to find parameter named: " + str(prefix+parname))
 
     my_render(engine, f)
     audio = engine.get_audio().T
-    assert np.mean(np.abs(audio)) > .01
+    assert np.mean(np.abs(audio)) > .001
 
 
 def test29():
