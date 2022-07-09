@@ -7,11 +7,10 @@ from box_instruments import *
 
 from typing import List
 import inspect
+import warnings
 
 from scipy import signal
 import numpy as np
-from enum import Enum
-import warnings
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
@@ -486,10 +485,10 @@ def test27():
     box6 = boxFromDSP('process = en.adsre;')
     box7 = boxFromDSP('process = fi.lowpass(5);')
 
+
 def test28(num_voices=12, dynamic_voices=True):
 
     cfg = {
-
         "OSC_A_TOGGLE": True,
         "OSC_A_CHOICE": OscChoice.SAWTOOTH,
         "OSC_A_UNISON": 7,
@@ -511,20 +510,17 @@ def test28(num_voices=12, dynamic_voices=True):
         "FILTER_SUB": True,
 
         "MODULATION_MATRIX": [
-            # source should be macro, gain, gate, freq
+            # todo: what if env is connected to LFO or vice versa?
+            # todo: what if one oscillator modulates another (FM synthesis)?
             ("macro1", "env1_A", 0.1, False),
             ("macro2", "oscA_gain", 0, False),
             # ("gain", "oscA_gain", .1, False),
             # ("gain", "oscB_gain", .1, False),
             # ("gain", "oscA_detune_amt", 1., False),
-
-
-            # source must be env or LFO
-            # todo: what if env is connected to LFO or vice versa?
             ("env1", "oscA_gain", .5, False),
             ("env1", "sub_gain", .2, False),
             ("env2", "filter_cutoff", 10_000, False),
-            # ("env2", "oscA_freq", 12., False),  # semitone units
+            # ("env2", "oscA_freq", 12., False),
             # ("lfo1", "oscA_freq", 12, True),
             # ("lfo1", "oscB_gain", .5, False),
         ],
@@ -575,13 +571,13 @@ def test28(num_voices=12, dynamic_voices=True):
     for parameter in desc:
         print(parameter)
 
-    # todo: figure out why this prefix is dummy
-    prefix = '/Polyphonic/Voices/dummy/'
     for parname, val in parameter_settings:
+        # todo: figure out why this prefix is dummy
+        full_name = '/Polyphonic/Voices/dummy/' + parname
         try:
-            f.set_parameter(prefix + parname, val)
+            f.set_parameter(full_name, val)
         except:
-            warnings.warn("Unable to find parameter named: " + str(prefix+parname))
+            warnings.warn(f'Unable to find parameter named: "{full_name}".')
 
     my_render(engine, f)
     audio = engine.get_audio().T
