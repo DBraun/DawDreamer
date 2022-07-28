@@ -25,6 +25,7 @@
 		428157405D2A574C22BF5B3D /* AudioUnit.framework */ = {isa = PBXBuildFile; fileRef = 1D609F443B08D98D397EEC1C; };
 		43CF16C66E5C10A00505A7B0 /* include_juce_audio_processors_ara.cpp */ = {isa = PBXBuildFile; fileRef = 356CE6A2709276F08338A0F7; };
 		48CA111A7776D753A8BFF02E /* RenderEngine.cpp */ = {isa = PBXBuildFile; fileRef = 58E5949DCB62BE84406F882C; };
+		4C644DD67DA8AE6ECBFDF0CB /* FaustBoxAPI.h */ = {isa = PBXBuildFile; fileRef = 42A1913A8354FD47FE96B6D2; };
 		4F9D459C6BC8A719CF73A1E0 /* AudioToolbox.framework */ = {isa = PBXBuildFile; fileRef = 81E1E946E734ED2D5F139566; };
 		516A7669BE79BC23CB4B86AB /* Profiler.cpp */ = {isa = PBXBuildFile; fileRef = CB1AA38CEDE7438D7F365590; };
 		516B14D8234B59D0A54345E0 /* RubberBandStretcher.cpp */ = {isa = PBXBuildFile; fileRef = 092AA38B997F3A2F636F78F5; };
@@ -74,6 +75,7 @@
 		EC456483653E6271848DB065 /* MPESettingsDataModel.cpp */ = {isa = PBXBuildFile; fileRef = A997E92A77CDFA70A6536BBD; };
 		EDAE68939B34523D0DB82066 /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 29DB2C710702A8342635B8DF; };
 		EDEB549D7B074BAFD0B2450F /* HighFrequencyAudioCurve.cpp */ = {isa = PBXBuildFile; fileRef = CA11143047AE83B873CC74E8; };
+		EE4E774C44FDAA05F600FD00 /* FaustSignalAPI.h */ = {isa = PBXBuildFile; fileRef = 07B214A6EFC7D8F79AE04C14; };
 		F2B685C5405CA2318DDF0273 /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = 3364D676B0400D289622EF11; };
 		F7A71CBC4CD144EE3AC35D54 /* AudioCurveCalculator.cpp */ = {isa = PBXBuildFile; fileRef = D4FF9DFE0AEDF26322C31077; };
 		FF43737511B767F50CC7DFFB /* StretchCalculator.cpp */ = {isa = PBXBuildFile; fileRef = F34E6B23EADFB01CDC4F4B75; };
@@ -87,6 +89,7 @@
 		0437FDFA6CF09192A01A9F89 /* SamplerAudioProcessorEditor.cpp */ /* SamplerAudioProcessorEditor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerAudioProcessorEditor.cpp; path = ../../Source/Sampler/Source/SamplerAudioProcessorEditor.cpp; sourceTree = SOURCE_ROOT; };
 		066AA4F18B1578FAE9DEF375 /* include_juce_opengl.mm */ /* include_juce_opengl.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_opengl.mm; path = ../../JuceLibraryCode/include_juce_opengl.mm; sourceTree = SOURCE_ROOT; };
 		06AE4EC72C9D2D0775EF879E /* include_juce_gui_extra.mm */ /* include_juce_gui_extra.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_extra.mm; path = ../../JuceLibraryCode/include_juce_gui_extra.mm; sourceTree = SOURCE_ROOT; };
+		07B214A6EFC7D8F79AE04C14 /* FaustSignalAPI.h */ /* FaustSignalAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FaustSignalAPI.h; path = ../../Source/FaustSignalAPI.h; sourceTree = SOURCE_ROOT; };
 		08C321AE5A9B564C9F8AC6CA /* Profiler.h */ /* Profiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Profiler.h; path = ../../thirdparty/rubberband/src/base/Profiler.h; sourceTree = SOURCE_ROOT; };
 		092AA38B997F3A2F636F78F5 /* RubberBandStretcher.cpp */ /* RubberBandStretcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RubberBandStretcher.cpp; path = ../../thirdparty/rubberband/src/RubberBandStretcher.cpp; sourceTree = SOURCE_ROOT; };
 		092B837B921581050089F848 /* sysutils.cpp */ /* sysutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sysutils.cpp; path = ../../thirdparty/rubberband/src/system/sysutils.cpp; sourceTree = SOURCE_ROOT; };
@@ -121,6 +124,7 @@
 		3AAA87ED81FE59EA46C6FE62 /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../JuceLibraryCode/modules/juce_core; sourceTree = SOURCE_ROOT; };
 		3C4A562AA5734126DF3D041A /* SpectralDifferenceAudioCurve.cpp */ /* SpectralDifferenceAudioCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SpectralDifferenceAudioCurve.cpp; path = ../../thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.cpp; sourceTree = SOURCE_ROOT; };
 		41F9CCC5586A494C6A26B0B1 /* samplerate.h */ /* samplerate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = samplerate.h; path = ../../thirdparty/libsamplerate/include/samplerate.h; sourceTree = SOURCE_ROOT; };
+		42A1913A8354FD47FE96B6D2 /* FaustBoxAPI.h */ /* FaustBoxAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FaustBoxAPI.h; path = ../../Source/FaustBoxAPI.h; sourceTree = SOURCE_ROOT; };
 		44A26898F037A3E6B43EB911 /* StandalonePluginWindow.h */ /* StandalonePluginWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StandalonePluginWindow.h; path = ../../Source/StandalonePluginWindow.h; sourceTree = SOURCE_ROOT; };
 		45D38E4893A53D1263DF4E82 /* CompoundAudioCurve.cpp */ /* CompoundAudioCurve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CompoundAudioCurve.cpp; path = ../../thirdparty/rubberband/src/audiocurves/CompoundAudioCurve.cpp; sourceTree = SOURCE_ROOT; };
 		4782971C3066F785B5354384 /* DataModel.h */ /* DataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DataModel.h; path = ../../Source/Sampler/Source/DataModels/DataModel.h; sourceTree = SOURCE_ROOT; };
@@ -573,6 +577,8 @@
 				4915A3C580F0DAA69FAAED98,
 				9ABCCF2DBAA01DE762D8BD60,
 				BFD142EBB8AFBADC8AB04A8A,
+				42A1913A8354FD47FE96B6D2,
+				07B214A6EFC7D8F79AE04C14,
 				7332613820553661C4FA3CD8,
 				C503A9D9F3009D679DBFC556,
 				1799B9631459052DD116F71A,
@@ -751,6 +757,8 @@
 				972909F8E3C96F724A1E69AE,
 				B942805B7846AE297800EF37,
 				E358C00D8D92D35AFBC9944C,
+				4C644DD67DA8AE6ECBFDF0CB,
+				EE4E774C44FDAA05F600FD00,
 				7C6656C8A61187E3C9113001,
 				210F38443F9D77354A4B28EB,
 				92F6A21BA484A258A4EF5F23,
@@ -840,6 +848,7 @@
 					"$(SRCROOT)/../../thirdparty/faust/compiler/boxes",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/documentator",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/draw",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/draw/device",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/draw/schema",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/errors",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/evaluate",
@@ -871,7 +880,7 @@
 					"\"../../thirdparty/libsamplerate/build_debug/src\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty/pybind11/include /usr/local/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include $(SRCROOT)/../../thirdparty/rubberband $(SRCROOT)/../../thirdparty/rubberband/rubberband $(SRCROOT)/../../thirdparty/rubberband/src $(SRCROOT)/../../thirdparty/portable_endian/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaust -shared -Wl,-undefined,dynamic_lookup -weak_framework Metal -weak_framework MetalKit";

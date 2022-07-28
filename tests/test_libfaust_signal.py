@@ -2,9 +2,13 @@
 # https://github.com/grame-cncm/faust/blob/master-dev/tools/benchmark/signal-tester.cpp
 
 from dawdreamer_utils import *
-from dawdreamer.faust import *
+from dawdreamer.faust.signal import *
 from typing import List
 import inspect
+
+from dawdreamer.faust import createLibContext
+createLibContext()  # We must do this before using the signal API.
+
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
@@ -86,24 +90,24 @@ def test4():
     my_render(engine, f)
 
 
-# def test6():
+def test6():
 
-#     """
-#     process = _ <: @(+(0.5), 500), @(*(1.5), 3000);
-#     """
+    """
+    process = _ <: @(+(0.5), 500), @(*(1.5), 3000);
+    """
 
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
-#     signals = []
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
 
-#     in1 = sigInput(0)
-#     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
-#     signals.append(sigDelay(sigMul(in1, sigReal(1.5)), sigReal(3000)))
+    in1 = sigInput(0)
+    signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
+    signals.append(sigDelay(sigMul(in1, sigReal(1.5)), sigReal(3000)))
 
-#     argv = ["-vec", "-lv", "1", "-double"]
+    argv = ["-vec"]
 
-#     f.compile_signals("test", signals, argv)
-#     my_render(engine, f)
+    f.compile_signals("test", signals, argv)
+    my_render(engine, f)
 
 
 def test_equivalent1():

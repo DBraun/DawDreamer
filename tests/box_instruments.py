@@ -1,5 +1,5 @@
 # import the Faust Box API
-from dawdreamer.faust import *
+from dawdreamer.faust.box import *
 
 # built-in modules
 from enum import Enum

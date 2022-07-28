@@ -3,6 +3,7 @@ wheelhouse/*
 .DS_Store
 */**.so
 *.xcuserstate
+.idea
 
 # These files are copied into this folder during setup.py
 dawdreamer/*.dll

@@ -2,7 +2,7 @@
 # https://github.com/grame-cncm/faust/blob/master-dev/tools/benchmark/box-tester.cpp
 
 from dawdreamer_utils import *
-from dawdreamer.faust import *
+from dawdreamer.faust.box import *
 from box_instruments import *
 
 from typing import List
@@ -11,6 +11,10 @@ import warnings
 
 from scipy import signal
 import numpy as np
+
+from dawdreamer.faust import createLibContext
+createLibContext()  # We must do this before using the Box API.
+
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
