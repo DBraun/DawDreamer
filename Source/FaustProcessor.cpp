@@ -721,7 +721,7 @@ std::tuple<BoxWrapper, int, int> FaustProcessor::dspToBox(
   return std::tuple<BoxWrapper, int, int>(BoxWrapper(box), inputs, outputs);
 }
 
-std::string FaustProcessor::boxToCPP(
+std::string FaustProcessor::compileBoxCPP(
     BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
   auto pathToFaustLibraries = getPathToFaustLibraries();
 

@@ -404,7 +404,8 @@ def test19b():
 
     box = boxReadOnlyTable(boxInt(4), waveform_content, boxWire())
 
-    f.boxToCPP(box)
+    cpp_code = f.compile_box_cpp(box)
+    assert cpp_code != ''
 
 
 @with_lib_context
@@ -611,7 +612,7 @@ def test28(num_voices=12, dynamic_voices=True):
     modular_synth = ModularSynth()
     box = modular_synth.build(cfg)
 
-    # f.boxToCPP(box)
+    # cpp_code = f.compile_box_cpp(box)
 
     f.compile_box("test", box)
 
@@ -650,7 +651,7 @@ def test30():
     f = engine.make_faust_processor("my_faust")
 
     box = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
-    cpp_code = f.boxToCPP(box)
+    cpp_code = f.compile_box_cpp(box)
     assert cpp_code != ''
 
 

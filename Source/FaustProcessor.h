@@ -314,7 +314,7 @@ class FaustProcessor : public ProcessorBase {
 
   std::tuple<BoxWrapper, int, int> dspToBox(const std::string &dsp_content);
 
-  std::string boxToCPP(BoxWrapper &box,
+  std::string compileBoxCPP(BoxWrapper &box,
                        std::optional<std::vector<std::string>> in_argv);
 };
 
@@ -472,10 +472,10 @@ Note that note-ons and note-offs are counted separately.")
            "`soundfile` primitive.")
 
       .def("compile_signals", &FaustProcessor::compileSignals, arg("name"),
-           arg("signal"), arg("argv") = py::none(), returnPolicy)
+           arg("signals"), arg("argv") = py::none(), returnPolicy)
       .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"),
            arg("argv") = py::none(), returnPolicy)
-      .def("boxToCPP", &FaustProcessor::boxToCPP, arg("box"),
+      .def("compile_box_cpp", &FaustProcessor::compileBoxCPP, arg("box"),
            arg("argv") = py::none(), "Print C++ code of a box.", returnPolicy)
       .def("dsp_to_box", &FaustProcessor::dspToBox, arg("dsp_code"),
            "Convert Faust DSP code to a tuple containing a Box, number of "
