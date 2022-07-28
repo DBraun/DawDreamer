@@ -6,12 +6,21 @@ from dawdreamer.faust.signal import *
 from typing import List
 import inspect
 
-from dawdreamer.faust import createLibContext
-createLibContext()  # We must do this before using the signal API.
-
+from dawdreamer.faust import createLibContext, destroyLibContext
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
+
+
+def with_lib_context(func):
+
+    def wrapped(*args, **kwargs):
+        createLibContext()
+        result = func(*args, **kwargs)
+        destroyLibContext()
+        return result
+
+    return wrapped
 
 
 def my_render(engine, f, duration=5.):
@@ -23,6 +32,7 @@ def my_render(engine, f, duration=5.):
     render(engine, file_path=file_path, duration=duration)    
 
 
+@with_lib_context
 def test1():
     """
     process = 0.5;
@@ -37,6 +47,7 @@ def test1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test2():
 
     """
@@ -54,6 +65,7 @@ def test2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test3():
 
     """
@@ -72,6 +84,7 @@ def test3():
     my_render(engine, f)
 
 
+@with_lib_context
 def test4():
 
     """
@@ -90,6 +103,7 @@ def test4():
     my_render(engine, f)
 
 
+@with_lib_context
 def test6():
 
     """
@@ -104,12 +118,14 @@ def test6():
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
     signals.append(sigDelay(sigMul(in1, sigReal(1.5)), sigReal(3000)))
 
+    # todo: use more argv
     argv = ["-vec"]
 
     f.compile_signals("test", signals, argv)
     my_render(engine, f)
 
 
+@with_lib_context
 def test_equivalent1():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -124,6 +140,7 @@ def test_equivalent1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_equivalent2():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -137,6 +154,7 @@ def test_equivalent2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test8():
     """
     process = @(+(0.5), 500) * vslider("Vol", 0.5, 0, 1, 0.01);
@@ -155,6 +173,7 @@ def test8():
     my_render(engine, f)
 
 
+@with_lib_context
 def test9():
     """
     import("stdfaust.lib");
@@ -178,6 +197,7 @@ def test9():
     my_render(engine, f)
 
 
+@with_lib_context
 def test10():
     """
     process = + ~ _;
@@ -194,6 +214,7 @@ def test10():
     my_render(engine, f)
 
 
+@with_lib_context
 def test11():
     """
     import("stdfaust.lib");
@@ -211,6 +232,7 @@ def test11():
     my_render(engine, f)
 
 
+@with_lib_context
 def test12():
     """
     process = waveform { 0, 100, 200, 300, 400 };
@@ -226,6 +248,7 @@ def test12():
     my_render(engine, f)
 
 
+@with_lib_context
 def test14():
     """
     process = _ <: +;
@@ -242,6 +265,7 @@ def test14():
     my_render(engine, f)
 
 
+@with_lib_context
 def test15():
     """
     process = _,_ <: !,_,_,! :> _,_;
@@ -261,6 +285,7 @@ def test15():
     my_render(engine, f)
 
 
+@with_lib_context
 def test16():
     """
     process = _,_,_,_ : _,!,!,_;
@@ -280,6 +305,7 @@ def test16():
     my_render(engine, f)
 
 
+# @with_lib_context
 # def test19():
 
 #     # todo: 'soundfile' primitive not yet supported for interp
@@ -304,6 +330,7 @@ def test16():
 #     my_render(engine, f)
 
 
+@with_lib_context
 def test20():
 
     """
@@ -320,6 +347,7 @@ def test20():
     my_render(engine, f)
 
 
+@with_lib_context
 def test21():
 
     """
@@ -336,6 +364,7 @@ def test21():
     my_render(engine, f)
 
 
+@with_lib_context
 def test22():
 
     """
@@ -356,6 +385,7 @@ def test22():
     assert np.mean(np.abs(audio)) > .1
 
 
+@with_lib_context
 def test24():
 
     """
@@ -395,6 +425,7 @@ def osc(f, freq):
     return sigSin(sigMul(phasor(f, freq), sigMul(sigReal(2.0), sigReal(3.141592653))))
 
 
+@with_lib_context
 def test_overload_add1():
     """
     //
@@ -413,6 +444,7 @@ def test_overload_add1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_add2():
     """
     //
@@ -431,6 +463,7 @@ def test_overload_add2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_add3():
     """
     //
@@ -449,6 +482,7 @@ def test_overload_add3():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_sub1():
     """
     //
@@ -467,6 +501,7 @@ def test_overload_sub1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_sub2():
     """
     //
@@ -485,6 +520,7 @@ def test_overload_sub2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul1():
     """
     //
@@ -503,6 +539,7 @@ def test_overload_mul1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul2():
     """
     //
@@ -521,6 +558,7 @@ def test_overload_mul2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul3():
     """
     //
@@ -538,6 +576,8 @@ def test_overload_mul3():
     f.compile_signals("test", signals)
     my_render(engine, f)
 
+
+@with_lib_context
 def test_overload_mul3():
     """
     //

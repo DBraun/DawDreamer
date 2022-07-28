@@ -706,6 +706,73 @@ void FaustProcessor::compileBox(
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 }
 
+std::tuple<BoxWrapper, int, int> FaustProcessor::dspToBox(
+    const std::string& dsp_content) {
+  int inputs = 0;
+  int outputs = 0;
+  std::string error_msg = "";
+  const std::string dsp_content2 =
+      std::string("import(\"stdfaust.lib\");\n") + dsp_content;
+  Box box = DSPToBoxes(dsp_content2, &inputs, &outputs, error_msg);
+  if (error_msg != "") {
+    throw std::runtime_error(error_msg);
+  }
+
+  return std::tuple<BoxWrapper, int, int>(BoxWrapper(box), inputs, outputs);
+}
+
+std::string FaustProcessor::boxToCPP(
+    BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
+  auto pathToFaustLibraries = getPathToFaustLibraries();
+
+  if (pathToFaustLibraries == "") {
+    throw std::runtime_error(
+        "FaustProcessor::compile(): Error for path for faust libraries: " +
+        pathToFaustLibraries);
+  }
+
+  int argc = 0;
+  const char** argv = new const char*[256];
+
+  argv[argc++] = "-I";
+  argv[argc++] = pathToFaustLibraries.c_str();
+
+  if (m_faustLibrariesPath != "") {
+    argv[argc++] = "-I";
+    argv[argc++] = m_faustLibrariesPath.c_str();
+  }
+
+  if (in_argv.has_value()) {
+    for (auto v : *in_argv) {
+      argv[argc++] = v.c_str();
+    }
+  }
+
+  std::string error_msg;
+
+  dsp_factory_base* factory =
+      createCPPDSPFactoryFromBoxes("test", box, argc, argv, error_msg);
+
+  for (int i = 0; i < argc; i++) {
+    argv[i] = NULL;
+  }
+  delete[] argv;
+  argv = nullptr;
+
+  if (factory) {
+    // Print the C++ class
+    seqbuf seq;
+    std::ostream os(&seq);
+    factory->write(&os);
+    delete (factory);
+    auto s = seq.get_sequence();
+    return std::string(s.begin(), s.end());
+  } else {
+    throw std::runtime_error(error_msg);
+  }
+  return std::string("");
+}
+
 bool FaustProcessor::setDSPFile(const std::string& path) {
   m_compileState = kNotCompiled;
 

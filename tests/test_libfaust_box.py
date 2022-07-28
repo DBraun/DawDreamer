@@ -12,12 +12,21 @@ import warnings
 from scipy import signal
 import numpy as np
 
-from dawdreamer.faust import createLibContext
-createLibContext()  # We must do this before using the Box API.
-
+from dawdreamer.faust import createLibContext, destroyLibContext
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
+
+
+def with_lib_context(func):
+
+    def wrapped(*args, **kwargs):
+        createLibContext()
+        result = func(*args, **kwargs)
+        destroyLibContext()
+        return result
+
+    return wrapped
 
 
 def my_render(engine, f, duration=5.):
@@ -29,6 +38,7 @@ def my_render(engine, f, duration=5.):
     render(engine, file_path=file_path, duration=duration)    
 
 
+@with_lib_context
 def test1():
     """
     process = 7,3.14;
@@ -42,6 +52,7 @@ def test1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test2():
 
     """
@@ -57,6 +68,7 @@ def test2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test3():
 
     """
@@ -73,6 +85,7 @@ def test3():
     my_render(engine, f)
 
 
+@with_lib_context
 def test4():
 
     """
@@ -88,6 +101,7 @@ def test4():
     my_render(engine, f)
 
 
+# @with_lib_context
 # def test5():
 
 #     """
@@ -103,6 +117,7 @@ def test4():
 #     f.compile_box("test", box)
 
 
+@with_lib_context
 def test6():
 
     """
@@ -118,6 +133,7 @@ def test6():
     my_render(engine, f)
 
 
+@with_lib_context
 # def test7():
 
 #     """
@@ -134,6 +150,7 @@ def test6():
 #     f.compile_box("test", box, argv)
 
 
+@with_lib_context
 def test8():
 
     """
@@ -150,6 +167,7 @@ def test8():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_equivalent1():
 
     """
@@ -165,6 +183,7 @@ def test_equivalent1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_equivalent2():
 
     """
@@ -180,6 +199,7 @@ def test_equivalent2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test9():
 
     """
@@ -196,6 +216,7 @@ def test9():
     my_render(engine, f)
 
 
+@with_lib_context
 def test10():
 
     """
@@ -217,6 +238,7 @@ def test10():
     my_render(engine, f)
 
 
+@with_lib_context
 def test11():
 
     """
@@ -233,6 +255,7 @@ def test11():
     my_render(engine, f)
 
 
+@with_lib_context
 def test12():
     """
     process = waveform { 0, 100, 200, 300, 400 };
@@ -247,6 +270,7 @@ def test12():
     my_render(engine, f)
 
 
+@with_lib_context
 def test13():
     """
     process = _ <: +;
@@ -261,6 +285,7 @@ def test13():
     my_render(engine, f)
 
 
+@with_lib_context
 def test14():
     """
     process = _,_ <: !,_,_,! :> _,_;
@@ -277,6 +302,7 @@ def test14():
     my_render(engine, f)
 
 
+@with_lib_context
 def test15():
     """
     process = + ~ _;
@@ -299,7 +325,7 @@ with {
     phasor(f) = f/ma.SR : (+ <: decimalpart) ~ _;
 };
 """
-
+@with_lib_context
 def test16():
     """
     """
@@ -312,6 +338,8 @@ def test16():
     f.compile_box("test", box)
     my_render(engine, f)
 
+
+@with_lib_context
 def test17():
     """
     import("stdfaust.lib");
@@ -332,7 +360,8 @@ def test17():
     my_render(engine, f)
 
 
-# skip soundfile
+# #skip soundfile
+# @with_lib_context
 # def test18():
 #     """
 #     process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
@@ -347,6 +376,7 @@ def test17():
 #     my_render(engine, f)
 
 
+@with_lib_context
 def test19():
     """
     process = 10,1,int(_) : rdtable;
@@ -361,6 +391,7 @@ def test19():
     my_render(engine, f)
 
 
+@with_lib_context
 def test19b():
     """
     process = 10,1,int(_) : rdtable;
@@ -376,6 +407,7 @@ def test19b():
     f.boxToCPP(box)
 
 
+@with_lib_context
 def test20():
     """
     process = 10,1,int(_),int(_),int(_) : rwtable;
@@ -390,6 +422,7 @@ def test20():
     my_render(engine, f)
 
 
+@with_lib_context
 def test24():
     """
     """
@@ -417,6 +450,7 @@ def test24():
     assert np.mean(np.abs(audio)) > .01
 
 
+@with_lib_context
 def test25a():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -434,6 +468,7 @@ def test25a():
     my_render(engine, f)
 
 
+@with_lib_context
 def test25b():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -447,6 +482,7 @@ def test25b():
     my_render(engine, f)
 
 
+@with_lib_context
 def test25c():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -463,6 +499,7 @@ def test25c():
     test_bus(2)
 
 
+@with_lib_context
 def test26():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -479,6 +516,7 @@ def test26():
     box6 = boxPar3(box4, box5, box3)
 
 
+@with_lib_context
 def test27():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -490,6 +528,7 @@ def test27():
     box7 = boxFromDSP('process = fi.lowpass(5);')
 
 
+@with_lib_context
 def test28(num_voices=12, dynamic_voices=True):
 
     cfg = {
@@ -577,8 +616,8 @@ def test28(num_voices=12, dynamic_voices=True):
     f.compile_box("test", box)
 
     desc = f.get_parameters_description()
-    for parameter in desc:
-        print(parameter)
+    # for parameter in desc:
+    #     print(parameter)
 
     for parname, val in parameter_settings:
         # todo: figure out why this prefix is dummy
@@ -593,6 +632,7 @@ def test28(num_voices=12, dynamic_voices=True):
     assert np.mean(np.abs(audio)) > .001
 
 
+@with_lib_context
 def test29():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -603,15 +643,18 @@ def test29():
     assert outputs == 1
 
 
+@with_lib_context
 def test30():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
     box = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
-    f.boxToCPP(box)
+    cpp_code = f.boxToCPP(box)
+    assert cpp_code != ''
 
 
+@with_lib_context
 def test_overload_add1():
     """
     //
@@ -628,6 +671,7 @@ def test_overload_add1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_add2():
     """
     //
@@ -644,6 +688,7 @@ def test_overload_add2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_add3():
     """
     //
@@ -660,6 +705,7 @@ def test_overload_add3():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_sub1():
     """
     //
@@ -676,6 +722,7 @@ def test_overload_sub1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_sub2():
     """
     //
@@ -692,6 +739,7 @@ def test_overload_sub2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul1():
     """
     //
@@ -707,6 +755,7 @@ def test_overload_mul1():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul2():
     """
     //
@@ -722,6 +771,7 @@ def test_overload_mul2():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul3():
     """
     //
@@ -737,6 +787,7 @@ def test_overload_mul3():
     my_render(engine, f)
 
 
+@with_lib_context
 def test_overload_mul3():
     """
     //
