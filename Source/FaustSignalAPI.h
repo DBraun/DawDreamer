@@ -919,7 +919,8 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal ff, largs;
             bool res = isSigFFun(s, ff, largs);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, TREE2STR(res, ff), TREE2STR(res, largs));
+                res, res ? tree2str(ff->branch(1)) : "",
+                SigWrapper(largs));
           },
           arg("sig"), returnPolicy)
       .def(
