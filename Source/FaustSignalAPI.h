@@ -710,13 +710,6 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             int i;
             Signal rgroup;
             bool res = isProj(s.ptr, &i, rgroup);
-            if (res) {
-              std::cerr << "isProj before: " << rgroup << std::endl;
-              rgroup = s.ptr->branch(1);
-              std::cerr << "isProj after: " << rgroup << std::endl;
-              std::cerr << "isProj after2: " << SigWrapper(rgroup).ptr
-                        << std::endl;
-            }
 
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, i, SigWrapper(rgroup));
@@ -729,7 +722,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal var, body;
             bool res = isRec(s, var, body);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, SigWrapper(body));
+                res, SigWrapper(var), SigWrapper(body));
           },
           arg("sig"), returnPolicy)
 
