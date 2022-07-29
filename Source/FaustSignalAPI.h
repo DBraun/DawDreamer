@@ -881,5 +881,75 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
                 res, SigWrapper(sf), SigWrapper(chan), SigWrapper(part),
                 SigWrapper(ridx));
           },
-          arg("sig"), returnPolicy);
+          arg("sig"), returnPolicy)
+
+      .def(
+          "isSigLowest",
+          [](SigWrapper &s) {
+            Signal x;
+            bool res = isSigLowest(s, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, SigWrapper(x));
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "isSigHighest",
+          [](SigWrapper &s) {
+            Signal x;
+            bool res = isSigHighest(s, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, SigWrapper(x));
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "isSigGen",
+          [](SigWrapper &s) {
+            Signal x;
+            bool res = isSigGen(s, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, SigWrapper(x));
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "isSigFFun",
+          [](SigWrapper &s) {
+            Signal ff, largs;
+            bool res = isSigFFun(s, ff, largs);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, TREE2STR(res, ff), TREE2STR(res, largs));
+          },
+          arg("sig"), returnPolicy)
+      .def(
+          "isSigFVar",
+          [](SigWrapper &s) {
+            Signal type, name, file;
+            bool res = isSigFVar(s, type, name, file);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, SigWrapper(type), res ? tree2str(name) : "",
+                res ? tree2str(file) : "");
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "isSigFConst",
+          [](SigWrapper &s) {
+            Signal type, name, file;
+            bool res = isSigFConst(s, type, name, file);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, SigWrapper(type), res ? tree2str(name) : "",
+                res ? tree2str(file) : "");
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "getUserData",
+          [](SigWrapper &s) {
+            return bool(getUserData(s));
+          },
+          arg("sig"), returnPolicy)
+			  
+			  ;
 }
