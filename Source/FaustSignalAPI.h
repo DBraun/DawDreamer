@@ -1,5 +1,7 @@
 #include "FaustProcessor.h"
 
+#define TREE2STR(res, t) res ? tree2str(t->branch(0)) : ""
+
 inline void create_bindings_for_faust_signal(py::module &faust_module) {
   using arg = py::arg;
   using kw_only = py::kw_only;
@@ -748,7 +750,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label;
             bool res = isSigButton(s, label);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "");
+                res, TREE2STR(res, label));
           },
           arg("sig"), returnPolicy)
 
@@ -758,7 +760,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label;
             bool res = isSigCheckbox(s, label);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "");
+                res, TREE2STR(res, label));
           },
           arg("sig"), returnPolicy)
 
@@ -768,7 +770,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label, init, theMin, theMax, step;
             bool res = isSigVSlider(s, label, init, theMin, theMax, step);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "", SigWrapper(init),
+                res, TREE2STR(res, label), SigWrapper(init),
                 SigWrapper(theMin), SigWrapper(theMax), SigWrapper(step));
           },
           arg("sig"), returnPolicy)
@@ -779,7 +781,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label, init, theMin, theMax, step;
             bool res = isSigHSlider(s, label, init, theMin, theMax, step);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "", SigWrapper(init),
+                res, TREE2STR(res, label), SigWrapper(init),
                 SigWrapper(theMin), SigWrapper(theMax), SigWrapper(step));
           },
           arg("sig"), returnPolicy)
@@ -790,7 +792,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label, init, theMin, theMax, step;
             bool res = isSigNumEntry(s, label, init, theMin, theMax, step);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "", SigWrapper(init),
+                res, TREE2STR(res, label), SigWrapper(init),
                 SigWrapper(theMin), SigWrapper(theMax), SigWrapper(step));
           },
           arg("sig"), returnPolicy)
@@ -801,7 +803,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label, theMin, theMax, t0;
             bool res = isSigVBargraph(s, label, theMin, theMax, t0);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "", SigWrapper(theMin),
+                res, TREE2STR(res, label), SigWrapper(theMin),
                 SigWrapper(theMax), SigWrapper(t0));
           },
           arg("sig"), returnPolicy)
@@ -812,7 +814,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label, theMin, theMax, t0;
             bool res = isSigHBargraph(s, label, theMin, theMax, t0);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "", SigWrapper(theMin),
+                res, TREE2STR(res, label), SigWrapper(theMin),
                 SigWrapper(theMax), SigWrapper(t0));
           },
           arg("sig"), returnPolicy)
@@ -853,7 +855,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             Signal label;
             bool res = isSigSoundfile(s, label);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, res ? tree2str(label) : "");
+                res, TREE2STR(res, label));
           },
           arg("sig"), returnPolicy)
 
