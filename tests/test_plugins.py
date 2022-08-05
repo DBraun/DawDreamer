@@ -310,9 +310,9 @@ def test_plugin_upright_piano():
     "C:/VSTPlugIns/LABS (64 Bit).dll",
     "C:/VSTPlugIns/LABS (64 Bit).vst3",
     "/Library/Audio/Plug-Ins/VST/LABS.vst",
-    "/Library/Audio/Plug-Ins/VST3/LABS.vst3",
+    # "/Library/Audio/Plug-Ins/VST3/LABS.vst3",  # todo: not working
     "C:/VSTPlugIns/Kontakt.dll",
-    # "C:/VSTPlugIns/Kontakt.vst3",  # not working
+    # "C:/VSTPlugIns/Kontakt.vst3",  # todo: not working
     ]
     )
 def test_plugin_editor(plugin_path: str):

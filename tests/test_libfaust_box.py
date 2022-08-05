@@ -20,6 +20,12 @@ SAMPLE_RATE = 44100
 
 def with_lib_context(func):
 
+    """
+    The safest way to use either the signal API or box API is to wrap
+    the function in a call that creates the lib context and a call
+    that destroys the lib context.
+    """
+
     def wrapped(*args, **kwargs):
         createLibContext()
         result = func(*args, **kwargs)
@@ -101,20 +107,21 @@ def test4():
     my_render(engine, f)
 
 
-# @with_lib_context
-# def test5():
+@with_lib_context
+def test5():
 
-#     """
-#     // Connection error
-#     process = _ : +;
-#     """
+    """
+    // Connection error
+    process = _ : +;
+    """
 
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
 
-#     box = boxSeq(boxWire(), boxMul())
+    box = boxSeq(boxWire(), boxMul())
 
-#     f.compile_box("test", box)
+    with pytest.raises(Exception):
+        f.compile_box("test", box)
 
 
 @with_lib_context
@@ -134,20 +141,21 @@ def test6():
 
 
 @with_lib_context
-# def test7():
+def test7():
 
-#     """
-#     process = @(_,7);
-#     """
+    """
+    process = @(_,7);
+    """
 
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
     
-#     box = boxDelay(boxWire(), boxInt(7))
+    box = boxDelay(boxWire(), boxInt(7))
      
-#     argv = ["-vec", "-lv", "1"]
+    # argv = ["-vec", "-lv", "1"]  # todo:
+    argv = ["-vec", "-lv"]
 
-#     f.compile_box("test", box, argv)
+    f.compile_box("test", box, argv)
 
 
 @with_lib_context
@@ -249,7 +257,7 @@ def test11():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
     
-    box = boxPar(boxSampleRate(), boxBufferSize());
+    box = boxPar(boxSampleRate(), boxBufferSize())
 
     f.compile_box("test", box)
     my_render(engine, f)
@@ -360,7 +368,7 @@ def test17():
     my_render(engine, f)
 
 
-# #skip soundfile
+# #skip soundfile  # todo:
 # @with_lib_context
 # def test18():
 #     """
@@ -457,7 +465,7 @@ def test25a():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    filter, inputs, outputs = f.dsp_to_box('process = si.smooth;');
+    filter, inputs, outputs = f.dsp_to_box('process = si.smooth;')
     assert inputs == 2
     assert outputs == 1
     cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
@@ -490,7 +498,7 @@ def test25c():
     f = engine.make_faust_processor("my_faust")
 
     def test_bus(n):
-        box, inputs, outputs = f.dsp_to_box(f'process = si.bus({n});');
+        box, inputs, outputs = f.dsp_to_box(f'process = si.bus({n});')
         print(f'exepcted {n}, and got inputs: {inputs}, outputs: {outputs}')
         assert inputs ==  n and outputs == n
 

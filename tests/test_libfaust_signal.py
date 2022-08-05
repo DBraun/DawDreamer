@@ -14,6 +14,12 @@ SAMPLE_RATE = 44100
 
 def with_lib_context(func):
 
+    """
+    The safest way to use either the signal API or box API is to wrap
+    the function in a call that creates the lib context and a call
+    that destroys the lib context.
+    """
+
     def wrapped(*args, **kwargs):
         createLibContext()
         result = func(*args, **kwargs)

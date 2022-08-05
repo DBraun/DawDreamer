@@ -41,7 +41,7 @@ def semiToRatio(box: Box) -> Box:
     return boxSeq(box, boxPow(boxReal(2.), boxWire()/12.))
 
 
-def boxParN(boxes: List[Box]):
+def boxParN(boxes: List[Box]) -> Box:
     N = len(boxes)
     assert N > 0
     box = boxes.pop(0)
@@ -127,7 +127,7 @@ class ModularSynth:
 
         self._MODS[f'lfo{i}'] = boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")
 
-    def _get_wavecycle_data(self, choice):
+    def _get_wavecycle_data(self, choice) -> List[float]:
 
         TABLE_SIZE = self._TABLE_SIZE
 
