@@ -713,7 +713,7 @@ std::tuple<BoxWrapper, int, int> FaustProcessor::dspToBox(
   std::string error_msg = "";
   const std::string dsp_content2 =
       std::string("import(\"stdfaust.lib\");\n") + dsp_content;
-  Box box = DSPToBoxes(dsp_content2, &inputs, &outputs, error_msg);
+  Box box = DSPToBoxes("dawdreamer", dsp_content2, &inputs, &outputs, error_msg);
   if (error_msg != "") {
     throw std::runtime_error(error_msg);
   }
