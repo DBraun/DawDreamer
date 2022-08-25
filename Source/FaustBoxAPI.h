@@ -724,7 +724,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
                 boxHSlider(label, boxInit, boxMin, boxMax, boxStep));
           },
           arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a horizontal slider. All the args except the first are Boxes.",
+          "Create a horizontal slider. All the args except the first are "
+          "Boxes.",
           returnPolicy)
       .def(
           "boxHSlider",
@@ -793,14 +794,15 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
                 boxMax(boxReal(1.0),
                        boxFConst(SType::kSInt, "fSamplingFreq", "<math.h>"))));
           },
+          "Return a box representing the constant sample rate, such as 44100.",
           returnPolicy)
       .def(
           "boxBufferSize",
           []() {
             return BoxWrapper(boxFVar(SType::kSInt, "count", "<math.h>"));
           },
+          "Return a box representing the buffer size, such as 1, 2, 4, 8, etc.",
           returnPolicy)
-
       .def(
           "boxFromDSP",
           [](const std::string &dsp_content) {
@@ -809,12 +811,24 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             std::string error_msg = "";
             const std::string dsp_content2 =
                 std::string("import(\"stdfaust.lib\");\n") + dsp_content;
-            Box box = DSPToBoxes("dawdreamer", dsp_content2, &inputs, &outputs, error_msg);
+            Box box = DSPToBoxes("dawdreamer", dsp_content2, &inputs, &outputs,
+                                 error_msg);
             if (error_msg != "") {
               throw std::runtime_error(error_msg);
             }
 
             return BoxWrapper(box);
           },
-          arg("dsp_code"), "Convert Faust DSP code to a Box.", returnPolicy);
+          arg("dsp_code"), "Convert Faust DSP code to a Box.", returnPolicy)
+      .def(
+          "getBoxType",
+          [](BoxWrapper s1) {
+            int inputs, outputs;
+            bool result = getBoxType(s1, &inputs, &outputs);
+            return py::make_tuple(result, inputs, outputs);
+          },
+          arg("box"),
+          "Return a tuple of (whether the type is valid, number of inputs, "
+          "number of outputs) of a box.",
+          returnPolicy);
 }
