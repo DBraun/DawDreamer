@@ -769,6 +769,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return BoxWrapper(boxVBargraph(label, boxMin, boxMax, box));
           },
           arg("label"), arg("min"), arg("max"), arg("step"), returnPolicy)
+
       .def(
           "boxHBargraph",
           [](std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax,
@@ -820,6 +821,419 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return BoxWrapper(box);
           },
           arg("dsp_code"), "Convert Faust DSP code to a Box.", returnPolicy)
+
+      .def(
+          "isBoxNil", [](BoxWrapper &b) { return isNil(b); }, arg("box"))
+
+      .def(
+          "isBoxAbstr", [](BoxWrapper &b) { return isBoxAbstr(b); }, arg("box"))
+
+      .def(
+          "isBoxAccess",
+          [](BoxWrapper &box) {
+            Box b2, b3;
+            bool res = isBoxAccess(box, b2, b3);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(b2), BoxWrapper(b3));
+          },
+          arg("box_t"))
+
+      .def(
+          "isBoxAppl",
+          [](BoxWrapper &box) {
+            Box b2, b3;
+            bool res = isBoxAppl(box, b2, b3);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(b2), BoxWrapper(b3));
+          },
+          arg("box_t"))
+
+      .def(
+          "isBoxButton",
+          [](BoxWrapper &b) {
+            Box label;
+            bool res = isBoxButton(b, label);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxCase",
+          [](BoxWrapper &b) {
+            Box rules;
+            bool res = isBoxCase(b, rules);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(rules));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxCheckbox",
+          [](BoxWrapper &b) {
+            Box label;
+            bool res = isBoxCheckbox(b, label);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxComponent",
+          [](BoxWrapper &b) {
+            Box filename;
+            bool res = isBoxComponent(b, filename);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(filename));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxCut", [](BoxWrapper &b) { return isBoxCut(b); }, arg("box"))
+
+      .def(
+          "isBoxEnvironment", [](BoxWrapper &b) { return isBoxEnvironment(b); },
+          arg("box"))
+
+      .def(
+          "isBoxError", [](BoxWrapper &b) { return isBoxError(b); }, arg("box"))
+
+      .def(
+          "isBoxFConst",
+          [](BoxWrapper &b) {
+            Box type, name, file;
+            bool res = isBoxFConst(b, type, name, file);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxFFun",
+          [](BoxWrapper &b) {
+            Box ffun;
+            bool res = isBoxFFun(b, ffun);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(ffun));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxFVar",
+          [](BoxWrapper &b) {
+            Box type, name, file;
+            bool res = isBoxFVar(b, type, name, file);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxHBarGraph",
+          [](BoxWrapper &b) {
+            Box label, a_min, a_max;
+            bool res = isBoxHBargraph(b, label, a_min, a_max);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxHGroup",
+          [](BoxWrapper &b) {
+            Box label, x;
+            bool res = isBoxHGroup(b, label, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(x));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxHSlider",
+          [](BoxWrapper &b) {
+            Box label, init, a_min, a_max, step;
+            bool res = isBoxHSlider(b, label, init, a_min, a_max, step);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
+                BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxIdent",
+          [](BoxWrapper &b) {
+            const char **blah;  // todo: check
+            bool res = isBoxIdent(b, blah);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, *blah);
+          },
+          arg("box"))
+
+      .def(
+          "isBoxInputs",
+          [](BoxWrapper &b) {
+            Box x;
+            bool res = isBoxInputs(b, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxInt",
+          [](BoxWrapper &b) {
+            int i;
+            bool res = isBoxInt(b, &i);
+            return py::make_tuple<py::return_value_policy::take_ownership>(res,
+                                                                           i);
+          },
+          arg("box"))
+
+      .def(
+          "isBoxIPar",
+          [](BoxWrapper &b) {
+            Box x, y, z;
+            bool res = isBoxIPar(b, x, y, z);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxIProd",
+          [](BoxWrapper &b) {
+            Box x, y, z;
+            bool res = isBoxIProd(b, x, y, z);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxISeq",
+          [](BoxWrapper &b) {
+            Box x, y, z;
+            bool res = isBoxISeq(b, x, y, z);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxISum",
+          [](BoxWrapper &b) {
+            Box x, y, z;
+            bool res = isBoxISum(b, x, y, z);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxLibrary",
+          [](BoxWrapper &b) {
+            Box filename;
+            bool res = isBoxLibrary(b, filename);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(filename));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxMerge",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxMerge(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxMetadata",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxMetadata(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxNumEntry",
+          [](BoxWrapper &b) {
+            Box label, init, a_min, a_max, step;
+            bool res = isBoxNumEntry(b, label, init, a_min, a_max, step);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
+                BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxOutputs",
+          [](BoxWrapper &b) {
+            Box x;
+            bool res = isBoxOutputs(b, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxPar",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxPar(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxPrim0", [](BoxWrapper &b) { return isBoxPrim0(b); }, arg("box"))
+
+      .def(
+          "isBoxPrim1", [](BoxWrapper &b) { return isBoxPrim1(b); }, arg("box"))
+
+      .def(
+          "isBoxPrim2", [](BoxWrapper &b) { return isBoxPrim2(b); }, arg("box"))
+
+      .def(
+          "isBoxPrim3", [](BoxWrapper &b) { return isBoxPrim3(b); }, arg("box"))
+
+      .def(
+          "isBoxPrim4", [](BoxWrapper &b) { return isBoxPrim4(b); }, arg("box"))
+
+      .def(
+          "isBoxPrim5", [](BoxWrapper &b) { return isBoxPrim5(b); }, arg("box"))
+
+      .def(
+          "isBoxReal",
+          [](BoxWrapper &b) {
+            double r;
+            bool res = isBoxReal(b, &r);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, r);
+          },
+          arg("box"))
+
+      .def(
+          "isBoxRec",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxRec(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxRoute",
+          [](BoxWrapper &b) {
+            Box n, m, r;
+            bool res = isBoxRoute(b, n, m, r);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(n), BoxWrapper(m), BoxWrapper(r));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxSeq",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxSeq(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxSlot", [](BoxWrapper &b) { return isBoxSlot(b); }, arg("box"))
+
+      .def(
+          "isBoxSoundfile",
+          [](BoxWrapper &b) {
+            Box label, chan;
+            bool res = isBoxSoundfile(b, label, chan);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(chan));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxSplit",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxSplit(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxSymbolic",
+          [](BoxWrapper &b) {
+            Box slot, body;
+            bool res = isBoxSymbolic(b, slot, body);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(slot), BoxWrapper(body));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxTGroup",
+          [](BoxWrapper &b) {
+            Box label, x;
+            bool res = isBoxSymbolic(b, label, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(x));
+          },
+          arg("box"))
+
+      .def(
+          "boxVBargraph",
+          [](std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax,
+             BoxWrapper &box) {
+            return BoxWrapper(boxVBargraph(label, boxMin, boxMax, box));
+          },
+          arg("label"), arg("min"), arg("max"), arg("step"), returnPolicy)
+
+      .def(
+          "isBoxVGroup",
+          [](BoxWrapper &b) {
+            Box label, x;
+            bool res = isBoxVGroup(b, label, x);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(x));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxVSlider",
+          [](BoxWrapper &b) {
+            Box label, init, a_min, a_max, step;
+            bool res = isBoxVSlider(b, label, init, a_min, a_max, step);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
+                BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
+          },
+          arg("box"))
+
+      .def(
+          "isBoxWaveform", [](BoxWrapper &b) { return isBoxWaveform(b); },
+          arg("box"))
+
+      .def(
+          "isBoxWithLocalDef",
+          [](BoxWrapper &b) {
+            Box body, ldef;
+            bool res = isBoxWithLocalDef(b, body, ldef);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(body), BoxWrapper(ldef));
+          },
+          arg("box"))
+
       .def(
           "getBoxType",
           [](BoxWrapper s1) {
