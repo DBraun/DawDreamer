@@ -21,6 +21,9 @@
 #include "generator/libfaust.h"
 #include "tree.hh"
 
+
+std::string getPathToFaustLibraries();
+
 class MySoundUI : public SoundUI {
  public:
   void addSoundfile(const char *label, const char *filename,
@@ -242,8 +245,6 @@ class FaustProcessor : public ProcessorBase {
  private:
   double mySampleRate;
 
-  std::string getPathToFaustLibraries();
-
   enum CompileState { kNotCompiled, kMono, kPoly, kSignalMono, kSignalPoly };
 
   CompileState m_compileState;
@@ -313,9 +314,6 @@ class FaustProcessor : public ProcessorBase {
                   std::optional<std::vector<std::string>> in_argv);
 
   std::tuple<BoxWrapper, int, int> dspToBox(const std::string &dsp_content);
-
-  std::string compileBoxCPP(BoxWrapper &box,
-                       std::optional<std::vector<std::string>> in_argv);
 };
 
 inline void create_bindings_for_faust_processor(py::module &m) {
@@ -475,8 +473,6 @@ Note that note-ons and note-offs are counted separately.")
            arg("signals"), arg("argv") = py::none(), returnPolicy)
       .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"),
            arg("argv") = py::none(), returnPolicy)
-      .def("compile_box_cpp", &FaustProcessor::compileBoxCPP, arg("box"),
-           arg("argv") = py::none(), "Print C++ code of a box.", returnPolicy)
       .def("dsp_to_box", &FaustProcessor::dspToBox, arg("dsp_code"),
            "Convert Faust DSP code to a tuple containing a Box, number of "
            "inputs, and outputs.",

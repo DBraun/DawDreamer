@@ -721,58 +721,6 @@ std::tuple<BoxWrapper, int, int> FaustProcessor::dspToBox(
   return std::tuple<BoxWrapper, int, int>(BoxWrapper(box), inputs, outputs);
 }
 
-std::string FaustProcessor::compileBoxCPP(
-    BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
-  auto pathToFaustLibraries = getPathToFaustLibraries();
-
-  if (pathToFaustLibraries == "") {
-    throw std::runtime_error(
-        "FaustProcessor::compile(): Error for path for faust libraries: " +
-        pathToFaustLibraries);
-  }
-
-  int argc = 0;
-  const char** argv = new const char*[256];
-
-  argv[argc++] = "-I";
-  argv[argc++] = pathToFaustLibraries.c_str();
-
-  if (m_faustLibrariesPath != "") {
-    argv[argc++] = "-I";
-    argv[argc++] = m_faustLibrariesPath.c_str();
-  }
-
-  if (in_argv.has_value()) {
-    for (auto v : *in_argv) {
-      argv[argc++] = v.c_str();
-    }
-  }
-
-  std::string error_msg;
-
-  dsp_factory_base* factory =
-      createCPPDSPFactoryFromBoxes("test", box, argc, argv, error_msg);
-
-  for (int i = 0; i < argc; i++) {
-    argv[i] = NULL;
-  }
-  delete[] argv;
-  argv = nullptr;
-
-  if (factory) {
-    // Print the C++ class
-    seqbuf seq;
-    std::ostream os(&seq);
-    factory->write(&os);
-    delete (factory);
-    auto s = seq.get_sequence();
-    return std::string(s.begin(), s.end());
-  } else {
-    throw std::runtime_error(error_msg);
-  }
-  return std::string("");
-}
-
 bool FaustProcessor::setDSPFile(const std::string& path) {
   m_compileState = kNotCompiled;
 
@@ -1079,91 +1027,6 @@ void FaustProcessor::saveMIDI(std::string& savePath) {
   file.writeTo(stream);
 }
 
-#ifdef WIN32
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-// Find path to .dll */
-// https://stackoverflow.com/a/57738892/12327461
-HMODULE hMod;
-std::wstring MyDLLPathFull;
-std::wstring MyDLLDir;
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
-                      LPVOID lpReserved) {
-  switch (ul_reason_for_call) {
-    case DLL_PROCESS_ATTACH:
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-      break;
-  }
-  hMod = hModule;
-  const int BUFSIZE = 4096;
-  wchar_t buffer[BUFSIZE];
-  if (::GetModuleFileNameW(hMod, buffer, BUFSIZE - 1) <= 0) {
-    return TRUE;
-  }
-
-  MyDLLPathFull = buffer;
-
-  size_t found = MyDLLPathFull.find_last_of(L"/\\");
-  MyDLLDir = MyDLLPathFull.substr(0, found);
-
-  return TRUE;
-}
-
-#else
-
-// this applies to both __APPLE__ and linux?
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <dlfcn.h>
-
-// https://stackoverflow.com/a/51993539/911207
-const char* getMyDLLPath(void) {
-  Dl_info dl_info;
-  dladdr((void*)getMyDLLPath, &dl_info);
-  return (dl_info.dli_fname);
-}
-#endif
-
-std::string FaustProcessor::getPathToFaustLibraries() {
-  // Get the path to the directory containing basics.lib, stdfaust.lib etc.
-
-  try {
-#ifdef WIN32
-    const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
-    // std::cerr << "MyDLLDir: ";
-    // std::wcerr << MyDLLDir << L'\n';
-    // convert const wchar_t to char
-    // https://stackoverflow.com/a/4387335
-    const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
-    // Count required buffer size (plus one for null-terminator).
-    size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
-    char* char_shareFaustDir = new char[size];
-    std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
-
-    std::string p(char_shareFaustDir);
-
-    delete[] char_shareFaustDir;
-    return p;
-#else
-    // this applies to __APPLE__ and LINUX
-    const char* myDLLPath = getMyDLLPath();
-    // std::cerr << "myDLLPath: " << myDLLPath << std::endl;
-    std::filesystem::path p = std::filesystem::path(myDLLPath);
-    p = p.parent_path() / "faustlibraries";
-    return p.string();
-#endif
-  } catch (...) {
-    throw std::runtime_error("Error getting path to faustlibraries.");
-  }
-}
-
 using myaudiotype =
     py::array_t<float, py::array::c_style | py::array::forcecast>;
 
@@ -1227,6 +1090,91 @@ void FaustProcessor::setReleaseLength(double sec) {
   m_releaseLengthSec = sec;
   if (m_dsp_poly) {
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+  }
+}
+
+#ifdef WIN32
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// Find path to .dll */
+// https://stackoverflow.com/a/57738892/12327461
+HMODULE hMod;
+std::wstring MyDLLPathFull;
+std::wstring MyDLLDir;
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
+                      LPVOID lpReserved) {
+  switch (ul_reason_for_call) {
+    case DLL_PROCESS_ATTACH:
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+      break;
+  }
+  hMod = hModule;
+  const int BUFSIZE = 4096;
+  wchar_t buffer[BUFSIZE];
+  if (::GetModuleFileNameW(hMod, buffer, BUFSIZE - 1) <= 0) {
+    return TRUE;
+  }
+
+  MyDLLPathFull = buffer;
+
+  size_t found = MyDLLPathFull.find_last_of(L"/\\");
+  MyDLLDir = MyDLLPathFull.substr(0, found);
+
+  return TRUE;
+}
+
+#else
+
+// this applies to both __APPLE__ and linux?
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <dlfcn.h>
+
+// https://stackoverflow.com/a/51993539/911207
+const char* getMyDLLPath(void) {
+  Dl_info dl_info;
+  dladdr((void*)getMyDLLPath, &dl_info);
+  return (dl_info.dli_fname);
+}
+#endif
+
+std::string getPathToFaustLibraries() {
+  // Get the path to the directory containing basics.lib, stdfaust.lib etc.
+
+  try {
+#ifdef WIN32
+    const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
+    // std::cerr << "MyDLLDir: ";
+    // std::wcerr << MyDLLDir << L'\n';
+    // convert const wchar_t to char
+    // https://stackoverflow.com/a/4387335
+    const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
+    // Count required buffer size (plus one for null-terminator).
+    size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
+    char* char_shareFaustDir = new char[size];
+    std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
+
+    std::string p(char_shareFaustDir);
+
+    delete[] char_shareFaustDir;
+    return p;
+#else
+    // this applies to __APPLE__ and LINUX
+    const char* myDLLPath = getMyDLLPath();
+    // std::cerr << "myDLLPath: " << myDLLPath << std::endl;
+    std::filesystem::path p = std::filesystem::path(myDLLPath);
+    p = p.parent_path() / "faustlibraries";
+    return p.string();
+#endif
+  } catch (...) {
+    throw std::runtime_error("Error getting path to faustlibraries.");
   }
 }
 

@@ -335,6 +335,28 @@ def test16():
 #     f.compile_signals("test", signals)
 #     my_render(engine, f)
 
+@with_lib_context
+def test19b():
+
+    """
+    // soundfile test:
+    process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    signals = []
+
+    rdx = sigInt(0)
+    chan = sigInt(0)
+    part = sigInt(0)
+
+    signals += sigSoundfile("sound[url:{'tango.wav'}]", rdx, chan, part)
+
+    cpp_code, err = signalsToSource(signals, 'cpp', 'my_dsp')
+    assert cpp_code != ''
+    assert err == ''
+
 
 @with_lib_context
 def test20():

@@ -1113,8 +1113,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           [](BoxWrapper &b) {
             double r;
             bool res = isBoxReal(b, &r);
-            return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, r);
+            return py::make_tuple<py::return_value_policy::take_ownership>(res,
+                                                                           r);
           },
           arg("box"))
 
@@ -1238,11 +1238,65 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           "getBoxType",
           [](BoxWrapper s1) {
             int inputs, outputs;
-            bool result = getBoxType(s1, &inputs, &outputs);
-            return py::make_tuple(result, inputs, outputs);
+            try {
+              bool result = getBoxType(s1, &inputs, &outputs);
+              return py::make_tuple(result, inputs, outputs);
+            } catch (std::exception &e) {
+              throw std::runtime_error(e.what());
+            }
           },
           arg("box"),
-          "Return a tuple of (whether the type is valid, number of inputs, "
-          "number of outputs) of a box.",
-          returnPolicy);
+          "Return a size-3 tuple of (whether the type is valid, number of "
+          "inputs, number of outputs) of a box.",
+          returnPolicy)
+
+      .def(
+          "boxToSource",
+          [](BoxWrapper &box, std::string &lang, std::string &class_name,
+             std::optional<std::vector<std::string>> in_argv) {
+            auto pathToFaustLibraries = getPathToFaustLibraries();
+
+            if (pathToFaustLibraries == "") {
+              throw std::runtime_error("Unable to load Faust Libraries.");
+            }
+
+            int argc = 0;
+            const char **argv = new const char *[256];
+
+            argv[argc++] = "-I";
+            argv[argc++] = pathToFaustLibraries.c_str();
+
+            argv[argc++] = "-cn";
+            argv[argc++] = class_name.c_str();
+
+            // if (m_faustLibrariesPath != "") {
+            //   argv[argc++] = "-I";
+            //   argv[argc++] = m_faustLibrariesPath.c_str();
+            // }
+
+            if (in_argv.has_value()) {
+              for (auto v : *in_argv) {
+                argv[argc++] = v.c_str();
+              }
+            }
+
+            std::string error_msg;
+
+            std::string source_code =
+                createSourceFromBoxes("test", box, lang, argc, argv, error_msg);
+
+            for (int i = 0; i < argc; i++) {
+              argv[i] = NULL;
+            }
+            delete[] argv;
+            argv = nullptr;
+
+            return py::make_tuple(source_code, error_msg);
+          },
+          arg("box"), arg("language"), arg("class_name"),
+          arg("argv") = py::none(),
+          "Turn a box into source code in a target language such as C++ "
+          "(\"cpp\").")
+
+      ;
 }
