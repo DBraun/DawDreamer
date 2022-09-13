@@ -16,3 +16,6 @@
 [submodule "thirdparty/libsamplerate"]
 	path = thirdparty/libsamplerate
 	url = https://github.com/libsndfile/libsamplerate
+[submodule "dawdreamer/faustlibraries"]
+	path = dawdreamer/faustlibraries
+	url = https://github.com/grame-cncm/faustlibraries
