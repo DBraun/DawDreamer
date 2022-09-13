@@ -8,8 +8,6 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python3.9 get
 # clone repo by copying in
 COPY . /DawDreamer
 
-RUN git clone --recursive https://github.com/grame-cncm/faustlibraries.git /DawDreamer/dawdreamer/faustlibraries
-
 WORKDIR /DawDreamer
 ENV PYTHONLIBPATH=/opt/python/cp39-cp39/lib
 ENV PYTHONINCLUDEPATH=/opt/python/cp39-cp39/include/python3.9
