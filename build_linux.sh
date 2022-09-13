@@ -21,7 +21,7 @@ libXrender-devel \
 libXcomposite-devel \
 libXinerama-devel \
 libXcursor-devel \
-freetype \
+freetype-devel \
 libsndfile-devel \
 libvorbis-devel \
 opus-devel \
