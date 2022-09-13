@@ -128,7 +128,7 @@ public:
     // todo: this is not a good thing to hard-code.
     // Ableton saves MIDI at a PPQN of 96, which is somewhat low.
     // To be easily compatible with higher resolution PPQN MIDI files that
-    // are loaded with `load_midi`, we use an internal high rate PPQN of 960.
+    // are loaded with `load_midi`, we use an internal high rate PPQN of 3840.
     // It's easy to "upsample" to this higher resolution, as we do in `load_midi` and `add_midi_note`.
     // Another bad design of the code is that FaustProcessor, PluginProcessor, and SamplerProcessor
     // have a lot of common code related to MIDIBuffers.

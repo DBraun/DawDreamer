@@ -337,6 +337,10 @@ but the filter mode cannot under automation.";
            arg("inputs"), arg("outputs"),
            "Set the number of input and output channels. An error will be "
            "thrown for an unaccepted option.")
+      .def("enable_all_buses", &PluginProcessorWrapper::enableAllBuses,
+           "Enable all buses. This may help with plugins with non-stereo outputs.")
+      .def("disable_nonmain_buses", &PluginProcessorWrapper::disableNonMainBuses,
+           "Disable all non-main buses (aux and sidechains).")
       .def("save_state", &PluginProcessorWrapper::saveStateInformation,
            arg("filepath"), "Save the state to a file.")
       .def("load_state", &PluginProcessorWrapper::loadStateInformation,

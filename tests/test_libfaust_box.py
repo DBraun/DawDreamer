@@ -634,8 +634,7 @@ def test28(num_voices=12, dynamic_voices=True):
     #     print(parameter)
 
     for parname, val in parameter_settings:
-        # todo: figure out why this prefix is dummy
-        full_name = '/Polyphonic/Voices/dummy/' + parname
+        full_name = '/Polyphonic/Voices/dawdreamer/' + parname
         try:
             f.set_parameter(full_name, val)
         except:

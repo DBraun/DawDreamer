@@ -98,12 +98,18 @@ PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
         throw std::runtime_error("PluginProcessor::loadPlugin error: " + errorMessage.toStdString());
     }
 
-    myPlugin->enableAllBuses();
-
-    auto inputs = myPlugin->getTotalNumInputChannels();
     auto outputs = myPlugin->getTotalNumOutputChannels();
+
+	if (outputs == 0) {
+        myPlugin->enableAllBuses();
+        myPlugin->disableNonMainBuses();
+        outputs = myPlugin->getTotalNumOutputChannels();
+	}
+    auto inputs = myPlugin->getTotalNumInputChannels();
+
+	ProcessorBase::setBusesLayout(myPlugin->getBusesLayout());
+
     this->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
-    myPlugin->setPlayConfigDetails(inputs, outputs, sampleRate, samplesPerBlock);
     myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
     myPlugin->setNonRealtime(true);
     mySampleRate = sampleRate;
@@ -154,13 +160,6 @@ PluginProcessor::setBusesLayout(const BusesLayout& arr) {
     THROW_ERROR_IF_NO_PLUGIN
     ProcessorBase::setBusesLayout(arr);
     return myPlugin->setBusesLayout(arr);
-}
-
-void
-PluginProcessor::numChannelsChanged() {
-    THROW_ERROR_IF_NO_PLUGIN
-    ProcessorBase::numChannelsChanged();
-    myPlugin->setPlayConfigDetails(this->getTotalNumInputChannels(), this->getTotalNumOutputChannels(), this->getSampleRate(), this->getBlockSize());
 }
 
 void
@@ -260,28 +259,6 @@ PluginProcessor::reset()
 {
     if (myPlugin.get()) {
         myPlugin->reset();
-    
-        juce::AudioPlayHead::PositionInfo posInfo;
-        // It's important to initialize these.
-        posInfo.setTimeInSamples(0);
-        posInfo.setTimeInSeconds(0);
-        posInfo.setPpqPosition(0);
-        
-        // Set all parameters, even ones which aren't automatable.
-        // Loop twice because some parameters are meta parameters.
-        for (int j=0; j<2; j++) {
-            int i = 0;
-            for (juce::AudioProcessorParameter *parameter : myPlugin->getParameters()) {
-                auto paramID = std::to_string(i);
-                auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
-
-                parameter->beginChangeGesture();
-                parameter->setValueNotifyingHost(theParameter->sample(posInfo));
-                parameter->endChangeGesture();
-
-                i++;
-            }
-        }
     }
 
     delete myMidiIteratorSec;
@@ -460,11 +437,15 @@ PluginProcessor::setPatch(const PluginPatch patch)
 
 }
 
-std::uint32_t
-PluginProcessor::getLatencySamples()
+double PluginProcessor::getTailLengthSeconds() const {
+  THROW_ERROR_IF_NO_PLUGIN
+  return myPlugin->getTailLengthSeconds();
+}
+
+int PluginProcessor::getLatencySamples()
 {
     THROW_ERROR_IF_NO_PLUGIN
-    return (uint32_t) myPlugin->getLatencySamples();
+    return myPlugin->getLatencySamples();
 }
 
 
@@ -744,16 +725,69 @@ PluginProcessorWrapper::getPluginParametersDescription()
         std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
         std::string label = processorParams[i]->getLabel().toStdString();
 
+		std::string category;
+
+		switch (processorParams[i]->getCategory()) {
+                  case AudioProcessorParameter::Category::genericParameter:
+                    category = "genericParameter";
+                    break;
+                  case AudioProcessorParameter::Category::inputGain:
+                    category = "inputGain";
+                    break;
+                  case AudioProcessorParameter::Category::outputGain:
+                    category = "outputGain";
+                    break;
+                  case AudioProcessorParameter::Category::inputMeter:
+                    category = "inputMeter";
+                    break;
+                  case AudioProcessorParameter::Category::outputMeter:
+                    category = "outputMeter";
+                    break;
+                  case AudioProcessorParameter::Category::
+                      compressorLimiterGainReductionMeter:
+                    category = "compressorLimiterGainReductionMeter";
+                    break;
+                  case AudioProcessorParameter::Category::
+                      expanderGateGainReductionMeter:
+                    category = "expanderGateGainReductionMeter";
+                    break;
+                  case AudioProcessorParameter::Category::analysisMeter:
+                    category = "analysisMeter";
+                    break;
+                  case AudioProcessorParameter::Category::otherMeter:
+                    category = "otherMeter";
+                    break;
+                  default:
+                    category = "unknown";
+                    break;
+		}
+
         py::dict myDictionary;
         myDictionary["index"] = i;
         myDictionary["name"] = theName;
         myDictionary["numSteps"] = processorParams[i]->getNumSteps();
+        myDictionary["isBoolean"] = processorParams[i]->isBoolean();
         myDictionary["isDiscrete"] = processorParams[i]->isDiscrete();
         myDictionary["label"] = label;
+        myDictionary["category"] = category;
+        
         myDictionary["text"] = currentText;
         myDictionary["isMetaParameter"] = processorParams[i]->isMetaParameter();
         myDictionary["isAutomatable"] = processorParams[i]->isAutomatable();
+        myDictionary["defaultValue"] = processorParams[i]->getDefaultValue();
+        myDictionary["defaultValueText"] =
+            processorParams[i]->getText(processorParams[i]->getDefaultValue(),
+                                        DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        myDictionary["min"] = processorParams[i]->getText(0.f, DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        myDictionary["max"] =
+            processorParams[i]->getText(1.f, DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
 
+		std::vector<std::string> valueStrings;
+        for (auto& valueString : processorParams[i]->getAllValueStrings()) {
+            valueStrings.push_back(valueString.toStdString());
+		}
+
+        myDictionary["valueStrings"] = valueStrings;
         myList.append(myDictionary);
     }
 
