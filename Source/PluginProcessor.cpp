@@ -135,6 +135,12 @@ PluginProcessor::~PluginProcessor() {
         std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
         myPlugin.reset();
     }
+
+    myMidiBufferQN.clear();
+    myMidiBufferSec.clear();
+    myRenderMidiBuffer.clear();
+    myRecordedMidiSequence.clear();
+
     delete myMidiIteratorQN;
     delete myMidiIteratorSec;
 }

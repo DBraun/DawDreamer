@@ -76,6 +76,11 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate,
 
 FaustProcessor::~FaustProcessor() {
   clear();
+
+  myMidiBufferQN.clear();
+  myMidiBufferSec.clear();
+  myRecordedMidiSequence.clear();
+
   delete myMidiIteratorQN;
   delete myMidiIteratorSec;
 }

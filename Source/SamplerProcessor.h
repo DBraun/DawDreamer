@@ -24,6 +24,10 @@ public:
     }
 
     ~SamplerProcessor() {
+        myMidiBufferQN.clear();
+        myMidiBufferSec.clear();
+        myRenderMidiBuffer.clear();
+        myRecordedMidiSequence.clear();
         delete myMidiIteratorSec;
         delete myMidiIteratorQN;
     }
