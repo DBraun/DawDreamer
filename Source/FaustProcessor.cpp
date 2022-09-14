@@ -427,7 +427,7 @@ bool FaustProcessor::compile() {
   }
 
   int argc = 0;
-  const char** argv = new const char*[256];
+  const char** argv = new const char*[64];
 
   argv[argc++] = "-I";
   argv[argc++] = pathToFaustLibraries.c_str();
@@ -839,7 +839,7 @@ py::list FaustProcessor::getPluginParametersDescription() {
   if (m_compileState) {
     int i = 0;
     for (auto* parameter : this->getParameters()) {
-      int maximumStringLength = 64;
+      int maximumStringLength = 256;
 
       std::string theName =
           parameter->getName(maximumStringLength).toStdString();
