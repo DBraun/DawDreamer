@@ -1,9 +1,13 @@
-dawdreamer Documentation
-============================
+Welcome to the DawDreamer Documentation
+==========================================
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    dawdreamer
+
+.. autosummary::
+
+   

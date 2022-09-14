@@ -1,0 +1,142 @@
+﻿dawdreamer.faust.signal
+=======================
+
+.. automodule:: dawdreamer.faust.signal
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      getUserData
+      isProj
+      isRec
+      isSigAttach
+      isSigBinOp
+      isSigButton
+      isSigCheckbox
+      isSigControl
+      isSigDelay
+      isSigDelay1
+      isSigDocAccessTbl
+      isSigDocConstantTbl
+      isSigDocWriteTbl
+      isSigEnable
+      isSigFConst
+      isSigFFun
+      isSigFVar
+      isSigFloatCast
+      isSigGen
+      isSigHBargraph
+      isSigHSlider
+      isSigHighest
+      isSigInput
+      isSigInt
+      isSigIntCast
+      isSigLowest
+      isSigNil
+      isSigNumEntry
+      isSigOutput
+      isSigPrefix
+      isSigRDTbl
+      isSigReal
+      isSigSelect2
+      isSigSoundfile
+      isSigSoundfileBuffer
+      isSigSoundfileLength
+      isSigSoundfileRate
+      isSigTable
+      isSigVBargraph
+      isSigVSlider
+      isSigWRTbl
+      isSigWaveform
+      sigAND
+      sigARightShift
+      sigAbs
+      sigAcos
+      sigAdd
+      sigAsin
+      sigAtan
+      sigAtan2
+      sigAttach
+      sigBinOp
+      sigBufferSize
+      sigButton
+      sigCeil
+      sigCheckbox
+      sigCos
+      sigDelay
+      sigDiv
+      sigEQ
+      sigExp
+      sigExp10
+      sigFConst
+      sigFVar
+      sigFloatCast
+      sigFloor
+      sigFmod
+      sigGE
+      sigGT
+      sigHBargraph
+      sigHSlider
+      sigInput
+      sigInt
+      sigIntCast
+      sigLE
+      sigLRightShift
+      sigLT
+      sigLeftShift
+      sigLog
+      sigLog10
+      sigMax
+      sigMin
+      sigMul
+      sigNE
+      sigNumEntry
+      sigOR
+      sigPow
+      sigReadOnlyTable
+      sigReal
+      sigRecursion
+      sigRem
+      sigRemainder
+      sigRint
+      sigSampleRate
+      sigSelect2
+      sigSelect3
+      sigSelf
+      sigSin
+      sigSoundfile
+      sigSqrt
+      sigSub
+      sigTan
+      sigVBargraph
+      sigVSlider
+      sigWaveform
+      sigWriteReadTable
+      sigXOR
+      signalsToSource
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Signal
+   
+   
+
+   
+   
+   
+
+
+

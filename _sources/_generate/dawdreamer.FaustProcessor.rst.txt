@@ -17,6 +17,8 @@
       ~FaustProcessor.add_midi_note
       ~FaustProcessor.clear_midi
       ~FaustProcessor.compile
+      ~FaustProcessor.compile_box
+      ~FaustProcessor.compile_signals
       ~FaustProcessor.get_audio
       ~FaustProcessor.get_automation
       ~FaustProcessor.get_name
@@ -43,6 +45,7 @@
       ~FaustProcessor.auto_import
       ~FaustProcessor.code
       ~FaustProcessor.compiled
+      ~FaustProcessor.dynamic_voices
       ~FaustProcessor.faust_libraries_path
       ~FaustProcessor.group_voices
       ~FaustProcessor.n_midi_events

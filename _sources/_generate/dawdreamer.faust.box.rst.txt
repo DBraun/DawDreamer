@@ -1,0 +1,160 @@
+﻿dawdreamer.faust.box
+====================
+
+.. automodule:: dawdreamer.faust.box
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      boxAND
+      boxARightShift
+      boxAbs
+      boxAcos
+      boxAdd
+      boxAsin
+      boxAtan
+      boxAtan2
+      boxAttach
+      boxBinOp
+      boxBufferSize
+      boxButton
+      boxCeil
+      boxCheckbox
+      boxCos
+      boxCut
+      boxDelay
+      boxDiv
+      boxEQ
+      boxExp
+      boxExp10
+      boxFConst
+      boxFVar
+      boxFloatCast
+      boxFloor
+      boxFmod
+      boxFromDSP
+      boxGE
+      boxGT
+      boxHBargraph
+      boxHSlider
+      boxInt
+      boxIntCast
+      boxLE
+      boxLRightShift
+      boxLT
+      boxLeftShift
+      boxLog
+      boxLog10
+      boxMax
+      boxMerge
+      boxMin
+      boxMul
+      boxNE
+      boxNumEntry
+      boxOR
+      boxPar
+      boxPar3
+      boxPar4
+      boxPar5
+      boxPow
+      boxReadOnlyTable
+      boxReal
+      boxRec
+      boxRem
+      boxRemainder
+      boxRint
+      boxRoute
+      boxSampleRate
+      boxSelect2
+      boxSelect3
+      boxSeq
+      boxSin
+      boxSoundfile
+      boxSplit
+      boxSqrt
+      boxSub
+      boxTan
+      boxToSignals
+      boxToSource
+      boxVBargraph
+      boxVSlider
+      boxWaveform
+      boxWire
+      boxWriteReadTable
+      boxXOR
+      getBoxType
+      isBoxAbstr
+      isBoxAccess
+      isBoxAppl
+      isBoxButton
+      isBoxCase
+      isBoxCheckbox
+      isBoxComponent
+      isBoxCut
+      isBoxEnvironment
+      isBoxError
+      isBoxFConst
+      isBoxFFun
+      isBoxFVar
+      isBoxHBarGraph
+      isBoxHGroup
+      isBoxHSlider
+      isBoxIPar
+      isBoxIProd
+      isBoxISeq
+      isBoxISum
+      isBoxIdent
+      isBoxInputs
+      isBoxInt
+      isBoxLibrary
+      isBoxMerge
+      isBoxMetadata
+      isBoxNil
+      isBoxNumEntry
+      isBoxOutputs
+      isBoxPar
+      isBoxPrim0
+      isBoxPrim1
+      isBoxPrim2
+      isBoxPrim3
+      isBoxPrim4
+      isBoxPrim5
+      isBoxReal
+      isBoxRec
+      isBoxRoute
+      isBoxSeq
+      isBoxSlot
+      isBoxSoundfile
+      isBoxSplit
+      isBoxSymbolic
+      isBoxTGroup
+      isBoxVGroup
+      isBoxVSlider
+      isBoxWaveform
+      isBoxWithLocalDef
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Box
+   
+   
+
+   
+   
+   
+
+
+

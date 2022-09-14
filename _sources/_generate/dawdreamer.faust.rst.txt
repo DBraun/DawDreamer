@@ -1,0 +1,30 @@
+﻿dawdreamer.faust
+================
+
+.. automodule:: dawdreamer.faust
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      createLibContext
+      destroyLibContext
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -17,6 +17,8 @@
       ~PluginProcessor.add_midi_note
       ~PluginProcessor.can_set_bus
       ~PluginProcessor.clear_midi
+      ~PluginProcessor.disable_nonmain_buses
+      ~PluginProcessor.enable_all_buses
       ~PluginProcessor.get_audio
       ~PluginProcessor.get_automation
       ~PluginProcessor.get_latency_samples
