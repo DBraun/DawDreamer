@@ -9,7 +9,7 @@ public:
         setMainBusInputsAndOutputs((int)gainLevels.size()*2, 2);
     }
 
-    void prepareToPlay(double, int) {
+    void prepareToPlay(double, int) override {
 
     }
 

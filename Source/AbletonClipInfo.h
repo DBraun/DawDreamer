@@ -73,7 +73,7 @@ class AbletonClipInfo {
                 }
             }
 
-            int last_index = warp_markers.size() - 1;
+            int last_index = (int) warp_markers.size() - 1;
             p1 = warp_markers.at(last_index-1).first;
             b1 = warp_markers.at(last_index-1).second;
             p2 = warp_markers.at(last_index).first;
@@ -198,7 +198,7 @@ class AbletonClipInfo {
             return head;
         }
         int find_str(FILE* f, const char* string) {
-            const int size = strlen(string);
+            const int size = (int) strlen(string);
             //char buffer[size];
             char* buffer = (char*)malloc(size * sizeof(char));
             if (fread(buffer, 1, size, f) != size) return 0;

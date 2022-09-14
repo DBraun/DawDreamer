@@ -84,11 +84,8 @@ ALL_PLUGIN_EFFECTS = []
 
 if platform.system() == "Darwin":
 
-	# # todo: error is currently "Unable to load component"
-	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component") 
-
-	# # todo: error is (fat file, but missing compatible architecture (have 'x86_64,i386', need 'arm64e'))
-	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component") 
+	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")
 
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst3")
@@ -98,6 +95,14 @@ if platform.system() == "Darwin":
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst")
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.vst3")
 	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "ValhallaFreqEcho.component")
+
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST/ValhallaSupermassive.vst")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST3/ValhallaSupermassive.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/Components/ValhallaSupermassive.component")  # todo: only DBraun has this
+
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST/ValhallaSpaceModulator.vst.vst")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/VST3/ValhallaSpaceModulator.vst.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "/Library/Audio/Plug-Ins/Components/ValhallaSpaceModulator.vst.component")  # todo: only DBraun has this
 
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst")
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker.vst3")
@@ -112,18 +117,20 @@ if platform.system() == "Darwin":
 	
 elif platform.system() == "Windows":
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "Dimension Expander_x64.dll")
-	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/Bloom.dll")                   # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/CamelCrusher.dll")            # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/CHOWTapeModel.dll")           # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/Szechuan Saturator.vst3")     # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/TAL-Chorus-LX.vst3")          # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugIns/TAL-Chorus-LX-64.dll")        # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugins/Bloom.dll")                   # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugins/CamelCrusher.dll")            # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugins/CHOWTapeModel.dll")           # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugins/Szechuan Saturator.vst3")     # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugins/TAL-Chorus-LX.vst3")          # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_EFFECTS, "C:/VSTPlugins/TAL-Chorus-LX-64.dll")        # todo: only DBraun has this
 
 	append_if_exists(ALL_PLUGIN_INSTRUMENTS, PLUGINS / "TAL-NoiseMaker-64.dll")
-	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Dexed.dll")               # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Serum_x64.dll")           # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/Surge.vst3")              # todo: only DBraun has this
-	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugins/Dexed.dll")               # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugins/Dexed.vst3")              # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugins/Serum_x64.dll")           # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugins/Surge XT.vst3")           # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugins/TAL-NoiseMaker-64.vst3")  # todo: only DBraun has this
+	append_if_exists(ALL_PLUGIN_INSTRUMENTS, "C:/VSTPlugins/TAL-NoiseMaker-64.dll")   # todo: only DBraun has this
 
 else:
 	# todo: test LV2 plugins on Linux
@@ -144,4 +151,6 @@ PLUGIN_INPUT_CHANNELS["RoughRider3"] = 3  # RoughRider has an optional mono side
 PLUGIN_INST_INPUT_CHANNELS["TAL-NoiseMaker-64"] = 2
 PLUGIN_INST_INPUT_CHANNELS["TAL-NoiseMaker"] = 2
 PLUGIN_INST_INPUT_CHANNELS["Surge"] = 2
-PLUGIN_OUTPUT_CHANNELS["Surge"] = 6
+PLUGIN_INST_INPUT_CHANNELS["Surge XT"] = 2
+PLUGIN_OUTPUT_CHANNELS["Surge"] = 2
+PLUGIN_OUTPUT_CHANNELS["Surge XT"] = 2

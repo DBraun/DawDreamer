@@ -16,7 +16,7 @@ public:
         setMainBusInputsAndOutputs(2, 2);
     }
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock) {
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override {
         mySampleRate = sampleRate;
         
         AudioPlayHead::PositionInfo posInfo;

@@ -4,6 +4,7 @@
 # `py -m build --wheel`
 # Then in the `dist` directory, `pip install dawdreamer`
 
+import setuptools
 from setuptools import setup, Extension
 from setuptools.dist import Distribution
 import os
@@ -138,7 +139,7 @@ setup(
     keywords='audio music sound',
     python_requires=">=3.7",
     install_requires=[],
-    packages=['dawdreamer'],
+    packages=setuptools.find_packages(),
     py_modules=['dawdreamer'],
     include_package_data=True,
     package_data={

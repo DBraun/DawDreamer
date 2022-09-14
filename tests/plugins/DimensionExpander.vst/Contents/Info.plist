@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>10J567</string>
+	<string>19H15</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>DimensionExpander</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.xfer.DimensionExpander.VST</string>
+	<string>com.xfer.DimExp.VST</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,41 +17,40 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.2.4</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.2.4</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>DTCompiler</key>
-	<string></string>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
-	<string>4A304a</string>
+	<string>12D4e</string>
+	<key>DTPlatformName</key>
+	<string>macosx</string>
 	<key>DTPlatformVersion</key>
-	<string>GM</string>
+	<string>11.1</string>
 	<key>DTSDKBuild</key>
-	<string>4A304a</string>
+	<string>20C63</string>
 	<key>DTSDKName</key>
-	<string>macosx10.6</string>
+	<string>macosx11.1</string>
 	<key>DTXcode</key>
-	<string>0400</string>
+	<string>1240</string>
 	<key>DTXcodeBuild</key>
-	<string>4A304a</string>
-	<key>SYConfig</key>
-	<dict>
-		<key>AutoConvertPresets</key>
-		<false/>
-		<key>CanDoMonoIO</key>
-		<false/>
-		<key>DisableStereoSupport</key>
-		<false/>
-		<key>PresetIsFXB</key>
-		<false/>
-		<key>UpdateNameOnLoad</key>
-		<true/>
-	</dict>
-	<key>VSTWindowCompositing</key>
+	<string>12D4e</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.11</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Xfer Records ©2021</string>
+	<key>com.apple.security.get-task-allow</key>
 	<true/>
 </dict>
 </plist>

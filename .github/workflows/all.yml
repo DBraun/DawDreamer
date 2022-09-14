@@ -9,7 +9,7 @@ on:
 jobs:
 
   build-ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         include:
@@ -33,16 +33,8 @@ jobs:
       with:
         platforms: all
 
-    - name: Checkout faustlibraries
-      uses: actions/checkout@v2
-      with:
-        repository: grame-cncm/faustlibraries
-        path: faustlibraries
-
-    - name: copy faust libraries
-      # necessary for setup.py to work.
+    - name: clean faust libraries
       run: |
-        cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
         rm thirdparty/faust/architecture/android/app/lib/libsndfile/lib/armeabi-v7a/libsndfile.so
         rm thirdparty/faust/architecture/android/app/lib/libsndfile/lib/arm64-v8a/libsndfile.so
@@ -121,17 +113,9 @@ jobs:
     - name: Get CMake
       uses: lukka/get-cmake@latest
 
-    - name: Checkout faustlibraries
-      uses: actions/checkout@v2
-      with:
-        repository: grame-cncm/faustlibraries
-        path: faustlibraries
-
-    - name: copy faust libraries
-      # necessary for setup.py to work.
+    - name: clean faust libraries
       run: |
-        Remove-Item -Recurse -Force "faustlibraries/.git"
-        cp -v -r faustlibraries dawdreamer
+        Remove-Item -Recurse -Force "dawdreamer/faustlibraries/.git"
 
     - name: Build libsamplerate
       run: |
@@ -204,16 +188,8 @@ jobs:
         make --directory=build_release
         cd ../..
 
-    - name: Checkout faustlibraries
-      uses: actions/checkout@v2
-      with:
-        repository: grame-cncm/faustlibraries
-        path: faustlibraries
-
-    - name: copy faust libraries
-      # necessary for setup.py to work.
+    - name: clean faust libraries
       run: |
-        cp -v -r faustlibraries dawdreamer
         rm -rf dawdreamer/faustlibraries/.git
 
     - name: Build wheels ${{ matrix.python-version }}

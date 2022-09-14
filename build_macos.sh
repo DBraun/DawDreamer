@@ -12,7 +12,8 @@ make --directory=build_release
 cd ../..
 
 # build macOS release
-xcodebuild ARCHS="x86_64 arm64" ONLY_ACTIVE_ARCH=NO -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
+# ARCHS="x86_64 arm64" 
+xcodebuild ARCHS="arm64" ONLY_ACTIVE_ARCH=NO -configuration Release -project Builds/MacOSX/DawDreamer.xcodeproj/
 mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
 
 rm tests/dawdreamer.so

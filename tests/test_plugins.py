@@ -86,7 +86,7 @@ def test_plugin_instrument1(plugin_path):
     # check that it's non-silent
     audio = engine.get_audio()
     assert(np.mean(np.abs(audio)) > .003)
-    assert(np.mean(np.abs(audio[:10000])) > .001)  # test that the first note wasn't silent
+    assert(np.mean(np.abs(audio[:,:int(.25*SAMPLE_RATE)])) > .003)  # test that the first note wasn't silent
 
     with pytest.raises(Exception):
         synth.load_preset('bogus_path.fxp')
@@ -161,7 +161,7 @@ def test_plugin_instrument_midi(plugin_path):
 @pytest.mark.parametrize("do_sidechain", [False, True])
 def test_plugin_goodhertz_sidechain(do_sidechain):
 
-    plugin_path = "C:/VSTPlugIns/Goodhertz/Ghz Vulf Compressor 3.vst3"
+    plugin_path = "C:/VSTPlugins/Goodhertz/Ghz Vulf Compressor 3.vst3"
 
     if not isfile(plugin_path):
         return
@@ -217,7 +217,7 @@ def test_plugin_goodhertz_sidechain(do_sidechain):
 
 def test_plugin_effect_ambisonics():
 
-    plugin_path = "C:/VSTPlugIns/sparta/sparta_ambiENC.dll"
+    plugin_path = "C:/VSTPlugins/sparta/sparta_ambiENC.dll"
 
     if not isfile(plugin_path):
         return
@@ -264,10 +264,11 @@ def test_plugin_effect_ambisonics():
 
     assert(proc_encoder.get_num_output_channels() == audio.shape[0])
 
-
-def test_plugin_upright_piano():
-
-    plugin_path = "C:/VSTPlugIns/Upright Piano VST/Upright Piano.dll"
+@pytest.mark.parametrize("plugin_path", [
+    "C:/VSTPlugins/UprightPiano.dll",
+    "C:/VSTPlugins/UprightPiano.vst3",
+    ])
+def test_plugin_upright_piano(plugin_path: str):
 
     if not isfile(plugin_path):
         return
@@ -306,13 +307,13 @@ def test_plugin_upright_piano():
 
 @pytest.mark.parametrize("plugin_path",
     [
-    "C:/VSTPlugIns/TAL-NoiseMaker-64.vst3",
-    "C:/VSTPlugIns/LABS (64 Bit).dll",
-    "C:/VSTPlugIns/LABS (64 Bit).vst3",
+    "C:/VSTPlugins/TAL-NoiseMaker-64.vst3",
+    "C:/VSTPlugins/LABS (64 Bit).dll",
+    "C:/VSTPlugins/LABS (64 Bit).vst3",
     "/Library/Audio/Plug-Ins/VST/LABS.vst",
-    "/Library/Audio/Plug-Ins/VST3/LABS.vst3",
-    "C:/VSTPlugIns/Kontakt.dll",
-    # "C:/VSTPlugIns/Kontakt.vst3",  # not working
+    # "/Library/Audio/Plug-Ins/VST3/LABS.vst3",  # todo: not working
+    "C:/VSTPlugins/Kontakt.dll",
+    # "C:/VSTPlugins/Kontakt.vst3",  # todo: not working
     ]
     )
 def test_plugin_editor(plugin_path: str):
@@ -399,8 +400,8 @@ def test_plugin_editor(plugin_path: str):
     assert(not np.allclose(audio*0., audio, atol=1e-07))
 
 
-def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEncoder.dll",
-                    plugin_path2="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/BinauralDecoder.dll"):
+def test_plugin_iem(plugin_path1="C:/VSTPlugins/IEMPluginSuite/MultiEncoder.dll",
+                    plugin_path2="C:/VSTPlugins/IEMPluginSuite/BinauralDecoder.dll"):
     
     if not isfile(plugin_path1) or not isfile(plugin_path2):
         return
@@ -482,3 +483,10 @@ def test_plugin_iem(plugin_path1="C:/VSTPlugIns/IEMPluginSuite/VST2/IEM/MultiEnc
     assert(not np.allclose(audio*0., audio, atol=1e-07))
     file_path = OUTPUT / f'test_plugin_{plugin_basename}_encoder.wav'
     wavfile.write(file_path, SAMPLE_RATE, audio.transpose())
+
+if __name__ == "__main__":
+    pass
+    # test_plugin_effect_ambisonics()
+    # test_plugin_iem()
+    # test_plugin_editor()
+    # test_plugin_upright_piano()

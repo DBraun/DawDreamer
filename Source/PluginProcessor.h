@@ -15,8 +15,6 @@ public:
 
     bool setBusesLayout(const BusesLayout& arr) override;
 
-    void numChannelsChanged() override;
-
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
     //bool supportsDoublePrecisionProcessing() { return myPlugin ? myPlugin->supportsDoublePrecisionProcessing() : false; }
@@ -27,7 +25,8 @@ public:
 
     bool acceptsMidi() const override { return myPlugin.get() && myPlugin->acceptsMidi(); }
     bool producesMidi() const override { return myPlugin.get() && myPlugin->producesMidi(); }
-    std::uint32_t getLatencySamples();
+    double getTailLengthSeconds() const override;
+    int getLatencySamples();
 
     void reset() override;
 

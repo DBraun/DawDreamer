@@ -3402,6 +3402,12 @@
     <ClInclude Include="..\..\Source\FaustProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\FaustBoxAPI.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\FaustSignalAPI.h">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\FilterProcessor.h">
       <Filter>DawDreamer\Processors</Filter>
     </ClInclude>
@@ -6332,7 +6338,7 @@
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\CMakeLists.txt">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
-    <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\README.md">
+    <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\readme.md">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\flac\Flac Licence.txt">

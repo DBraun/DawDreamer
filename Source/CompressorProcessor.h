@@ -22,7 +22,7 @@ public:
         setMainBusInputsAndOutputs(2, 2);
     }
 
-    void prepareToPlay(double sampleRate, int samplesPerBlock) {
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override {
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), 2 };
         myCompressor.prepare(spec);
     }
