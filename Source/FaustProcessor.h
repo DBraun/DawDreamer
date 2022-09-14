@@ -21,7 +21,6 @@
 #include "generator/libfaust.h"
 #include "tree.hh"
 
-
 std::string getPathToFaustLibraries();
 
 class MySoundUI : public SoundUI {
@@ -304,16 +303,12 @@ class FaustProcessor : public ProcessorBase {
 
   std::string getTarget();
 
-  // public libfaust signal API
+  // public libfaust API
  public:
-  void compileSignals(const std::string &name,
-                      std::vector<SigWrapper> &wrappers,
+  void compileSignals(std::vector<SigWrapper> &wrappers,
                       std::optional<std::vector<std::string>> in_argv);
 
-  void compileBox(const std::string &name, BoxWrapper &box,
-                  std::optional<std::vector<std::string>> in_argv);
-
-  std::tuple<BoxWrapper, int, int> dspToBox(const std::string &dsp_content);
+  void compileBox(BoxWrapper &box, std::optional<std::vector<std::string>> in_argv);
 };
 
 inline void create_bindings_for_faust_processor(py::module &m) {
@@ -469,14 +464,10 @@ Note that note-ons and note-offs are counted separately.")
            "Set the audio data that the FaustProcessor can use with the "
            "`soundfile` primitive.")
 
-      .def("compile_signals", &FaustProcessor::compileSignals, arg("name"),
-           arg("signals"), arg("argv") = py::none(), returnPolicy)
-      .def("compile_box", &FaustProcessor::compileBox, arg("name"), arg("box"),
+      .def("compile_signals", &FaustProcessor::compileSignals, arg("signals"),
            arg("argv") = py::none(), returnPolicy)
-      .def("dsp_to_box", &FaustProcessor::dspToBox, arg("dsp_code"),
-           "Convert Faust DSP code to a tuple containing a Box, number of "
-           "inputs, and outputs.",
-           returnPolicy)
+      .def("compile_box", &FaustProcessor::compileBox, arg("box"),
+           arg("argv") = py::none(), returnPolicy)
 
       .doc() =
       "A Faust Processor can compile and execute FAUST code. See "

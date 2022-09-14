@@ -7,7 +7,7 @@ PYBIND11_MODULE(dawdreamer, m) {
   using kw_only = py::kw_only;
 
   m.doc() = R"pbdoc(
-        dawdreamer
+        DawDreamer
         -----------------------
     
         .. currentmodule:: dawdreamer
@@ -100,7 +100,10 @@ PYBIND11_MODULE(dawdreamer, m) {
     The abstract Processor Base class, which all processors subclass.
 )pbdoc";
 
-  py::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor");
+  py::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor")
+      .doc() = R"pbdoc(
+A simple sine oscillator, mainly for testing.
+)pbdoc";
 
   py::class_<PlaybackProcessor, ProcessorBase>(m, "PlaybackProcessor")
       .def("set_data", &PlaybackProcessor::setData, arg("data"),
@@ -444,7 +447,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
   auto faust = m.def_submodule("faust");
 
    faust.doc() = R"pbdoc(
-         dawdreamer
+         Faust
          -----------------------
   
          .. currentmodule:: dawdreamer.faust
@@ -456,38 +459,13 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
             .signal
      )pbdoc";
 
-   py::class_<Node>(faust, "Node").def("__repr__", [](const Node &node) {
-     std::ostringstream out;
-     out << "Node[" << name(node.getSym()) << "]";
-     return out.str();
-            })
-       .doc() = "A Node";
-
    faust
        .def(
            "createLibContext", []() { createLibContext(); },
            "Create a libfaust context.")
        .def(
            "destroyLibContext", []() { destroyLibContext(); },
-           "Destroy a libfaust context.")
-       .def(
-           "boxToSignals",
-           [](BoxWrapper &box) {
-             std::string error_msg;
-             tvec signals = boxesToSignals(box, error_msg);
-
-            if (!error_msg.empty()) {
-              throw std::runtime_error(error_msg);
-            }
-
-            std::vector<SigWrapper> outSignals;
-            for (Signal sig : signals) {
-              outSignals.push_back(SigWrapper(sig));
-            }
-
-            return outSignals;
-          },
-          arg("box"), "Convert a box to a list of signals.", py::return_value_policy::take_ownership);
+           "Destroy a libfaust context.");
 
    create_bindings_for_faust_box(faust);
    create_bindings_for_faust_signal(faust);

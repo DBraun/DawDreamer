@@ -488,3 +488,5 @@ if __name__ == "__main__":
     pass
     # test_plugin_effect_ambisonics()
     # test_plugin_iem()
+    # test_plugin_editor()
+    # test_plugin_upright_piano()

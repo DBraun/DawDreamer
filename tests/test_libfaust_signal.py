@@ -49,7 +49,7 @@ def test1():
     f = engine.make_faust_processor("faust")
 
     signals.append(sigReal(0.5))
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -67,7 +67,7 @@ def test2():
     in1 = sigInput(0)
     signals.append(sigAdd(in1, sigReal(0.5)))
     signals.append(sigMul(in1, sigReal(1.5)))
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -86,7 +86,7 @@ def test3():
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
     signals.append(sigDelay(sigMul(in1, sigReal(1.5)), sigReal(3000)))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -105,7 +105,7 @@ def test4():
     signals.append(sigAdd(sigDelay(in1, sigReal(500)), sigReal(0.5)))
     signals.append(sigMul(sigDelay(in1, sigReal(3000)), sigReal(1.5)))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -124,10 +124,9 @@ def test6():
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
     signals.append(sigDelay(sigMul(in1, sigReal(1.5)), sigReal(3000)))
 
-    # todo: use more argv
-    argv = ["-vec"]
+    argv = ["-vec", "-lv", "1", "-double"]
 
-    f.compile_signals("test", signals, argv)
+    f.compile_signals(signals, argv)
     my_render(engine, f)
 
 
@@ -142,7 +141,7 @@ def test_equivalent1():
     signals.append(s1)
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -156,7 +155,7 @@ def test_equivalent2():
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -175,7 +174,7 @@ def test8():
 
     signals.append(sigMul(slider, sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500))))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -199,7 +198,7 @@ def test9():
 
     signals.append(sigMul(freq, sigMul(gain, sigInput(0))))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -216,7 +215,7 @@ def test10():
 
     signals.append(sigRecursion(sigAdd(sigSelf(), in1)))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -234,7 +233,7 @@ def test11():
     signals.append(sigSampleRate())
     signals.append(sigBufferSize())
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -250,7 +249,7 @@ def test12():
 
     signals += sigWaveform([i*100. for i in range(5)])
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -267,7 +266,7 @@ def test14():
     in1 = sigInput(0)
     signals.append(sigAdd(in1, in1))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -287,7 +286,7 @@ def test15():
     signals.append(in2)
     signals.append(in1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -307,7 +306,7 @@ def test16():
     signals.append(in1)
     signals.append(in3)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -332,7 +331,7 @@ def test16():
 
 #     signals += sigSoundfile("sound[url:{'tango.wav'}]", rdx, chan, part)
 
-#     f.compile_signals("test", signals)
+#     f.compile_signals(signals)
 #     my_render(engine, f)
 
 @with_lib_context
@@ -353,9 +352,8 @@ def test19b():
 
     signals += sigSoundfile("sound[url:{'tango.wav'}]", rdx, chan, part)
 
-    cpp_code, err = signalsToSource(signals, 'cpp', 'my_dsp')
+    cpp_code = signalsToSource(signals, 'cpp', 'MyDSP')
     assert cpp_code != ''
-    assert err == ''
 
 
 @with_lib_context
@@ -371,7 +369,7 @@ def test20():
 
     signals.append(sigReadOnlyTable(sigInt(10), sigInt(1), sigInput(0)))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -388,7 +386,7 @@ def test21():
 
     signals.append(sigWriteReadTable(sigInt(10), sigInt(1), sigInput(0), sigInput(1), sigInput(2)))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -405,7 +403,7 @@ def test22():
     signals.append(osc(f, sigVSlider("h:Oscillator/Freq1", sigReal(300), sigReal(100), sigReal(2000), sigReal(0.01))))
     signals.append(osc(f, sigVSlider("h:Oscillator/Freq2", sigReal(500), sigReal(100), sigReal(2000), sigReal(0.01))))
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     desc = f.get_parameters_description()
     assert len(desc) >= 2
     my_render(engine, f)
@@ -434,7 +432,7 @@ def test24():
     f.load_midi(abspath(ASSETS / midi_basename))
 
     f.num_voices = 10
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
 
     my_render(engine, f)
     audio = engine.get_audio().T
@@ -468,7 +466,7 @@ def test_overload_add1():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -487,7 +485,7 @@ def test_overload_add2():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -506,7 +504,7 @@ def test_overload_add3():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -525,7 +523,7 @@ def test_overload_sub1():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -544,7 +542,7 @@ def test_overload_sub2():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -563,7 +561,7 @@ def test_overload_mul1():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -582,7 +580,7 @@ def test_overload_mul2():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -601,7 +599,7 @@ def test_overload_mul3():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 
@@ -620,7 +618,7 @@ def test_overload_mul3():
 
     signals.append(s1)
 
-    f.compile_signals("test", signals)
+    f.compile_signals(signals)
     my_render(engine, f)
 
 

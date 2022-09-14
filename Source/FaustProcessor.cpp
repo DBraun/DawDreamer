@@ -540,18 +540,18 @@ bool FaustProcessor::compile() {
   return true;
 }
 
-void FaustProcessor::compileSignals(
-    const std::string& name, std::vector<SigWrapper>& wrappers,
-    std::optional<std::vector<std::string>> in_argv) {
+
+void FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
+                                    std::optional<std::vector<std::string>> in_argv) {
   m_compileState = kNotCompiled;
   clear();
 
   int argc = 0;
-  const char** argv = new const char*[256];
+  const char* argv[64];
 
   if (in_argv.has_value()) {
-    for (auto v : *in_argv) {
-      argv[argc++] = v.c_str();
+    for (auto& s : *in_argv) {
+      argv[argc++] = s.c_str();
     }
   }
 
@@ -563,14 +563,8 @@ void FaustProcessor::compileSignals(
   auto target = getTarget();
   std::string error_msg;
 
-  m_factory =
-      createDSPFactoryFromSignals(name, signals, argc, argv, target, error_msg);
-
-  for (int i = 0; i < argc; i++) {
-    argv[i] = NULL;
-  }
-  delete[] argv;
-  argv = nullptr;
+  m_factory = createDSPFactoryFromSignals("dawdreamer", signals, argc, argv,
+                                          target, error_msg);
 
   if (!m_factory) {
     clear();
@@ -628,32 +622,25 @@ void FaustProcessor::compileSignals(
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 }
 
-void FaustProcessor::compileBox(
-    const std::string& name, BoxWrapper& box,
-    std::optional<std::vector<std::string>> in_argv) {
+void FaustProcessor::compileBox(BoxWrapper& box,
+                                std::optional<std::vector<std::string>> in_argv) {
   m_compileState = kNotCompiled;
   clear();
 
   int argc = 0;
-  const char** argv = new const char*[256];
+  const char* argv[64];
 
   if (in_argv.has_value()) {
-    for (auto v : *in_argv) {
-      argv[argc++] = v.c_str();
+    for (auto& s : *in_argv) {
+      argv[argc++] = s.c_str();
     }
   }
 
   auto target = this->getTarget();
   std::string error_msg;
 
-  m_factory =
-      createDSPFactoryFromBoxes(name, box, argc, argv, target, error_msg);
-
-  for (int i = 0; i < argc; i++) {
-    argv[i] = NULL;
-  }
-  delete[] argv;
-  argv = nullptr;
+  m_factory = createDSPFactoryFromBoxes("dawdreamer", box, argc, argv, target,
+                                        error_msg);
 
   if (!m_factory) {
     clear();
@@ -709,21 +696,6 @@ void FaustProcessor::compileBox(
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
-}
-
-std::tuple<BoxWrapper, int, int> FaustProcessor::dspToBox(
-    const std::string& dsp_content) {
-  int inputs = 0;
-  int outputs = 0;
-  std::string error_msg = "";
-  const std::string dsp_content2 =
-      std::string("import(\"stdfaust.lib\");\n") + dsp_content;
-  Box box = DSPToBoxes("dawdreamer", dsp_content2, &inputs, &outputs, error_msg);
-  if (error_msg != "") {
-    throw std::runtime_error(error_msg);
-  }
-
-  return std::tuple<BoxWrapper, int, int>(BoxWrapper(box), inputs, outputs);
 }
 
 bool FaustProcessor::setDSPFile(const std::string& path) {

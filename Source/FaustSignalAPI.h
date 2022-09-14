@@ -9,8 +9,8 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
   auto signal_module = faust_module.def_submodule("signal");
 
   signal_module.doc() = R"pbdoc(
-        dawdreamer
-        -----------------------
+        The Faust Signal API
+        -------------------------------------------------------------
 
 		For reference: https://faustdoc.grame.fr/tutorials/signal-api/
     
@@ -23,12 +23,6 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
   auto returnPolicy = py::return_value_policy::take_ownership;
 
   py::class_<SigWrapper>(signal_module, "Signal")
-      .def("__repr__",
-           [](const SigWrapper &sig) {
-             std::ostringstream out;
-             out << "Signal[" << sig.ptr << "]";
-             return out.str();
-           })
       .def(py::init<float>(), arg("val"), "Init with a float")
       .def(py::init<int>(), arg("val"), "Init with an int")
       .def(
@@ -41,7 +35,6 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             return branches;
           },
           returnPolicy)
-      .def("node", [](const SigWrapper &sig) { return sig.ptr->node(); })
       .def("__add__",
            [](const SigWrapper &s1, SigWrapper &s2) {
              return SigWrapper(sigAdd((SigWrapper &)s1, s2));
@@ -965,7 +958,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             }
 
             int argc = 0;
-            const char **argv = new const char *[256];
+            const char *argv[64];
 
             argv[argc++] = "-I";
             argv[argc++] = pathToFaustLibraries.c_str();
@@ -973,35 +966,29 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             argv[argc++] = "-cn";
             argv[argc++] = class_name.c_str();
 
-            // if (m_faustLibrariesPath != "") {
-            //   argv[argc++] = "-I";
-            //   argv[argc++] = m_faustLibrariesPath.c_str();
-            // }
-
             if (in_argv.has_value()) {
               for (auto v : *in_argv) {
                 argv[argc++] = v.c_str();
               }
             }
 
-            std::string error_msg;
+            std::string error_msg = "";
 
             std::string source_code = createSourceFromSignals(
                 "test", signals, lang, argc, argv, error_msg);
 
-            for (int i = 0; i < argc; i++) {
-              argv[i] = NULL;
-            }
-            delete[] argv;
-            argv = nullptr;
+			if (error_msg != "") {
+              throw std::runtime_error(error_msg);
+			}
 
-            return py::make_tuple(source_code, error_msg);
+            return source_code;
           },
           arg("signals"), arg("language"), arg("class_name"),
           arg("argv") = py::none(),
           "Turn a list of signals into source code in a target language such "
-          "as C++ "
-          "(\"cpp\").")
+          "as \"cpp\". The second argument `argv` is a list of strings to send "
+          "to a Faust command line.",
+          returnPolicy)
 
       ;
 }

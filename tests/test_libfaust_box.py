@@ -54,7 +54,7 @@ def test1():
     f = engine.make_faust_processor("faust")
 
     box = boxPar(boxInt(7), boxReal(3.14))
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -70,7 +70,7 @@ def test2():
 
     box = boxSeq(boxPar(boxWire(), boxReal(3.14)), boxAdd())
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -87,7 +87,7 @@ def test3():
 
     box = boxAdd(boxWire(), boxReal(3.14))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -103,7 +103,7 @@ def test4():
 
     box = boxSeq(boxPar(boxWire(), boxWire()), boxAdd())
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -121,7 +121,7 @@ def test5():
     box = boxSeq(boxWire(), boxMul())
 
     with pytest.raises(Exception):
-        f.compile_box("test", box)
+        f.compile_box(box)
 
 
 @with_lib_context
@@ -136,7 +136,7 @@ def test6():
     
     box = boxDelay(boxWire(), boxInt(7))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -151,11 +151,10 @@ def test7():
     f = engine.make_faust_processor("my_faust")
     
     box = boxDelay(boxWire(), boxInt(7))
-     
-    # argv = ["-vec", "-lv", "1"]  # todo:
-    argv = ["-vec", "-lv"]
 
-    f.compile_box("test", box, argv)
+    argv = ["-vec", "-lv", "1", "-double"]
+
+    f.compile_box(box, argv)
 
 
 @with_lib_context
@@ -171,7 +170,7 @@ def test8():
     box = boxSplit(boxWire(), boxPar(boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)),
                                              boxMul(boxDelay(boxWire(), boxReal(3000)), boxReal(1.5))))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -187,7 +186,7 @@ def test_equivalent1():
     b1 = boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5))
     box = boxPar(b1, b1)
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -203,7 +202,7 @@ def test_equivalent2():
     box = boxPar(boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)),
                          boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -220,7 +219,7 @@ def test9():
     box = boxMul(boxWire(),
         boxHSlider("Freq [midi:ctrl 7][style:knob]", boxReal(100), boxReal(100), boxReal(2000), boxReal(1)))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -242,7 +241,7 @@ def test10():
     box = boxMul(boxVSlider("h:Oscillator/freq", boxReal(440), boxReal(50), boxReal(1000), boxReal(0.1)),
                          boxVSlider("h:Oscillator/gain", boxReal(0), boxReal(0), boxReal(1), boxReal(0.01)))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -259,7 +258,7 @@ def test11():
     
     box = boxPar(boxSampleRate(), boxBufferSize())
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -274,7 +273,7 @@ def test12():
 
     box = boxWaveform([i*100. for i in range(5)])
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -289,7 +288,7 @@ def test13():
 
     box = boxSplit(boxWire(), boxAdd())
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -306,7 +305,7 @@ def test14():
                            boxMerge(boxPar4(boxCut(), boxWire(), boxWire(), boxCut()),
                                     boxPar(boxWire(), boxWire())))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -321,7 +320,7 @@ def test15():
 
     box = boxRec(boxAdd(), boxWire())
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -343,7 +342,7 @@ def test16():
 
     box = phasor(boxReal(440))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -364,7 +363,7 @@ def test17():
 
     box = boxPar(osc(boxReal(440)), osc(boxReal(440)))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -380,7 +379,7 @@ def test17():
 
 #     box = boxSoundfile("sound[url:{'tango.wav'}]", boxInt(2), boxInt(0), boxInt(0))
 
-#     f.compile_box("test", box)
+#     f.compile_box(box)
 #     my_render(engine, f)
 
 
@@ -395,7 +394,7 @@ def test19():
 
     box = boxReadOnlyTable(boxInt(10), boxInt(1), boxIntCast(boxWire()))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -412,13 +411,11 @@ def test19b():
 
     box = boxReadOnlyTable(boxInt(4), waveform_content, boxWire())
 
-    cpp_code, err = boxToSource(box, 'cpp', 'my_dsp', [])
+    cpp_code = boxToSource(box, 'cpp', 'MyDSP')
     assert cpp_code != ''
-    assert err == ''
 
-    cpp_code, err = boxToSource(box, 'cpp', 'my_dsp')
+    cpp_code = boxToSource(box, 'cpp', 'MyDSP')
     assert cpp_code != ''
-    assert err == ''
 
 
 @with_lib_context
@@ -432,7 +429,7 @@ def test20():
 
     box = boxWriteReadTable(boxInt(10), boxInt(1), boxIntCast(boxWire()), boxIntCast(boxWire()), boxIntCast(boxWire()))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -457,7 +454,7 @@ def test24():
     f.load_midi(abspath(ASSETS / midi_basename))
 
     f.num_voices = 10
-    f.compile_box("test", box)
+    f.compile_box(box)
 
     my_render(engine, f)
     audio = engine.get_audio().T
@@ -470,15 +467,15 @@ def test25a():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    filter, inputs, outputs = f.dsp_to_box('process = si.smooth;')
+    filter, inputs, outputs = boxFromDSP('process = si.smooth;')
     assert inputs == 2
     assert outputs == 1
-    cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
+    cutoffAndInput, inputs, outputs = boxFromDSP('process = hslider("cutoff", 300, 100, 2000, .01), _;')
     assert inputs == 1
     assert outputs == 2
 
     filteredInput = boxSeq(cutoffAndInput, filter)
-    f.compile_box("test", filteredInput)
+    f.compile_box(filteredInput)
     my_render(engine, f)
 
 
@@ -488,11 +485,11 @@ def test25b():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    filter, inputs, outputs = f.dsp_to_box('process = si.smooth;');
-    cutoffAndInput, inputs, outputs = f.dsp_to_box('process = hslider("cutoff", 300, 100, 2000, .01), _;')
+    filter, inputs, outputs = boxFromDSP('process = si.smooth;');
+    cutoffAndInput, inputs, outputs = boxFromDSP('process = hslider("cutoff", 300, 100, 2000, .01), _;')
 
     filteredInput = boxSeq(cutoffAndInput, filter)
-    f.compile_box("test", filteredInput)
+    f.compile_box(filteredInput)
     my_render(engine, f)
 
 
@@ -503,8 +500,7 @@ def test25c():
     f = engine.make_faust_processor("my_faust")
 
     def test_bus(n):
-        box, inputs, outputs = f.dsp_to_box(f'process = si.bus({n});')
-        print(f'exepcted {n}, and got inputs: {inputs}, outputs: {outputs}')
+        box, inputs, outputs = boxFromDSP(f'process = si.bus({n});')
         assert inputs ==  n and outputs == n
 
     # test ascending and then descending.
@@ -536,10 +532,10 @@ def test27():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box4 = boxFromDSP('process = os.osc;')
-    box5 = boxFromDSP('process = en.adsr;')
-    box6 = boxFromDSP('process = en.adsre;')
-    box7 = boxFromDSP('process = fi.lowpass(5);')
+    box4, _, _ = boxFromDSP('process = os.osc;')
+    box5, _, _ = boxFromDSP('process = en.adsr;')
+    box6, _, _ = boxFromDSP('process = en.adsre;')
+    box7, _, _ = boxFromDSP('process = fi.lowpass(5);')
 
 
 @with_lib_context
@@ -625,11 +621,12 @@ def test28(num_voices=12, dynamic_voices=True):
     modular_synth = ModularSynth()
     box = modular_synth.build(cfg)
 
-    # cpp_code, _ = boxToSource(box, 'cpp', 'my_dsp')
+    f.compile_box(box)
 
-    f.compile_box("test", box)
+    cpp_code = boxToSource(box, 'cpp', 'MyDSP')
 
     desc = f.get_parameters_description()
+
     # for parameter in desc:
     #     print(parameter)
 
@@ -651,7 +648,7 @@ def test29():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box, inputs, outputs = f.dsp_to_box(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    box, inputs, outputs = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
     assert inputs == 2
     assert outputs == 1
 
@@ -662,10 +659,11 @@ def test30():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
-    cpp_code, err = boxToSource(box, 'cpp', 'my_dsp')
+    box, ins, outs = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    assert ins == 2
+    assert outs == 1
+    cpp_code = boxToSource(box, 'cpp', 'MyDSP')
     assert cpp_code != ''
-    assert err == ''
 
 
 @with_lib_context
@@ -681,7 +679,7 @@ def test_overload_add1():
     in1 = boxWire()
     box = (in1 + boxReal(0.5)) + (in1+ boxInt(1))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -698,7 +696,7 @@ def test_overload_add2():
     in1 = boxWire()
     box = (in1 + 0.5) + (in1 + 1)
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -715,7 +713,7 @@ def test_overload_add3():
     in1 = boxWire()
     box = sum([in1, boxReal(0.5)]) + sum([in1, boxInt(1)])
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -732,7 +730,7 @@ def test_overload_sub1():
     in1 = boxWire()
     box = (in1 - boxReal(0.5)) + (in1 - boxInt(1))
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -749,7 +747,7 @@ def test_overload_sub2():
     in1 = boxWire()
     box = (in1 - 0.5) + (in1 - 1)
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -765,7 +763,7 @@ def test_overload_mul1():
 
     box = boxWire() * boxReal(0.5)
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -781,7 +779,7 @@ def test_overload_mul2():
 
     box = boxWire() * 0.5
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -797,7 +795,7 @@ def test_overload_mul3():
 
     box = boxWire() * 2
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 
@@ -813,7 +811,7 @@ def test_overload_mul3():
 
     box = boxWire() * boxInt(2)
 
-    f.compile_box("test", box)
+    f.compile_box(box)
     my_render(engine, f)
 
 

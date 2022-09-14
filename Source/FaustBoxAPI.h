@@ -7,8 +7,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
   auto box_module = faust_module.def_submodule("box");
 
   box_module.doc() = R"pbdoc(
-        dawdreamer
-        -----------------------
+        The Faust Box API
+        -----------------------------------------------------------
     
 		For reference: https://faustdoc.grame.fr/tutorials/box-api/
 
@@ -802,25 +802,51 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           []() {
             return BoxWrapper(boxFVar(SType::kSInt, "count", "<math.h>"));
           },
-          "Return a box representing the buffer size, such as 1, 2, 4, 8, etc.",
+          "Return a box representing the buffer size (also known as block "
+          "size), such as 1, 2, 4, 8, etc.",
           returnPolicy)
       .def(
           "boxFromDSP",
-          [](const std::string &dsp_content) {
+          [](const std::string &dsp_content,
+             std::optional<std::vector<std::string>> in_argv) {
             int inputs = 0;
             int outputs = 0;
             std::string error_msg = "";
             const std::string dsp_content2 =
                 std::string("import(\"stdfaust.lib\");\n") + dsp_content;
-            Box box = DSPToBoxes("dawdreamer", dsp_content2, &inputs, &outputs,
-                                 error_msg);
+
+            int argc = 0;
+            const char *argv[64];
+
+            auto pathToFaustLibraries = getPathToFaustLibraries();
+            if (pathToFaustLibraries == "") {
+              throw std::runtime_error("Unable to load Faust Libraries.");
+            }
+
+            argv[argc++] = "-I";
+            argv[argc++] = pathToFaustLibraries.c_str();
+
+            if (in_argv.has_value()) {
+              for (auto v : *in_argv) {
+                argv[argc++] = v.c_str();
+              }
+            }
+
+            Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv,
+                                 &inputs, &outputs, error_msg);
+
             if (error_msg != "") {
               throw std::runtime_error(error_msg);
             }
 
-            return BoxWrapper(box);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                BoxWrapper(box), inputs, outputs);
           },
-          arg("dsp_code"), "Convert Faust DSP code to a Box.", returnPolicy)
+          arg("dsp_code"), arg("argv") = py::none(),
+          "Convert Faust DSP code to a Box. This returns a tuple of the box, "
+          "num inputs, and num outputs. The second argument `argv` is a list "
+          "of strings to send to a Faust command line.",
+          returnPolicy)
 
       .def(
           "isBoxNil", [](BoxWrapper &b) { return isNil(b); }, arg("box"))
@@ -836,7 +862,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(b2), BoxWrapper(b3));
           },
-          arg("box_t"))
+          arg("box_t"), returnPolicy)
 
       .def(
           "isBoxAppl",
@@ -846,7 +872,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(b2), BoxWrapper(b3));
           },
-          arg("box_t"))
+          arg("box_t"), returnPolicy)
 
       .def(
           "isBoxButton",
@@ -856,7 +882,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxCase",
@@ -866,7 +892,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(rules));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxCheckbox",
@@ -876,7 +902,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxComponent",
@@ -889,14 +915,16 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"))
 
       .def(
-          "isBoxCut", [](BoxWrapper &b) { return isBoxCut(b); }, arg("box"))
+          "isBoxCut", [](BoxWrapper &b) { return isBoxCut(b); }, arg("box"),
+          returnPolicy)
 
       .def(
           "isBoxEnvironment", [](BoxWrapper &b) { return isBoxEnvironment(b); },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxError", [](BoxWrapper &b) { return isBoxError(b); }, arg("box"))
+          "isBoxError", [](BoxWrapper &b) { return isBoxError(b); }, arg("box"),
+          returnPolicy)
 
       .def(
           "isBoxFConst",
@@ -906,7 +934,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxFFun",
@@ -916,7 +944,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(ffun));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxFVar",
@@ -926,7 +954,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxHBarGraph",
@@ -936,7 +964,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxHGroup",
@@ -946,7 +974,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label), BoxWrapper(x));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxHSlider",
@@ -957,17 +985,21 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
                 res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
                 BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxIdent",
           [](BoxWrapper &b) {
-            const char **blah;  // todo: check
-            bool res = isBoxIdent(b, blah);
-            return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, *blah);
+            int argc = 256;
+            const char **str = new const char *[argc];
+            bool res = isBoxIdent(b, str);
+            for (int i = 0; i < argc; i++) {
+              str[i] = NULL;
+            }
+            delete[] str;
+            return res;
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxInputs",
@@ -977,7 +1009,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxInt",
@@ -987,7 +1019,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(res,
                                                                            i);
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxIPar",
@@ -997,7 +1029,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxIProd",
@@ -1007,7 +1039,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxISeq",
@@ -1017,7 +1049,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxISum",
@@ -1027,7 +1059,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxLibrary",
@@ -1037,7 +1069,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(filename));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxMerge",
@@ -1047,7 +1079,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxMetadata",
@@ -1057,7 +1089,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxNumEntry",
@@ -1068,7 +1100,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
                 res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
                 BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxOutputs",
@@ -1078,7 +1110,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxPar",
@@ -1088,25 +1120,31 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim0", [](BoxWrapper &b) { return isBoxPrim0(b); }, arg("box"))
+          "isBoxPrim0", [](BoxWrapper &b) { return isBoxPrim0(b); }, arg("box"),
+          returnPolicy)
 
       .def(
-          "isBoxPrim1", [](BoxWrapper &b) { return isBoxPrim1(b); }, arg("box"))
+          "isBoxPrim1", [](BoxWrapper &b) { return isBoxPrim1(b); }, arg("box"),
+          returnPolicy)
 
       .def(
-          "isBoxPrim2", [](BoxWrapper &b) { return isBoxPrim2(b); }, arg("box"))
+          "isBoxPrim2", [](BoxWrapper &b) { return isBoxPrim2(b); }, arg("box"),
+          returnPolicy)
 
       .def(
-          "isBoxPrim3", [](BoxWrapper &b) { return isBoxPrim3(b); }, arg("box"))
+          "isBoxPrim3", [](BoxWrapper &b) { return isBoxPrim3(b); }, arg("box"),
+          returnPolicy)
 
       .def(
-          "isBoxPrim4", [](BoxWrapper &b) { return isBoxPrim4(b); }, arg("box"))
+          "isBoxPrim4", [](BoxWrapper &b) { return isBoxPrim4(b); }, arg("box"),
+          returnPolicy)
 
       .def(
-          "isBoxPrim5", [](BoxWrapper &b) { return isBoxPrim5(b); }, arg("box"))
+          "isBoxPrim5", [](BoxWrapper &b) { return isBoxPrim5(b); }, arg("box"),
+          returnPolicy)
 
       .def(
           "isBoxReal",
@@ -1116,7 +1154,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(res,
                                                                            r);
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxRec",
@@ -1126,7 +1164,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxRoute",
@@ -1136,7 +1174,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(n), BoxWrapper(m), BoxWrapper(r));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxSeq",
@@ -1146,10 +1184,11 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxSlot", [](BoxWrapper &b) { return isBoxSlot(b); }, arg("box"))
+          "isBoxSlot", [](BoxWrapper &b) { return isBoxSlot(b); }, arg("box"),
+          returnPolicy)
 
       .def(
           "isBoxSoundfile",
@@ -1159,7 +1198,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label), BoxWrapper(chan));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxSplit",
@@ -1169,7 +1208,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(x), BoxWrapper(y));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxSymbolic",
@@ -1179,7 +1218,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(slot), BoxWrapper(body));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxTGroup",
@@ -1189,15 +1228,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label), BoxWrapper(x));
           },
-          arg("box"))
-
-      .def(
-          "boxVBargraph",
-          [](std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax,
-             BoxWrapper &box) {
-            return BoxWrapper(boxVBargraph(label, boxMin, boxMax, box));
-          },
-          arg("label"), arg("min"), arg("max"), arg("step"), returnPolicy)
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxVGroup",
@@ -1207,7 +1238,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label), BoxWrapper(x));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxVSlider",
@@ -1218,11 +1249,11 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
                 res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
                 BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxWaveform", [](BoxWrapper &b) { return isBoxWaveform(b); },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxWithLocalDef",
@@ -1232,7 +1263,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(body), BoxWrapper(ldef));
           },
-          arg("box"))
+          arg("box"), returnPolicy)
 
       .def(
           "getBoxType",
@@ -1261,7 +1292,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             }
 
             int argc = 0;
-            const char **argv = new const char *[256];
+			const char *argv[64];
 
             argv[argc++] = "-I";
             argv[argc++] = pathToFaustLibraries.c_str();
@@ -1269,34 +1300,49 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             argv[argc++] = "-cn";
             argv[argc++] = class_name.c_str();
 
-            // if (m_faustLibrariesPath != "") {
-            //   argv[argc++] = "-I";
-            //   argv[argc++] = m_faustLibrariesPath.c_str();
-            // }
-
             if (in_argv.has_value()) {
               for (auto v : *in_argv) {
                 argv[argc++] = v.c_str();
               }
             }
 
-            std::string error_msg;
+            std::string error_msg = "";
 
             std::string source_code =
                 createSourceFromBoxes("test", box, lang, argc, argv, error_msg);
 
-            for (int i = 0; i < argc; i++) {
-              argv[i] = NULL;
+            if (error_msg != "") {
+              throw std::runtime_error(error_msg);
             }
-            delete[] argv;
-            argv = nullptr;
 
-            return py::make_tuple(source_code, error_msg);
+            return source_code;
           },
           arg("box"), arg("language"), arg("class_name"),
           arg("argv") = py::none(),
-          "Turn a box into source code in a target language such as C++ "
-          "(\"cpp\").")
+          "Turn a box into source code in a target language such as \"cpp\". "
+          "The second argument `argv` is a list of strings to send to a Faust "
+          "command line.",
+          returnPolicy)
+
+      .def(
+          "boxToSignals",
+          [](BoxWrapper &box) {
+            std::string error_msg;
+            tvec signals = boxesToSignals(box, error_msg);
+
+            if (!error_msg.empty()) {
+              throw std::runtime_error(error_msg);
+            }
+
+            std::vector<SigWrapper> outSignals;
+            for (Signal sig : signals) {
+              outSignals.push_back(SigWrapper(sig));
+            }
+
+            return outSignals;
+          },
+          arg("box"), "Convert a box to a list of signals.",
+          py::return_value_policy::take_ownership)
 
       ;
 }
