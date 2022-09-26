@@ -51,13 +51,11 @@ def test_plugin_instrument1(plugin_path):
 
     desc = synth.get_parameters_description()
 
-    # value = synth.get_parameter(0)
-    # # value = 0.1
-    # synth.set_parameter(0, value)
-    # assert abs(synth.get_parameter(0) - value) < 1e-07
-    synth.get_parameter(0)
-    synth.set_parameter(0, synth.get_parameter(0))
-    synth.set_automation(0, np.array([synth.get_parameter(0)]))
+    val = synth.get_parameter(0)
+    synth.set_parameter(0, val)
+    assert np.isclose(val, synth.get_parameter(0))
+    synth.set_automation(0, np.array([val]))
+    assert np.isclose(val, synth.get_parameter(0))
 
     # todo: generalize this
     num_input_channels = synth.get_num_input_channels()
@@ -79,9 +77,7 @@ def test_plugin_instrument1(plugin_path):
 
     plugin_basename = basename(plugin_path)
 
-    # print(f'start render ----- {plugin_path}')
     render(engine, file_path=OUTPUT / f'test_plugin_instrument_{plugin_basename}.wav', duration=DURATION)
-    # print(f'end render ----- {plugin_path}')
 
     # check that it's non-silent
     audio = engine.get_audio()
@@ -316,7 +312,7 @@ def test_plugin_upright_piano(plugin_path: str):
     # "C:/VSTPlugins/Kontakt.vst3",  # todo: not working
     ]
     )
-def test_plugin_editor(plugin_path: str):
+def test_plugin_editor(plugin_path):
 
     """Remember to use `-p no:faulthandler` when running this pytest."""
 
@@ -488,5 +484,5 @@ if __name__ == "__main__":
     pass
     # test_plugin_effect_ambisonics()
     # test_plugin_iem()
-    # test_plugin_editor()
+    test_plugin_editor()
     # test_plugin_upright_piano()

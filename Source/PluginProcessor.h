@@ -33,7 +33,7 @@ public:
     bool loadPreset(const std::string& path);
     bool loadVST3Preset(const std::string& path);
 
-    void createParameterLayout();  // NB: this is different from other processors because it's called after a VST is loaded.
+    void createParameterLayout();
 
     void setPatch(const PluginPatch patch);
 
@@ -116,8 +116,6 @@ public:
     std::string wrapperGetParameterName(int parameter);
 
     bool wrapperSetParameter(int parameterIndex, float value);
-
-    bool wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn);
 
     int wrapperGetPluginParameterSize();
 

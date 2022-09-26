@@ -4,19 +4,15 @@
 #include "custom_pybind_wrappers.h"
 #include "CustomParameters.h"
 
-const int DAW_PARARAMETER_MAX_NAME_LENGTH = 512;
+const int DAW_PARAMETER_MAX_NAME_LENGTH = 512;
 
 class ProcessorBase : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    ProcessorBase(std::function< juce::AudioProcessorValueTreeState::ParameterLayout()> createParameterFunc, std::string newUniqueName = "") :
+    ProcessorBase(std::string newUniqueName = "") :
         AudioProcessor{},
-        myUniqueName{ newUniqueName }, myParameters(*this, nullptr, "PARAMETERS", createParameterFunc()) {
-        this->setNonRealtime(true);
-    }
-
-    ProcessorBase(std::string newUniqueName = "") : AudioProcessor{}, myUniqueName{ newUniqueName }, myParameters(*this, nullptr, newUniqueName.c_str(), createEmptyParameterLayout()) {
+        myUniqueName{ newUniqueName } {
         this->setNonRealtime(true);
     }
 
@@ -24,8 +20,8 @@ public:
     void prepareToPlay(double, int) override {}
     void releaseResources() override {}
     void reset() override;
-    
-    //
+
+	//
     void setPlayHead(AudioPlayHead* newPlayHead) override {AudioProcessor::setPlayHead(newPlayHead);}
     //
 
@@ -63,15 +59,22 @@ public:
     void getStateInformation(juce::MemoryBlock&) override;
     void setStateInformation(const void*, int) override;
 
-    virtual bool setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn);
+    virtual bool setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn);
+    virtual bool setAutomationByIndex(int& index, py::array input, std::uint32_t ppqn);
 
-    virtual bool setAutomationVal(std::string parameterName, float val);
+	bool ProcessorBase::setAutomationVal(const char* parameterName, float val);
+    virtual bool setAutomationValByStr(std::string& parameterName, float val);
 
-    float getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo);
+	virtual bool setAutomationValByIndex(int index, float val);
+
+	float getAutomationVal(const char* parameterName, AudioPlayHead::PositionInfo& posInfo);
+    float getAutomationVal(std::string& parameterName, AudioPlayHead::PositionInfo& posInfo);
     float getAutomationAtZero(std::string parameterName);
+    float getAutomationAtZeroByIndex(int& index);
 
-    std::vector<float> getAutomation(std::string parameterName);
-    py::array_t<float> getAutomationNumpy(std::string parameterName);
+    std::vector<float> getAutomation(std::string& parameterName);
+    std::vector<float> getAutomationByIndex(int& index);
+    py::array_t<float> getAutomationNumpy(std::string& parameterName);
     py::dict getAutomationAll();
 
     //==============================================================================
@@ -146,8 +149,6 @@ private:
  
 protected:
 
-    AudioProcessorValueTreeState myParameters;
-
     juce::AudioProcessorValueTreeState::ParameterLayout createEmptyParameterLayout()
     {
         juce::AudioProcessorValueTreeState::ParameterLayout params;
@@ -166,6 +167,5 @@ protected:
         busesLayout.inputBuses.add(inputChannelSet);
         busesLayout.outputBuses.add(outputChannelSet);
         return busesLayout;
-    }
-    
+    }    
 };

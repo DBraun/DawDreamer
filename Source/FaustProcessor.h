@@ -178,15 +178,13 @@ class FaustProcessor : public ProcessorBase {
 
   void reset() override;
 
-  void createParameterLayout();  // NB: this is different from other processors
-                                 // because it's called after a Faust DSP file
-                                 // is compiled.
+  void createParameterLayout();
 
   const juce::String getName() const override { return "FaustProcessor"; }
 
   void automateParameters(AudioPlayHead::PositionInfo &posInfo,
                           int numSamples) override;
-  bool setAutomation(std::string parameterName, py::array input,
+  bool setAutomation(std::string& parameterName, py::array input,
                      std::uint32_t ppqn) override;
 
   // faust stuff
@@ -335,9 +333,9 @@ inline void create_bindings_for_faust_processor(py::module &m) {
 
   faustProcessor
       .def("set_dsp", &FaustProcessor::setDSPFile, arg("filepath"),
-           "Set the FAUST signal process with a file.")
+           "Set the FAUST box process with a file.")
       .def("set_dsp_string", &FaustProcessor::setDSPString, arg("faust_code"),
-           "Set the FAUST signal process with a string containing FAUST code.")
+           "Set the FAUST box process with a string containing FAUST code.")
       .def("compile", &FaustProcessor::compile,
            "Compile the FAUST object. You must have already set a dsp file "
            "path or dsp string.")
@@ -375,68 +373,6 @@ inline void create_bindings_for_faust_processor(py::module &m) {
                     "If enabled (default), voices are dynamically enabled and "
                     "disabled to save computation. This parameter only matters "
                     "if polyphony is enabled.")
-      .def_property(
-          "release_length", &FaustProcessor::getReleaseLength,
-          &FaustProcessor::setReleaseLength,
-          "If using polyphony, specifying the release length accurately can "
-          "help avoid warnings about voices being stolen.")
-      .def_property("faust_libraries_path",
-                    &FaustProcessor::getFaustLibrariesPath,
-                    &FaustProcessor::setFaustLibrariesPath,
-                    "Absolute path to directory containing your custom "
-                    "\".lib\" files containing Faust code.")
-      .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents,
-                             "The number of MIDI events stored in the buffer. \
-Note that note-ons and note-offs are counted separately.")
-      .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), kw_only(),
-           arg("clear_previous") = true, arg("beats") = false,
-           arg("all_events") = true, load_midi_description)
-      .def("clear_midi", &FaustProcessor::clearMidi, "Remove all MIDI notes.")
-      .def("add_midi_note", &FaustProcessor::addMidiNote, arg("note"),
-           arg("velocity"), arg("start_time"), arg("duration"), kw_only(),
-           arg("beats") = false, add_midi_description)
-      .def("save_midi", &FaustProcessor::saveMIDI, arg("filepath"),
-           save_midi_description)
-      .def("set_soundfiles", &FaustProcessor::setSoundfiles,
-           arg("soundfile_dict"),
-           "Set the audio data that the FaustProcessor can use with the "
-           "`soundfile` primitive.")
-      .def("set_dsp", &FaustProcessor::setDSPFile, arg("filepath"),
-           "Set the FAUST box process with a file.")
-      .def("set_dsp_string", &FaustProcessor::setDSPString, arg("faust_code"),
-           "Set the FAUST box process with a string containing FAUST code.")
-      .def("compile", &FaustProcessor::compile,
-           "Compile the FAUST object. You must have already set a dsp file "
-           "path or dsp string.")
-      .def_property(
-          "auto_import", &FaustProcessor::getAutoImport,
-          &FaustProcessor::setAutoImport,
-          "The auto import string. Default is `import(\"stdfaust.lib\");`")
-      .def("get_parameters_description",
-           &FaustProcessor::getPluginParametersDescription,
-           "Get a list of dictionaries describing the parameters of the most "
-           "recently compiled FAUST code.")
-      .def("get_parameter", &FaustProcessor::getParamWithIndex,
-           arg("param_index"))
-      .def("get_parameter", &FaustProcessor::getParamWithPath,
-           arg("parameter_path"))
-      .def("set_parameter", &FaustProcessor::setParamWithIndex,
-           arg("parameter_index"), arg("value"))
-      .def("set_parameter", &FaustProcessor::setAutomationVal,
-           arg("parameter_path"), arg("value"))
-      .def_property_readonly("compiled", &FaustProcessor::isCompiled,
-                             "Did the most recent DSP code compile?")
-      .def_property_readonly("code", &FaustProcessor::code,
-                             "Get the most recently compiled Faust DSP code.")
-      .def_property("num_voices", &FaustProcessor::getNumVoices,
-                    &FaustProcessor::setNumVoices,
-                    "The number of voices for polyphony. Set to zero to "
-                    "disable polyphony. One or more enables polyphony.")
-      .def_property(
-          "group_voices", &FaustProcessor::getGroupVoices,
-          &FaustProcessor::setGroupVoices,
-          "If grouped, all polyphonic voices will share the same parameters. "
-          "This parameter only matters if polyphony is enabled.")
       .def_property(
           "release_length", &FaustProcessor::getReleaseLength,
           &FaustProcessor::setReleaseLength,

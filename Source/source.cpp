@@ -359,7 +359,7 @@ but the filter mode cannot under automation.";
            "extension.")
       .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
       .def("set_patch", &PluginProcessorWrapper::wrapperSetPatch, arg("patch"))
-      .def("get_parameter", &PluginProcessorWrapper::wrapperGetParameter,
+      .def("get_parameter", &PluginProcessorWrapper::getAutomationAtZeroByIndex,
            arg("index"), "Get a parameter's value.")
       .def("get_parameter_name",
            &PluginProcessorWrapper::wrapperGetParameterName, arg("index"),
@@ -368,7 +368,7 @@ but the filter mode cannot under automation.";
            arg("index"), "Get a parameter's value as text.")
       .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter,
            arg("index"), arg("value"), "Set a parameter's value to a constant.")
-      .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation,
+      .def("set_automation", &PluginProcessorWrapper::setAutomationByIndex,
            arg("parameter_index"), arg("data"), kw_only(), arg("ppqn") = 0,
            "Set the automation based on its index.")
       .def("get_plugin_parameter_size",
@@ -408,13 +408,13 @@ or effects. Some plugins such as ones that do sidechain compression can accept t
   py::class_<SamplerProcessor, ProcessorBase>(m, "SamplerProcessor")
       .def("set_data", &SamplerProcessor::setData, arg("data"),
            "Set an audio sample.")
-      .def("get_parameter", &SamplerProcessor::wrapperGetParameter,
+      .def("get_parameter", &SamplerProcessor::getAutomationAtZeroByIndex,
            arg("index"), "Get a parameter's value.")
       .def("get_parameter_name", &SamplerProcessor::wrapperGetParameterName,
            arg("index"), "Get a parameter's name.")
       .def("get_parameter_text", &SamplerProcessor::wrapperGetParameterAsText,
            arg("index"), "Get a parameter's value as text.")
-      .def("set_parameter", &SamplerProcessor::wrapperSetParameter,
+      .def("set_parameter", &SamplerProcessor::setAutomationValByIndex,
            arg("index"), arg("value"), "Set a parameter's value to a constant.")
       .def("get_parameter_size",
            &SamplerProcessor::wrapperGetPluginParameterSize,

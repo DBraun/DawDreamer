@@ -93,10 +93,8 @@ public:
         for (int j = 0; j < 2; j++) {
             for (int i = 0; i < processor.getNumParameters(); ++i)
             {
-                auto parameterName = processor.getParameterName(i);
-                std::string paramID = std::to_string(i);
                 // give it a valid single sample of automation.
-                dawDreamerPluginProcessor.setAutomationVal(paramID, processor.getParameter(i));
+                dawDreamerPluginProcessor.setAutomationValByIndex(i, processor.getParameter(i));
             }
         }
     }

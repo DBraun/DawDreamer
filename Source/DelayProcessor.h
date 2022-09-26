@@ -6,13 +6,9 @@ class DelayProcessor : public ProcessorBase
 {
 public:
     DelayProcessor(std::string newUniqueName, std::string rule, float delaySize, float wet) :
-        ProcessorBase(createParameterLayout, newUniqueName), myRule{ rule }{
+        ProcessorBase(newUniqueName), myRule{ rule }{
+		createParameterLayout();
 
-        setDelay(delaySize);
-        setWet(wet);
-
-        myDelaySize = myParameters.getRawParameterValue("delay");
-        myWetLevel = myParameters.getRawParameterValue("wet_level");
         setMainBusInputsAndOutputs(2, 2);
     }
 
@@ -22,7 +18,7 @@ public:
         AudioPlayHead::PositionInfo posInfo;
         automateParameters(posInfo, 1); // do this to give a valid state to the filter.
 
-        initDelay();
+        initDelay(getAutomationAtZero("delay"));
         
         const int numChannels = 2;
         juce::dsp::ProcessSpec spec{ sampleRate, static_cast<juce::uint32> (samplesPerBlock), static_cast<juce::uint32> (numChannels) };
@@ -48,8 +44,10 @@ public:
 
     void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
         *myWetLevel = getAutomationVal("wet_level", posInfo);
-        *myDelaySize = getAutomationVal("delay", posInfo);
-        updateParameters();
+
+		// convert milliseconds to samples
+        myDelay.setDelay((getAutomationVal("delay", posInfo)) * .001f *
+                         (float)mySampleRate);
     }
 
     void reset() override {
@@ -70,8 +68,6 @@ private:
 
     double mySampleRate = 44100.;
 
-    std::atomic<float>* myDelaySize; // delay in milliseconds
-
     // todo: very inconvenient that Linear is a struct and not an enum. It makes changing the type later difficult.
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> myDelay;
 
@@ -80,16 +76,11 @@ private:
 
     juce::AudioSampleBuffer delayBuffer;
 
-    void updateParameters() {
-        // convert milliseconds to samples
-        myDelay.setDelay((*myDelaySize)*.001f*(float)mySampleRate);
-    }
-
-    void initDelay() {
+    void initDelay(float delayMs) {
         // todo: NB: DelayLine seems to need to be initialized with the maximum delay size you'll ever ask for before re-initializing.
         // todo: What's a more flexible solution so that through parameter automation we might be able to increase the delay over time?
 
-        int delayInSamples = int(*myDelaySize * .001 * mySampleRate);
+        int delayInSamples = int(delayMs * .001 * mySampleRate);
         if (!myRule.compare("linear"))
         {
             myDelay = juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>(delayInSamples);
@@ -100,13 +91,26 @@ private:
         }
     }
 
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+public:
+    void createParameterLayout()
     {
-        juce::AudioProcessorValueTreeState::ParameterLayout params;
+		juce::AudioProcessorParameterGroup group;
 
-        params.add(std::make_unique<AutomateParameterFloat>("wet_level", "wet_level", NormalisableRange<float>(0.f, 1.f), .1f));
-        params.add(std::make_unique<AutomateParameterFloat>("delay", "delay", NormalisableRange<float>(0.f, 44100.f), 10.f)); // todo: proper max value
-        return params;
+        group.addChild(std::make_unique<AutomateParameterFloat>(
+                    "wet_level", "wet_level",
+                    NormalisableRange<float>(0.f, 1.f), .1f));
+                group.addChild(std::make_unique<AutomateParameterFloat>(
+                    "delay", "delay", NormalisableRange<float>(0.f, 44100.f),
+                    10.f));  // todo: proper max value
+
+        this->setParameterTree(std::move(group));
+
+        int i = 0;
+        for (auto* parameter : this->getParameters()) {
+          // give it a valid single sample of automation.
+          ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
+          i++;
+        }
     }
 
 };

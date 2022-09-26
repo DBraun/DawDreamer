@@ -59,6 +59,8 @@ public:
 
     bool loadAbletonClipInfo(const char* filepath);
 
+	void createParameterLayout();
+
 private:
 
     void init();
@@ -88,7 +90,6 @@ private:
     double m_sample_rate;
 
     double m_time_ratio_if_warp_off = 1.;
-    std::atomic<float>* myTranspose;
 
     std::vector<Clip> m_clips;
     int m_clipIndex = 0;
@@ -96,7 +97,6 @@ private:
 
     void setupRubberband();
 
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     int m_rubberbandConfig = 0;
 };
 

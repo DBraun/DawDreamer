@@ -1,8 +1,9 @@
 #include "PlaybackWarpProcessor.h"
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 
-PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr, double data_sr) : ProcessorBase{ createParameterLayout, newUniqueName }
+PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData, double sr, double data_sr) : ProcessorBase{ newUniqueName }
 {
+    createParameterLayout();
     m_numChannels = (int)inputData.size();
     setMainBusInputsAndOutputs(0, m_numChannels);
     const int numSamples = (int)inputData.at(0).size();
@@ -25,8 +26,9 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, std::vec
     resetWarpMarkers(120.);
 }
 
-PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, double data_sr) : ProcessorBase{ createParameterLayout, newUniqueName }
+PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr, double data_sr) : ProcessorBase{ newUniqueName }
 {
+	createParameterLayout();
     m_sample_rate = sr;
     setData(input, data_sr);
     defaultRubberBandOptions();
@@ -37,7 +39,6 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, py::arra
 void
 PlaybackWarpProcessor::init() {
     setAutomationVal("transpose", 0.);
-    myTranspose = myParameters.getRawParameterValue("transpose");
     setupRubberband();
     setClipPositionsDefault();
 }
@@ -60,8 +61,7 @@ PlaybackWarpProcessor::prepareToPlay(double, int) {
 
 void
 PlaybackWarpProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {
-    *myTranspose = getAutomationVal("transpose", posInfo);
-    double scale = std::pow(2., *myTranspose / 12.);
+	double scale = std::pow(2., getAutomationVal("transpose", posInfo) / 12.);
     m_rbstretcher->setPitchScale(scale * myPlaybackDataSR / m_sample_rate);
 }
 
@@ -438,13 +438,21 @@ PlaybackWarpProcessor::setupRubberband() {
         1.);
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout
+void
 PlaybackWarpProcessor::createParameterLayout()
 {
-    juce::AudioProcessorValueTreeState::ParameterLayout params;
+  juce::AudioProcessorParameterGroup group;
 
-    params.add(std::make_unique<AutomateParameterFloat>("transpose", "transpose", NormalisableRange<float>(-96.f, 96.f), 0.f));
-    return params;
+  group.addChild(std::make_unique<AutomateParameterFloat>("transpose", "transpose", NormalisableRange<float>(-96.f, 96.f), 0.f));
+
+  this->setParameterTree(std::move(group));
+
+  int i = 0;
+  for (auto* parameter : this->getParameters()) {
+    // give it a valid single sample of automation.
+    ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
+    i++;
+  }
 }
 
 #endif

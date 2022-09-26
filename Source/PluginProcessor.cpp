@@ -237,19 +237,20 @@ PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, int nu
     THROW_ERROR_IF_NO_PLUGIN
             
     int i = 0;
+
+	auto allParameters = this->getParameters();
     
     for (juce::AudioProcessorParameter *parameter : myPlugin->getParameters()) {
         
-        auto name = parameter->getName(DAW_PARARAMETER_MAX_NAME_LENGTH);
+        auto name = parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH);
 
         if (name.compare("") == 0 || !parameter->isAutomatable()) {
             i++;
             continue;
         }
-        
-        auto paramID = std::to_string(i);
-        auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(paramID));
-                
+
+        auto theParameter = (AutomateParameterFloat*)allParameters.getUnchecked(i);
+
         if (theParameter->isAutomated()) {
             parameter->beginChangeGesture();
             parameter->setValueNotifyingHost(theParameter->sample(posInfo));
@@ -370,8 +371,7 @@ PluginProcessor::loadStateInformation(std::string filepath) {
 
     int i = 0;
     for (auto *parameter : myPlugin->getParameters()) {
-        std::string paramID = std::to_string(i);
-        ProcessorBase::setAutomationVal(paramID, parameter->getValue());
+        ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
         i++;
     }
 
@@ -405,21 +405,28 @@ PluginProcessor::saveStateInformation(std::string filepath) {
 void
 PluginProcessor::createParameterLayout()
 {
-
-    juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
-
-    // clear existing parameters in the layout?
-    ValueTree blankState;
-    myParameters.replaceState(blankState);
+	juce::AudioProcessorParameterGroup group;
     
     int i = 0;
     for (auto *parameter : myPlugin->getParameters()) {
-        auto parameterName = parameter->getName(DAW_PARARAMETER_MAX_NAME_LENGTH);
+        auto parameterName = parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH);
         std::string paramID = std::to_string(i);
-        myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(paramID, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
-        // give it a valid single sample of automation.
-        ProcessorBase::setAutomationVal(paramID, parameter->getValue());
+
+        group.addChild(
+                std::make_unique<AutomateParameterFloat>(
+                    paramID, parameterName, NormalisableRange<float>(0.f, 1.f),
+                    parameter->getValue()));
         i++;
+    }
+
+	this->setParameterTree(std::move(group));
+
+	this->updateHostDisplay();
+
+    i = 0;
+    for (auto* parameter : this->getParameters()) {
+         ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
+		 i++;
     }
 }
 
@@ -469,11 +476,15 @@ PluginProcessor::setParameter(const int parameterIndex, const float value)
 {
     THROW_ERROR_IF_NO_PLUGIN
 
-    myPlugin->setParameter(parameterIndex, value); // todo: instead we need to do parameter->setValue(value)
+    auto parameters = myPlugin->getParameters();
 
-    std::string paramID = std::to_string(parameterIndex);
+    if (parameterIndex < 0 || parameterIndex >= parameters.size()) {
+      throw std::runtime_error("Parameter not found for index: " +
+                               std::to_string(parameterIndex));
+    }
+    parameters.getUnchecked(parameterIndex)->setValue(value);
 
-    ProcessorBase::setAutomationVal(paramID, value);
+    ProcessorBase::setAutomationValByIndex(parameterIndex, value);
 }
 
 //==============================================================================
@@ -490,29 +501,15 @@ PluginProcessor::getPatch() {
     AudioPlayHead::PositionInfo posInfo;
     posInfo.setTimeInSeconds(0.);
     posInfo.setTimeInSamples(0.);
-    for (int i = 0; i < myPlugin->getNumParameters(); i++) {
 
-        auto theName = myPlugin->getParameterName(i);
+	int i = 0;
+	for (auto& uncastedParameter : this->getParameters()) {
 
-        if (theName == "Param") {
-            continue;
-        }
-
-        auto parameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
-        if (parameter) {
-            float val = parameter->sample(posInfo);
-            if (parameter) {
-                params.push_back(std::make_pair(i, val));
-            }
-            else {
-                throw std::runtime_error("Error getPatch : " + theName.toStdString());
-            }
-        }
-        else {
-            throw std::runtime_error("Error getPatch with parameter: " + theName.toStdString());
-        }
-
-    }
+		auto parameter = (AutomateParameterFloat*)uncastedParameter;
+        float val = parameter->sample(posInfo);
+        params.push_back(std::make_pair(i, val));
+		i++;
+	}
 
     params.shrink_to_fit();
 
@@ -673,19 +670,6 @@ PluginProcessorWrapper::wrapperGetPatch()
     return customBoost::pluginPatchToListOfTuples(PluginProcessor::getPatch());
 }
 
-float
-PluginProcessorWrapper::wrapperGetParameter(int parameterIndex)
-{
-    THROW_ERROR_IF_NO_PLUGIN
-
-    if (parameterIndex >= myPlugin->getNumParameters()) {
-        throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
-        return 0.;
-    }
-
-    return ProcessorBase::getAutomationAtZero(std::to_string(parameterIndex));
-}
-
 std::string
 PluginProcessorWrapper::wrapperGetParameterName(int parameter)
 {
@@ -695,19 +679,17 @@ PluginProcessorWrapper::wrapperGetParameterName(int parameter)
 bool
 PluginProcessorWrapper::wrapperSetParameter(int parameterIndex, float value)
 {
-    
-    THROW_ERROR_IF_NO_PLUGIN
+  THROW_ERROR_IF_NO_PLUGIN
 
-    myPlugin->setParameter(parameterIndex, value); // todo: instead we need to do parameter->setValue(value)
+  auto parameters = myPlugin->getParameters();
 
-    std::string paramID = std::to_string(parameterIndex);
+  if (parameterIndex < 0 || parameterIndex >= parameters.size()) {
+    throw std::runtime_error("Parameter not found for index: " +
+                             std::to_string(parameterIndex));
+  }
+  parameters.getUnchecked(parameterIndex)->setValue(value);
 
-    return ProcessorBase::setAutomationVal(paramID, value);
-}
-
-bool
-PluginProcessorWrapper::wrapperSetAutomation(int parameterIndex, py::array input, std::uint32_t ppqn) {
-    return PluginProcessorWrapper::setAutomation(std::to_string(parameterIndex), input, ppqn);
+  return ProcessorBase::setAutomationValByIndex(parameterIndex, value);
 }
 
 int
@@ -727,8 +709,8 @@ PluginProcessorWrapper::getPluginParametersDescription()
     const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
     for (int i = 0; i < myPlugin->getNumParameters(); i++) {
 
-        std::string theName = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
-        std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        std::string theName = (processorParams[i])->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+        std::string currentText = processorParams[i]->getText(processorParams[i]->getValue(), DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
         std::string label = processorParams[i]->getLabel().toStdString();
 
 		std::string category;
@@ -783,10 +765,10 @@ PluginProcessorWrapper::getPluginParametersDescription()
         myDictionary["defaultValue"] = processorParams[i]->getDefaultValue();
         myDictionary["defaultValueText"] =
             processorParams[i]->getText(processorParams[i]->getDefaultValue(),
-                                        DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
-        myDictionary["min"] = processorParams[i]->getText(0.f, DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+                                        DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+        myDictionary["min"] = processorParams[i]->getText(0.f, DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
         myDictionary["max"] =
-            processorParams[i]->getText(1.f, DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+            processorParams[i]->getText(1.f, DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
 
 		std::vector<std::string> valueStrings;
         for (auto& valueString : processorParams[i]->getAllValueStrings()) {

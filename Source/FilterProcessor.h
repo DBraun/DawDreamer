@@ -43,9 +43,6 @@ public:
 private:
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> myFilter;
     FILTER_FilterFormat myMode;
-    std::atomic<float>* myFreq;
-    std::atomic<float>* myQ;
-    std::atomic<float>* myGain;
 
     double mySampleRate;
     int mySamplesPerBlock;
@@ -53,13 +50,27 @@ private:
     std::string modeToString(FILTER_FilterFormat mode);
     FILTER_FilterFormat stringToMode(std::string s);
 
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
-    {
-        juce::AudioProcessorValueTreeState::ParameterLayout params;
+public:
+    void createParameterLayout() {
+      juce::AudioProcessorParameterGroup group;
 
-        params.add(std::make_unique<AutomateParameterFloat>("freq", "freq", NormalisableRange<float>(0.f, 22050.f), 1000.f));
-        params.add(std::make_unique<AutomateParameterFloat>("q", "q", NormalisableRange<float>(0.01f, 10.f), 0.707107f));
-        params.add(std::make_unique<AutomateParameterFloat>("gain", "gain", NormalisableRange<float>(-100.f, 30.f), 1.f));
-        return params;
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+          "freq", "freq", NormalisableRange<float>(0.f, 22050.f), 1000.f));
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+          "q", "q", NormalisableRange<float>(0.01f, 10.f), 0.707107f));
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+          "gain", "gain", NormalisableRange<float>(-100.f, 30.f), 1.f));
+
+      this->setParameterTree(std::move(group));
+
+	  this->updateHostDisplay();
+
+      int i = 0;
+      for (auto* parameter : this->getParameters()) {
+        // give it a valid single sample of automation.
+        ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
+        i++;
+      }
     }
+
 };

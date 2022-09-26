@@ -6,19 +6,9 @@ class ReverbProcessor : public ProcessorBase
 {
 public:
     ReverbProcessor(std::string newUniqueName, float roomSize=0.5f, float damping=0.5f, float wetLevel=0.33f, float dryLevel=0.4f, float width=1.0f) :
-        ProcessorBase(createParameterLayout, newUniqueName) {
+        ProcessorBase( newUniqueName) {
+		createParameterLayout();
 
-        setRoomSize(roomSize);
-        setDamping(damping);
-        setDryLevel(dryLevel);
-        setWetLevel(wetLevel);
-        setWidth(width);
-
-        myRoomSize = myParameters.getRawParameterValue("room_size");
-        myDamping = myParameters.getRawParameterValue("damping");
-        myDryLevel = myParameters.getRawParameterValue("dry_level");
-        myWetLevel = myParameters.getRawParameterValue("wet_level");
-        myWidth = myParameters.getRawParameterValue("width");
         setMainBusInputsAndOutputs(2, 2);
     }
 
@@ -42,14 +32,13 @@ public:
     }
 
     void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
-
-        *myRoomSize = getAutomationVal("room_size", posInfo);
-        *myDamping = getAutomationVal("damping", posInfo);
-        *myDryLevel = getAutomationVal("dry_level", posInfo);
-        *myWetLevel = getAutomationVal("wet_level", posInfo);
-        *myWidth = getAutomationVal("width", posInfo);
-
-        updateParameters();
+        juce::dsp::Reverb::Parameters params;
+        params.damping = getAutomationVal("damping", posInfo);
+        params.dryLevel = getAutomationVal("dry_level", posInfo);
+        params.roomSize = getAutomationVal("room_size", posInfo);
+        params.wetLevel = getAutomationVal("wet_level", posInfo);
+        params.width = getAutomationVal("width", posInfo);
+        myReverb.setParameters(params);
     }
 
     void reset() override {
@@ -74,35 +63,31 @@ public:
     void setWidth(float width) { setAutomationVal("width", width); }
     float getWidth() { return getAutomationAtZero("width");  }
 
+    void createParameterLayout() {
+
+	  juce::AudioProcessorParameterGroup group;
+
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+		   "room_size", "room_size", NormalisableRange<float>(0.f, 1.f), 0.f));
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+		  "damping", "damping", NormalisableRange<float>(0.f, 1.f), 0.f));
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+		  "wet_level", "wet_level", NormalisableRange<float>(0.f, 1.f), 0.f));
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+		  "dry_level", "dry_level", NormalisableRange<float>(0.f, 1.f), 0.f));
+      group.addChild(std::make_unique<AutomateParameterFloat>(
+		  "width", "width", NormalisableRange<float>(0.f, 1.f), 0.f));
+
+      this->setParameterTree(std::move(group));
+
+      int i = 0;
+      for (auto* parameter : this->getParameters()) {
+        // give it a valid single sample of automation.
+        ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
+        i++;
+      }
+    }
 
 private:
     juce::dsp::Reverb myReverb;
-    std::atomic<float>* myRoomSize;
-    std::atomic<float>* myDamping;
-    std::atomic<float>* myWetLevel;
-    std::atomic<float>* myDryLevel;
-    std::atomic<float>* myWidth;
-
-    void updateParameters() {
-        juce::dsp::Reverb::Parameters params;
-        params.damping = *myDamping;
-        params.dryLevel = *myDryLevel;
-        params.roomSize = *myRoomSize;
-        params.wetLevel = *myWetLevel;
-        params.width = *myWidth;
-        myReverb.setParameters(params);
-    }
-
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
-    {
-        juce::AudioProcessorValueTreeState::ParameterLayout params;
-
-        params.add(std::make_unique<AutomateParameterFloat>("room_size", "room_size", NormalisableRange<float>(0.f, 1.f), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("damping", "damping", NormalisableRange<float>(0.f, 1.f), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("wet_level", "wet_level", NormalisableRange<float>(0.f, 1.f), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("dry_level", "dry_level", NormalisableRange<float>(0.f, 1.f), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("width", "width", NormalisableRange<float>(0.f, 1.f), 0.f));
-        return params;
-    }
-
 };

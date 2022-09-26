@@ -85,7 +85,7 @@ FaustProcessor::~FaustProcessor() {
   delete myMidiIteratorSec;
 }
 
-bool FaustProcessor::setAutomation(std::string parameterName, py::array input,
+bool FaustProcessor::setAutomation(std::string& parameterName, py::array input,
                                    std::uint32_t ppqn) {
   COMPILE_FAUST
   return ProcessorBase::setAutomation(parameterName, input, ppqn);
@@ -341,19 +341,21 @@ void FaustProcessor::clear() {
   SAFE_DELETE(m_soundUI);
   SAFE_DELETE(m_ui);
 
-  if (m_compileState == kSignalPoly) {
-    // todo: need to delete m_dsp_poly
-    //        std::cerr << "not deleting m_dsp_poly!" << std::endl;
-    //        delete (mydsp_poly*) m_dsp_poly;
+  if (m_dsp_poly) {
+      delete (mydsp_poly*) m_dsp_poly;
+    m_dsp_poly = nullptr;
+	  // we don't need to delete m_dsp because m_dsp_poly would have done it
+      m_dsp = nullptr;
   } else {
     SAFE_DELETE(m_dsp);
     delete m_dsp_poly;
+    m_dsp_poly = nullptr;
+    m_dsp = nullptr;
   }
-  m_dsp_poly = nullptr;
 
+  SAFE_DELETE(m_poly_factory);
   deleteDSPFactory(m_factory);
   m_factory = nullptr;
-  SAFE_DELETE(m_poly_factory);
 
   m_compileState = kNotCompiled;
 }
@@ -540,10 +542,9 @@ bool FaustProcessor::compile() {
   return true;
 }
 
-
-void FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
-                                    std::optional<std::vector<std::string>> in_argv) {
-  m_compileState = kNotCompiled;
+void FaustProcessor::compileSignals(
+    std::vector<SigWrapper>& wrappers,
+    std::optional<std::vector<std::string>> in_argv) {
   clear();
 
   int argc = 0;
@@ -572,7 +573,9 @@ void FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
   }
 
   m_dsp = m_factory->createDSPInstance();
-  assert(m_dsp);
+  if (!m_dsp) {
+    throw std::runtime_error("FaustProcessor: m_dsp not created.");
+  }
 
   // create new factory
   bool is_polyphonic = m_nvoices > 0;
@@ -622,9 +625,8 @@ void FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 }
 
-void FaustProcessor::compileBox(BoxWrapper& box,
-                                std::optional<std::vector<std::string>> in_argv) {
-  m_compileState = kNotCompiled;
+void FaustProcessor::compileBox(
+    BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
   clear();
 
   int argc = 0;
@@ -668,8 +670,6 @@ void FaustProcessor::compileBox(BoxWrapper& box,
   m_numInputChannels = inputs;
   m_numOutputChannels = outputs;
 
-  setMainBusInputsAndOutputs(inputs, outputs);
-
   // make new UI
   if (is_polyphonic) {
     m_midi_handler = rt_midi("my_midi");
@@ -696,6 +696,8 @@ void FaustProcessor::compileBox(BoxWrapper& box,
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+  setMainBusInputsAndOutputs(inputs, outputs);
 }
 
 bool FaustProcessor::setDSPFile(const std::string& path) {
@@ -742,7 +744,7 @@ bool FaustProcessor::setParamWithIndex(const int index, float p) {
 
   auto& parAddress = it->second;
 
-  return this->setAutomationVal(parAddress, p);
+  return this->setAutomationValByStr(parAddress, p);
 }
 
 float FaustProcessor::getParamWithIndex(const int index) {
@@ -769,11 +771,8 @@ float FaustProcessor::getParamWithPath(const std::string& n) {
 std::string FaustProcessor::code() { return m_code; }
 
 void FaustProcessor::createParameterLayout() {
-  juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
 
-  // clear existing parameters in the layout?
-  ValueTree blankState;
-  myParameters.replaceState(blankState);
+  juce::AudioProcessorParameterGroup group;
 
   m_map_juceIndex_to_faustIndex.clear();
   m_map_juceIndex_to_parAddress.clear();
@@ -820,29 +819,37 @@ void FaustProcessor::createParameterLayout() {
     m_map_juceIndex_to_parAddress[numParamsAdded] = parnameString;
 
     auto parameterLabel = m_ui->getParamLabel(i);
-    myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(
+    group.addChild(std::make_unique<AutomateParameterFloat>(
         parameterName, parameterName,
         NormalisableRange<float>(m_ui->getParamMin(i), m_ui->getParamMax(i)),
         m_ui->getParamInit(i), parameterLabel));
-    // give it a valid single sample of automation.
-    ProcessorBase::setAutomationVal(parameterName, m_ui->getParamValue(i));
 
     numParamsAdded += 1;
   }
+
+  this->setParameterTree(std::move(group));
+
+  int i = 0;
+  for (auto* parameter : this->getParameters()) {
+    int j = m_map_juceIndex_to_faustIndex[i];
+    // give it a valid single sample of automation.
+    ProcessorBase::setAutomationValByIndex(i, m_ui->getParamInit(j));
+    i++;
+  }
+
 }
 
 py::list FaustProcessor::getPluginParametersDescription() {
-  py::list myList;
 
   COMPILE_FAUST
 
+  py::list myList;
+  
   if (m_compileState) {
     int i = 0;
     for (auto* parameter : this->getParameters()) {
-      int maximumStringLength = 256;
-
       std::string theName =
-          parameter->getName(maximumStringLength).toStdString();
+          parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
       std::string label = parameter->getLabel().toStdString();
 
       auto it = m_map_juceIndex_to_faustIndex.find(i);

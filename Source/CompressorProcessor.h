@@ -6,19 +6,12 @@ class CompressorProcessor : public ProcessorBase
 {
 public:
     CompressorProcessor(std::string newUniqueName, float threshold, float ratio, float attack, float release) :
-        ProcessorBase(createParameterLayout, newUniqueName) {
-
-        setThreshold(threshold);
-        setRatio(ratio);
-        setAttack(attack);
-        setRelease(release);
-
-        myThreshold = myParameters.getRawParameterValue("threshold");
-        myRatio = myParameters.getRawParameterValue("ratio");
-        myAttack = myParameters.getRawParameterValue("attack");
-        myRelease = myParameters.getRawParameterValue("release");
-
-        updateParameters();
+        ProcessorBase(newUniqueName) {
+		createParameterLayout();
+		setThreshold(threshold);
+		setRatio(ratio);
+		setAttack(attack);
+		setRelease(release);
         setMainBusInputsAndOutputs(2, 2);
     }
 
@@ -38,12 +31,12 @@ public:
     }
 
     void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
+ 
+		myCompressor.setThreshold(getAutomationVal("threshold", posInfo));
+        myCompressor.setRatio(getAutomationVal("ratio", posInfo));
+        myCompressor.setAttack(getAutomationVal("attack", posInfo));
+        myCompressor.setRelease(getAutomationVal("release", posInfo));
 
-        *myThreshold = getAutomationVal("threshold", posInfo);
-        *myRatio = getAutomationVal("ratio", posInfo);
-        *myAttack = getAutomationVal("attack", posInfo);
-        *myRelease = getAutomationVal("release", posInfo);
-        updateParameters();
     }
 
     void reset() override {
@@ -68,27 +61,32 @@ public:
 
 private:
     juce::dsp::Compressor<float> myCompressor;
-    std::atomic<float>* myThreshold;
-    std::atomic<float>* myRatio;
-    std::atomic<float>* myAttack;
-    std::atomic<float>* myRelease;
 
-    void updateParameters() {
-        myCompressor.setThreshold(*myThreshold);
-        myCompressor.setRatio(*myRatio);
-        myCompressor.setAttack(*myAttack);
-        myCompressor.setRelease(*myRelease);
-    }
-
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+public:
+   void createParameterLayout()
     {
-        juce::AudioProcessorValueTreeState::ParameterLayout params;
+		juce::AudioProcessorParameterGroup group;
 
-        params.add(std::make_unique<AutomateParameterFloat>("threshold", "threshold", NormalisableRange<float>(-400.f, 200.f), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("ratio", "ratio", NormalisableRange<float>(1.f, std::numeric_limits<float>::max()), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("attack", "attack", NormalisableRange<float>(0.f, 10000.f), 0.f));
-        params.add(std::make_unique<AutomateParameterFloat>("release", "release", NormalisableRange<float>(0.f, 10000.f), 0.f));
-        return params;
+        group.addChild(std::make_unique<AutomateParameterFloat>(
+            "threshold", "threshold", NormalisableRange<float>(-400.f, 200.f),
+            0.f));
+        group.addChild(std::make_unique<AutomateParameterFloat>(
+            "ratio", "ratio",
+            NormalisableRange<float>(1.f, std::numeric_limits<float>::max()),
+            0.f));
+        group.addChild(std::make_unique<AutomateParameterFloat>(
+            "attack", "attack", NormalisableRange<float>(0.f, 10000.f), 0.f));
+        group.addChild(std::make_unique<AutomateParameterFloat>(
+            "release", "release", NormalisableRange<float>(0.f, 10000.f), 0.f));
+
+		this->setParameterTree(std::move(group));
+
+		int i = 0;
+        for (auto* parameter : this->getParameters()) {
+          // give it a valid single sample of automation.
+          ProcessorBase::setAutomationValByIndex(i, parameter->getValue());
+          i++;
+        }
     }
 
 };

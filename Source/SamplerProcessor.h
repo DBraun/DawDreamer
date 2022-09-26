@@ -35,32 +35,6 @@ public:
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return true; }
 
-    float
-    wrapperGetParameter(int parameterIndex)
-    {
-        if (parameterIndex >= sampler.getNumParameters()) {
-            throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
-            return 0.;
-        }
-
-        auto parameterName = sampler.getParameterName(parameterIndex);
-
-        return ProcessorBase::getAutomationAtZero(parameterName.toStdString());
-    }
-
-    void
-    wrapperSetParameter(const int parameterIndex, const float value)
-    {
-        if (parameterIndex >= sampler.getNumParameters()) {
-            throw std::runtime_error("Parameter not found for index: " + std::to_string(parameterIndex));
-            return;
-        }
-
-        auto parameterName = sampler.getParameterName(parameterIndex);
-
-        ProcessorBase::setAutomationVal(parameterName.toStdString(), value);
-    }
-
     void
     setPlayHead(AudioPlayHead* newPlayHead) override
     {
@@ -346,41 +320,32 @@ public:
     void
     createParameterLayout()
     {
-        juce::AudioProcessorValueTreeState::ParameterLayout blankLayout;
-
-        // clear existing parameters in the layout?
-        ValueTree blankState;
-        myParameters.replaceState(blankState);
+		juce::AudioProcessorParameterGroup group;
 
         for (int i = 0; i < sampler.getNumParameters(); ++i)
         {
             auto parameterName = sampler.getParameterName(i);
-            // Ensure the parameter is not unused.
+            group.addChild(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
+        }
 
-            myParameters.createAndAddParameter(std::make_unique<AutomateParameterFloat>(parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
+		this->setParameterTree(std::move(group));
+
+        for (int i = 0; i < sampler.getNumParameters(); ++i) {
             // give it a valid single sample of automation.
-            ProcessorBase::setAutomationVal(parameterName.toStdString(), sampler.getParameter(i));
+            ProcessorBase::setAutomationValByIndex(i, sampler.getParameter(i));
         }
     }
 
     void
     automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override {
 
+		auto allParameters = this->getParameters();
+
         for (int i = 0; i < sampler.getNumParameters(); i++) {
-
-            auto theName = sampler.getParameterName(i);
-
-            auto theParameter = ((AutomateParameterFloat*)myParameters.getParameter(theName));
-            if (theParameter) {
-                sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo));
-            }
-            else {
-                std::cerr << "Error automateParameters: " << theName << std::endl;
-            }
+			auto theParameter = (AutomateParameterFloat*)allParameters.getUnchecked(i);
+            sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo));
         }
-        
     }
-
 
 private:
 

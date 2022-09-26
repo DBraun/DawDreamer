@@ -8,99 +8,162 @@ ProcessorBase::numChannelsChanged() {
 void
 ProcessorBase::getStateInformation(juce::MemoryBlock& destData)
 {
-    auto state = myParameters.copyState();
-    std::unique_ptr<juce::XmlElement> xml(state.createXml());
-    copyXmlToBinary(*xml, destData);
 }
 
 void
 ProcessorBase::setStateInformation(const void* data, int sizeInBytes)
 {
-    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-
-    if (xmlState.get() != nullptr)
-        if (xmlState->hasTagName(myParameters.state.getType()))
-            myParameters.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
-bool ProcessorBase::setAutomation(std::string parameterName, py::array input, std::uint32_t ppqn) {
+bool ProcessorBase::setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn) {
 
-    try
-    {
-        auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
-
-        if (parameter) {
-            return parameter->setAutomation(input, ppqn);
+    for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+    if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
+            .toStdString() == parameterName) {
+          auto parameter = (AutomateParameterFloat*)
+              uncastedParameter;
+          parameter->setAutomation(input, ppqn);
+          return true;
         }
-        else {
-            throw std::runtime_error("Failed to find parameter: " + parameterName);
-        }
-    }
-    catch (const std::exception& e)
-    {
-        throw std::runtime_error("Failed to set '" + parameterName + "' automation: " + e.what());
-    }
+	}
 
-    return true;
+    throw std::runtime_error("Failed to set parameter: " + parameterName);
+    return false;
 }
 
-bool ProcessorBase::setAutomationVal(std::string parameterName, float val) {
+bool ProcessorBase::setAutomationByIndex(int& index, py::array input,
+                                  std::uint32_t ppqn) {
 
-    try
-    {
-        auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
-        if (parameter) {
-            parameter->setAutomation(val);
-        }
-        else {
-            throw std::runtime_error("Failed to find parameter: " + parameterName);
-        }
-    }
-    catch (const std::exception& e)
-    {
-        throw std::runtime_error("Failed to set '" + parameterName + "' automation: " + e.what());
-    }
+	auto parameters = this->getParameterTree().getParameters(true);
+  if (index < 0 || index >= parameters.size()) {
+    throw std::runtime_error("Failed to set automation for parameter at index " +
+                             std::to_string(index));
+  }
 
-    return true;
+	auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+	parameter->setAutomation(input, ppqn);
+	return true;
 }
 
-std::vector<float> ProcessorBase::getAutomation(std::string parameterName) {
-    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
-
-    if (parameter) {
-        return parameter->getAutomation();
-    }
-    else {
-        throw std::runtime_error("Failed to get automation values for parameter: " + parameterName);
-    }
+bool ProcessorBase::setAutomationVal(const char* parameterName, float val) {
+  return setAutomationValByStr(std::string(parameterName), val);
 }
 
-float ProcessorBase::getAutomationVal(std::string parameterName, AudioPlayHead::PositionInfo& posInfo) {
-    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
+bool ProcessorBase::setAutomationValByStr(std::string& parameterName, float val) {
 
-    if (parameter) {
-        return parameter->sample(posInfo);
+	std::cout << "looking for param: " << parameterName << std::endl;
+    for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+		if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
+				.toStdString() == parameterName) {
+		  auto parameter = (AutomateParameterFloat*)
+			  uncastedParameter;
+		  parameter->setAutomation(val);
+                  std::cout << "   and found it" << std::endl;
+		  return true;
+                } else {
+                  std::cout << "   but found: "
+                            << uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
+                                   .toStdString()
+                            << std::endl;        
+		}
+	}
+
+  throw std::runtime_error("Failed to set parameter: " + parameterName);
+  return false;
+}
+
+bool ProcessorBase::setAutomationValByIndex(int index, float val) {
+
+	auto parameters = this->getParameterTree().getParameters(true);
+  if (index < 0 || index >= parameters.size()) {
+      throw std::runtime_error("Failed to set parameter at index " + std::to_string(index));
+  }
+
+	auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+  parameter->setAutomation(val);
+  return true;
+}
+
+std::vector<float> ProcessorBase::getAutomation(std::string& parameterName) {
+
+    for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+    if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
+            .toStdString() == parameterName) {
+      auto parameter = (AutomateParameterFloat*) uncastedParameter;
+      return parameter->getAutomation();
     }
-    else {
-        throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
+  }
+
+  throw std::runtime_error("Failed to get automation values for parameter: " +
+                           parameterName);
+}
+
+std::vector<float> ProcessorBase::getAutomationByIndex(int& index) {
+
+	auto parameters = this->getParameterTree().getParameters(true);
+  if (index < 0 || index >= parameters.size()) {
+    throw std::runtime_error("Failed to get automation for parameter at index " +
+                             std::to_string(index));
+  }
+
+  auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+  return parameter->getAutomation();
+}
+
+float ProcessorBase::getAutomationVal(const char* parameterName,
+	AudioPlayHead::PositionInfo& posInfo) {
+  return getAutomationVal(std::string(parameterName), posInfo);
+}
+
+float ProcessorBase::getAutomationVal(std::string& parameterName, AudioPlayHead::PositionInfo& posInfo) {
+
+    for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+    if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString() == parameterName) {
+      auto parameter = (AutomateParameterFloat*)
+          uncastedParameter;  // todo: why do we have to cast to
+                              // AutomateParameterFloat instead of
+                              // AutomateParameter
+      return parameter->sample(posInfo);
     }
+  }
+
+  throw std::runtime_error("Failed to get automation value for parameter: " +
+                           parameterName);
+}
+
+float ProcessorBase::getAutomationAtZeroByIndex(int& index) {
+  auto parameters = this->getParameters();
+
+  if (index < 0 || index >= parameters.size()) {
+    throw std::runtime_error("Failed to get automation value for parameter at index: " + index);
+  }
+
+    auto parameter = (AutomateParameterFloat*) parameters.getUnchecked(index);
+    AudioPlayHead::PositionInfo posInfo;
+    posInfo.setTimeInSamples(0.);
+    posInfo.setTimeInSeconds(0.);
+    return parameter->sample(posInfo);
 }
 
 float ProcessorBase::getAutomationAtZero(std::string parameterName) {
-    auto parameter = (AutomateParameterFloat*)myParameters.getParameter(parameterName);  // todo: why do we have to cast to AutomateParameterFloat instead of AutomateParameter
 
-    if (parameter) {
-        AudioPlayHead::PositionInfo posInfo;
-        posInfo.setTimeInSamples(0.);
-        posInfo.setTimeInSeconds(0.);
-        return parameter->sample(posInfo);
+	auto parameters = this->getParameters();
+  for (auto& uncastedParameter : parameters) {
+    if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
+            .toStdString() == parameterName) {
+      auto parameter = (AutomateParameterFloat*)uncastedParameter;
+      AudioPlayHead::PositionInfo posInfo;
+      posInfo.setTimeInSamples(0.);
+      posInfo.setTimeInSeconds(0.);
+      return parameter->sample(posInfo);
     }
-    else {
-        throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
-    }
+  }
+
+throw std::runtime_error("Failed to get automation value for parameter: " +
+                           parameterName);
 }
 
-py::array_t<float> ProcessorBase::getAutomationNumpy(std::string parameterName) {
+py::array_t<float> ProcessorBase::getAutomationNumpy(std::string& parameterName) {
     std::vector<float> data = getAutomation(parameterName);
 
     py::array_t<float, py::array::c_style> arr({ (int)data.size() });
@@ -141,7 +204,7 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int n
             auto theParameter = (AutomateParameterFloat*)processorParams[i];
             
             // Note that we don't use label because it's sometimes blank. The same choice must be made in reset()
-            std::string name = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+            std::string name = (processorParams[i])->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
             
             if (name.compare("") == 0) {
                 continue;
@@ -165,7 +228,7 @@ ProcessorBase::reset() {
     
     for (int i = 0; i < this->getNumParameters(); i++) {
         // Note that we don't use label because it's sometimes blank. The same choice must be made in recordAutomation()
-        std::string name = (processorParams[i])->getName(DAW_PARARAMETER_MAX_NAME_LENGTH).toStdString();
+        std::string name = (processorParams[i])->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
         if (name.compare("") == 0) {
             continue;
         }
