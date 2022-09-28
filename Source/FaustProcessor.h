@@ -184,7 +184,7 @@ class FaustProcessor : public ProcessorBase {
 
   void automateParameters(AudioPlayHead::PositionInfo &posInfo,
                           int numSamples) override;
-  bool setAutomation(std::string& parameterName, py::array input,
+  bool setAutomation(std::string &parameterName, py::array input,
                      std::uint32_t ppqn) override;
 
   // faust stuff
@@ -306,7 +306,8 @@ class FaustProcessor : public ProcessorBase {
   void compileSignals(std::vector<SigWrapper> &wrappers,
                       std::optional<std::vector<std::string>> in_argv);
 
-  void compileBox(BoxWrapper &box, std::optional<std::vector<std::string>> in_argv);
+  void compileBox(BoxWrapper &box,
+                  std::optional<std::vector<std::string>> in_argv);
 };
 
 inline void create_bindings_for_faust_processor(py::module &m) {

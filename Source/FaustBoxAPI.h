@@ -332,9 +332,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           [](std::string &label, BoxWrapper &chan,
              std::optional<BoxWrapper> part, std::optional<BoxWrapper> rdx) {
             if (part.has_value() && rdx.has_value()) {
-              return BoxWrapper(boxSoundfile(label, chan,
-                                             *part,
-                                             *rdx));
+              return BoxWrapper(boxSoundfile(label, chan, *part, *rdx));
             } else {
               return BoxWrapper(boxSoundfile(label, chan));
             }
@@ -1292,7 +1290,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             }
 
             int argc = 0;
-			const char *argv[64];
+            const char *argv[64];
 
             argv[argc++] = "-I";
             argv[argc++] = pathToFaustLibraries.c_str();

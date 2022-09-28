@@ -1,65 +1,57 @@
 #include "CustomParameters.h"
-#include "ProcessorBase.h"
 
 #include <algorithm>
 
-bool
-AutomateParameter::setAutomation(py::array_t<float> input, std::uint32_t newPPQN) {
+#include "ProcessorBase.h"
 
-    if (newPPQN < 0) {
-        throw std::runtime_error("The PPQN must be greater than or equal to zero. Received: " + std::to_string(newPPQN));
-    }
+bool AutomateParameter::setAutomation(py::array_t<float> input,
+                                      std::uint32_t newPPQN) {
+  if (newPPQN < 0) {
+    throw std::runtime_error(
+        "The PPQN must be greater than or equal to zero. Received: " +
+        std::to_string(newPPQN));
+  }
 
-    m_ppqn = newPPQN;
+  m_ppqn = newPPQN;
 
-    try
-    {
-        myAutomation.clear();
-
-        auto numSamples = input.shape(0);
-
-        myAutomation = std::vector<float>(numSamples, 0.f);
-
-        memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
-        m_hasAutomation = numSamples > 1;
-    }
-    catch (const std::exception& e)
-    {
-        throw std::runtime_error(std::string("Error: setAutomation: ") + e.what());
-        return false;
-    }
-
-    return true;
-}
-
-void
-AutomateParameter::setAutomation(const float val) {
+  try {
     myAutomation.clear();
-    myAutomation.push_back(val);
-    m_hasAutomation = false;
+
+    auto numSamples = input.shape(0);
+
+    myAutomation = std::vector<float>(numSamples, 0.f);
+
+    memcpy(myAutomation.data(), (float*)input.data(),
+           numSamples * sizeof(float));
+    m_hasAutomation = numSamples > 1;
+  } catch (const std::exception& e) {
+    throw std::runtime_error(std::string("Error: setAutomation: ") + e.what());
+    return false;
+  }
+
+  return true;
 }
 
-std::vector<float>
-AutomateParameter::getAutomation() {
-    return myAutomation;
+void AutomateParameter::setAutomation(const float val) {
+  myAutomation.clear();
+  myAutomation.push_back(val);
+  m_hasAutomation = false;
 }
 
-float
-AutomateParameter::sample(AudioPlayHead::PositionInfo& posInfo) {
+std::vector<float> AutomateParameter::getAutomation() { return myAutomation; }
 
-    size_t i;
-    auto numSamples = myAutomation.size();
-    if (numSamples == 0) {
-        throw std::runtime_error("Can't sample parameter with no samples.");
-    }
-    if (m_ppqn > 0) {
-        i = std::min(numSamples - 1, size_t(*posInfo.getPpqPosition() * m_ppqn));
-    }
-    else {
-        i = std::min(numSamples - 1, size_t(*posInfo.getTimeInSamples()));
-    }
+float AutomateParameter::sample(AudioPlayHead::PositionInfo& posInfo) {
+  size_t i;
+  auto numSamples = myAutomation.size();
+  if (numSamples == 0) {
+    throw std::runtime_error("Can't sample parameter with no samples.");
+  }
+  if (m_ppqn > 0) {
+    i = std::min(numSamples - 1, size_t(*posInfo.getPpqPosition() * m_ppqn));
+  } else {
+    i = std::min(numSamples - 1, size_t(*posInfo.getTimeInSamples()));
+  }
 
-    i = std::max((size_t)0, i);
-    return myAutomation.at(i);
-
+  i = std::max((size_t)0, i);
+  return myAutomation.at(i);
 }

@@ -344,8 +344,8 @@ void FaustProcessor::clear() {
   if (m_dsp_poly) {
     delete m_dsp_poly;
     m_dsp_poly = NULL;
-	// we don't need to delete m_dsp because m_dsp_poly would have done it
-    //SAFE_DELETE(m_dsp);
+    // we don't need to delete m_dsp because m_dsp_poly would have done it
+    // SAFE_DELETE(m_dsp);
   } else {
     delete m_dsp_poly;
     m_dsp_poly = NULL;
@@ -770,7 +770,6 @@ float FaustProcessor::getParamWithPath(const std::string& n) {
 std::string FaustProcessor::code() { return m_code; }
 
 void FaustProcessor::createParameterLayout() {
-
   juce::AudioProcessorParameterGroup group;
 
   m_map_juceIndex_to_faustIndex.clear();
@@ -835,15 +834,13 @@ void FaustProcessor::createParameterLayout() {
     ProcessorBase::setAutomationValByIndex(i, m_ui->getParamInit(j));
     i++;
   }
-
 }
 
 py::list FaustProcessor::getPluginParametersDescription() {
-
   COMPILE_FAUST
 
   py::list myList;
-  
+
   if (m_compileState) {
     int i = 0;
     for (auto* parameter : this->getParameters()) {

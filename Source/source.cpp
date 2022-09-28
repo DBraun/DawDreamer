@@ -341,8 +341,10 @@ but the filter mode cannot under automation.";
            "Set the number of input and output channels. An error will be "
            "thrown for an unaccepted option.")
       .def("enable_all_buses", &PluginProcessorWrapper::enableAllBuses,
-           "Enable all buses. This may help with plugins with non-stereo outputs.")
-      .def("disable_nonmain_buses", &PluginProcessorWrapper::disableNonMainBuses,
+           "Enable all buses. This may help with plugins with non-stereo "
+           "outputs.")
+      .def("disable_nonmain_buses",
+           &PluginProcessorWrapper::disableNonMainBuses,
            "Disable all non-main buses (aux and sidechains).")
       .def("save_state", &PluginProcessorWrapper::saveStateInformation,
            arg("filepath"), "Save the state to a file.")
@@ -446,7 +448,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
 
   auto faust = m.def_submodule("faust");
 
-   faust.doc() = R"pbdoc(
+  faust.doc() = R"pbdoc(
          Faust
          -----------------------
   
@@ -459,17 +461,16 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
             .signal
      )pbdoc";
 
-   faust
-       .def(
-           "createLibContext", []() { createLibContext(); },
-           "Create a libfaust context.")
-       .def(
-           "destroyLibContext", []() { destroyLibContext(); },
-           "Destroy a libfaust context.");
+  faust
+      .def(
+          "createLibContext", []() { createLibContext(); },
+          "Create a libfaust context.")
+      .def(
+          "destroyLibContext", []() { destroyLibContext(); },
+          "Destroy a libfaust context.");
 
-   create_bindings_for_faust_box(faust);
-   create_bindings_for_faust_signal(faust);
-
+  create_bindings_for_faust_box(faust);
+  create_bindings_for_faust_signal(faust);
 
 #endif
 
