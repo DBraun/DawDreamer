@@ -342,15 +342,14 @@ void FaustProcessor::clear() {
   SAFE_DELETE(m_ui);
 
   if (m_dsp_poly) {
-      delete (mydsp_poly*) m_dsp_poly;
-    m_dsp_poly = nullptr;
-	  // we don't need to delete m_dsp because m_dsp_poly would have done it
-      m_dsp = nullptr;
-  } else {
-    SAFE_DELETE(m_dsp);
     delete m_dsp_poly;
-    m_dsp_poly = nullptr;
-    m_dsp = nullptr;
+    m_dsp_poly = NULL;
+	// we don't need to delete m_dsp because m_dsp_poly would have done it
+    //SAFE_DELETE(m_dsp);
+  } else {
+    delete m_dsp_poly;
+    m_dsp_poly = NULL;
+    SAFE_DELETE(m_dsp);
   }
 
   SAFE_DELETE(m_poly_factory);
