@@ -192,6 +192,10 @@ RenderEngine::getRenderLength(const double renderLength, bool isBeats) {
 bool
 RenderEngine::render(const double renderLength, bool isBeats) {
 
+	if (m_stringDag.empty()) {
+		throw std::runtime_error("Cannot render an empty graph.");
+	}
+
     int64_t numRenderedSamples = getRenderLength(renderLength, isBeats);
     
     auto numberOfBuffers = myBufferSize == 1 ? numRenderedSamples : (int64_t) std::ceil(((double)numRenderedSamples - 1.) / myBufferSize);
