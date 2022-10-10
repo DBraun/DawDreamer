@@ -1,5 +1,17 @@
 #include "FaustProcessor.h"
 
+class DawDreamerFaustLibContext {
+ public:
+  int enter() {
+    createLibContext();
+    return 1;
+  };
+  void exit(const py::object &type, const py::object &value,
+            const py::object &traceback) {
+    destroyLibContext();
+  };
+};
+
 inline void create_bindings_for_faust_box(py::module &faust_module) {
   using arg = py::arg;
   using kw_only = py::kw_only;
@@ -814,7 +826,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
                 std::string("import(\"stdfaust.lib\");\n") + dsp_content;
 
             int argc = 0;
-            const char *argv[64];
+            const char *argv[512];
 
             auto pathToFaustLibraries = getPathToFaustLibraries();
             if (pathToFaustLibraries == "") {
@@ -1289,8 +1301,14 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
               throw std::runtime_error("Unable to load Faust Libraries.");
             }
 
+            auto pathToArchitecture = getPathToArchitectureFiles();
+            if (pathToArchitecture == "") {
+              throw std::runtime_error(
+                  "Unable to find Faust architecture files.");
+            }
+
             int argc = 0;
-            const char *argv[64];
+            const char *argv[512];
 
             argv[argc++] = "-I";
             argv[argc++] = pathToFaustLibraries.c_str();
@@ -1298,22 +1316,31 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             argv[argc++] = "-cn";
             argv[argc++] = class_name.c_str();
 
+            argv[argc++] = "-A";
+            argv[argc++] = pathToArchitecture.c_str();
+
             if (in_argv.has_value()) {
-              for (auto v : *in_argv) {
+              for (auto &v : *in_argv) {
                 argv[argc++] = v.c_str();
               }
             }
 
             std::string error_msg = "";
 
-            std::string source_code =
-                createSourceFromBoxes("test", box, lang, argc, argv, error_msg);
+            std::string source_code = createSourceFromBoxes(
+                "dawdreamer", box, lang, argc, argv, error_msg);
 
-            if (error_msg != "") {
+            if (source_code == "") {
               throw std::runtime_error(error_msg);
             }
 
-            return source_code;
+            std::variant<std::string, py::bytes> result;
+            if (lang == "wasm" || lang == "wast") {
+              result = py::bytes(source_code);
+              return result;
+            }
+            result = source_code;
+            return result;
           },
           arg("box"), arg("language"), arg("class_name"),
           arg("argv") = py::none(),

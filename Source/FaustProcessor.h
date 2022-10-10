@@ -22,6 +22,7 @@
 #include "tree.hh"
 
 std::string getPathToFaustLibraries();
+std::string getPathToArchitectureFiles();
 
 class MySoundUI : public SoundUI {
  public:
@@ -31,9 +32,9 @@ class MySoundUI : public SoundUI {
     std::string saved_url_real = std::string(label);
     if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
       // If failure, use 'defaultsound'
-      std::cerr << "addSoundfile : soundfile for " << label
-                << " cannot be created !" << std::endl;
       *sf_zone = defaultsound;
+      throw std::runtime_error("addSoundfile : soundfile for " +
+                               std::string(label) + " cannot be created !");
       return;
     }
 

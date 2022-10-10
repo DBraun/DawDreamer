@@ -93,11 +93,22 @@ else:
         f"setup.py hasn't been implemented for platform: {platform}."
     )
 
-faustlibraries = list(glob.glob(os.path.join(this_dir, 'dawdreamer/faustlibraries/*'), recursive=True))
+# copy architecture files
+destination = shutil.copytree(os.path.join(this_dir, "thirdparty", "faust", "architecture"),
+                              os.path.join(this_dir, "dawdreamer", "architecture"),
+                              dirs_exist_ok=True,
+                              ignore=shutil.ignore_patterns('*.dll', '*.so', '*.html', '*.wav', '*.png', '*.pdf', '*.a'))
 
+# architecture files
+architecture_files = list(glob.glob(os.path.join(this_dir, 'dawdreamer/architecture/*'), recursive=True))
+if not architecture_files:
+    raise ValueError("You need to put the architecture directory inside dawdreamer.")
+package_data += architecture_files
+
+# Faust libraries
+faustlibraries = list(glob.glob(os.path.join(this_dir, 'dawdreamer/faustlibraries/*'), recursive=True))
 if not faustlibraries:
     raise ValueError("You need to put the faustlibraries repo inside dawdreamer.")
-
 package_data += faustlibraries
 
 package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))

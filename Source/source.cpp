@@ -469,6 +469,13 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
           "destroyLibContext", []() { destroyLibContext(); },
           "Destroy a libfaust context.");
 
+  py::class_<DawDreamerFaustLibContext>(
+      faust, "FaustContext",
+      "A libfaust context to be used with Python's \"with\" syntax.")
+      .def(py::init<>())
+      .def("__enter__", &DawDreamerFaustLibContext::enter)
+      .def("__exit__", &DawDreamerFaustLibContext::exit);
+
   create_bindings_for_faust_box(faust);
   create_bindings_for_faust_signal(faust);
 

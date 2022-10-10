@@ -41,19 +41,12 @@ bool ProcessorBase::setAutomationVal(const char* parameterName, float val) {
 
 bool ProcessorBase::setAutomationValByStr(std::string& parameterName,
                                           float val) {
-  std::cout << "looking for param: " << parameterName << std::endl;
   for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
     if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
             .toStdString() == parameterName) {
       auto parameter = (AutomateParameterFloat*)uncastedParameter;
       parameter->setAutomation(val);
-      std::cout << "   and found it" << std::endl;
       return true;
-    } else {
-      std::cout << "   but found: "
-                << uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
-                       .toStdString()
-                << std::endl;
     }
   }
 
