@@ -67,7 +67,7 @@ class ProcessorBase : public juce::AudioProcessor {
   virtual bool setAutomationByIndex(int& index, py::array input,
                                     std::uint32_t ppqn);
 
-  bool ProcessorBase::setAutomationVal(const char* parameterName, float val);
+  bool setAutomationVal(const char* parameterName, float val);
   virtual bool setAutomationValByStr(std::string& parameterName, float val);
 
   virtual bool setAutomationValByIndex(int index, float val);

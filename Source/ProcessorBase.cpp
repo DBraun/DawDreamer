@@ -36,7 +36,8 @@ bool ProcessorBase::setAutomationByIndex(int& index, py::array input,
 }
 
 bool ProcessorBase::setAutomationVal(const char* parameterName, float val) {
-  return setAutomationValByStr(std::string(parameterName), val);
+  auto s = std::string(parameterName);
+  return setAutomationValByStr(s, val);
 }
 
 bool ProcessorBase::setAutomationValByStr(std::string& parameterName,
@@ -93,7 +94,8 @@ std::vector<float> ProcessorBase::getAutomationByIndex(int& index) {
 
 float ProcessorBase::getAutomationVal(const char* parameterName,
                                       AudioPlayHead::PositionInfo& posInfo) {
-  return getAutomationVal(std::string(parameterName), posInfo);
+  std::string s = std::string(parameterName);
+  return getAutomationVal(s, posInfo);
 }
 
 float ProcessorBase::getAutomationVal(std::string& parameterName,
