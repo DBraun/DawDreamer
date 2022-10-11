@@ -94,10 +94,22 @@ else:
     )
 
 # copy architecture files
-destination = shutil.copytree(os.path.join(this_dir, "thirdparty", "faust", "architecture"),
-                              os.path.join(this_dir, "dawdreamer", "architecture"),
-                              dirs_exist_ok=True,
-                              ignore=shutil.ignore_patterns('*.dll', '*.so', '*.html', '*.wav', '*.png', '*.pdf', '*.a'))
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                shutil.copy2(s, d)
+
+destination = copytree(os.path.join(this_dir, "thirdparty", "faust", "architecture"),
+                       os.path.join(this_dir, "dawdreamer", "architecture"),
+                       ignore=shutil.ignore_patterns('*.dll', '*.so', '*.html', '*.wav', '*.png', '*.pdf', '*.a'))
 
 # architecture files
 architecture_files = list(glob.glob(os.path.join(this_dir, 'dawdreamer/architecture/*'), recursive=True))

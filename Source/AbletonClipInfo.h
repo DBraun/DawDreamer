@@ -4,6 +4,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <cstring>
 
 #include "portable_endian.h"
 
