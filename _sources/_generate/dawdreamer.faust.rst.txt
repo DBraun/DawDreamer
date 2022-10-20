@@ -20,6 +20,12 @@
 
    
    
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      FaustContext
+   
    
 
    
