@@ -104,12 +104,16 @@ def copytree(src, dst, symlinks=False, ignore=None):
         if os.path.isdir(s):
             copytree(s, d, symlinks, ignore)
         else:
+            if ignore is not None and ignore(os.fspath(src), [item]):
+                continue
+
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
 destination = copytree(os.path.join(this_dir, "thirdparty", "faust", "architecture"),
                        os.path.join(this_dir, "dawdreamer", "architecture"),
-                       ignore=shutil.ignore_patterns('*.dll', '*.so', '*.html', '*.wav', '*.png', '*.pdf', '*.a'))
+                       ignore=shutil.ignore_patterns('*.dll', '*.so', '*.html', '*.wav', '*.mp3', '*.png',
+                                                     '*.jpg', '*.pdf', '*.a', '*.wasm', '*.data'))
 
 # architecture files
 architecture_files = list(glob.glob(os.path.join(this_dir, 'dawdreamer/architecture/*'), recursive=True))

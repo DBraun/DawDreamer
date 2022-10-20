@@ -491,20 +491,25 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
       .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
       .def("render", &RenderEngine::render, arg("duration"), kw_only(),
            arg("beats") = false,
-           "Render the most recently loaded graph. By default, when `beats` is "
+           "Render the most recently loaded graph. By default, when "
+           "`beats` is "
            "False, duration is measured in seconds, otherwise beats.")
       .def("set_bpm", &RenderEngine::setBPM, arg("bpm"),
            "Set the beats-per-minute of the engine as a constant rate.")
       .def("set_bpm", &RenderEngine::setBPMwithPPQN, arg("bpm"), arg("ppqn"),
-           "Set the beats-per-minute of the engine using a 1D numpy array and "
-           "a constant PPQN. If the values in the array suddenly change every "
+           "Set the beats-per-minute of the engine using a 1D numpy "
+           "array and "
+           "a constant PPQN. If the values in the array suddenly "
+           "change every "
            "PPQN samples, the tempo change will occur \"on-the-beat.\"")
       .def("get_audio", &RenderEngine::getAudioFrames,
            "Get the most recently rendered audio as a numpy array.")
       .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"),
-           "Get the most recently rendered audio for a specific processor.")
+           "Get the most recently rendered audio for a specific "
+           "processor.")
       .def("remove_processor", &RenderEngine::removeProcessor, arg("name"),
-           "Remove a processor based on its unique name. Existing Python "
+           "Remove a processor based on its unique name. Existing "
+           "Python "
            "references to the processor will become invalid.")
       .def("load_graph", &RenderEngine::loadGraphWrapper, arg("dag"),
            "Load a directed acyclic graph of processors.")
@@ -516,7 +521,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
            returnPolicy)
       .def("make_sampler_processor", &RenderEngine::makeSamplerProcessor,
            arg("name"), arg("data"),
-           "Make a Sampler Processor with audio data to be used as the sample.",
+           "Make a Sampler Processor with audio data to be used as the "
+           "sample.",
            returnPolicy)
 #ifdef BUILD_DAWDREAMER_FAUST
       .def("make_faust_processor", &RenderEngine::makeFaustProcessor,
