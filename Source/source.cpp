@@ -341,8 +341,10 @@ but the filter mode cannot under automation.";
            "Set the number of input and output channels. An error will be "
            "thrown for an unaccepted option.")
       .def("enable_all_buses", &PluginProcessorWrapper::enableAllBuses,
-           "Enable all buses. This may help with plugins with non-stereo outputs.")
-      .def("disable_nonmain_buses", &PluginProcessorWrapper::disableNonMainBuses,
+           "Enable all buses. This may help with plugins with non-stereo "
+           "outputs.")
+      .def("disable_nonmain_buses",
+           &PluginProcessorWrapper::disableNonMainBuses,
            "Disable all non-main buses (aux and sidechains).")
       .def("save_state", &PluginProcessorWrapper::saveStateInformation,
            arg("filepath"), "Save the state to a file.")
@@ -359,7 +361,7 @@ but the filter mode cannot under automation.";
            "extension.")
       .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
       .def("set_patch", &PluginProcessorWrapper::wrapperSetPatch, arg("patch"))
-      .def("get_parameter", &PluginProcessorWrapper::wrapperGetParameter,
+      .def("get_parameter", &PluginProcessorWrapper::getAutomationAtZeroByIndex,
            arg("index"), "Get a parameter's value.")
       .def("get_parameter_name",
            &PluginProcessorWrapper::wrapperGetParameterName, arg("index"),
@@ -368,7 +370,7 @@ but the filter mode cannot under automation.";
            arg("index"), "Get a parameter's value as text.")
       .def("set_parameter", &PluginProcessorWrapper::wrapperSetParameter,
            arg("index"), arg("value"), "Set a parameter's value to a constant.")
-      .def("set_automation", &PluginProcessorWrapper::wrapperSetAutomation,
+      .def("set_automation", &PluginProcessorWrapper::setAutomationByIndex,
            arg("parameter_index"), arg("data"), kw_only(), arg("ppqn") = 0,
            "Set the automation based on its index.")
       .def("get_plugin_parameter_size",
@@ -408,13 +410,13 @@ or effects. Some plugins such as ones that do sidechain compression can accept t
   py::class_<SamplerProcessor, ProcessorBase>(m, "SamplerProcessor")
       .def("set_data", &SamplerProcessor::setData, arg("data"),
            "Set an audio sample.")
-      .def("get_parameter", &SamplerProcessor::wrapperGetParameter,
+      .def("get_parameter", &SamplerProcessor::getAutomationAtZeroByIndex,
            arg("index"), "Get a parameter's value.")
       .def("get_parameter_name", &SamplerProcessor::wrapperGetParameterName,
            arg("index"), "Get a parameter's name.")
       .def("get_parameter_text", &SamplerProcessor::wrapperGetParameterAsText,
            arg("index"), "Get a parameter's value as text.")
-      .def("set_parameter", &SamplerProcessor::wrapperSetParameter,
+      .def("set_parameter", &SamplerProcessor::setAutomationValByIndex,
            arg("index"), arg("value"), "Set a parameter's value to a constant.")
       .def("get_parameter_size",
            &SamplerProcessor::wrapperGetPluginParameterSize,
@@ -446,7 +448,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
 
   auto faust = m.def_submodule("faust");
 
-   faust.doc() = R"pbdoc(
+  faust.doc() = R"pbdoc(
          Faust
          -----------------------
   
@@ -459,17 +461,23 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
             .signal
      )pbdoc";
 
-   faust
-       .def(
-           "createLibContext", []() { createLibContext(); },
-           "Create a libfaust context.")
-       .def(
-           "destroyLibContext", []() { destroyLibContext(); },
-           "Destroy a libfaust context.");
+  faust
+      .def(
+          "createLibContext", []() { createLibContext(); },
+          "Create a libfaust context.")
+      .def(
+          "destroyLibContext", []() { destroyLibContext(); },
+          "Destroy a libfaust context.");
 
-   create_bindings_for_faust_box(faust);
-   create_bindings_for_faust_signal(faust);
+  py::class_<DawDreamerFaustLibContext>(
+      faust, "FaustContext",
+      "A libfaust context to be used with Python's \"with\" syntax.")
+      .def(py::init<>())
+      .def("__enter__", &DawDreamerFaustLibContext::enter)
+      .def("__exit__", &DawDreamerFaustLibContext::exit);
 
+  create_bindings_for_faust_box(faust);
+  create_bindings_for_faust_signal(faust);
 
 #endif
 
@@ -483,20 +491,25 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
       .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
       .def("render", &RenderEngine::render, arg("duration"), kw_only(),
            arg("beats") = false,
-           "Render the most recently loaded graph. By default, when `beats` is "
+           "Render the most recently loaded graph. By default, when "
+           "`beats` is "
            "False, duration is measured in seconds, otherwise beats.")
       .def("set_bpm", &RenderEngine::setBPM, arg("bpm"),
            "Set the beats-per-minute of the engine as a constant rate.")
       .def("set_bpm", &RenderEngine::setBPMwithPPQN, arg("bpm"), arg("ppqn"),
-           "Set the beats-per-minute of the engine using a 1D numpy array and "
-           "a constant PPQN. If the values in the array suddenly change every "
+           "Set the beats-per-minute of the engine using a 1D numpy "
+           "array and "
+           "a constant PPQN. If the values in the array suddenly "
+           "change every "
            "PPQN samples, the tempo change will occur \"on-the-beat.\"")
       .def("get_audio", &RenderEngine::getAudioFrames,
            "Get the most recently rendered audio as a numpy array.")
       .def("get_audio", &RenderEngine::getAudioFramesForName, arg("name"),
-           "Get the most recently rendered audio for a specific processor.")
+           "Get the most recently rendered audio for a specific "
+           "processor.")
       .def("remove_processor", &RenderEngine::removeProcessor, arg("name"),
-           "Remove a processor based on its unique name. Existing Python "
+           "Remove a processor based on its unique name. Existing "
+           "Python "
            "references to the processor will become invalid.")
       .def("load_graph", &RenderEngine::loadGraphWrapper, arg("dag"),
            "Load a directed acyclic graph of processors.")
@@ -508,7 +521,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
            returnPolicy)
       .def("make_sampler_processor", &RenderEngine::makeSamplerProcessor,
            arg("name"), arg("data"),
-           "Make a Sampler Processor with audio data to be used as the sample.",
+           "Make a Sampler Processor with audio data to be used as the "
+           "sample.",
            returnPolicy)
 #ifdef BUILD_DAWDREAMER_FAUST
       .def("make_faust_processor", &RenderEngine::makeFaustProcessor,

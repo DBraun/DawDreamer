@@ -37,7 +37,6 @@ def test_add_processor():
 
     engine.load_graph(graph)
 
-
     engine.render(DURATION)
 
     audio = engine.get_audio()

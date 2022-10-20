@@ -5,10 +5,12 @@ wheelhouse/*
 *.xcuserstate
 .idea
 *.pyc
+*.ipynb_checkpoints
 
 # These files are copied into this folder during setup.py
 dawdreamer/*.dll
 dawdreamer/*.pyd
+dawdreamer/architecture/*
 dawdreamer/faustlibraries/*
 dawdreamer/libfaust.2.dylib
 dawdreamer/licenses/*

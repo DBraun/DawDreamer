@@ -6338,7 +6338,7 @@
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\CMakeLists.txt">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
-    <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\README.md">
+    <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\readme.md">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\flac\Flac Licence.txt">

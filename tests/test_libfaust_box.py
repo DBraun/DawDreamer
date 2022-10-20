@@ -152,6 +152,7 @@ def test7():
     
     box = boxDelay(boxWire(), boxInt(7))
 
+    # Vector compilation
     argv = ["-vec", "-lv", "1", "-double"]
 
     f.compile_box(box, argv)
@@ -168,11 +169,12 @@ def test8():
     f = engine.make_faust_processor("my_faust")
     
     box = boxSplit(boxWire(), boxPar(boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)),
-                                             boxMul(boxDelay(boxWire(), boxReal(3000)), boxReal(1.5))))
+                                     boxMul(boxDelay(boxWire(), boxReal(3000)), boxReal(1.5))))
 
     f.compile_box(box)
     my_render(engine, f)
 
+# Equivalent signal expressions
 
 @with_lib_context
 def test_equivalent1():
@@ -185,6 +187,11 @@ def test_equivalent1():
     
     b1 = boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5))
     box = boxPar(b1, b1)
+
+    valid, inputs, outputs = getBoxType(box)
+    assert valid
+    assert inputs == 2
+    assert outputs == 2
 
     f.compile_box(box)
     my_render(engine, f)
@@ -200,7 +207,12 @@ def test_equivalent2():
     f = engine.make_faust_processor("my_faust")
     
     box = boxPar(boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)),
-                         boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)))
+                 boxAdd(boxDelay(boxWire(), boxReal(500)), boxReal(0.5)))
+
+    valid, inputs, outputs = getBoxType(box)
+    assert valid
+    assert inputs == 2
+    assert outputs == 2
 
     f.compile_box(box)
     my_render(engine, f)
@@ -217,7 +229,33 @@ def test9():
     f = engine.make_faust_processor("my_faust")
     
     box = boxMul(boxWire(),
-        boxHSlider("Freq [midi:ctrl 7][style:knob]", boxReal(100), boxReal(100), boxReal(2000), boxReal(1)))
+                 boxHSlider("Freq [midi:ctrl 7][style:knob]",
+                            boxReal(100),
+                            boxReal(100),
+                            boxReal(2000),
+                            boxReal(1)))
+
+    f.compile_box(box)
+    my_render(engine, f)
+
+
+@with_lib_context
+def test9b():
+
+    """
+    process = _,hslider("Freq [midi:ctrl 7][style:knob]", 100, 100, 2000, 1) : *;
+    """
+    # Same as test9, but we use float args instead of boxReal
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+    
+    box = boxMul(boxWire(),
+                 boxHSlider("Freq [midi:ctrl 7][style:knob]",
+                            100,
+                            100,
+                            2000,
+                            1))
 
     f.compile_box(box)
     my_render(engine, f)
@@ -239,7 +277,7 @@ def test10():
     f = engine.make_faust_processor("my_faust")
     
     box = boxMul(boxVSlider("h:Oscillator/freq", boxReal(440), boxReal(50), boxReal(1000), boxReal(0.1)),
-                         boxVSlider("h:Oscillator/gain", boxReal(0), boxReal(0), boxReal(1), boxReal(0.01)))
+                 boxVSlider("h:Oscillator/gain", boxReal(0), boxReal(0), boxReal(1), boxReal(0.01)))
 
     f.compile_box(box)
     my_render(engine, f)
@@ -302,8 +340,8 @@ def test14():
     f = engine.make_faust_processor("my_faust")
 
     box = boxSplit(boxPar(boxWire(), boxWire()),
-                           boxMerge(boxPar4(boxCut(), boxWire(), boxWire(), boxCut()),
-                                    boxPar(boxWire(), boxWire())))
+                          boxMerge(boxPar4(boxCut(), boxWire(), boxWire(), boxCut()),
+                                   boxPar(boxWire(), boxWire())))
 
     f.compile_box(box)
     my_render(engine, f)
@@ -339,7 +377,7 @@ def test16():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
-
+    # phasor is imported from box_instruments.py
     box = phasor(boxReal(440))
 
     f.compile_box(box)
@@ -360,27 +398,36 @@ def test17():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
-
+    # osc is imported from box_instruments.py
     box = boxPar(osc(boxReal(440)), osc(boxReal(440)))
 
     f.compile_box(box)
     my_render(engine, f)
 
 
-# #skip soundfile  # todo:
-# @with_lib_context
-# def test18():
-#     """
-#     process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
-#     """
 
-#     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-#     f = engine.make_faust_processor("my_faust")
+@with_lib_context
+def test18():
+    """
+    process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
+    """
 
-#     box = boxSoundfile("sound[url:{'tango.wav'}]", boxInt(2), boxInt(0), boxInt(0))
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
 
-#     f.compile_box(box)
-#     my_render(engine, f)
+    box = boxSoundfile("mySound[url:{'tango.wav'}]", boxInt(2), boxInt(0), boxInt(0))
+
+    # Note that the "tango.wav" is not actually opened.
+    # If tango.wav existed, we could open it with librosa and then pass it via set_soundfiles.
+    # Because tango.wav doesn't exist, we will just pass zeros.
+
+    soundfiles = {
+        'mySound': [np.zeros((2, 10000))]
+    }
+    f.set_soundfiles(soundfiles)
+   
+    f.compile_box(box)
+    my_render(engine, f)
 
 
 @with_lib_context
@@ -398,18 +445,58 @@ def test19():
     my_render(engine, f)
 
 
+
 @with_lib_context
 def test19b():
     """
-    process = 10,1,int(_) : rdtable;
+    w = waveform{-1., 0., 1., 0.};
+    process = w,int(_) : rdtable;
     """
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    waveform_content = boxSeq(boxWaveform([-1., 0., 1., 0.]), boxPar(boxCut(), boxWire()))
+    waveform_content = boxWaveform([-1., 0., 1., 0.])
 
-    box = boxReadOnlyTable(boxInt(4), waveform_content, boxWire())
+    rdtable = boxReadOnlyTable()
+    valid, inputs, outputs = getBoxType(rdtable)
+    assert valid
+    assert inputs == 3
+    assert outputs == 1
+
+    joined = boxPar(waveform_content, boxWire())
+    valid, inputs, outputs = getBoxType(joined)
+    assert valid
+    assert inputs == 1
+    assert outputs == 3
+
+    box = boxSeq(joined, rdtable)
+
+    cpp_code = boxToSource(box, 'cpp', 'MyDSP')
+    assert cpp_code != ''
+
+    cpp_code = boxToSource(box, 'cpp', 'MyDSP')
+    assert cpp_code != ''
+
+
+@with_lib_context
+def test19c():
+    """
+    w = waveform{-1., 0., 1., 0.};
+    process = w,int(_) : rdtable;
+    """
+    # This is a clumsier way of using boxReadOnlyTable
+    # because we've hardcoded the boxInt(4), the length of the waveform.
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    waveform = boxWaveform([-1., 0., 1., 0.])
+
+    waveform_length = boxSeq(waveform, boxPar(boxWire(), boxCut()))
+    waveform_content = boxSeq(waveform, boxPar(boxCut(), boxWire()))
+
+    box = boxReadOnlyTable(waveform_length, waveform_content, boxWire())
 
     cpp_code = boxToSource(box, 'cpp', 'MyDSP')
     assert cpp_code != ''
@@ -456,45 +543,15 @@ def test24():
     f.num_voices = 10
     f.compile_box(box)
 
+    f.get_parameters_description()
+
     my_render(engine, f)
     audio = engine.get_audio().T
     assert np.mean(np.abs(audio)) > .01
 
 
 @with_lib_context
-def test25a():
-
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-    f = engine.make_faust_processor("my_faust")
-
-    filter, inputs, outputs = boxFromDSP('process = si.smooth;')
-    assert inputs == 2
-    assert outputs == 1
-    cutoffAndInput, inputs, outputs = boxFromDSP('process = hslider("cutoff", 300, 100, 2000, .01), _;')
-    assert inputs == 1
-    assert outputs == 2
-
-    filteredInput = boxSeq(cutoffAndInput, filter)
-    f.compile_box(filteredInput)
-    my_render(engine, f)
-
-
-@with_lib_context
-def test25b():
-
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
-    f = engine.make_faust_processor("my_faust")
-
-    filter, inputs, outputs = boxFromDSP('process = si.smooth;');
-    cutoffAndInput, inputs, outputs = boxFromDSP('process = hslider("cutoff", 300, 100, 2000, .01), _;')
-
-    filteredInput = boxSeq(cutoffAndInput, filter)
-    f.compile_box(filteredInput)
-    my_render(engine, f)
-
-
-@with_lib_context
-def test25c():
+def test24b():
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
@@ -509,21 +566,56 @@ def test25c():
     test_bus(2)
 
 
-@with_lib_context
-def test26():
+@pytest.mark.parametrize("backend",
+    ['c', 'cmajor', 'cpp', 'csharp', 'dlang', 'java', 'jax', 'julia', 'rust', 'wasm', 'wast']
+    )
+def test25a(backend):
+
+    createLibContext()
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box1 = boxWire()
+    box, inputs, outputs = boxFromDSP('process = os.osc(440);')
 
-    box2 = boxMul(box1, boxReal(0.5))
-    box3 = boxRem(box1, boxReal(0.8))
+    source_code = boxToSource(box, backend, "MyDSP")
+    assert source_code != ''
 
-    box4 = boxSeq(box2, box1)
-    box5 = boxSeq(box3, box1)
+    f.compile_box(box)
+    my_render(engine, f)
 
-    box6 = boxPar3(box4, box5, box3)
+    destroyLibContext()
+
+
+@pytest.mark.parametrize("backend",
+    ['c', 'cmajor', 'cpp', 'csharp', 'dlang', 'java', 'jax', 'julia', 'rust', 'wasm', 'wast']
+)
+def test26a(backend):
+
+    createLibContext()
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    filter, inputs, outputs = boxFromDSP('process = fi.lowpass(5);')
+    assert inputs == 2
+    assert outputs == 1
+    cutoff = boxHSlider("cutoff", boxReal(300), boxReal(100), boxReal(2000), boxReal(0.01))
+    cutoffAndInput = boxPar(cutoff, boxWire())
+    filteredInput = boxSeq(cutoffAndInput, filter)
+
+    valid, inputs, outputs = getBoxType(filteredInput)
+    assert valid
+    assert inputs == 1
+    assert outputs == 1
+
+    f.compile_box(filteredInput)
+    my_render(engine, f)
+
+    source_code = boxToSource(filteredInput, backend, "MyDSP")
+    assert source_code != ''
+
+    destroyLibContext()
 
 
 @with_lib_context
@@ -532,10 +624,10 @@ def test27():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box4, _, _ = boxFromDSP('process = os.osc;')
-    box5, _, _ = boxFromDSP('process = en.adsr;')
-    box6, _, _ = boxFromDSP('process = en.adsre;')
-    box7, _, _ = boxFromDSP('process = fi.lowpass(5);')
+    box1, inputs, outputs = boxFromDSP('process = os.osc;')
+    box2, inputs, outputs = boxFromDSP('process = en.adsr;')
+    box3, inputs, outputs = boxFromDSP('process = en.adsre;')
+    box4, inputs, outputs = boxFromDSP('process = fi.lowpass(5);')
 
 
 @with_lib_context

@@ -93,11 +93,38 @@ else:
         f"setup.py hasn't been implemented for platform: {platform}."
     )
 
-faustlibraries = list(glob.glob(os.path.join(this_dir, 'dawdreamer/faustlibraries/*'), recursive=True))
+# copy architecture files
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            if ignore is not None and ignore(os.fspath(src), [item]):
+                continue
+
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                shutil.copy2(s, d)
+
+destination = copytree(os.path.join(this_dir, "thirdparty", "faust", "architecture"),
+                       os.path.join(this_dir, "dawdreamer", "architecture"),
+                       ignore=shutil.ignore_patterns('*.dll', '*.so', '*.html', '*.wav', '*.mp3', '*.png',
+                                                     '*.jpg', '*.pdf', '*.a', '*.wasm', '*.data'))
+
+# architecture files
+architecture_files = list(glob.glob(os.path.join(this_dir, 'dawdreamer/architecture/*'), recursive=True))
+if not architecture_files:
+    raise ValueError("You need to put the architecture directory inside dawdreamer.")
+package_data += architecture_files
+
+# Faust libraries
+faustlibraries = list(glob.glob(os.path.join(this_dir, 'dawdreamer/faustlibraries/*'), recursive=True))
 if not faustlibraries:
     raise ValueError("You need to put the faustlibraries repo inside dawdreamer.")
-
 package_data += faustlibraries
 
 package_data += list(glob.glob('dawdreamer/licenses/*', recursive=True))
