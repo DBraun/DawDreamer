@@ -975,7 +975,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             std::string error_msg = "";
 
             std::string source_code = createSourceFromSignals(
-                "test", signals, lang, argc, argv, error_msg);
+                "dawdreamer", signals, lang, argc, argv, error_msg);
 
             if (error_msg != "") {
               throw std::runtime_error(error_msg);

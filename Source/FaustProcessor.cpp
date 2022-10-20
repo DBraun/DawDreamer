@@ -448,9 +448,9 @@ bool FaustProcessor::compile() {
   bool is_polyphonic = m_nvoices > 0;
   if (is_polyphonic) {
     m_poly_factory = createPolyDSPFactoryFromString(
-        "DawDreamer", theCode, argc, argv, target, m_errorString, optimize);
+        "dawdreamer", theCode, argc, argv, target, m_errorString, optimize);
   } else {
-    m_factory = createDSPFactoryFromString("DawDreamer", theCode, argc, argv,
+    m_factory = createDSPFactoryFromString("dawdreamer", theCode, argc, argv,
                                            target, m_errorString, optimize);
   }
 
@@ -868,7 +868,8 @@ py::list FaustProcessor::getPluginParametersDescription() {
                                ? std::numeric_limits<long long>::max()
                                : (long long)((m_ui->getParamMax(faustIndex) -
                                               m_ui->getParamMin(faustIndex)) /
-                                             step) + 1;
+                                             step) +
+                                     1;
 
       // todo: It would be better for DawDreamer to store the discrete
       // parameters correctly, but we're still saving them all as
@@ -1163,7 +1164,8 @@ std::string getPathToFaustLibraries() {
 }
 
 std::string getPathToArchitectureFiles() {
-  // Get the path to the directory containing jax/minimal.py, unity/unity.cpp etc.
+  // Get the path to the directory containing jax/minimal.py, unity/unity.cpp
+  // etc.
 
   try {
 #ifdef WIN32

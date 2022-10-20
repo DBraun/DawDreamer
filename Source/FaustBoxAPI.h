@@ -842,8 +842,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
               }
             }
 
-            Box box = DSPToBoxes("", dsp_content2, argc, argv, &inputs,
-                                 &outputs, error_msg);
+            Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv,
+                                 &inputs, &outputs, error_msg);
 
             if (error_msg != "") {
               throw std::runtime_error(error_msg);
