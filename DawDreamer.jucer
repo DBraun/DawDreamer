@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.14"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.6.15"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
