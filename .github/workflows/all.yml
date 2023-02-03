@@ -46,7 +46,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.4.0
+      uses: pypa/cibuildwheel@v2.12.0
       env:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
@@ -103,11 +103,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel numpy librosa scipy
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.3
@@ -196,7 +191,7 @@ jobs:
         rm -rf dawdreamer/faustlibraries/.git
 
     - name: Build wheels ${{ matrix.python-version }}
-      uses: pypa/cibuildwheel@v2.3.1
+      uses: pypa/cibuildwheel@v2.12.0
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-major }}
@@ -212,8 +207,8 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: ${{matrix.archs-macos}}
-        # todo: want to test Python 3.10
-        CIBW_TEST_SKIP: "*310*"
+        # todo: want to test Python 3.10 and 3.11
+        CIBW_TEST_SKIP: "*310* *311*"
 
     - uses: actions/upload-artifact@v2
       with:
