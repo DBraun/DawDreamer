@@ -32,12 +32,12 @@
 
   ID:                 juce_events
   vendor:             juce
-  version:            7.0.0
+  version:            7.0.5
   name:               JUCE message and event handling classes
   description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:            http://www.juce.com/juce
   license:            ISC
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_core
 

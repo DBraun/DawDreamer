@@ -140,6 +140,7 @@ void Drawable::setBoundsToEnclose (Rectangle<float> area)
     auto newBounds = area.getSmallestIntegerContainer() + parentOrigin;
     originRelativeToComponent = parentOrigin - newBounds.getPosition();
     setBounds (newBounds);
+    updateTransform();
 }
 
 //==============================================================================
@@ -152,6 +153,23 @@ bool Drawable::replaceColour (Colour original, Colour replacement)
             changed = d->replaceColour (original, replacement) || changed;
 
     return changed;
+}
+
+void Drawable::setDrawableTransform (const AffineTransform& transform)
+{
+    drawableTransform = transform;
+    updateTransform();
+}
+
+void Drawable::updateTransform()
+{
+    if (drawableTransform.isIdentity())
+        return;
+
+    const auto transformationOrigin = originRelativeToComponent + getPosition();
+    setTransform (AffineTransform::translation (transformationOrigin * (-1))
+                      .followedBy (drawableTransform)
+                      .followedBy (AffineTransform::translation (transformationOrigin)));
 }
 
 //==============================================================================

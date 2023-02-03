@@ -54,7 +54,7 @@
  #import <MetalKit/MetalKit.h>
 
 #elif JUCE_IOS
- #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+ #if JUCE_PUSH_NOTIFICATIONS
   #import <UserNotifications/UserNotifications.h>
  #endif
 
@@ -67,9 +67,19 @@
  #include <vfw.h>
  #include <commdlg.h>
  #include <commctrl.h>
- #include <UIAutomation.h>
  #include <sapi.h>
- #include <Dxgi.h>
+ #include <dxgi.h>
+
+ #if JUCE_MINGW
+  // Some MinGW headers use 'new' as a parameter name
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wkeyword-macro")
+  #define new new_
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+ #endif
+
+ #include <uiautomation.h>
+
+ #undef new
 
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
@@ -127,6 +137,18 @@ namespace juce
         ScaledImage image;
         Point<int> hotspot;
     };
+
+    template <typename MemberFn>
+    static const AccessibilityHandler* getEnclosingHandlerWithInterface (const AccessibilityHandler* handler, MemberFn fn)
+    {
+        if (handler == nullptr)
+            return nullptr;
+
+        if ((handler->*fn)() != nullptr)
+            return handler;
+
+        return getEnclosingHandlerWithInterface (handler->getParent(), fn);
+    }
 } // namespace juce
 
 #include "mouse/juce_PointerState.h"
@@ -241,6 +263,7 @@ namespace juce
 #include "windows/juce_ThreadWithProgressWindow.cpp"
 #include "windows/juce_TooltipWindow.cpp"
 #include "windows/juce_TopLevelWindow.cpp"
+#include "windows/juce_VBlankAttachement.cpp"
 #include "commands/juce_ApplicationCommandInfo.cpp"
 #include "commands/juce_ApplicationCommandManager.cpp"
 #include "commands/juce_ApplicationCommandTarget.cpp"
@@ -259,7 +282,7 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
-#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_UNIT_TESTS
+#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_IOS || JUCE_UNIT_TESTS
  #include "native/accessibility/juce_AccessibilityTextHelpers.h"
 #endif
 
@@ -267,8 +290,8 @@ namespace juce
  #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
 
  #if JUCE_IOS
-  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_UIViewComponentPeer.mm"
+  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
 
@@ -278,6 +301,7 @@ namespace juce
 
  #else
   #include "native/accessibility/juce_mac_Accessibility.mm"
+  #include "native/juce_mac_PerScreenDisplayLinks.h"
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
   #include "native/juce_mac_MainMenu.mm"
@@ -304,6 +328,7 @@ namespace juce
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
+ #include "native/x11/juce_linux_ScopedWindowAssociation.h"
  #include "native/juce_linux_Windowing.cpp"
  #include "native/x11/juce_linux_XWindowSystem.cpp"
 
@@ -312,6 +337,28 @@ namespace juce
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
+
+namespace juce
+{
+static jobject makeAndroidRect (Rectangle<int> r)
+{
+    return getEnv()->NewObject (AndroidRect,
+                                AndroidRect.constructor,
+                                r.getX(),
+                                r.getY(),
+                                r.getRight(),
+                                r.getBottom());
+}
+
+static jobject makeAndroidPoint (Point<int> p)
+{
+    return getEnv()->NewObject (AndroidPoint,
+                                AndroidPoint.create,
+                                p.getX(),
+                                p.getY());
+}
+} // namespace juce
+
  #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"

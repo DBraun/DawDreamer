@@ -95,14 +95,12 @@ static String getOSXVersion()
         {
             const String systemVersionPlist ("/System/Library/CoreServices/SystemVersion.plist");
 
-           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
             if (@available (macOS 10.13, *))
             {
                 NSError* error = nullptr;
                 return [NSDictionary dictionaryWithContentsOfURL: createNSURLFromFile (systemVersionPlist)
                                                            error: &error];
             }
-           #endif
 
             return [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (systemVersionPlist)];
         }();
@@ -137,9 +135,10 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 
         case 11: return MacOS_11;
         case 12: return MacOS_12;
+        case 13: return MacOS_13;
     }
 
-    return UnknownOS;
+    return MacOSX;
    #endif
 }
 
@@ -154,6 +153,10 @@ String SystemStats::getOperatingSystemName()
 
 String SystemStats::getDeviceDescription()
 {
+    if (auto* userInfo = [[NSProcessInfo processInfo] environment])
+        if (auto* simDeviceName = [userInfo objectForKey: @"SIMULATOR_MODEL_IDENTIFIER"])
+            return nsStringToJuce (simDeviceName);
+
    #if JUCE_IOS
     const char* name = "hw.machine";
    #else
@@ -167,22 +170,7 @@ String SystemStats::getDeviceDescription()
         HeapBlock<char> model (size);
 
         if (sysctlbyname (name, model, &size, nullptr, 0) >= 0)
-        {
-            String description (model.get());
-
-           #if JUCE_IOS
-            if (description == "x86_64") // running in the simulator
-            {
-                if (auto* userInfo = [[NSProcessInfo processInfo] environment])
-                {
-                    if (auto* simDeviceName = [userInfo objectForKey: @"SIMULATOR_DEVICE_NAME"])
-                        return nsStringToJuce (simDeviceName);
-                }
-            }
-          #endif
-
-            return description;
-        }
+            return String (model.get());
     }
 
     return {};
@@ -351,6 +339,36 @@ bool Time::setSystemTimeToThisTime() const
 int SystemStats::getPageSize()
 {
     return (int) NSPageSize();
+}
+
+String SystemStats::getUniqueDeviceID()
+{
+    static const auto deviceId = []
+    {
+        ChildProcess proc;
+
+        if (proc.start ("ioreg -rd1 -c IOPlatformExpertDevice", ChildProcess::wantStdOut))
+        {
+            constexpr const char key[] = "\"IOPlatformUUID\"";
+            constexpr const auto keyLen = (int) sizeof (key);
+
+            auto output = proc.readAllProcessOutput();
+            auto index = output.indexOf (key);
+
+            if (index >= 0)
+            {
+                auto start = output.indexOf (index + keyLen, "\"");
+                auto end = output.indexOf (start + 1, "\"");
+                return output.substring (start + 1, end).replace("-", "");
+            }
+        }
+
+        return String();
+    }();
+
+    // Please tell someone at JUCE if this occurs
+    jassert (deviceId.isNotEmpty());
+    return deviceId;
 }
 
 } // namespace juce

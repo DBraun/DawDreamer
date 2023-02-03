@@ -69,9 +69,9 @@ public:
     CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
 
 private:
-    void audioDeviceIOCallbackWithContext (const float** ins,
+    void audioDeviceIOCallbackWithContext (const float* const* ins,
                                            int numIns,
-                                           float** outs,
+                                           float* const* outs,
                                            int numOuts,
                                            int numSamples,
                                            const AudioIODeviceCallbackContext& context) override
@@ -502,15 +502,90 @@ String AudioDeviceManager::initialiseWithDefaultDevices (int numInputChannelsNee
 
 void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) const
 {
+    enum class Direction { out, in };
+
     if (auto* type = getCurrentDeviceTypeObject())
     {
-        for (const auto isInput : { false, true })
+        // We avoid selecting a device pair that doesn't share a matching sample rate, if possible.
+        // If not, other parts of the AudioDeviceManager and AudioIODevice classes should generate
+        // an appropriate error message when opening or starting these devices.
+        const auto getDevicesToTestForMatchingSampleRate = [&setup, type, this] (Direction dir)
         {
-            const auto numChannelsNeeded = isInput ? numInputChansNeeded : numOutputChansNeeded;
+            const auto isInput = dir == Direction::in;
             const auto info = getSetupInfo (setup, isInput);
 
-            if (numChannelsNeeded > 0 && info.name.isEmpty())
-                info.name = type->getDeviceNames (isInput) [type->getDefaultDeviceIndex (isInput)];
+            if (! info.name.isEmpty())
+                return StringArray { info.name };
+
+            const auto numChannelsNeeded = isInput ? numInputChansNeeded : numOutputChansNeeded;
+            auto deviceNames = numChannelsNeeded > 0 ? type->getDeviceNames (isInput) : StringArray {};
+            deviceNames.move (type->getDefaultDeviceIndex (isInput), 0);
+
+            return deviceNames;
+        };
+
+        std::map<std::pair<Direction, String>, Array<double>> sampleRatesCache;
+
+        const auto getSupportedSampleRates = [&sampleRatesCache, type] (Direction dir, const String& deviceName)
+        {
+            const auto key = std::make_pair (dir, deviceName);
+
+            auto& entry = [&]() -> auto&
+            {
+                auto it = sampleRatesCache.find (key);
+
+                if (it != sampleRatesCache.end())
+                    return it->second;
+
+                auto& elem = sampleRatesCache[key];
+                auto tempDevice = rawToUniquePtr (type->createDevice ((dir == Direction::in) ? "" : deviceName,
+                                                                      (dir == Direction::in) ? deviceName : ""));
+                if (tempDevice != nullptr)
+                    elem = tempDevice->getAvailableSampleRates();
+
+                return elem;
+            }();
+
+            return entry;
+        };
+
+        const auto validate = [&getSupportedSampleRates] (const String& outputDeviceName, const String& inputDeviceName)
+        {
+            jassert (! outputDeviceName.isEmpty() && ! inputDeviceName.isEmpty());
+
+            const auto outputSampleRates = getSupportedSampleRates (Direction::out, outputDeviceName);
+            const auto inputSampleRates  = getSupportedSampleRates (Direction::in,  inputDeviceName);
+
+            return std::any_of (inputSampleRates.begin(),
+                                inputSampleRates.end(),
+                                [&] (auto inputSampleRate) { return outputSampleRates.contains (inputSampleRate); });
+        };
+
+        auto outputsToTest = getDevicesToTestForMatchingSampleRate (Direction::out);
+        auto inputsToTest  = getDevicesToTestForMatchingSampleRate (Direction::in);
+
+        // We set default device names, so in case no in-out pair passes the validation, we still
+        // produce the same result as before
+        if (setup.outputDeviceName.isEmpty() && ! outputsToTest.isEmpty())
+            setup.outputDeviceName = outputsToTest[0];
+
+        if (setup.inputDeviceName.isEmpty() && ! inputsToTest.isEmpty())
+            setup.inputDeviceName = inputsToTest[0];
+
+        // We check all possible in-out pairs until the first validation pass. If no pair passes we
+        // leave the setup unchanged.
+        for (const auto& out : outputsToTest)
+        {
+            for (const auto& in : inputsToTest)
+            {
+                if (validate (out, in))
+                {
+                    setup.outputDeviceName = out;
+                    setup.inputDeviceName  = in;
+
+                    return;
+                }
+            }
         }
     }
 }
@@ -720,6 +795,12 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         currentDeviceType = currentAudioDevice->getTypeName();
 
         currentAudioDevice->start (callbackHandler.get());
+
+        error = currentAudioDevice->getLastError();
+    }
+
+    if (error.isEmpty())
+    {
         updateCurrentSetup();
 
         for (int i = 0; i < availableDeviceTypes.size(); ++i)
@@ -901,9 +982,9 @@ void AudioDeviceManager::removeAudioCallback (AudioIODeviceCallback* callbackToR
     }
 }
 
-void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelData,
+void AudioDeviceManager::audioDeviceIOCallbackInt (const float* const* inputChannelData,
                                                    int numInputChannels,
-                                                   float** outputChannelData,
+                                                   float* const* outputChannelData,
                                                    int numOutputChannels,
                                                    int numSamples,
                                                    const AudioIODeviceCallbackContext& context)
@@ -925,7 +1006,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
                                                                      numSamples,
                                                                      context);
 
-        auto** tempChans = tempBuffer.getArrayOfWritePointers();
+        auto* const* tempChans = tempBuffer.getArrayOfWritePointers();
 
         for (int i = callbacks.size(); --i > 0;)
         {
@@ -967,7 +1048,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
             testSound.reset();
     }
 
-    outputLevelGetter->updateLevel (const_cast<const float**> (outputChannelData), numOutputChannels, numSamples);
+    outputLevelGetter->updateLevel (outputChannelData, numOutputChannels, numSamples);
 }
 
 void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)
@@ -1810,10 +1891,19 @@ private:
         std::function<void()> stopped;
         std::function<void()> error;
 
-        void audioDeviceIOCallback (const float**, int, float**, int, int) override { NullCheckedInvocation::invoke (callback); }
-        void audioDeviceAboutToStart (AudioIODevice*)                      override { NullCheckedInvocation::invoke (aboutToStart); }
-        void audioDeviceStopped()                                          override { NullCheckedInvocation::invoke (stopped); }
-        void audioDeviceError (const String&)                              override { NullCheckedInvocation::invoke (error); }
+        void audioDeviceIOCallbackWithContext (const float* const*,
+                                               int,
+                                               float* const*,
+                                               int,
+                                               int,
+                                               const AudioIODeviceCallbackContext&) override
+        {
+            NullCheckedInvocation::invoke (callback);
+        }
+
+        void audioDeviceAboutToStart (AudioIODevice*) override { NullCheckedInvocation::invoke (aboutToStart); }
+        void audioDeviceStopped()                     override { NullCheckedInvocation::invoke (stopped); }
+        void audioDeviceError (const String&)         override { NullCheckedInvocation::invoke (error); }
     };
 
     void initialiseManager (AudioDeviceManager& manager)

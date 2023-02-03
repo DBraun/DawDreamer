@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      7
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        5
 
 /** Current JUCE version number.
 
@@ -43,8 +43,7 @@
 
 #if ! DOXYGEN
 #define JUCE_VERSION_ID \
-    volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER); \
-    ignoreUnused (juceVersionId);
+    [[maybe_unused]] volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER);
 #endif
 
 //==============================================================================
@@ -55,6 +54,7 @@
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -63,15 +63,16 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
+#include <optional>
 #include <queue>
 #include <set>
 #include <sstream>
+#include <thread>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <set>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

@@ -306,8 +306,7 @@ private:
             {
                 if (error != nil)
                 {
-                    String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                    ignoreUnused (errorString);
+                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
 
                     JUCE_CAMERA_LOG ("Still picture capture failed, error: " + errorString);
                     jassertfalse;
@@ -341,10 +340,8 @@ private:
 
             const auto codecType = []
             {
-               #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
                 if (@available (macOS 10.13, *))
                    return AVVideoCodecTypeJPEG;
-               #endif
 
                 return AVVideoCodecJPEG;
             }();

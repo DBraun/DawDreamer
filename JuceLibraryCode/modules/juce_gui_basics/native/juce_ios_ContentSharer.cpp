@@ -26,10 +26,6 @@
 namespace juce
 {
 
-#if ! defined (__IPHONE_10_0) || __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_10_0
- using UIActivityType = NSString*;
-#endif
-
 class ContentSharer::ContentSharerNativeImpl    : public ContentSharer::Pimpl,
                                                   private Component
 {
@@ -108,12 +104,9 @@ private:
 
         controller.get().excludedActivityTypes = nil;
 
-        controller.get().completionWithItemsHandler = ^ (UIActivityType type, BOOL completed,
-                                                         NSArray* returnedItems, NSError* error)
+        controller.get().completionWithItemsHandler = ^([[maybe_unused]] UIActivityType type, BOOL completed,
+                                                        [[maybe_unused]] NSArray* returnedItems, NSError* error)
         {
-            ignoreUnused (type);
-            ignoreUnused (returnedItems);
-
             succeeded = completed;
 
             if (error != nil)

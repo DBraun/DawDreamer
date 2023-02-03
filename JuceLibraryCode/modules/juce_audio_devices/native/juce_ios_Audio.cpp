@@ -293,10 +293,8 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             options |= (AVAudioSessionCategoryOptionDefaultToSpeaker
                       | AVAudioSessionCategoryOptionAllowBluetooth);
 
-           #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
             if (@available (iOS 10.0, *))
                 options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
-           #endif
         }
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
@@ -581,16 +579,15 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             impl.fillHostCallbackInfo (callbackInfo);
 
             Boolean hostIsPlaying = NO;
-            OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
-                                                             &hostIsPlaying,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr);
+            [[maybe_unused]] OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
+                                                                              &hostIsPlaying,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr);
 
-            ignoreUnused (err);
             jassert (err == noErr);
 
             if (hostIsPlaying != shouldSartPlaying)
@@ -606,15 +603,14 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             impl.fillHostCallbackInfo (callbackInfo);
 
             Boolean hostIsRecording = NO;
-            OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
-                                                             nullptr,
-                                                             &hostIsRecording,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr,
-                                                             nullptr);
-            ignoreUnused (err);
+            [[maybe_unused]] OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
+                                                                              nullptr,
+                                                                              &hostIsRecording,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr,
+                                                                              nullptr);
             jassert (err == noErr);
 
             if (hostIsRecording != shouldStartRecording)
@@ -705,13 +701,18 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     Image getIcon (int size)
     {
-        if (interAppAudioConnected)
+       #if TARGET_OS_MACCATALYST
+        if (@available (macCatalyst 14.0, *))
+       #endif
         {
-            UIImage* hostUIImage = AudioOutputUnitGetHostIcon (audioUnit, size);
-            if (hostUIImage != nullptr)
-                return juce_createImageFromUIImage (hostUIImage);
+            if (interAppAudioConnected)
+            {
+                if (UIImage* hostUIImage = AudioOutputUnitGetHostIcon (audioUnit, size))
+                    return juce_createImageFromUIImage (hostUIImage);
+            }
         }
-        return Image();
+
+        return {};
     }
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
@@ -731,7 +732,6 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
                                             &dataSize);
         if (err == noErr)
         {
-           #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
             if (@available (iOS 10.0, *))
             {
                 [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl
@@ -740,7 +740,6 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
 
                 return;
             }
-           #endif
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl];
@@ -808,11 +807,9 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
 
     void handleAudioUnitPropertyChange (AudioUnit,
                                         AudioUnitPropertyID propertyID,
-                                        AudioUnitScope scope,
-                                        AudioUnitElement element)
+                                        [[maybe_unused]] AudioUnitScope scope,
+                                        [[maybe_unused]] AudioUnitElement element)
     {
-        ignoreUnused (scope);
-        ignoreUnused (element);
         JUCE_IOS_AUDIO_LOG ("handleAudioUnitPropertyChange: propertyID: " << String (propertyID)
                                                             << " scope: " << String (scope)
                                                           << " element: " << String (element));
@@ -834,9 +831,8 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     {
         UInt32 connected;
         UInt32 dataSize = sizeof (connected);
-        OSStatus err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_IsInterAppConnected,
-                                             kAudioUnitScope_Global, 0, &connected, &dataSize);
-        ignoreUnused (err);
+        [[maybe_unused]] OSStatus err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_IsInterAppConnected,
+                                                              kAudioUnitScope_Global, 0, &connected, &dataSize);
         jassert (err == noErr);
 
         JUCE_IOS_AUDIO_LOG ("handleInterAppAudioConnectionChange: " << (connected ? "connected"
@@ -892,8 +888,8 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             if ((int) numFrames > channelData.getFloatBufferSize())
                 channelData.setFloatBufferSize ((int) numFrames);
 
-            float** const inputData = channelData.audioData.getArrayOfWritePointers();
-            float** const outputData = inputData + channelData.inputs->numActiveChannels;
+            float* const* const inputData = channelData.audioData.getArrayOfWritePointers();
+            float* const* const outputData = inputData + channelData.inputs->numActiveChannels;
 
             if (useInput)
             {
@@ -1078,21 +1074,19 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     {
         zerostruct (callbackInfo);
         UInt32 dataSize = sizeof (HostCallbackInfo);
-        OSStatus err = AudioUnitGetProperty (audioUnit,
-                                             kAudioUnitProperty_HostCallbacks,
-                                             kAudioUnitScope_Global,
-                                             0,
-                                             &callbackInfo,
-                                             &dataSize);
-        ignoreUnused (err);
+        [[maybe_unused]] OSStatus err = AudioUnitGetProperty (audioUnit,
+                                                              kAudioUnitProperty_HostCallbacks,
+                                                              kAudioUnitScope_Global,
+                                                              0,
+                                                              &callbackInfo,
+                                                              &dataSize);
         jassert (err == noErr);
     }
 
     void handleAudioTransportEvent (AudioUnitRemoteControlEvent event)
     {
-        OSStatus err = AudioUnitSetProperty (audioUnit, kAudioOutputUnitProperty_RemoteControlToHost,
-                                             kAudioUnitScope_Global, 0, &event, sizeof (event));
-        ignoreUnused (err);
+        [[maybe_unused]] OSStatus err = AudioUnitSetProperty (audioUnit, kAudioOutputUnitProperty_RemoteControlToHost,
+                                                              kAudioUnitScope_Global, 0, &event, sizeof (event));
         jassert (err == noErr);
     }
 

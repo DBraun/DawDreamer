@@ -382,9 +382,12 @@ struct ObjCClass
     template <typename Type>
     void addIvar (const char* name)
     {
-        BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
-        jassert (b); ignoreUnused (b);
+        [[maybe_unused]] BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
+        jassert (b);
     }
+
+    template <typename Fn>
+    void addMethod (SEL selector, Fn callbackFn) { addMethod (selector, toFnPtr (callbackFn)); }
 
     template <typename Result, typename... Args>
     void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
@@ -396,8 +399,8 @@ struct ObjCClass
 
     void addProtocol (Protocol* protocol)
     {
-        BOOL b = class_addProtocol (cls, protocol);
-        jassert (b); ignoreUnused (b);
+        [[maybe_unused]] BOOL b = class_addProtocol (cls, protocol);
+        jassert (b);
     }
 
     template <typename ReturnType, typename... Params>
@@ -480,13 +483,31 @@ Class* getJuceClassFromNSObject (NSObject* obj)
     return obj != nullptr ? getIvar<Class*> (obj, "cppObject") : nullptr;
 }
 
-template <typename ReturnT, class Class, typename... Params>
-ReturnT (^CreateObjCBlock(Class* object, ReturnT (Class::*fn)(Params...))) (Params...)
+namespace detail
 {
-    __block Class* _this = object;
-    __block ReturnT (Class::*_fn)(Params...) = fn;
+template <typename> struct Signature;
+template <typename R, typename... A> struct Signature<R (A...)> {};
 
-    return [[^ReturnT (Params... params) { return (_this->*_fn) (params...); } copy] autorelease];
+template <typename Class, typename Result, typename... Args>
+constexpr auto getSignature (Result (Class::*) (Args...))       { return Signature<Result (Args...)>{}; }
+
+template <typename Class, typename Result, typename... Args>
+constexpr auto getSignature (Result (Class::*) (Args...) const) { return Signature<Result (Args...)>{}; }
+
+template <typename Class, typename Fn, typename Result, typename... Params>
+auto createObjCBlockImpl (Class* object, Fn func, Signature<Result (Params...)>)
+{
+    __block auto _this = object;
+    __block auto _func = func;
+
+    return [[^Result (Params... params) { return (_this->*_func) (params...); } copy] autorelease];
+}
+} // namespace detail
+
+template <typename Class, typename MemberFunc>
+auto CreateObjCBlock (Class* object, MemberFunc fn)
+{
+    return detail::createObjCBlockImpl (object, fn, detail::getSignature (fn));
 }
 
 template <typename BlockType>
@@ -506,6 +527,64 @@ public:
 
 private:
     BlockType block;
+};
+
+//==============================================================================
+class ScopedNotificationCenterObserver
+{
+public:
+    ScopedNotificationCenterObserver() = default;
+
+    ScopedNotificationCenterObserver (id observerIn,
+                                      SEL selector,
+                                      NSNotificationName nameIn,
+                                      id objectIn,
+                                      Class klassIn = [NSNotificationCenter class])
+        : observer (observerIn), name (nameIn), object (objectIn), klass (klassIn)
+    {
+        [[klass defaultCenter] addObserver: observer
+                                  selector: selector
+                                      name: name
+                                    object: object];
+    }
+
+    ~ScopedNotificationCenterObserver()
+    {
+        if (observer != nullptr && name != nullptr)
+        {
+            [[klass defaultCenter] removeObserver: observer
+                                             name: name
+                                           object: object];
+        }
+    }
+
+    ScopedNotificationCenterObserver (ScopedNotificationCenterObserver&& other) noexcept
+    {
+        swap (other);
+    }
+
+    ScopedNotificationCenterObserver& operator= (ScopedNotificationCenterObserver&& other) noexcept
+    {
+        ScopedNotificationCenterObserver (std::move (other)).swap (*this);
+        return *this;
+    }
+
+    ScopedNotificationCenterObserver (const ScopedNotificationCenterObserver&) = delete;
+    ScopedNotificationCenterObserver& operator= (const ScopedNotificationCenterObserver&) = delete;
+
+private:
+    void swap (ScopedNotificationCenterObserver& other) noexcept
+    {
+        std::swap (other.observer, observer);
+        std::swap (other.name, name);
+        std::swap (other.object, object);
+        std::swap (other.klass, klass);
+    }
+
+    id observer = nullptr;
+    NSNotificationName name = nullptr;
+    id object = nullptr;
+    Class klass = nullptr;
 };
 
 } // namespace juce

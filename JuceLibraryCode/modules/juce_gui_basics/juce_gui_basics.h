@@ -35,12 +35,12 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            7.0.0
+  version:            7.0.5
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_graphics juce_data_structures
   OSXFrameworks:      Cocoa QuartzCore
@@ -278,6 +278,7 @@ namespace juce
 #include "windows/juce_NativeMessageBox.h"
 #include "windows/juce_ThreadWithProgressWindow.h"
 #include "windows/juce_TooltipWindow.h"
+#include "windows/juce_VBlankAttachement.h"
 #include "layout/juce_MultiDocumentPanel.h"
 #include "layout/juce_SidePanel.h"
 #include "filebrowser/juce_FileBrowserListener.h"

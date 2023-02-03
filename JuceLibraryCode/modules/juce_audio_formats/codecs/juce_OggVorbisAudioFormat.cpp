@@ -158,7 +158,7 @@ public:
     }
 
     //==============================================================================
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         const auto getBufferedRange = [this] { return bufferedRange; };
@@ -216,7 +216,8 @@ public:
         if (! remainingSamples.isEmpty())
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) remainingSamples.getLength() * sizeof (int));
+                    zeromem (destSamples[i] + startOffsetInDestBuffer + (remainingSamples.getStart() - startSampleInFile),
+                             (size_t) remainingSamples.getLength() * sizeof (int));
 
         return true;
     }

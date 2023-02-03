@@ -462,7 +462,7 @@ private:
         if (callback != nullptr)
         {
             if ((numActiveInChans + numActiveOutChans) > 0)
-                callback->audioDeviceIOCallbackWithContext (const_cast<const float**> (inChans.getData()),
+                callback->audioDeviceIOCallbackWithContext (inChans.getData(),
                                                             numActiveInChans,
                                                             outChans,
                                                             numActiveOutChans,
@@ -544,21 +544,19 @@ private:
         }
     }
 
-    static void infoShutdownCallback (jack_status_t code, const char* reason, void* arg)
+    static void infoShutdownCallback (jack_status_t code, [[maybe_unused]] const char* reason, void* arg)
     {
         jassertquiet (code == 0);
 
         JUCE_JACK_LOG ("Shutting down with message:");
         JUCE_JACK_LOG (reason);
-        ignoreUnused (reason);
 
         shutdownCallback (arg);
     }
 
-    static void errorCallback (const char* msg)
+    static void errorCallback ([[maybe_unused]] const char* msg)
     {
         JUCE_JACK_LOG ("JackAudioIODevice::errorCallback " + String (msg));
-        ignoreUnused (msg);
     }
 
     bool deviceIsOpen = false;
