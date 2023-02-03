@@ -173,10 +173,10 @@ bool PlaybackWarpProcessor::setClipPositions(
 void PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer,
                                          juce::MidiBuffer& midiBuffer) {
   auto posInfo = getPlayHead()->getPosition();
+  buffer.clear();
 
   if ((m_clips.size() == 0) || (m_clipIndex >= m_clips.size())) {
     // There are no clips, or we've already passed the last clip.
-    buffer.clear();
     ProcessorBase::processBlock(buffer, midiBuffer);
     return;
   }
