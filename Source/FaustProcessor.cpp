@@ -115,7 +115,7 @@ void FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer,
     if (m_dsp != NULL) {
       m_dsp->compute(buffer.getNumSamples(),
                      (float**)buffer.getArrayOfReadPointers(),
-                     buffer.getArrayOfWritePointers());
+                     (float**)buffer.getArrayOfWritePointers());
     } else {
       throw std::runtime_error("Faust Processor: m_dsp is null");
     }
