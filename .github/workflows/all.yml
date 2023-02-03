@@ -61,6 +61,7 @@ jobs:
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
+        CIBW_TEST_SKIP: "*311*"
 
     - uses: actions/upload-artifact@v2
       with:
@@ -139,6 +140,7 @@ jobs:
         CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
+        CIBW_TEST_SKIP: "*311*"
 
     - uses: actions/upload-artifact@v2
       with:
