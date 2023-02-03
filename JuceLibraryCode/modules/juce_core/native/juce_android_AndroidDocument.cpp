@@ -101,8 +101,7 @@ struct AndroidDocumentDetail
         auto* env = getEnv();
         LocalRef<jobjectArray> array { env->NewObjectArray (sizeof... (args), JavaString, nullptr) };
 
-        int unused[] { (env->SetObjectArrayElement (array.get(), Ix, args.get()), 0)... };
-        ignoreUnused (unused);
+        (env->SetObjectArrayElement (array.get(), Ix, args.get()), ...);
 
         return array;
     }
@@ -417,14 +416,18 @@ struct AndroidDocument::Utils
             return false;
         }
 
-        std::unique_ptr<InputStream>  createInputStream()  const override
+        std::unique_ptr<InputStream> createInputStream() const override
         {
-            return makeStream<AndroidContentUriInputStream>  (AndroidStreamHelpers::StreamKind::input);
+            auto result = std::make_unique<AndroidContentUriInputStream> (uri);
+            return result->openedSuccessfully() ? std::move (result) : nullptr;
         }
 
         std::unique_ptr<OutputStream> createOutputStream() const override
         {
-            return makeStream<AndroidContentUriOutputStream> (AndroidStreamHelpers::StreamKind::output);
+            auto stream = AndroidStreamHelpers::createStream (uri, AndroidStreamHelpers::StreamKind::output);
+
+            return stream.get() != nullptr ? std::make_unique<AndroidContentUriOutputStream> (std::move (stream))
+                                           : nullptr;
         }
 
         AndroidDocumentInfo getInfo() const override
@@ -507,15 +510,6 @@ struct AndroidDocument::Utils
         NativeInfo getNativeInfo() const override { return { uri }; }
 
     private:
-        template <typename Stream>
-        std::unique_ptr<Stream> makeStream (AndroidStreamHelpers::StreamKind kind) const
-        {
-            auto stream = AndroidStreamHelpers::createStream (uri, kind);
-
-            return stream.get() != nullptr ? std::make_unique<Stream> (std::move (stream))
-                                           : nullptr;
-        }
-
         GlobalRef uri;
     };
 
@@ -750,21 +744,17 @@ struct AndroidDocument::Utils
 };
 
 //==============================================================================
-void AndroidDocumentPermission::takePersistentReadWriteAccess (const URL& url)
+void AndroidDocumentPermission::takePersistentReadWriteAccess ([[maybe_unused]] const URL& url)
 {
    #if JUCE_ANDROID
     AndroidDocumentDetail::setPermissions (url, ContentResolver19.takePersistableUriPermission);
-   #else
-    ignoreUnused (url);
    #endif
 }
 
-void AndroidDocumentPermission::releasePersistentReadWriteAccess (const URL& url)
+void AndroidDocumentPermission::releasePersistentReadWriteAccess ([[maybe_unused]] const URL& url)
 {
    #if JUCE_ANDROID
     AndroidDocumentDetail::setPermissions (url, ContentResolver19.releasePersistableUriPermission);
-   #else
-    ignoreUnused (url);
    #endif
 }
 
@@ -822,7 +812,7 @@ AndroidDocument AndroidDocument::fromFile (const File& filePath)
                                                 : nullptr };
 }
 
-AndroidDocument AndroidDocument::fromDocument (const URL& documentUrl)
+AndroidDocument AndroidDocument::fromDocument ([[maybe_unused]] const URL& documentUrl)
 {
    #if JUCE_ANDROID
     if (getAndroidSDKVersion() < 19)
@@ -844,12 +834,11 @@ AndroidDocument AndroidDocument::fromDocument (const URL& documentUrl)
 
     return AndroidDocument { Utils::createPimplForSdk (javaUri) };
    #else
-    ignoreUnused (documentUrl);
     return AndroidDocument{};
    #endif
 }
 
-AndroidDocument AndroidDocument::fromTree (const URL& treeUrl)
+AndroidDocument AndroidDocument::fromTree ([[maybe_unused]] const URL& treeUrl)
 {
    #if JUCE_ANDROID
     if (getAndroidSDKVersion() < 21)
@@ -879,7 +868,6 @@ AndroidDocument AndroidDocument::fromTree (const URL& treeUrl)
 
     return AndroidDocument { Utils::createPimplForSdk (documentUri) };
    #else
-    ignoreUnused (treeUrl);
     return AndroidDocument{};
    #endif
 }

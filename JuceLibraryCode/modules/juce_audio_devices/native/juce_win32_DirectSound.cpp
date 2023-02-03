@@ -251,8 +251,8 @@ public:
         if (pOutputBuffer != nullptr)
         {
             JUCE_DS_LOG ("closing output: " + name);
-            HRESULT hr = pOutputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr); ignoreUnused (hr);
+            [[maybe_unused]] HRESULT hr = pOutputBuffer->Stop();
+            JUCE_DS_LOG_ERROR (hr);
 
             pOutputBuffer->Release();
             pOutputBuffer = nullptr;
@@ -555,8 +555,8 @@ public:
         if (pInputBuffer != nullptr)
         {
             JUCE_DS_LOG ("closing input: " + name);
-            HRESULT hr = pInputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr); ignoreUnused (hr);
+            [[maybe_unused]] HRESULT hr = pInputBuffer->Stop();
+            JUCE_DS_LOG_ERROR (hr);
 
             pInputBuffer->Release();
             pInputBuffer = nullptr;
@@ -1196,7 +1196,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
         for (int i = 0; i < inChans.size(); ++i)
             inChans.getUnchecked(i)->synchronisePosition();
 
-        startThread (9);
+        startThread (Priority::highest);
         sleep (10);
 
         notify();

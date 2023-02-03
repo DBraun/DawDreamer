@@ -34,6 +34,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 633
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-dtor",
                                      "-Wnon-virtual-dtor",
+                                     "-Wdeprecated",
                                      "-Wreorder",
                                      "-Wunsequenced",
                                      "-Wint-to-pointer-cast",
@@ -67,7 +68,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-dtor",
                                      "-Wtype-limits",
                                      "-Wcpp",
                                      "-W#warnings",
-                                     "-Wmaybe-uninitialized")
+                                     "-Wmaybe-uninitialized",
+                                     "-Wunused-but-set-variable")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values

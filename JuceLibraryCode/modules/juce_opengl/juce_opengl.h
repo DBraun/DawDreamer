@@ -35,12 +35,12 @@
 
   ID:                 juce_opengl
   vendor:             juce
-  version:            7.0.0
+  version:            7.0.5
   name:               JUCE OpenGL classes
   description:        Classes for rendering OpenGL in a JUCE window.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_gui_extra
   OSXFrameworks:      OpenGL

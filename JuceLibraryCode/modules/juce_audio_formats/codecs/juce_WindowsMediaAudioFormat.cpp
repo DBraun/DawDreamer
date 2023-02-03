@@ -163,7 +163,7 @@ public:
             wmSyncReader->Close();
     }
 
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         if (sampleRate <= 0)
@@ -262,7 +262,7 @@ private:
 
     void checkCoInitialiseCalled()
     {
-        ignoreUnused (CoInitialize (nullptr));
+        [[maybe_unused]] const auto result = CoInitialize (nullptr);
     }
 
     void scanFileForDetails()

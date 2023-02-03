@@ -195,7 +195,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer")
  METHOD (isExhausted, "isExhausted", "()Z") \
  METHOD (setPosition, "setPosition", "(J)Z") \
 
-DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 16, javaJuceHttpStream, sizeof(javaJuceHttpStream))
+DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 16, javaJuceHttpStream)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -311,25 +311,6 @@ String URL::getFileName() const
 
     return toString (false).fromLastOccurrenceOf ("/", false, true);
 }
-
-struct AndroidStreamHelpers
-{
-    enum class StreamKind { output, input };
-
-    static LocalRef<jobject> createStream (const GlobalRef& uri, StreamKind kind)
-    {
-        auto* env = getEnv();
-        auto contentResolver = AndroidContentUriResolver::getContentResolver();
-
-        if (contentResolver == nullptr)
-            return {};
-
-        return LocalRef<jobject> (env->CallObjectMethod (contentResolver.get(),
-                                                         kind == StreamKind::input ? ContentResolver.openInputStream
-                                                                                   : ContentResolver.openOutputStream,
-                                                         uri.get()));
-    }
-};
 
 //==============================================================================
 class WebInputStream::Pimpl

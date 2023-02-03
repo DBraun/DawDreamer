@@ -324,7 +324,7 @@ public:
         Don't modify any of the pointers that are returned, and bear in mind that
         these will become invalid if the buffer is resized.
     */
-    const Type** getArrayOfReadPointers() const noexcept            { return const_cast<const Type**> (channels); }
+    const Type* const* getArrayOfReadPointers() const noexcept            { return channels; }
 
     /** Returns an array of pointers to the channels in the buffer.
 
@@ -339,7 +339,7 @@ public:
 
         @see setNotClear
     */
-    Type** getArrayOfWritePointers() noexcept                       { isClear = false; return channels; }
+    Type* const* getArrayOfWritePointers() noexcept                       { isClear = false; return channels; }
 
     //==============================================================================
     /** Changes the buffer's size or number of channels.
@@ -465,7 +465,7 @@ public:
         @param newNumSamples    the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
-    void setDataToReferTo (Type** dataToReferTo,
+    void setDataToReferTo (Type* const* dataToReferTo,
                            int newNumChannels,
                            int newStartSample,
                            int newNumSamples)
@@ -506,7 +506,7 @@ public:
         @param newNumSamples    the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
-    void setDataToReferTo (Type** dataToReferTo,
+    void setDataToReferTo (Type* const* dataToReferTo,
                            int newNumChannels,
                            int newNumSamples)
     {
@@ -558,7 +558,11 @@ public:
         if (! isClear)
         {
             for (int i = 0; i < numChannels; ++i)
+            {
+                JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
                 FloatVectorOperations::clear (channels[i], size);
+                JUCE_END_IGNORE_WARNINGS_MSVC
+            }
 
             isClear = true;
         }
@@ -799,6 +803,8 @@ public:
             auto* d = channels[destChannel] + destStartSample;
             auto* s = source.channels[sourceChannel] + sourceStartSample;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+
             if (isClear)
             {
                 isClear = false;
@@ -815,6 +821,8 @@ public:
                 else
                     FloatVectorOperations::add (d, s, numSamples);
             }
+
+            JUCE_END_IGNORE_WARNINGS_MSVC
         }
     }
 
@@ -877,7 +885,11 @@ public:
         @param numSamples           the number of samples to process
         @param startGain            the gain to apply to the first sample (this is multiplied with
                                     the source samples before they are added to this buffer)
-        @param endGain              the gain to apply to the final sample. The gain is linearly
+        @param endGain              The gain that would apply to the sample after the final sample.
+                                    The gain that applies to the final sample is
+                                    (numSamples - 1) / numSamples * (endGain - startGain). This
+                                    ensures a continuous ramp when supplying the same value in
+                                    endGain and startGain in subsequent blocks. The gain is linearly
                                     interpolated between the first and last samples.
     */
     void addFromWithRamp (int destChannel,
@@ -1043,7 +1055,11 @@ public:
         @param numSamples           the number of samples to process
         @param startGain            the gain to apply to the first sample (this is multiplied with
                                     the source samples before they are copied to this buffer)
-        @param endGain              the gain to apply to the final sample. The gain is linearly
+        @param endGain              The gain that would apply to the sample after the final sample.
+                                    The gain that applies to the final sample is
+                                    (numSamples - 1) / numSamples * (endGain - startGain). This
+                                    ensures a continuous ramp when supplying the same value in
+                                    endGain and startGain in subsequent blocks. The gain is linearly
                                     interpolated between the first and last samples.
 
         @see addFrom
@@ -1177,7 +1193,7 @@ private:
         jassert (size >= 0);
 
         auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);
-        auto requiredSampleAlignment = std::alignment_of<Type>::value;
+        auto requiredSampleAlignment = std::alignment_of_v<Type>;
         size_t alignmentOverflow = channelListSize % requiredSampleAlignment;
 
         if (alignmentOverflow != 0)

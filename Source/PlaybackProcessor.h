@@ -31,7 +31,7 @@ class PlaybackProcessor : public ProcessorBase {
                     juce::MidiBuffer& midiBuffer) override {
     auto posInfo = getPlayHead()->getPosition();
 
-    buffer.applyGain(0.);
+    buffer.clear();
 
     int numSamples = std::min(
         buffer.getNumSamples(),

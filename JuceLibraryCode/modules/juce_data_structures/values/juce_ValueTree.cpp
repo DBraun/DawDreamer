@@ -46,7 +46,7 @@ public:
 
     SharedObject& operator= (const SharedObject&) = delete;
 
-    ~SharedObject()
+    ~SharedObject() override
     {
         jassert (parent == nullptr); // this should never happen unless something isn't obeying the ref-counting!
 
@@ -669,6 +669,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
 
+    if (source == *this)
+        return;
+
     if (source.object == nullptr)
         removeAllProperties (undoManager);
     else if (object != nullptr)
@@ -678,6 +681,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 void ValueTree::copyPropertiesAndChildrenFrom (const ValueTree& source, UndoManager* undoManager)
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to copy to a null ValueTree will fail!
+
+    if (source == *this)
+        return;
 
     copyPropertiesFrom (source, undoManager);
     removeAllChildren (undoManager);
@@ -867,7 +873,7 @@ ValueTree::Iterator::Iterator (const ValueTree& v, bool isEnd)
 
 ValueTree::Iterator& ValueTree::Iterator::operator++()
 {
-    internal = static_cast<SharedObject**> (internal) + 1;
+    ++internal;
     return *this;
 }
 
@@ -876,7 +882,7 @@ bool ValueTree::Iterator::operator!= (const Iterator& other) const  { return int
 
 ValueTree ValueTree::Iterator::operator*() const
 {
-    return ValueTree (SharedObject::Ptr (*static_cast<SharedObject**> (internal)));
+    return ValueTree (SharedObject::Ptr (*internal));
 }
 
 ValueTree::Iterator ValueTree::begin() const noexcept   { return Iterator (*this, false); }

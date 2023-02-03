@@ -172,12 +172,12 @@ struct SystemJavaClassComparator;
 class JNIClassBase
 {
 public:
-    JNIClassBase (const char* classPath, int minSDK, const void* byteCode, size_t byteCodeSize);
+    JNIClassBase (const char* classPath, int minSDK, const uint8* byteCode, size_t byteCodeSize);
     virtual ~JNIClassBase();
 
     operator jclass() const noexcept  { return classRef; }
 
-    static void initialiseAllClasses (JNIEnv*);
+    static void initialiseAllClasses (JNIEnv*, jobject context);
     static void releaseAllClasses (JNIEnv*);
 
     const char* getClassPath() const noexcept { return classPath; }
@@ -202,7 +202,7 @@ private:
     jclass classRef = nullptr;
 
     static Array<JNIClassBase*>& getClasses();
-    void initialise (JNIEnv*);
+    void initialise (JNIEnv*, jobject context);
     void release (JNIEnv*);
     void tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoader);
 
@@ -210,6 +210,9 @@ private:
 };
 
 //==============================================================================
+template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { return N; }
+                                constexpr auto numBytes (std::nullptr_t)  { return static_cast<size_t> (0); }
+
 #define CREATE_JNI_METHOD(methodID, stringName, params)          methodID = resolveMethod (env, stringName, params);
 #define CREATE_JNI_STATICMETHOD(methodID, stringName, params)    methodID = resolveStaticMethod (env, stringName, params);
 #define CREATE_JNI_FIELD(fieldID, stringName, signature)         fieldID  = resolveField (env, stringName, signature);
@@ -219,26 +222,26 @@ private:
 #define DECLARE_JNI_FIELD(fieldID, stringName, signature)        jfieldID  fieldID;
 #define DECLARE_JNI_CALLBACK(fieldID, stringName, signature)
 
-#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData, byteCodeSize) \
-    class CppClassName ## _Class   : public JNIClassBase \
-    { \
-    public: \
-        CppClassName ## _Class() : JNIClassBase (javaPath, minSDK, byteCodeData, byteCodeSize) {} \
-    \
-        void initialiseFields (JNIEnv* env) \
-        { \
-            Array<JNINativeMethod> callbacks; \
-            JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD, CREATE_JNI_CALLBACK); \
-            resolveCallbacks (env, callbacks); \
-        } \
-    \
-        JNI_CLASS_MEMBERS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD, DECLARE_JNI_FIELD, DECLARE_JNI_CALLBACK) \
-    }; \
-    static CppClassName ## _Class CppClassName;
+#define DECLARE_JNI_CLASS_WITH_BYTECODE(CppClassName, javaPath, minSDK, byteCodeData)                                                       \
+    class CppClassName ## _Class   : public JNIClassBase                                                                                    \
+    {                                                                                                                                       \
+    public:                                                                                                                                 \
+        CppClassName ## _Class() : JNIClassBase (javaPath, minSDK, byteCodeData, numBytes (byteCodeData)) {}                                \
+                                                                                                                                            \
+        void initialiseFields (JNIEnv* env)                                                                                                 \
+        {                                                                                                                                   \
+            Array<JNINativeMethod> callbacks;                                                                                               \
+            JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD, CREATE_JNI_CALLBACK);  \
+            resolveCallbacks (env, callbacks);                                                                                              \
+        }                                                                                                                                   \
+                                                                                                                                            \
+        JNI_CLASS_MEMBERS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD, DECLARE_JNI_FIELD, DECLARE_JNI_CALLBACK)              \
+    };                                                                                                                                      \
+    static inline const CppClassName ## _Class CppClassName;
 
 //==============================================================================
 #define DECLARE_JNI_CLASS_WITH_MIN_SDK(CppClassName, javaPath, minSDK) \
-    DECLARE_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, nullptr, 0)
+    DECLARE_JNI_CLASS_WITH_BYTECODE (CppClassName, javaPath, minSDK, nullptr)
 
 //==============================================================================
 #define DECLARE_JNI_CLASS(CppClassName, javaPath) \
@@ -358,7 +361,7 @@ DECLARE_JNI_CLASS (AndroidBundle, "android/os/Bundle")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (dumpReferenceTables, "dumpReferenceTables", "()V")
 
-  DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug")
+DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug")
 #undef JNI_CLASS_MEMBERS
 
 #define JUCE_LOG_JNI_REFERENCES_TABLE getEnv()->CallStaticVoidMethod (AndroidDebug, AndroidDebug.dumpReferenceTables);
@@ -369,6 +372,12 @@ DECLARE_JNI_CLASS (AndroidBundle, "android/os/Bundle")
  METHOD (getSize,     "getSize",     "(Landroid/graphics/Point;)V" )
 
 DECLARE_JNI_CLASS (AndroidDisplay, "android/view/Display")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getRealMetrics, "getRealMetrics", "(Landroid/util/DisplayMetrics;)V")
+
+DECLARE_JNI_CLASS (AndroidDisplay17, "android/view/Display")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -557,9 +566,16 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
  METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
  METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
  METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V") \
- METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V") \
+ METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V")  \
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
+ METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidView23, "android/view/View", 23)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -725,7 +741,6 @@ DECLARE_JNI_CLASS (JavaMap, "java/util/Map")
 DECLARE_JNI_CLASS (JavaMethod, "java/lang/reflect/Method")
 #undef JNI_CLASS_MEMBERS
 
-
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (constructor, "<init>", "()V") \
   METHOD (getClass, "getClass", "()Ljava/lang/Class;") \
@@ -761,7 +776,7 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  METHOD (registerActivityLifecycleCallbacks,   "registerActivityLifecycleCallbacks",   "(Landroid/app/Application$ActivityLifecycleCallbacks;)V") \
  METHOD (unregisterActivityLifecycleCallbacks, "unregisterActivityLifecycleCallbacks", "(Landroid/app/Application$ActivityLifecycleCallbacks;)V")
 
- DECLARE_JNI_CLASS (AndroidApplication, "android/app/Application")
+DECLARE_JNI_CLASS (AndroidApplication, "android/app/Application")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -769,7 +784,7 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  METHOD (getHolder,       "getHolder",       "()Landroid/view/SurfaceHolder;") \
  METHOD (getParent,       "getParent",       "()Landroid/view/ViewParent;")
 
- DECLARE_JNI_CLASS (AndroidSurfaceView, "android/view/SurfaceView")
+DECLARE_JNI_CLASS (AndroidSurfaceView, "android/view/SurfaceView")
 #undef JNI_CLASS_MEMBERS
 
 
@@ -778,7 +793,7 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  METHOD (addCallback,    "addCallback",    "(Landroid/view/SurfaceHolder$Callback;)V") \
  METHOD (removeCallback, "removeCallback", "(Landroid/view/SurfaceHolder$Callback;)V")
 
- DECLARE_JNI_CLASS (AndroidSurfaceHolder, "android/view/SurfaceHolder")
+DECLARE_JNI_CLASS (AndroidSurfaceHolder, "android/view/SurfaceHolder")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -993,20 +1008,20 @@ public:
                                              const Array<int>& /*grantResults*/) {}
     virtual void onActivityResult (int /*requestCode*/, int /*resultCode*/, LocalRef<jobject> /*data*/) {}
 
+    /** @internal */
+    static void onCreatedCallback (JNIEnv*, FragmentOverlay&, jobject obj);
+    /** @internal */
+    static void onStartCallback (JNIEnv*, FragmentOverlay&);
+    /** @internal */
+    static void onRequestPermissionsResultCallback (JNIEnv*, FragmentOverlay&, jint requestCode, jobjectArray jPermissions, jintArray jGrantResults);
+    /** @internal */
+    static void onActivityResultCallback (JNIEnv*, FragmentOverlay&, jint requestCode, jint resultCode, jobject data);
+
 protected:
     jobject getNativeHandle();
 
 private:
-
     GlobalRef native;
-
-public:
-    /* internal: do not use */
-    static void onActivityResultNative (JNIEnv*, jobject, jlong, jint, jint, jobject);
-    static void onCreateNative (JNIEnv*, jobject, jlong, jobject);
-    static void onStartNative (JNIEnv*, jobject, jlong);
-    static void onRequestPermissionsResultNative (JNIEnv*, jobject, jlong, jint,
-                                                  jobjectArray, jintArray);
 };
 
 //==============================================================================
@@ -1017,5 +1032,31 @@ void startAndroidActivityForResult (const LocalRef<jobject>& intent, int request
 //==============================================================================
 bool androidHasSystemFeature (const String& property);
 String audioManagerGetProperty (const String& property);
+
+namespace detail
+{
+
+template <auto Fn, typename Result, typename Class, typename... Args>
+inline constexpr auto generatedCallbackImpl =
+    juce::toFnPtr (JNICALL [] (JNIEnv* env, jobject, jlong host, Args... args) -> Result
+                   {
+                       if (auto* object = reinterpret_cast<Class*> (host))
+                           return Fn (env, *object, args...);
+
+                       return {};
+                   });
+
+template <auto Fn, typename Result, typename Class, typename... Args>
+constexpr auto generateCallbackImpl (Result (*) (JNIEnv*, Class&, Args...))        { return generatedCallbackImpl<Fn, Result, Class, Args...>; }
+
+template <auto Fn, typename Result, typename Class, typename... Args>
+constexpr auto generateCallbackImpl (Result (*) (JNIEnv*, const Class&, Args...))  { return generatedCallbackImpl<Fn, Result, Class, Args...>; }
+
+} // namespace detail
+
+// Evaluates to a static function that forwards to the provided Fn, assuming that the
+// 'host' argument points to an object on which it is valid to call Fn
+template <auto Fn>
+inline constexpr auto generatedCallback = detail::generateCallbackImpl<Fn> (Fn);
 
 } // namespace juce

@@ -29,7 +29,7 @@ namespace juce
 
 namespace CoreMidiHelpers
 {
-    static bool checkError (OSStatus err, int lineNum)
+    static bool checkError (OSStatus err, [[maybe_unused]] int lineNum)
     {
         if (err == noErr)
             return true;
@@ -38,7 +38,6 @@ namespace CoreMidiHelpers
         Logger::writeToLog ("CoreMIDI error: " + String (lineNum) + " - " + String::toHexString ((int) err));
        #endif
 
-        ignoreUnused (lineNum);
         return false;
     }
 
@@ -661,11 +660,11 @@ namespace CoreMidiHelpers
             : u32InputHandler (std::make_unique<ump::U32ToBytestreamHandler> (input, callback))
         {}
 
-        void dispatch (const MIDIEventList& list, double time) const
+        void dispatch (const MIDIEventList* list, double time) const
         {
-            auto* packet = &list.packet[0];
+            auto* packet = list->packet;
 
-            for (uint32_t i = 0; i < list.numPackets; ++i)
+            for (uint32_t i = 0; i < list->numPackets; ++i)
             {
                 static_assert (sizeof (uint32_t) == sizeof (UInt32)
                                && alignof (uint32_t) == alignof (UInt32),
@@ -695,11 +694,11 @@ namespace CoreMidiHelpers
             : bytestreamInputHandler (std::make_unique<ump::BytestreamToBytestreamHandler> (input, callback))
         {}
 
-        void dispatch (const MIDIPacketList& list, double time) const
+        void dispatch (const MIDIPacketList* list, double time) const
         {
-            auto* packet = &list.packet[0];
+            auto* packet = list->packet;
 
-            for (unsigned int i = 0; i < list.numPackets; ++i)
+            for (unsigned int i = 0; i < list->numPackets; ++i)
             {
                 auto len = readUnaligned<decltype (packet->length)> (&(packet->length));
                 bytestreamInputHandler->pushMidiData (packet->data, len, time);
@@ -725,12 +724,12 @@ namespace CoreMidiHelpers
             : newReceiver (input, callback), oldReceiver (input, callback)
         {}
 
-        void dispatch (const MIDIEventList& list, double time) const
+        void dispatch (const MIDIEventList* list, double time) const
         {
             newReceiver.dispatch (list, time);
         }
 
-        void dispatch (const MIDIPacketList& list, double time) const
+        void dispatch (const MIDIPacketList* list, double time) const
         {
             oldReceiver.dispatch (list, time);
         }
@@ -768,7 +767,7 @@ namespace CoreMidiHelpers
         }
 
         template <typename EventList>
-        void handlePackets (const EventList& list)
+        void handlePackets (const EventList* list)
         {
             const auto time = Time::getMillisecondCounterHiRes() * 0.001;
 
@@ -885,7 +884,7 @@ namespace CoreMidiHelpers
 
         static void newMidiInputProc (const MIDIEventList* list, void* readProcRefCon, void*)
         {
-            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (*list);
+            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (list);
         }
     };
    #endif
@@ -928,7 +927,7 @@ namespace CoreMidiHelpers
     private:
         static void oldMidiInputProc (const MIDIPacketList* list, void* readProcRefCon, void*)
         {
-            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (*list);
+            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (list);
         }
     };
    #endif

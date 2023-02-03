@@ -35,12 +35,12 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            7.0.0
+  version:            7.0.5
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_audio_formats
   OSXFrameworks:      Accelerate
@@ -74,7 +74,9 @@
   #include <immintrin.h>
  #endif
 
-#elif defined (__ARM_NEON__) || defined (__ARM_NEON) || defined (__arm64__) || defined (__aarch64__)
+// it's ok to check for _M_ARM below as this is only defined on Windows for Arm 32-bit
+// which has a minimum requirement of armv7, which supports neon.
+#elif defined (__ARM_NEON__) || defined (__ARM_NEON) || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM) || defined (_M_ARM64)
 
  #ifndef JUCE_USE_SIMD
   #define JUCE_USE_SIMD 1
@@ -206,10 +208,10 @@ namespace juce
             inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
            #endif
           #else
-            inline void snapToZero (float&       x) noexcept            { ignoreUnused (x); }
+            inline void snapToZero ([[maybe_unused]] float&       x) noexcept            {}
            #ifndef DOXYGEN
-            inline void snapToZero (double&      x) noexcept            { ignoreUnused (x); }
-            inline void snapToZero (long double& x) noexcept            { ignoreUnused (x); }
+            inline void snapToZero ([[maybe_unused]] double&      x) noexcept            {}
+            inline void snapToZero ([[maybe_unused]] long double& x) noexcept            {}
            #endif
           #endif
         }
@@ -227,7 +229,7 @@ namespace juce
   #else
    #include "native/juce_sse_SIMDNativeOps.h"
   #endif
- #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
+ #elif JUCE_ARM
   #include "native/juce_neon_SIMDNativeOps.h"
  #else
   #error "SIMD register support not implemented for this platform"

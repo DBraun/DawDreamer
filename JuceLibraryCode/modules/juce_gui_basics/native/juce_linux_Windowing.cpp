@@ -61,6 +61,8 @@ public:
             xSettings->addListener (this);
 
         getNativeRealtimeModifiers = []() -> ModifierKeys { return XWindowSystem::getInstance()->getNativeRealtimeModifiers(); };
+
+        updateVBlankTimer();
     }
 
     ~LinuxComponentPeer() override
@@ -369,6 +371,8 @@ public:
 
         bounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
                                    : physicalBounds / currentScaleFactor;
+
+        updateVBlankTimer();
     }
 
     void updateBorderSize()
@@ -390,13 +394,22 @@ public:
         }
     }
 
+    bool setWindowAssociation (::Window windowIn)
+    {
+        clearWindowAssociation();
+        association = { this, windowIn };
+        return association.isValid();
+    }
+
+    void clearWindowAssociation() { association = {}; }
+
     //==============================================================================
     static bool isActiveApplication;
     bool focused = false;
 
 private:
     //==============================================================================
-    class LinuxRepaintManager   : public Timer
+    class LinuxRepaintManager
     {
     public:
         LinuxRepaintManager (LinuxComponentPeer& p)
@@ -405,7 +418,7 @@ private:
         {
         }
 
-        void timerCallback() override
+        void dispatchDeferredRepaints()
         {
             XWindowSystem::getInstance()->processPendingPaintsForWindow (peer.windowH);
 
@@ -413,32 +426,20 @@ private:
                 return;
 
             if (! regionsNeedingRepaint.isEmpty())
-            {
-                stopTimer();
                 performAnyPendingRepaintsNow();
-            }
             else if (Time::getApproximateMillisecondCounter() > lastTimeImageUsed + 3000)
-            {
-                stopTimer();
                 image = Image();
-            }
         }
 
         void repaint (Rectangle<int> area)
         {
-            if (! isTimerRunning())
-                startTimer (repaintTimerPeriod);
-
             regionsNeedingRepaint.add (area * peer.currentScaleFactor);
         }
 
         void performAnyPendingRepaintsNow()
         {
             if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
-            {
-                startTimer (repaintTimerPeriod);
                 return;
-            }
 
             auto originalRepaintRegion = regionsNeedingRepaint;
             regionsNeedingRepaint.clear();
@@ -473,8 +474,6 @@ private:
                     }
                 }
 
-                startTimer (repaintTimerPeriod);
-
                 RectangleList<int> adjustedList (originalRepaintRegion);
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
 
@@ -495,12 +494,9 @@ private:
             }
 
             lastTimeImageUsed = Time::getApproximateMillisecondCounter();
-            startTimer (repaintTimerPeriod);
         }
 
     private:
-        enum { repaintTimerPeriod = 1000 / 100 };
-
         LinuxComponentPeer& peer;
         const bool isSemiTransparentWindow;
         Image image;
@@ -510,6 +506,26 @@ private:
         bool useARGBImagesForRendering = XWindowSystem::getInstance()->canUseARGBImages();
 
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
+    };
+
+    class LinuxVBlankManager  : public Timer
+    {
+    public:
+        explicit LinuxVBlankManager (std::function<void()> cb)  : callback (std::move (cb))
+        {
+            jassert (callback);
+        }
+
+        ~LinuxVBlankManager() override           { stopTimer(); }
+
+        //==============================================================================
+        void timerCallback() override            { callback(); }
+
+    private:
+        std::function<void()> callback;
+
+        JUCE_DECLARE_NON_COPYABLE (LinuxVBlankManager)
+        JUCE_DECLARE_NON_MOVEABLE (LinuxVBlankManager)
     };
 
     //==============================================================================
@@ -554,8 +570,31 @@ private:
         }
     }
 
+    void onVBlank()
+    {
+        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+
+        if (repainter != nullptr)
+            repainter->dispatchDeferredRepaints();
+    }
+
+    void updateVBlankTimer()
+    {
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (bounds))
+        {
+            // Some systems fail to set an explicit refresh rate, or ask for a refresh rate of 0
+            // (observed on Raspbian Bullseye over VNC). In these situations, use a fallback value.
+            const auto newIntFrequencyHz = roundToInt (display->verticalFrequencyHz.value_or (0.0));
+            const auto frequencyToUse = newIntFrequencyHz != 0 ? newIntFrequencyHz : 100;
+
+            if (vBlankManager.getTimerInterval() != frequencyToUse)
+                vBlankManager.startTimerHz (frequencyToUse);
+        }
+    }
+
     //==============================================================================
     std::unique_ptr<LinuxRepaintManager> repainter;
+    LinuxVBlankManager vBlankManager { [this]() { onVBlank(); } };
 
     ::Window windowH = {}, parentWindow = {};
     Rectangle<int> bounds;
@@ -563,6 +602,7 @@ private:
     bool fullScreen = false, isAlwaysOnTop = false;
     double currentScaleFactor = 1.0;
     Array<Component*> glRepaintListeners;
+    ScopedWindowAssociation association;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)

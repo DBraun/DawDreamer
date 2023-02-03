@@ -120,12 +120,6 @@
 #undef check
 
 //==============================================================================
-#ifndef    JUCE_STANDALONE_APPLICATION
- JUCE_COMPILER_WARNING ("Please re-save your project with the latest Projucer version to avoid this warning")
- #define   JUCE_STANDALONE_APPLICATION 0
-#endif
-
-//==============================================================================
 #include "containers/juce_AbstractFifo.cpp"
 #include "containers/juce_ArrayBase.cpp"
 #include "containers/juce_ListenerList.cpp"
@@ -192,6 +186,7 @@
 #include "zip/juce_ZipFile.cpp"
 #include "files/juce_FileFilter.cpp"
 #include "files/juce_WildcardFileFilter.cpp"
+#include "native/juce_native_ThreadPriorities.h"
 
 //==============================================================================
 #if ! JUCE_WINDOWS

@@ -122,20 +122,34 @@ public:
         return 0.0f;
     }
 
+    void setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay)
+    {
+        fixedNumDecimalPlaces = jmax (0, decimalPlacesToDisplay);
+        numDecimalPlaces = fixedNumDecimalPlaces;
+    }
+
+    int getNumDecimalPlacesToDisplay() const
+    {
+        return fixedNumDecimalPlaces == -1 ? numDecimalPlaces : fixedNumDecimalPlaces;
+    }
+
     void updateRange()
     {
-        // figure out the number of DPs needed to display all values at this
-        // interval setting.
-        numDecimalPlaces = 7;
-
-        if (normRange.interval != 0.0)
+        if (fixedNumDecimalPlaces == -1)
         {
-            int v = std::abs (roundToInt (normRange.interval * 10000000));
+            // figure out the number of DPs needed to display all values at this
+            // interval setting.
+            numDecimalPlaces = 7;
 
-            while ((v % 10) == 0 && numDecimalPlaces > 0)
+            if (normRange.interval != 0.0)
             {
-                --numDecimalPlaces;
-                v /= 10;
+                int v = std::abs (roundToInt (normRange.interval * 10000000));
+
+                while ((v % 10) == 0 && numDecimalPlaces > 0)
+                {
+                    --numDecimalPlaces;
+                    v /= 10;
+                }
             }
         }
 
@@ -207,7 +221,6 @@ public:
 
             updateText();
             owner.repaint();
-            updatePopupDisplay (newValue);
 
             triggerChangeMessage (notification);
         }
@@ -241,7 +254,7 @@ public:
             lastValueMin = newValue;
             valueMin = newValue;
             owner.repaint();
-            updatePopupDisplay (newValue);
+            updatePopupDisplay();
 
             triggerChangeMessage (notification);
         }
@@ -275,7 +288,7 @@ public:
             lastValueMax = newValue;
             valueMax = newValue;
             owner.repaint();
-            updatePopupDisplay (valueMax.getValue());
+            updatePopupDisplay();
 
             triggerChangeMessage (notification);
         }
@@ -348,6 +361,9 @@ public:
 
         if (owner.onValueChange != nullptr)
             owner.onValueChange();
+
+        if (checker.shouldBailOut())
+            return;
 
         if (auto* handler = owner.getAccessibilityHandler())
             handler->notifyAccessibilityEvent (AccessibilityEvent::valueChanged);
@@ -439,6 +455,8 @@ public:
             if (newValue != valueBox->getText())
                 valueBox->setText (newValue, dontSendNotification);
         }
+
+        updatePopupDisplay();
     }
 
     double constrainedValue (double value) const
@@ -1047,25 +1065,36 @@ public:
                                             | ComponentPeer::windowIgnoresKeyPresses
                                             | ComponentPeer::windowIgnoresMouseClicks);
 
-            if (style == SliderStyle::TwoValueHorizontal
-                || style == SliderStyle::TwoValueVertical)
-            {
-                updatePopupDisplay (sliderBeingDragged == 2 ? getMaxValue()
-                                                            : getMinValue());
-            }
-            else
-            {
-                updatePopupDisplay (getValue());
-            }
-
+            updatePopupDisplay();
             popupDisplay->setVisible (true);
         }
     }
 
-    void updatePopupDisplay (double valueToShow)
+    void updatePopupDisplay()
     {
-        if (popupDisplay != nullptr)
-            popupDisplay->updatePosition (owner.getTextFromValue (valueToShow));
+        if (popupDisplay == nullptr)
+            return;
+
+        const auto valueToShow = [this]
+        {
+            constexpr SliderStyle multiSliderStyles[] { SliderStyle::TwoValueHorizontal,
+                                                        SliderStyle::TwoValueVertical,
+                                                        SliderStyle::ThreeValueHorizontal,
+                                                        SliderStyle::ThreeValueVertical };
+
+            if (std::find (std::begin (multiSliderStyles), std::end (multiSliderStyles), style) == std::end (multiSliderStyles))
+                return getValue();
+
+            if (sliderBeingDragged == 2)
+                return getMaxValue();
+
+            if (sliderBeingDragged == 1)
+                return getMinValue();
+
+            return getValue();
+        }();
+
+        popupDisplay->updatePosition (owner.getTextFromValue (valueToShow));
     }
 
     bool canDoubleClickToValue() const
@@ -1299,6 +1328,7 @@ public:
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
     int numDecimalPlaces = 7;
+    int fixedNumDecimalPlaces = -1;
     int textBoxWidth = 80, textBoxHeight = 20;
     IncDecButtonMode incDecButtonMode = incDecButtonsNotDraggable;
     ModifierKeys::Flags modifierToSwapModes = ModifierKeys::ctrlAltCommandModifiers;
@@ -1658,11 +1688,14 @@ double Slider::snapValue (double attemptedValue, DragMode)
     return attemptedValue;
 }
 
-int Slider::getNumDecimalPlacesToDisplay() const noexcept   { return pimpl->numDecimalPlaces; }
+int Slider::getNumDecimalPlacesToDisplay() const noexcept
+{
+    return pimpl->getNumDecimalPlacesToDisplay();
+}
 
 void Slider::setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay)
 {
-    pimpl->numDecimalPlaces = decimalPlacesToDisplay;
+    pimpl->setNumDecimalPlacesToDisplay (decimalPlacesToDisplay);
     updateText();
 }
 

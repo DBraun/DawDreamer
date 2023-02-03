@@ -453,10 +453,9 @@ static bool isPerMonitorDPIAwareProcess()
    #endif
 }
 
-static bool isPerMonitorDPIAwareWindow (HWND nativeWindow)
+static bool isPerMonitorDPIAwareWindow ([[maybe_unused]] HWND nativeWindow)
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
-    ignoreUnused (nativeWindow);
     return false;
    #else
     setDPIAwareness();
@@ -500,29 +499,96 @@ static double getGlobalDPI()
 }
 
 //==============================================================================
+class ScopedSuspendResumeNotificationRegistration
+{
+    static auto& getFunctions()
+    {
+        struct Functions
+        {
+            using Register = HPOWERNOTIFY (WINAPI*) (HANDLE, DWORD);
+            using Unregister = BOOL (WINAPI*) (HPOWERNOTIFY);
+
+            Register registerNotification = (Register) getUser32Function ("RegisterSuspendResumeNotification");
+            Unregister unregisterNotification = (Unregister) getUser32Function ("UnregisterSuspendResumeNotification");
+
+            bool isValid() const { return registerNotification != nullptr && unregisterNotification != nullptr; }
+
+            Functions() = default;
+            JUCE_DECLARE_NON_COPYABLE (Functions)
+            JUCE_DECLARE_NON_MOVEABLE (Functions)
+        };
+
+        static const Functions functions;
+        return functions;
+    }
+
+public:
+    ScopedSuspendResumeNotificationRegistration() = default;
+
+    explicit ScopedSuspendResumeNotificationRegistration (HWND window)
+        : handle (getFunctions().isValid()
+                      ? getFunctions().registerNotification (window, DEVICE_NOTIFY_WINDOW_HANDLE)
+                      : nullptr)
+    {}
+
+private:
+    struct Destructor
+    {
+        void operator() (HPOWERNOTIFY ptr) const
+        {
+            if (ptr != nullptr)
+                getFunctions().unregisterNotification (ptr);
+        }
+    };
+
+    std::unique_ptr<std::remove_pointer_t<HPOWERNOTIFY>, Destructor> handle;
+};
+
+//==============================================================================
 class ScopedThreadDPIAwarenessSetter::NativeImpl
 {
 public:
-    explicit NativeImpl (HWND nativeWindow)
+    static auto& getFunctions()
     {
-        ignoreUnused (nativeWindow);
-
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (auto* functionSingleton = FunctionSingleton::getInstance())
+        struct Functions
         {
-            if (! functionSingleton->isLoaded())
-                return;
+            SetThreadDPIAwarenessContextFunc setThreadAwareness             = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+            GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+            GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+            GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
 
-            auto dpiAwareWindow = (functionSingleton->getAwarenessFromContext (functionSingleton->getWindowAwareness (nativeWindow))
+            bool isLoaded() const noexcept
+            {
+                return setThreadAwareness != nullptr
+                    && getWindowAwareness != nullptr
+                    && getThreadAwareness != nullptr
+                    && getAwarenessFromContext != nullptr;
+            }
+
+            Functions() = default;
+            JUCE_DECLARE_NON_COPYABLE (Functions)
+            JUCE_DECLARE_NON_MOVEABLE (Functions)
+        };
+
+        static const Functions functions;
+        return functions;
+    }
+
+    explicit NativeImpl (HWND nativeWindow [[maybe_unused]])
+    {
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        if (const auto& functions = getFunctions(); functions.isLoaded())
+        {
+            auto dpiAwareWindow = (functions.getAwarenessFromContext (functions.getWindowAwareness (nativeWindow))
                                    == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
 
-            auto dpiAwareThread = (functionSingleton->getAwarenessFromContext (functionSingleton->getThreadAwareness())
+            auto dpiAwareThread = (functions.getAwarenessFromContext (functions.getThreadAwareness())
                                    == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
 
             if (dpiAwareWindow && ! dpiAwareThread)
-                oldContext = functionSingleton->setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+                oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
             else if (! dpiAwareWindow && dpiAwareThread)
-                oldContext = functionSingleton->setThreadAwareness (DPI_AWARENESS_CONTEXT_UNAWARE);
+                oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_UNAWARE);
         }
        #endif
     }
@@ -530,43 +596,15 @@ public:
     ~NativeImpl()
     {
         if (oldContext != nullptr)
-            if (auto* functionSingleton = FunctionSingleton::getInstance())
-                functionSingleton->setThreadAwareness (oldContext);
+            getFunctions().setThreadAwareness (oldContext);
     }
 
 private:
-    struct FunctionSingleton  : public DeletedAtShutdown
-    {
-        FunctionSingleton() = default;
-        ~FunctionSingleton() override { clearSingletonInstance(); }
-
-        SetThreadDPIAwarenessContextFunc setThreadAwareness             = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-        GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-        GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-
-        bool isLoaded() const noexcept
-        {
-            return setThreadAwareness != nullptr
-                && getWindowAwareness != nullptr
-                && getThreadAwareness != nullptr
-                && getAwarenessFromContext != nullptr;
-        }
-
-        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FunctionSingleton)
-
-        JUCE_DECLARE_NON_COPYABLE (FunctionSingleton)
-        JUCE_DECLARE_NON_MOVEABLE (FunctionSingleton)
-    };
-
     DPI_AWARENESS_CONTEXT oldContext = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeImpl)
     JUCE_DECLARE_NON_MOVEABLE (NativeImpl)
 };
-
-
-JUCE_IMPLEMENT_SINGLETON (ScopedThreadDPIAwarenessSetter::NativeImpl::FunctionSingleton)
 
 ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWindow)
 {
@@ -575,17 +613,31 @@ ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWind
 
 ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
 
+static auto& getScopedDPIAwarenessDisablerFunctions()
+{
+    struct Functions
+    {
+        GetThreadDPIAwarenessContextFunc localGetThreadDpiAwarenessContext = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+        GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+        SetThreadDPIAwarenessContextFunc localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+
+        Functions() = default;
+        JUCE_DECLARE_NON_COPYABLE (Functions)
+        JUCE_DECLARE_NON_MOVEABLE (Functions)
+    };
+
+    static const Functions functions;
+    return functions;
+}
+
 ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
-    static auto localGetThreadDpiAwarenessContext            = (GetThreadDPIAwarenessContextFunc)        getUser32Function ("GetThreadDpiAwarenessContext");
-    static auto localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+    const auto& functions = getScopedDPIAwarenessDisablerFunctions();
 
-    if (! isPerMonitorDPIAwareThread (localGetThreadDpiAwarenessContext, localGetAwarenessFromDpiAwarenessContextFunc))
+    if (! isPerMonitorDPIAwareThread (functions.localGetThreadDpiAwarenessContext, functions.localGetAwarenessFromDpiAwarenessContextFunc))
         return;
 
-    static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-
-    if (localSetThreadDPIAwarenessContext != nullptr)
+    if (auto* localSetThreadDPIAwarenessContext = functions.localSetThreadDPIAwarenessContext)
     {
         previousContext = localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
 
@@ -599,9 +651,7 @@ ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
 {
     if (previousContext != nullptr)
     {
-        static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-
-        if (localSetThreadDPIAwarenessContext != nullptr)
+        if (auto* localSetThreadDPIAwarenessContext = getScopedDPIAwarenessDisablerFunctions().localSetThreadDPIAwarenessContext)
             localSetThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
        #if JUCE_DEBUG
@@ -663,17 +713,7 @@ JUCE_API double getScaleFactorForWindow (HWND h)
 {
     // NB. Using a local function here because we need to call this method from the plug-in wrappers
     // which don't load the DPI-awareness functions on startup
-    static GetDPIForWindowFunc localGetDPIForWindow = nullptr;
-
-    static bool hasChecked = false;
-
-    if (! hasChecked)
-    {
-        hasChecked = true;
-
-        if (localGetDPIForWindow == nullptr)
-            localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-    }
+    static auto localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
 
     if (localGetDPIForWindow != nullptr)
         return (double) localGetDPIForWindow (h) / USER_DEFAULT_SCREEN_DPI;
@@ -1113,6 +1153,13 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 //==============================================================================
 namespace IconConverters
 {
+    struct IconDestructor
+    {
+        void operator() (HICON ptr) const { if (ptr != nullptr) DestroyIcon (ptr); }
+    };
+
+    using IconPtr = std::unique_ptr<std::remove_pointer_t<HICON>, IconDestructor>;
+
     static Image createImageFromHICON (HICON icon)
     {
         if (icon == nullptr)
@@ -1381,10 +1428,7 @@ static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
         : desc.Monitor;
 }
 
-struct VBlankListener
-{
-    virtual void onVBlank() = 0;
-};
+using VBlankListener = ComponentPeer::VBlankListener;
 
 //==============================================================================
 class VSyncThread : private Thread,
@@ -1399,7 +1443,7 @@ public:
           monitor (mon)
     {
         listeners.push_back (listener);
-        startThread (10);
+        startThread (Priority::highest);
     }
 
     ~VSyncThread() override
@@ -1573,7 +1617,7 @@ public:
                        threads.end());
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED (VBlankDispatcher, true)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED (VBlankDispatcher, false)
 
 private:
     //==============================================================================
@@ -1616,6 +1660,31 @@ private:
 JUCE_IMPLEMENT_SINGLETON (VBlankDispatcher)
 
 //==============================================================================
+class SimpleTimer  : private Timer
+{
+public:
+    SimpleTimer (int intervalMs, std::function<void()> callbackIn)
+        : callback (std::move (callbackIn))
+    {
+        jassert (callback);
+        startTimer (intervalMs);
+    }
+
+    ~SimpleTimer() override
+    {
+        stopTimer();
+    }
+
+private:
+    void timerCallback() override
+    {
+        callback();
+    }
+
+    std::function<void()> callback;
+};
+
+//==============================================================================
 class HWNDComponentPeer  : public ComponentPeer,
                            private VBlankListener,
                            private Timer
@@ -1656,12 +1725,18 @@ public:
             return ModifierKeys::currentModifiers;
         };
 
-        if (updateCurrentMonitor())
-            VBlankDispatcher::getInstance()->updateDisplay (*this, currentMonitor);
+        updateCurrentMonitorAndRefreshVBlankDispatcher();
+
+        if (parentToAddTo != nullptr)
+            monitorUpdateTimer.emplace (1000, [this] { updateCurrentMonitorAndRefreshVBlankDispatcher(); });
+
+        suspendResumeRegistration = ScopedSuspendResumeNotificationRegistration { hwnd };
     }
 
     ~HWNDComponentPeer() override
     {
+        suspendResumeRegistration = {};
+
         VBlankDispatcher::getInstance()->removeListener (*this);
 
         // do this first to avoid messages arriving for this window before it's destroyed
@@ -1674,9 +1749,6 @@ public:
         currentTouches.deleteAllTouchesForPeer (this);
 
         callFunctionIfNotLocked (&destroyWindowCallback, (void*) hwnd);
-
-        if (currentWindowIcon != nullptr)
-            DestroyIcon (currentWindowIcon);
 
         if (dropTarget != nullptr)
         {
@@ -2072,6 +2144,7 @@ public:
     //==============================================================================
     void onVBlank() override
     {
+        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
         dispatchDeferredRepaints();
     }
 
@@ -2223,8 +2296,7 @@ public:
                 nameBuffer.clear();
                 nameBuffer.resize (bufferSize + 1, 0); // + 1 for the null terminator
 
-                const auto readCharacters = DragQueryFile (dropFiles, i, nameBuffer.data(), (UINT) nameBuffer.size());
-                ignoreUnused (readCharacters);
+                [[maybe_unused]] const auto readCharacters = DragQueryFile (dropFiles, i, nameBuffer.data(), (UINT) nameBuffer.size());
                 jassert (readCharacters == bufferSize);
 
                 dragInfo.files.add (String (nameBuffer.data()));
@@ -2315,7 +2387,7 @@ private:
     bool fullScreen = false, isDragging = false, isMouseOver = false,
          hasCreatedCaret = false, constrainerIsResizing = false;
     BorderSize<int> windowBorder;
-    HICON currentWindowIcon = nullptr;
+    IconConverters::IconPtr currentWindowIcon;
     FileDropTarget* dropTarget = nullptr;
     uint8 updateLayeredWindowAlpha = 255;
     UWPUIViewSettings uwpViewSettings;
@@ -2377,7 +2449,6 @@ private:
 
             TCHAR moduleFile[1024] = {};
             GetModuleFileName (moduleHandle, moduleFile, 1024);
-            WORD iconNum = 0;
 
             WNDCLASSEX wcex = {};
             wcex.cbSize         = sizeof (wcex);
@@ -2386,9 +2457,13 @@ private:
             wcex.lpszClassName  = windowClassName.toWideCharPointer();
             wcex.cbWndExtra     = 32;
             wcex.hInstance      = moduleHandle;
-            wcex.hIcon          = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
-            iconNum = 1;
-            wcex.hIconSm        = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
+
+            for (const auto& [index, field, ptr] : { std::tuple { 0, &wcex.hIcon,   &iconBig },
+                                                     std::tuple { 1, &wcex.hIconSm, &iconSmall } })
+            {
+                auto iconNum = static_cast<WORD> (index);
+                ptr->reset (*field = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum));
+            }
 
             atom = RegisterClassEx (&wcex);
             jassert (atom != 0);
@@ -2482,6 +2557,8 @@ private:
 
             return false;
         }
+
+        IconConverters::IconPtr iconBig, iconSmall;
 
         JUCE_DECLARE_NON_COPYABLE (WindowClassHolder)
     };
@@ -2668,15 +2745,11 @@ private:
 
     void setIcon (const Image& newIcon) override
     {
-        if (auto hicon = IconConverters::createHICONFromImage (newIcon, TRUE, 0, 0))
+        if (IconConverters::IconPtr hicon { IconConverters::createHICONFromImage (newIcon, TRUE, 0, 0) })
         {
-            SendMessage (hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
-            SendMessage (hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
-
-            if (currentWindowIcon != nullptr)
-                DestroyIcon (currentWindowIcon);
-
-            currentWindowIcon = hicon;
+            SendMessage (hwnd, WM_SETICON, ICON_BIG,   reinterpret_cast<LPARAM> (hicon.get()));
+            SendMessage (hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM> (hicon.get()));
+            currentWindowIcon = std::move (hicon);
         }
     }
 
@@ -2684,7 +2757,9 @@ private:
     {
         using ChangeWindowMessageFilterExFunc = BOOL (WINAPI*) (HWND, UINT, DWORD, PVOID);
 
-        if (auto changeMessageFilter = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx"))
+        static auto changeMessageFilter = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx");
+
+        if (changeMessageFilter != nullptr)
         {
             changeMessageFilter (hwnd, WM_DROPFILES, 1 /*MSGFLT_ALLOW*/, nullptr);
             changeMessageFilter (hwnd, WM_COPYDATA, 1 /*MSGFLT_ALLOW*/, nullptr);
@@ -2811,7 +2886,7 @@ private:
                 CombineRgn (rgn, rgn, clipRgn, RGN_AND);
                 DeleteObject (clipRgn);
 
-                std::aligned_storage<8192, alignof (RGNDATA)>::type rgnData;
+                std::aligned_storage_t<8192, alignof (RGNDATA)> rgnData;
                 const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) &rgnData);
 
                 if (res > 0 && res <= sizeof (rgnData))
@@ -2909,10 +2984,8 @@ private:
     }
    #endif
 
-    void setCurrentRenderingEngine (int index) override
+    void setCurrentRenderingEngine ([[maybe_unused]] int index) override
     {
-        ignoreUnused (index);
-
        #if JUCE_DIRECT2D
         if (getAvailableRenderingEngines().size() > 1)
         {
@@ -3481,7 +3554,7 @@ private:
                         const UINT keyChar  = MapVirtualKey ((UINT) key, 2);
                         const UINT scanCode = MapVirtualKey ((UINT) key, 0);
                         BYTE keyState[256];
-                        ignoreUnused (GetKeyboardState (keyState));
+                        [[maybe_unused]] const auto state = GetKeyboardState (keyState);
 
                         WCHAR text[16] = { 0 };
                         if (ToUnicode ((UINT) key, scanCode, keyState, text, 8, 0) != 1)
@@ -3649,10 +3722,18 @@ private:
         return 0;
     }
 
-    bool updateCurrentMonitor()
+    enum class ForceRefreshDispatcher
+    {
+        no,
+        yes
+    };
+
+    void updateCurrentMonitorAndRefreshVBlankDispatcher (ForceRefreshDispatcher force = ForceRefreshDispatcher::no)
     {
         auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
-        return std::exchange (currentMonitor, monitor) != monitor;
+
+        if (std::exchange (currentMonitor, monitor) != monitor || force == ForceRefreshDispatcher::yes)
+            VBlankDispatcher::getInstance()->updateDisplay (*this, currentMonitor);
     }
 
     bool handlePositionChanged()
@@ -3671,9 +3752,7 @@ private:
         }
 
         handleMovedOrResized();
-
-        if (updateCurrentMonitor())
-            VBlankDispatcher::getInstance()->updateDisplay (*this, currentMonitor);
+        updateCurrentMonitorAndRefreshVBlankDispatcher();
 
         return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly.
     }
@@ -3831,8 +3910,7 @@ private:
 
         auto* dispatcher = VBlankDispatcher::getInstance();
         dispatcher->reconfigureDisplays();
-        updateCurrentMonitor();
-        dispatcher->updateDisplay (*this, currentMonitor);
+        updateCurrentMonitorAndRefreshVBlankDispatcher (ForceRefreshDispatcher::yes);
     }
 
     //==============================================================================
@@ -4598,6 +4676,8 @@ private:
     bool shouldIgnoreModalDismiss = false;
 
     RectangleList<int> deferredRepaints;
+    ScopedSuspendResumeNotificationRegistration suspendResumeRegistration;
+    std::optional<SimpleTimer> monitorUpdateTimer;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
@@ -5367,27 +5447,23 @@ void Displays::findDisplays (float masterScale)
 }
 
 //==============================================================================
-static HICON extractFileHICON (const File& file)
+static auto extractFileHICON (const File& file)
 {
     WORD iconNum = 0;
     WCHAR name[MAX_PATH * 2];
     file.getFullPathName().copyToUTF16 (name, sizeof (name));
 
-    return ExtractAssociatedIcon ((HINSTANCE) Process::getCurrentModuleInstanceHandle(),
-                                  name, &iconNum);
+    return IconConverters::IconPtr { ExtractAssociatedIcon ((HINSTANCE) Process::getCurrentModuleInstanceHandle(),
+                                                            name,
+                                                            &iconNum) };
 }
 
 Image juce_createIconForFile (const File& file)
 {
-    Image image;
+    if (const auto icon = extractFileHICON (file))
+        return IconConverters::createImageFromHICON (icon.get());
 
-    if (auto icon = extractFileHICON (file))
-    {
-        image = IconConverters::createImageFromHICON (icon);
-        DestroyIcon (icon);
-    }
-
-    return image;
+    return {};
 }
 
 //==============================================================================
@@ -5435,12 +5511,6 @@ private:
     public:
         explicit ImageImpl (const CustomMouseCursorInfo& infoIn) : info (infoIn) {}
 
-        ~ImageImpl() override
-        {
-            for (auto& pair : cursorsBySize)
-                DestroyCursor (pair.second);
-        }
-
         HCURSOR getCursor (ComponentPeer& peer) override
         {
             JUCE_ASSERT_MESSAGE_THREAD;
@@ -5451,7 +5521,7 @@ private:
             const auto iter = cursorsBySize.find (size);
 
             if (iter != cursorsBySize.end())
-                return iter->second;
+                return iter->second.get();
 
             const auto logicalSize = info.image.getScaledBounds();
             const auto scale = (float) size / (float) unityCursorSize;
@@ -5466,12 +5536,19 @@ private:
             const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt ((float) info.hotspot.x * effectiveScale));
             const auto hy = jlimit (0, rescaled.getHeight(), roundToInt ((float) info.hotspot.y * effectiveScale));
 
-            return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
+            return cursorsBySize.emplace (size, CursorPtr { IconConverters::createHICONFromImage (rescaled, false, hx, hy) }).first->second.get();
         }
 
     private:
+        struct CursorDestructor
+        {
+            void operator() (HCURSOR ptr) const { if (ptr != nullptr) DestroyCursor (ptr); }
+        };
+
+        using CursorPtr = std::unique_ptr<std::remove_pointer_t<HCURSOR>, CursorDestructor>;
+
         const CustomMouseCursorInfo info;
-        std::map<int, HCURSOR> cursorsBySize;
+        std::map<int, CursorPtr> cursorsBySize;
     };
 
     static auto getCursorSizeForPeerFunction() -> int (*) (ComponentPeer&)

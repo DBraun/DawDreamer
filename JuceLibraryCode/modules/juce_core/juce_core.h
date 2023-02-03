@@ -32,12 +32,12 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            7.0.0
+  version:            7.0.5
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
   license:            ISC
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:
   OSXFrameworks:      Cocoa Foundation IOKit
@@ -344,6 +344,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_AllocationHooks.h"
 #include "memory/juce_Reservoir.h"
 #include "files/juce_AndroidDocument.h"
+#include "streams/juce_AndroidDocumentInputSource.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_mac_ObjCHelpers.h"

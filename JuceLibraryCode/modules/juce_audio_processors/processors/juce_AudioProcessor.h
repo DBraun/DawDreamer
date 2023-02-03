@@ -418,7 +418,7 @@ public:
             @param set           The AudioChannelSet which is to be probed.
             @param currentLayout If non-null, pretend that the current layout of the AudioProcessor is
                                  currentLayout. On exit, currentLayout will be modified to
-                                 to represent the buses layouts of the AudioProcessor as if the layout
+                                 represent the buses layouts of the AudioProcessor as if the layout
                                  of the receiver had been successfully changed. This is useful as changing
                                  the layout of the receiver may change the bus layout of other buses.
 
@@ -524,7 +524,7 @@ public:
 
          @see addBus
     */
-    virtual bool canAddBus (bool isInput) const                     { ignoreUnused (isInput); return false; }
+    virtual bool canAddBus (bool isInput) const;
 
     /**  Callback to query if the last bus can currently be removed.
 
@@ -537,7 +537,7 @@ public:
 
          The default implementation will always return false.
     */
-    virtual bool canRemoveBus (bool isInput) const                  { ignoreUnused (isInput); return false; }
+    virtual bool canRemoveBus (bool isInput) const;
 
     /** Dynamically request an additional bus.
 
@@ -1361,8 +1361,8 @@ protected:
 
         void addBus (bool isInput, const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true);
 
-        JUCE_NODISCARD BusesProperties withInput  (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
-        JUCE_NODISCARD BusesProperties withOutput (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
+        [[nodiscard]] BusesProperties withInput  (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
+        [[nodiscard]] BusesProperties withOutput (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
     };
 
     /** Callback to query if adding/removing buses currently possible.
