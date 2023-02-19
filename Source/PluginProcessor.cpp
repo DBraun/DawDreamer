@@ -6,7 +6,12 @@
 
 #include "StandalonePluginWindow.h"
 
-static std::mutex PLUGIN_INSTANCE_MUTEX;
+// JUCE has a global state MessageManager.
+// To know when to delete it, we must
+// keep track of how many plugins are active.
+static std::mutex GLOBAL_PLUGIN_MUTEX;
+static int GLOBAL_PLUGIN_ACTIVE_COUNT = 0;
+
 using juce::ExtensionsVisitor;
 
 #define THROW_ERROR_IF_NO_PLUGIN                               \
@@ -75,8 +80,13 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
   }
 
   if (myPlugin.get()) {
-    std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
+    std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
     myPlugin.reset();
+    GLOBAL_PLUGIN_ACTIVE_COUNT--;
+    if (GLOBAL_PLUGIN_ACTIVE_COUNT == 0) {
+      juce::DeletedAtShutdown::deleteAll();
+      juce::MessageManager::deleteInstance();
+    }
   }
 
   // If there is a problem here first check the preprocessor definitions
@@ -87,13 +97,18 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
   String errorMessage;
 
-  std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
-  myPlugin = pluginFormatManager.createPluginInstance(
-      *pluginDescriptions[0], sampleRate, samplesPerBlock, errorMessage);
+  // introduce scope because we'll use a mutex.
+  {
+    std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
+    myPlugin = pluginFormatManager.createPluginInstance(
+        *pluginDescriptions[0], sampleRate, samplesPerBlock, errorMessage);
 
-  if (myPlugin.get() == nullptr) {
-    throw std::runtime_error("PluginProcessor::loadPlugin error: " +
-                             errorMessage.toStdString());
+    if (myPlugin.get() == nullptr) {
+      throw std::runtime_error("PluginProcessor::loadPlugin error: " +
+                               errorMessage.toStdString());
+    }
+    // We loaded the plugin.
+    GLOBAL_PLUGIN_ACTIVE_COUNT++;
   }
 
   auto outputs = myPlugin->getTotalNumOutputChannels();
@@ -130,8 +145,13 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
 PluginProcessor::~PluginProcessor() {
   if (myPlugin.get()) {
-    std::lock_guard<std::mutex> lock(PLUGIN_INSTANCE_MUTEX);
+    std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
     myPlugin.reset();
+    GLOBAL_PLUGIN_ACTIVE_COUNT--;
+    if (GLOBAL_PLUGIN_ACTIVE_COUNT == 0) {
+      juce::DeletedAtShutdown::deleteAll();
+      juce::MessageManager::deleteInstance();
+    }
   }
 
   myMidiBufferQN.clear();
