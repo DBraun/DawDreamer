@@ -18,9 +18,6 @@ class PluginProcessor : public ProcessorBase {
 
   void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
-  // bool supportsDoublePrecisionProcessing() { return myPlugin ?
-  // myPlugin->supportsDoublePrecisionProcessing() : false; }
-
   void processBlock(juce::AudioSampleBuffer& buffer,
                     juce::MidiBuffer& midiBuffer) override;
 
@@ -115,8 +112,6 @@ class PluginProcessorWrapper : public PluginProcessor {
   void wrapperSetPatch(py::list listOfTuples);
 
   py::list wrapperGetPatch();
-
-  float wrapperGetParameter(int parameterIndex);
 
   std::string wrapperGetParameterName(int parameter);
 

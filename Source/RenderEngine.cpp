@@ -6,7 +6,7 @@ RenderEngine::RenderEngine(double sr, int bs)
     : AudioPlayHead{},
       mySampleRate{sr},
       myBufferSize{bs},
-      m_mainProcessorGraph(new juce::AudioProcessorGraph()) {
+      m_mainProcessorGraph(std::make_unique<juce::AudioProcessorGraph>()) {
   m_mainProcessorGraph->setNonRealtime(true);
   m_mainProcessorGraph->setPlayHead(this);
 
@@ -542,7 +542,7 @@ bool RenderEngine::loadGraphWrapper(py::object dagObj) {
     throw std::runtime_error("Error: load_graph. No processors were passed.");
   }
 
-  DAG* buildingDag = new DAG();
+  std::unique_ptr<DAG> buildingDag(new DAG());
 
   for (py::handle theTuple : dagObj) {  // iterators!
 
@@ -597,8 +597,6 @@ bool RenderEngine::loadGraphWrapper(py::object dagObj) {
   }
 
   auto result = RenderEngine::loadGraph(*buildingDag);
-
-  delete buildingDag;
 
   return result;
 }

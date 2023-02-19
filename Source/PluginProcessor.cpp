@@ -41,7 +41,7 @@ struct PresetVisitor : public ExtensionsVisitor {
 
 PluginProcessor::PluginProcessor(std::string newUniqueName, double sampleRate,
                                  int samplesPerBlock, std::string path)
-    : ProcessorBase{newUniqueName} {
+    : ProcessorBase{newUniqueName}, myPlugin{nullptr} {
   myPluginPath = path;
 
   loadPlugin(sampleRate, samplesPerBlock);
