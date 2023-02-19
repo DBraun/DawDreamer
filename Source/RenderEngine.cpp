@@ -414,7 +414,10 @@ void RenderEngine::transportRewind() {}
 void RenderEngine::prepareProcessor(ProcessorBase* processor,
                                     const std::string& name) {
   if (this->removeProcessor(name)) {
-    // todo: maybe warn the user that a processor was removed.
+    std::cerr << "Warning: a processor with the name \"" << name
+              << "\" already exists and was removed to make room for the new "
+                 "processor."
+              << std::endl;
   };
 
   auto node = m_mainProcessorGraph->addNode(

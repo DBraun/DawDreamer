@@ -509,7 +509,7 @@ const PluginPatch PluginProcessor::getPatch() {
   for (auto& uncastedParameter : this->getParameters()) {
     auto parameter = (AutomateParameterFloat*)uncastedParameter;
     float val = parameter->sample(posInfo);
-    params.push_back(std::make_pair(i, val));
+    params.emplace_back(i, val);
     i++;
   }
 

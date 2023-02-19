@@ -25,8 +25,11 @@ class AddProcessor : public ProcessorBase {
       // and the size of myGainLevels isn't zero. If it were zero,
       // getSafeGainLevel(index) will know to use 1.0f for every gain.
 
-      // todo: throw graceful error
-      return;
+      throw std::runtime_error(
+          "AddProcessor: The incoming audio buffer has " + numInputs +
+          std::string(
+              " channels, but the number of specified gain levels is ") +
+          std::to_string(myGainLevels.size()));
     }
 
     const int numTimesToSum = numInputs - 1;
