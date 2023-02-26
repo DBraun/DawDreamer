@@ -55,7 +55,6 @@ if platform.system() == "Windows":
 elif platform.system() == "Linux":
 
     files = ['dawdreamer/dawdreamer.so']
-    files += list(glob.glob(os.path.join(this_dir, 'dawdreamer/libfaust*.so*')))
     for file in files:
         filepath = os.path.abspath(file)
         assert os.path.isfile(filepath), ValueError("File not found: " + filepath)

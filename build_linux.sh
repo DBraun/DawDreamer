@@ -3,14 +3,10 @@ echo "PYTHONINCLUDEPATH: $PYTHONINCLUDEPATH"
 
 if [[ $(uname -m) == 'x86_64' ]]; then
     echo "building for x86_64"
-	cp -v thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 dawdreamer/
-	ln dawdreamer/libfaust.so.2 dawdreamer/libfaust.so
-	ln thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2 thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so
+	cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2
 else
     echo "building for $(uname -m)" 
-	cp -v thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so.2 dawdreamer/
-	ln dawdreamer/libfaust.so.2 dawdreamer/libfaust.so
-	ln thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so.2 thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so
+	cp thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so.2
 fi
 
 yum install -y libsndfile \

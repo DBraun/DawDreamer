@@ -17,13 +17,14 @@ RUN sh -v build_linux.sh
 WORKDIR /DawDreamer
 RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 
-# Build and install wheel
+# Build wheel
 WORKDIR /DawDreamer
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer
-RUN DISTUTILS_DEBUG=1 python3.9 /DawDreamer/setup.py install
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer:/DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib
+RUN python3.9 -m build --wheel
 
-# todo: ideally we could remove the files here
-# RUN rm -rf /DawDreamer/dawdreamer/*.so*
+# Install wheel
+WORKDIR /DawDreamer
+RUN python3.9 -m pip install dist/dawdreamer*.whl
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
