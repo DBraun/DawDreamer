@@ -24,7 +24,7 @@ RUN python3.9 -m build --wheel
 
 # Install wheel
 WORKDIR /DawDreamer
-RUN pip3 install dist/dawdreamer*.whl
+RUN python3.9 -m pip install dist/dawdreamer*.whl
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
