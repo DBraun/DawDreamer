@@ -240,7 +240,7 @@ def audio2mel_spectrogram(audio_folder_path, plot_flag=False, window_size=2048, 
     # Get a list of audio file names in the folder
     audio_file_names = os.listdir(audio_folder_path)
     np.random.shuffle(audio_file_names)
-    
+
     # Compute mel-scaled spectrograms for each audio file
     mel_spectrograms = []
     for file_name in audio_file_names:
@@ -267,6 +267,7 @@ def audio2mel_spectrogram(audio_folder_path, plot_flag=False, window_size=2048, 
         # Plot the mel-scaled spectrogram if plot_flag is True
         if plot_flag:
             plt.figure(figsize=(10, 4))
+            # TODO: Need to fix spectrogram visualization frequency axis!
             lbd.specshow(mel_spectrogram, x_axis='time', y_axis='mel',sr=sample_rate, fmin=f_min, fmax=f_max, hop_length=hop_length, cmap='jet', vmin=-range_db, vmax=mel_spectrogram.max() + high_boost_db)
             plt.colorbar(format='%+2.0f dB')
             plt.title('Mel spectrogram for {}'.format(file_name))
