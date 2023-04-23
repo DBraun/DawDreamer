@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # NOTE: You can test building wheels locally with
-# `py -m build --wheel`
+# `python -m build --wheel`
 # Then in the `dist` directory, `pip install dawdreamer`
 
 import setuptools
@@ -44,7 +44,7 @@ except Exception as e:
 
 if platform.system() == "Windows":
 
-    build_folder = os.path.join(this_dir, "Builds", "VisualStudio2019", "x64", "Release", "Dynamic Library")
+    build_folder = os.path.join(this_dir, "Builds", "VisualStudio2022", "x64", "Release", "Dynamic Library")
     shutil.copy(os.path.join(build_folder, 'dawdreamer.dll'), os.path.join('dawdreamer', 'dawdreamer.pyd'))
     
     package_data += ['dawdreamer/dawdreamer.pyd']
