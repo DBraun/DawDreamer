@@ -39,7 +39,7 @@ class MySoundUI : public SoundUI {
     }
 
     // Get the soundfile.
-    *sf_zone = fSoundfileMap[saved_url_real];
+    *sf_zone = fSoundfileMap[saved_url_real].get();
   }
 
   virtual void addSoundfileFromBuffers(const char *label,
@@ -100,8 +100,7 @@ class MySoundUI : public SoundUI {
       // Share the same buffers for all other channels so that we have max_chan
       // channels available
       soundfile->shareBuffers(numChannels, MAX_CHAN);
-
-      fSoundfileMap[saved_url_real] = soundfile;
+      fSoundfileMap[saved_url_real] = std::shared_ptr<Soundfile>(soundfile);
     }
   }
 };

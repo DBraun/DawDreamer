@@ -1,0 +1,6 @@
+darwin-x64
+darwin-arm64
+win-x64
+ubuntu-x86_64
+*.zip
+*.dmg

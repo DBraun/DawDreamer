@@ -45,12 +45,9 @@ except Exception as e:
 if platform.system() == "Windows":
 
     build_folder = os.path.join(this_dir, "Builds", "VisualStudio2019", "x64", "Release", "Dynamic Library")
-    libfaust_folder = os.path.join(this_dir, "thirdparty", "libfaust", "win-x64", "Release", "bin")
-
     shutil.copy(os.path.join(build_folder, 'dawdreamer.dll'), os.path.join('dawdreamer', 'dawdreamer.pyd'))
-    shutil.copy(os.path.join(libfaust_folder, 'faust.dll'), os.path.join('dawdreamer', 'faust.dll'))
     
-    package_data += ['dawdreamer/faust.dll', 'dawdreamer/dawdreamer.pyd']
+    package_data += ['dawdreamer/dawdreamer.pyd']
 
 elif platform.system() == "Linux":
 
@@ -70,8 +67,8 @@ elif platform.system() == "Linux":
             'dawdreamer',
             ['dawdreamer/null.c'],
             language='c++',
-            # null.c doesn't use libfaust, so we must prevent it getting culled with --no-as-needed
-            extra_compile_args=['-Wl,--no-as-needed -lfaust'],
+            # null.c doesn't use libfaustwithllvm, so we must prevent it getting culled with --no-as-needed
+            extra_compile_args=['-Wl,--no-as-needed -lfaustwithllvm'],
             library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
             runtime_library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
         ),
@@ -79,13 +76,11 @@ elif platform.system() == "Linux":
 
 elif platform.system() == "Darwin":
 
-    build_folder = os.path.join(this_dir, "Builds", "MacOSX", "build", "Release")
-    libfaust_folder = os.path.join(this_dir, "thirdparty", "libfaust", "darwin-x64", "Release")
+    build_folder = os.path.join(this_dir, "Builds", "MacOSX", "build", "Release-"+os.environ['ARCHS'])
 
     shutil.copy(os.path.join(build_folder, 'dawdreamer.so'), os.path.join('dawdreamer', 'dawdreamer.so'))
-    shutil.copy(os.path.join(libfaust_folder, 'libfaust.a'), os.path.join('dawdreamer', 'libfaust.2.dylib'))
 
-    package_data += ['dawdreamer/libfaust.2.dylib', 'dawdreamer/dawdreamer.so']
+    package_data += ['dawdreamer/dawdreamer.so']
 
 else:
     raise NotImplementedError(
@@ -160,7 +155,8 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10"
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11"
     ],
     keywords='audio music sound',
     python_requires=">=3.7",
