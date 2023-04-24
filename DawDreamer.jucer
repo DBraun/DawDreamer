@@ -308,7 +308,7 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <VS2022 targetFolder="Builds/VisualStudio2022" vstLegacyFolder="thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK"
-            extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;USE_BUILTIN_FFT"
+            extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;WIN32&#10;_WIN32&#10;_WINDOWS&#10;__SSE__&#10;__SSE2__&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND&#10;NOMINMAX&#10;HAVE_LIBSAMPLERATE&#10;USE_BUILTIN_FFT&#10;NO_THREADING"
             externalLibraries="libfaustwithllvm.lib&#10;samplerate.lib">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="$(pythonLocation)\include;&#10;..\..\thirdparty\pybind11\include;&#10;..\..\thirdparty\faust\architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/boxes;&#10;../../thirdparty/faust/compiler/documentator;&#10;../../thirdparty/faust/compiler/draw;&#10;../../thirdparty/faust/compiler/draw/device;&#10;../../thirdparty/faust/compiler/draw/schema;&#10;../../thirdparty/faust/compiler/errors;&#10;../../thirdparty/faust/compiler/evaluate;&#10;../../thirdparty/faust/compiler/extended;&#10;../../thirdparty/faust/compiler/generator;&#10;../../thirdparty/faust/compiler/generator/interpreter;&#10;../../thirdparty/faust/compiler/normalize;&#10;../../thirdparty/faust/compiler/parallelize;&#10;../../thirdparty/faust/compiler/parser;&#10;../../thirdparty/faust/compiler/patternmatcher;&#10;../../thirdparty/faust/compiler/propagate;&#10;../../thirdparty/faust/compiler/signals;&#10;../../thirdparty/faust/compiler/tlib;&#10;../../thirdparty/faust/compiler/transform;&#10;../../thirdparty/faust/compiler/utils;&#10;..\..\thirdparty\libsamplerate\src;&#10;..\..\thirdparty\libsamplerate\include;&#10;..\..\thirdparty\rubberband;&#10;..\..\thirdparty\rubberband\rubberband;&#10;..\..\thirdparty\rubberband\src;&#10;..\..\thirdparty\portable_endian\include;"
@@ -353,7 +353,8 @@
   </MODULES>
   <JUCEOPTIONS JUCE_PLUGINHOST_VST3="1" JUCE_PLUGINHOST_AU="1" JUCE_CHECK_MEMORY_LEAKS="0"
                JUCE_WEB_BROWSER="0" JUCE_PLUGINHOST_VST="1" JUCE_VST3_CAN_REPLACE_VST2="0"
-               JUCE_USE_CURL="0" JUCE_ALSA="0" JUCE_PLUGINHOST_LV2="1" JUCE_PLUGINHOST_LADSPA="1"/>
+               JUCE_USE_CURL="0" JUCE_ALSA="0" JUCE_PLUGINHOST_LV2="1" JUCE_PLUGINHOST_LADSPA="1"
+               JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <LIVE_SETTINGS>
     <LINUX/>
     <WINDOWS/>
