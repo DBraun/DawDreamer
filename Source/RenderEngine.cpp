@@ -291,7 +291,7 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
 
   MidiBuffer renderMidiBuffer;
 
-  auto stepInSeconds = double(myBufferSize) / mySampleRate;
+  auto stepInMinutes = double(myBufferSize) / (mySampleRate * 60);
 
   for (int64_t i = 0; i < numberOfBuffers; ++i) {
     m_positionInfo.setBpm(getBPM(*m_positionInfo.getPpqPosition()));
@@ -304,12 +304,11 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
     m_mainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
 
     m_positionInfo.setTimeInSamples(*m_positionInfo.getTimeInSamples() +
-                                    myBufferSize);
-    m_positionInfo.setTimeInSeconds(*m_positionInfo.getTimeInSeconds() +
-                                    stepInSeconds);
+                                   (int64_t)myBufferSize);
+    m_positionInfo.setTimeInSeconds(double(*m_positionInfo.getTimeInSamples()) /
+                                    mySampleRate);
     m_positionInfo.setPpqPosition(*m_positionInfo.getPpqPosition() +
-                                  (stepInSeconds / 60.) *
-                                      *m_positionInfo.getBpm());
+                                  stepInMinutes * *m_positionInfo.getBpm());
   }
 
   m_positionInfo.setIsPlaying(false);
