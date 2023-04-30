@@ -1,5 +1,7 @@
 #include "FaustProcessor.h"
 
+#ifdef BUILD_DAWDREAMER_FAUST
+
 #define TREE2STR(res, t) res ? tree2str(t->branch(0)) : ""
 
 inline void create_bindings_for_faust_signal(py::module &faust_module) {
@@ -992,3 +994,5 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
 
       ;
 }
+
+#endif

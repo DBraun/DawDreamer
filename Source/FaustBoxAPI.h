@@ -1,5 +1,7 @@
 #include "FaustProcessor.h"
 
+#ifdef BUILD_DAWDREAMER_FAUST
+
 class DawDreamerFaustLibContext {
  public:
   int enter() {
@@ -1371,3 +1373,5 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
 
       ;
 }
+
+#endif

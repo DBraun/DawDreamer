@@ -65,8 +65,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src;..\..\thirdparty\portable_endian\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)/include;../../thirdparty;../../thirdparty/pybind11/include;../../thirdparty/faust/architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;../../thirdparty/libsamplerate/src;../../thirdparty/libsamplerate/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -79,8 +79,8 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src;..\..\thirdparty\portable_endian\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)/include;../../thirdparty;../../thirdparty/pybind11/include;../../thirdparty/faust/architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;../../thirdparty/libsamplerate/src;../../thirdparty/libsamplerate/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <OutputFile>$(OutDir)\dawdreamer.dll</OutputFile>
@@ -91,14 +91,12 @@
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate\build_debug\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalDependencies>libfaustwithllvm.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalDependencies>libfaustwithllvm.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate\build_debug\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -112,8 +110,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src;..\..\thirdparty\portable_endian\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)/include;../../thirdparty;../../thirdparty/pybind11/include;../../thirdparty/faust/architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;../../thirdparty/libsamplerate/src;../../thirdparty/libsamplerate/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -126,8 +124,8 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)\include;..\..\thirdparty\pybind11\include;..\..\thirdparty\faust\architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;..\..\thirdparty\libsamplerate\src;..\..\thirdparty\libsamplerate\include;..\..\thirdparty\rubberband;..\..\thirdparty\rubberband\rubberband;..\..\thirdparty\rubberband\src;..\..\thirdparty\portable_endian\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lilv;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sratom;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\sord;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\serd;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK\lv2;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\LV2_SDK;..\..\JuceLibraryCode\modules\juce_audio_processors\format_types\VST3_SDK;..\..\thirdparty\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;..\..\JuceLibraryCode;..\..\JuceLibraryCode\modules;$(pythonLocation)/include;../../thirdparty;../../thirdparty/pybind11/include;../../thirdparty/faust/architecture;../../thirdparty/faust/compiler;../../thirdparty/faust/compiler/boxes;../../thirdparty/faust/compiler/documentator;../../thirdparty/faust/compiler/draw;../../thirdparty/faust/compiler/draw/device;../../thirdparty/faust/compiler/draw/schema;../../thirdparty/faust/compiler/errors;../../thirdparty/faust/compiler/evaluate;../../thirdparty/faust/compiler/extended;../../thirdparty/faust/compiler/generator;../../thirdparty/faust/compiler/generator/interpreter;../../thirdparty/faust/compiler/normalize;../../thirdparty/faust/compiler/parallelize;../../thirdparty/faust/compiler/parser;../../thirdparty/faust/compiler/patternmatcher;../../thirdparty/faust/compiler/propagate;../../thirdparty/faust/compiler/signals;../../thirdparty/faust/compiler/tlib;../../thirdparty/faust/compiler/transform;../../thirdparty/faust/compiler/utils;../../thirdparty/libsamplerate/src;../../thirdparty/libsamplerate/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==;BUILD_DAWDREAMER_FAUST;BUILD_DAWDREAMER_RUBBERBAND;SAMPLER_SKIP_UI;JUCE_MODAL_LOOPS_PERMITTED;_WIN32;__SSE__;__SSE2__;NOMINMAX;HAVE_LIBSAMPLERATE;USE_BUILTIN_FFT;NO_THREADING;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=0.7.0;JUCE_APP_VERSION_HEX=0x700;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JucePlugin_Build_LV2=0;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <OutputFile>$(OutDir)\dawdreamer.dll</OutputFile>
@@ -141,14 +139,13 @@
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>libfaustwithllvm.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>libfaustwithllvm.lib samplerate.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalDependencies>libfaustwithllvm.lib;samplerate.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Release\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
@@ -156,38 +153,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\CompoundAudioCurve.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\ConstantAudioCurve.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\HighFrequencyAudioCurve.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\PercussiveAudioCurve.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\SilentAudioCurve.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\audiocurves\SpectralDifferenceAudioCurve.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\base\Profiler.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\AudioCurveCalculator.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\FFT.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\dsp\Resampler.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\getopt\getopt.c">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\getopt\getopt_long.c">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\jni\RubberBandStretcherJNI.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft.c"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fftr.c"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\speex\resample.c"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\system\Allocators.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\system\sysutils.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\system\Thread.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\system\VectorOpsComplex.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\rubberband-c.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\RubberBandStretcher.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\StretchCalculator.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherChannelData.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherImpl.cpp"/>
-    <ClCompile Include="..\..\thirdparty\rubberband\src\StretcherProcess.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\DataModels\DataModel.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\DataModels\MPESettingsDataModel.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\Main.cpp">
@@ -2463,7 +2428,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
@@ -2487,41 +2451,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\thirdparty\libsamplerate\include\samplerate.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\CompoundAudioCurve.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\ConstantAudioCurve.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\HighFrequencyAudioCurve.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\PercussiveAudioCurve.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\SilentAudioCurve.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\audiocurves\SpectralDifferenceAudioCurve.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\base\Profiler.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\base\RingBuffer.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\base\Scavenger.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\AudioCurveCalculator.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\FFT.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\MovingMedian.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\Resampler.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\SampleFilter.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\SincWindow.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\dsp\Window.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\float_cast\float_cast.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\getopt\getopt.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\getopt\unistd.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\_kiss_fft_guts.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fft_log.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\kissfft\kiss_fftr.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\pommier\neon_mathfun.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\pommier\sse_mathfun.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\speex\speex_resampler.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\system\Allocators.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\system\sysutils.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\system\Thread.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\system\VectorOps.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\system\VectorOpsComplex.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\StretchCalculator.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherChannelData.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\src\StretcherImpl.h"/>
-    <ClInclude Include="..\..\thirdparty\rubberband\rubberband\RubberBandStretcher.h"/>
     <ClInclude Include="..\..\Source\StandalonePluginWindow.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointMarker.h"/>
     <ClInclude Include="..\..\Source\Sampler\Source\Components\LoopPointsOverlay.h"/>
@@ -3534,12 +3463,9 @@
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_video\playback\juce_VideoComponent.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_video\juce_video.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
-    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\thirdparty\rubberband\src\kissfft\COPYING"/>
-    <None Include="..\..\thirdparty\rubberband\src\speex\COPYING"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_devices\native\oboe\README.md"/>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>

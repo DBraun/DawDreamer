@@ -6,7 +6,7 @@
 #include <vector>
 #include <cstring>
 
-#include "portable_endian.h"
+#include <portable_endian/include/portable_endian.h>
 
 class AbletonClipInfo {
  public:
