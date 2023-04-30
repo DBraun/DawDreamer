@@ -99,6 +99,9 @@
     <Lib>
       <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win-x64\Debug\lib;..\..\thirdparty\libsamplerate\build_debug\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <PostBuildEvent>
+      <Command>copy &quot;x64\Debug\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
