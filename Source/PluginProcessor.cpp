@@ -71,7 +71,8 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
   pluginFormatManager.addDefaultFormats();
 
-  { std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
+  {
+    std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
     juce::MessageManager::getInstance();  // to avoid runtime jassert(false)
                                           // thrown by JUCE
   }
