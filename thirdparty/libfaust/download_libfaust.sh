@@ -10,8 +10,8 @@ if [ "$(uname)" = "Darwin" ]; then
 
     curl -L https://github.com/grame-cncm/faust/releases/download/2.59.5/Faust-2.59.5-x64.dmg -o Faust-2.59.5-x64.dmg
     hdiutil attach Faust-2.59.5-x64.dmg
-    mkdir -p darwin-x86_64/Release
-    cp -R /Volumes/Faust-2.59.5/Faust-2.59.5/* darwin-x86_64/Release/
+    mkdir -p darwin-x64/Release
+    cp -R /Volumes/Faust-2.59.5/Faust-2.59.5/* darwin-x64/Release/
     hdiutil detach /Volumes/Faust-2.59.5/
 elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
     echo "You are running Linux"
