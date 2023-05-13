@@ -95,10 +95,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - { os: windows-2022, python-version: "3.7", CIBW-BUILD: "cp37*"}
-        - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
-        - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
-        - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
+        # - { os: windows-2022, python-version: "3.7", CIBW-BUILD: "cp37*"}
+        # - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
+        # - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
+        # - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
         - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
 
     steps:
@@ -152,7 +152,7 @@ jobs:
         CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
-        CIBW_TEST_SKIP: "*311*"
+        # CIBW_TEST_SKIP: "*311*"
 
     - uses: actions/upload-artifact@v3
       with:
