@@ -47,7 +47,7 @@ ifeq ($(CONFIG),Debug)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -g -ggdb -O0 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaustwithllvm $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaustwithllvm $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
@@ -70,7 +70,7 @@ ifeq ($(CONFIG),Release)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaustwithllvm $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Release/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaustwithllvm $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif

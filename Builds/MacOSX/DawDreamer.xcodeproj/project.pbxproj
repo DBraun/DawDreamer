@@ -677,7 +677,7 @@
 					"$(inherited)",
 					"\"$(pythonLocation)/lib\"",
 					"\"/usr/local/lib\"",
-					"\"../../thirdparty/libfaust/darwin-x64/Debug\"",
+					"\"../../thirdparty/libfaust/darwin-x64/Debug/lib\"",
 					"\"../../thirdparty/libsamplerate/build_debug/src\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
@@ -775,7 +775,7 @@
 					"$(inherited)",
 					"\"$(pythonLocation)/lib\"",
 					"\"/usr/local/lib\"",
-					"\"../../thirdparty/libfaust/darwin-x64/lib\"",
+					"\"../../thirdparty/libfaust/darwin-x64/Release/lib\"",
 					"\"../../thirdparty/libsamplerate/build_release/src\"",
 				);
 				LLVM_LTO = YES;
@@ -874,7 +874,7 @@
 					"$(inherited)",
 					"\"$(pythonLocation)/lib\"",
 					"\"/usr/local/lib\"",
-					"\"../../thirdparty/libfaust/darwin-arm64/lib\"",
+					"\"../../thirdparty/libfaust/darwin-arm64/Release/lib\"",
 					"\"../../thirdparty/libsamplerate/build_release/src\"",
 				);
 				LLVM_LTO = YES;

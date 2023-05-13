@@ -52,7 +52,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\Dynamic Library\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">dawdreamer</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);$(pythonLocation)\libs;..\..\thirdparty\libfaust\win64\lib;..\..\thirdparty\libsamplerate\build_release\src\Release</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);$(pythonLocation)\libs;..\..\thirdparty\libfaust\win64\Release\lib;..\..\thirdparty\libsamplerate\build_release\src\Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -139,7 +139,7 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win64\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win64\Release\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>libfaustwithllvm.lib samplerate.lib %(AdditionalOptions)</AdditionalOptions>
@@ -149,7 +149,7 @@
       <OutputFile>$(IntDir)\dawdreamer.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win64\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(pythonLocation)\libs;..\..\thirdparty\libfaust\win64\Release\lib;..\..\thirdparty\libsamplerate\build_release\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>copy &quot;x64\Release\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;</Command>

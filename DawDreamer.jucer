@@ -135,15 +135,15 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug-x86_64" isDebug="1" optimisation="1" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
-                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug&#10;../../thirdparty/libsamplerate/build_debug/src"
+                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug/lib&#10;../../thirdparty/libsamplerate/build_debug/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
         <CONFIGURATION name="Release-x86_64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
-                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/lib&#10;../../thirdparty/libsamplerate/build_release/src"
+                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
         <CONFIGURATION name="Release-arm64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
-                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-arm64/lib&#10;../../thirdparty/libsamplerate/build_release/src"
+                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-arm64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -169,9 +169,9 @@
                 externalLibraries="samplerate&#10;faustwithllvm">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
@@ -195,7 +195,7 @@
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="dawdreamer" headerPath="$(pythonLocation)/include;"
                        libraryPath="$(pythonLocation)\libs;" postbuildCommand="copy &quot;x64\Debug\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="dawdreamer" libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win64\lib;&#10;..\..\thirdparty\libsamplerate\build_release\src\Release;"
+        <CONFIGURATION isDebug="0" name="Release" targetName="dawdreamer" libraryPath="$(pythonLocation)\libs;&#10;..\..\thirdparty\libfaust\win64\Release\lib;&#10;..\..\thirdparty\libsamplerate\build_release\src\Release;"
                        postbuildCommand="copy &quot;x64\Release\Dynamic Library\dawdreamer.dll&quot; &quot;$(pythonLocation)\dawdreamer.pyd&quot;;"
                        extraLinkerFlags="libfaustwithllvm.lib samplerate.lib" defines="BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND"
                        headerPath="$(pythonLocation)/include;"/>
