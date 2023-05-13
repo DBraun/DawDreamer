@@ -20,7 +20,6 @@ alsa-utils
 
 echo "Build libsamplerate"
 cd thirdparty/libsamplerate
-mkdir build_release
 cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 cd build_release
 make CONFIG=Release

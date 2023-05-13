@@ -22,7 +22,7 @@ RUN python3.9 -m pip install librosa scipy numpy pytest build wheel
 
 # Build wheel
 WORKDIR /DawDreamer
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer:/DawDreamer/thirdparty/libfaust/ubuntu-x86_64/lib
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer:/DawDreamer/thirdparty/libfaust/ubuntu-x86_64/Release/lib
 RUN python3.9 -m build --wheel
 
 # Install wheel
