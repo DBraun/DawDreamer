@@ -166,6 +166,6 @@ setup(
         "": package_data
     },
     zip_safe=False,
-    # distclass=BinaryDistribution,
-    # ext_modules=ext_modules
+    distclass=BinaryDistribution,
+    ext_modules=ext_modules
 )
