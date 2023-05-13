@@ -61,14 +61,16 @@ elif platform.system() == "Linux":
 
     # For Linux, we do a hacky thing where we force a compilation of an empty file
     # in order for auditwheel to work.
-    # dawdreamer_dir = os.path.join(this_dir, 'dawdreamer')
+    dawdreamer_dir = os.path.join(this_dir, 'dawdreamer')
     # ext_modules = [
     #     Extension(
     #         'dawdreamer',
     #         ['dawdreamer/null.c'],
     #         language='c++',
-    #         library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
-    #         runtime_library_dirs=[dawdreamer_dir, '/usr/local/lib', '/usr/lib/x86_64-linux-gnu'],
+    #         # null.c doesn't use libfaustwithllvm, so we must prevent it getting culled with --no-as-needed
+    #         extra_compile_args=['-Wl,--no-as-needed -lfaustwithllvm'],
+    #         library_dirs=[dawdreamer_dir],
+    #         runtime_library_dirs=[dawdreamer_dir],
     #     ),
     # ]
 
