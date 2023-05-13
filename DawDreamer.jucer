@@ -133,11 +133,11 @@
                extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;HAVE_LIBSAMPLERATE&#10;HAVE_VDSP&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND"
                xcodeValidArchs="arm64,x86_64">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug-x64" isDebug="1" optimisation="1" targetName="dawdreamer.so"
+        <CONFIGURATION name="Debug-x86_64" isDebug="1" optimisation="1" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
                        libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug&#10;../../thirdparty/libsamplerate/build_debug/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
-        <CONFIGURATION name="Release-x64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
+        <CONFIGURATION name="Release-x86_64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
                        libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/lib&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="10.15 SDK" macOSDeploymentTarget="10.15"/>
