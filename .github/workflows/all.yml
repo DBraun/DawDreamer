@@ -42,7 +42,7 @@ jobs:
 
     - name: Download libfaust
       run: |
-        yum install -y zip
+        apt-get install zip
         cd thirdparty/libfaust
         sh download_libfaust.sh
 
