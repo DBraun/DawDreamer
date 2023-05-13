@@ -8,6 +8,9 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python3.9 get
 # clone repo by copying in
 COPY . /DawDreamer
 
+WORKDIR /DawDreamer/thirdparty/libfaust
+RUN sh download_libfaust.sh
+
 WORKDIR /DawDreamer
 ENV PYTHONLIBPATH=/opt/python/cp39-cp39/lib
 ENV PYTHONINCLUDEPATH=/opt/python/cp39-cp39/include/python3.9

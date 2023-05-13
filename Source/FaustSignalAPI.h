@@ -649,16 +649,6 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
           arg("sig"), returnPolicy)
 
       .def(
-          "isSigTable",
-          [](SigWrapper &t) {
-            Signal id, n, sig;
-            bool res = isSigTable(t, id, n, sig);
-            return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, SigWrapper(id), SigWrapper(n), SigWrapper(sig));
-          },
-          arg("sig"), returnPolicy)
-
-      .def(
           "isSigDocConstantTbl",
           [](SigWrapper &s) {
             Signal n, init;
