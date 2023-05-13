@@ -220,10 +220,10 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
-          export ARCHS="${{matrix.ARCHS}}"
+          ARCHS="${{matrix.ARCHS}}"
           export pythonLocation=$(python3-config --prefix)
           otool -L $pythonLocation/bin/python3
-          xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/
+          xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/ CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
           mv Builds/MacOSX/build/Release-${{matrix.ARCHS}}/dawdreamer.so.dylib Builds/MacOSX/build/Release-${{matrix.ARCHS}}/dawdreamer.so
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -v ."
