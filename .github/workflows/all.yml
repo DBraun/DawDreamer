@@ -9,15 +9,15 @@ on:
 jobs:
 
   build-ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-        - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_x86_64"}
-        - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
+        # - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_x86_64"}
+        # - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
         - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
-        - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
-        - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
+        # - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
+        # - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
         # - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_aarch64"}
         # - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_aarch64"}
         # - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_aarch64"}
@@ -30,7 +30,7 @@ jobs:
 
     - name: Set up QEMU for aarch64 on Linux
       if: runner.os == 'Linux'
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v2
       with:
         platforms: all
 
@@ -74,7 +74,7 @@ jobs:
         path: ./wheelhouse/*.whl
 
   build-ubuntu-docker:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -176,15 +176,15 @@ jobs:
     strategy:
       matrix:
         include:
-        - { os: macos-latest, build: cp37-macosx_x86_64, python-version: "3.7", ARCHS: "x86_64", python-major: "3.7m" }
-        - { os: macos-latest, build: cp38-macosx_x86_64, python-version: "3.8", ARCHS: "x86_64", python-major: "3.8" }
+        # - { os: macos-latest, build: cp37-macosx_x86_64, python-version: "3.7", ARCHS: "x86_64", python-major: "3.7m" }
+        # - { os: macos-latest, build: cp38-macosx_x86_64, python-version: "3.8", ARCHS: "x86_64", python-major: "3.8" }
         - { os: macos-latest, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64", python-major: "3.9" }
-        - { os: macos-latest, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64", python-major: "3.10" }
-        - { os: macos-latest, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64", python-major: "3.11" }
-        - { os: macos-latest, build: cp38-macosx_arm64, python-version: "3.8", ARCHS: "arm64", python-major: "3.8" }
-        - { os: macos-latest, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64", python-major: "3.9" }
-        - { os: macos-latest, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64", python-major: "3.10" }
-        - { os: macos-latest, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64", python-major: "3.11" }
+        # - { os: macos-latest, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64", python-major: "3.10" }
+        # - { os: macos-latest, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64", python-major: "3.11" }
+        # - { os: macos-latest, build: cp38-macosx_arm64, python-version: "3.8", ARCHS: "arm64", python-major: "3.8" }
+        # - { os: macos-latest, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64", python-major: "3.9" }
+        # - { os: macos-latest, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64", python-major: "3.10" }
+        # - { os: macos-latest, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64", python-major: "3.11" }
 
     steps:
     - uses: actions/checkout@v2
@@ -218,7 +218,6 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: 11.0
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
-          ARCHS="${{matrix.ARCHS}}"
           export pythonLocation=$(python3-config --prefix)
           otool -L $pythonLocation/bin/python3
           xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/ CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
@@ -229,8 +228,9 @@ jobs:
         CIBW_BUILD: ${{matrix.build}}
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
-        # todo: want to test Python 3.10 and 3.11
-        CIBW_TEST_SKIP: "*310* *311*"
+        CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
+        # todo: want to test Python 3.11
+        CIBW_TEST_SKIP: "*311* *arm64*"
 
     - uses: actions/upload-artifact@v3
       with:
