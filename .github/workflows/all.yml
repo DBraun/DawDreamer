@@ -131,7 +131,6 @@ jobs:
     - name: Build libsamplerate
       run: |
         cd thirdparty/libsamplerate
-        mkdir build_release
         cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
         cd build_release
         msbuild libsamplerate.sln /property:Configuration=Release
@@ -200,7 +199,6 @@ jobs:
     - name: Build libsamplerate
       run: |
         cd thirdparty/libsamplerate
-        mkdir build_release
         cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="${{matrix.ARCHS}}" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
         make --directory=build_release
         cd ../..
@@ -222,11 +220,11 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: 10.15
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
-          ARCHS="${{matrix.ARCHS}}"
+          export ARCHS="${{matrix.ARCHS}}"
           export pythonLocation=$(python3-config --prefix)
           otool -L $pythonLocation/bin/python3
-          xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/ CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
-          mv Builds/MacOSX/build/Release/dawdreamer.so.dylib Builds/MacOSX/build/Release/dawdreamer.so
+          xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/
+          mv Builds/MacOSX/build/Release-${{matrix.ARCHS}}/dawdreamer.so.dylib Builds/MacOSX/build/Release-${{matrix.ARCHS}}/dawdreamer.so
         CIBW_TEST_REQUIRES: -r test-requirements.txt
         CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -v ."
         CIBW_BUILD: ${{matrix.build}}
