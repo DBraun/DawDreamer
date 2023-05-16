@@ -175,15 +175,15 @@ jobs:
     strategy:
       matrix:
         include:
-        - { os: macos-latest, build: cp37-macosx_x86_64, python-version: "3.7", ARCHS: "x86_64", python-major: "3.7m" }
-        - { os: macos-latest, build: cp38-macosx_x86_64, python-version: "3.8", ARCHS: "x86_64", python-major: "3.8" }
-        - { os: macos-latest, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64", python-major: "3.9" }
-        - { os: macos-latest, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64", python-major: "3.10" }
-        - { os: macos-latest, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64", python-major: "3.11" }
-        - { os: macos-latest, build: cp38-macosx_arm64, python-version: "3.8", ARCHS: "arm64", python-major: "3.8" }
-        - { os: macos-latest, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64", python-major: "3.9" }
-        - { os: macos-latest, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64", python-major: "3.10" }
-        - { os: macos-latest, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64", python-major: "3.11" }
+        - { os: macos-11, build: cp37-macosx_x86_64, python-version: "3.7", ARCHS: "x86_64", python-major: "3.7m" }
+        - { os: macos-11, build: cp38-macosx_x86_64, python-version: "3.8", ARCHS: "x86_64", python-major: "3.8" }
+        - { os: macos-11, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64", python-major: "3.9" }
+        - { os: macos-11, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64", python-major: "3.10" }
+        - { os: macos-11, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64", python-major: "3.11" }
+        - { os: macos-11, build: cp38-macosx_arm64, python-version: "3.8", ARCHS: "arm64", python-major: "3.8" }
+        - { os: macos-11, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64", python-major: "3.9" }
+        - { os: macos-11, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64", python-major: "3.10" }
+        - { os: macos-11, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64", python-major: "3.11" }
 
     steps:
     - uses: actions/checkout@v2
