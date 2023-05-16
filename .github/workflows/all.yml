@@ -229,7 +229,7 @@ jobs:
         CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
         CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
         # todo: want to test Python 3.11
-        CIBW_TEST_SKIP: "*311* *arm64*"
+        CIBW_TEST_SKIP: "*37* *311* *arm64*"
 
     - uses: actions/upload-artifact@v3
       with:

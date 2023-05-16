@@ -535,7 +535,8 @@ def test23():
     print('sl1.to_str()', sl1.to_str())
     print('box.to_str()', box.to_str())
 
-    if (slider := isBoxHSlider(sl1))[0]:
+    slider = isBoxHSlider(sl1)
+    if slider[0]:
         label, init, theMin, theMax, step = slider[1:]
         print('label.extract_name()', label.extract_name())
         print('label.to_str()', label.to_str())
