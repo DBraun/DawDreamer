@@ -1,14 +1,6 @@
 echo "PYTHONLIBPATH: $PYTHONLIBPATH"
 echo "PYTHONINCLUDEPATH: $PYTHONINCLUDEPATH"
 
-if [[ $(uname -m) == 'x86_64' ]]; then
-    echo "building for x86_64"
-	cp thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so thirdparty/libfaust/ubuntu-x86_64/lib/libfaust.so.2
-else
-    echo "building for $(uname -m)" 
-	cp thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so thirdparty/libfaust/ubuntu-aarch64/lib/libfaust.so.2
-fi
-
 yum install -y libsndfile \
 libX11-devel \
 libXrandr-devel \
@@ -28,7 +20,6 @@ alsa-utils
 
 echo "Build libsamplerate"
 cd thirdparty/libsamplerate
-mkdir build_release
 cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 cd build_release
 make CONFIG=Release

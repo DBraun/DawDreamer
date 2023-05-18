@@ -1,5 +1,7 @@
 #include "FaustProcessor.h"
 
+#ifdef BUILD_DAWDREAMER_FAUST
+
 class DawDreamerFaustLibContext {
  public:
   int enter() {
@@ -35,6 +37,26 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
   py::class_<BoxWrapper>(box_module, "Box")
       .def(py::init<float>(), arg("val"), "Init with a float", returnPolicy)
       .def(py::init<int>(), arg("val"), "Init with an int", returnPolicy)
+
+      .def(
+          "to_str",
+          [](const BoxWrapper &b) { return tree2str((BoxWrapper &)b); },
+          "Convert a box (such as the label of a UI) to a string.")
+      .def(
+          "extract_name",
+          [](const BoxWrapper &b) { return extractName((BoxWrapper &)b); },
+          "Return the name from a label.")
+      //.def(
+      //    "print_str",
+      //    [](const BoxWrapper &box1, const bool shared, const int max_size) {
+      //      return printBox((BoxWrapper &)box1, shared, max_size);
+      //    },
+      //    arg("shared"), arg("max_size"),
+      //    "Return the box as a string. The argument `shared` is whether "
+      //    "identical sub boxes are printed as identifiers. The argument "
+      //    "`max_size` is the maximum number of characters to be printed "
+      //    "(possibly needed for big expressions in non shared mode).",
+      //    returnPolicy)
       .def(
           "__add__",
           [](const BoxWrapper &box1, BoxWrapper &box2) {
@@ -160,6 +182,30 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           returnPolicy)
 
       .def(
+          "__floordiv__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(
+                boxFloor(boxDiv((BoxWrapper &)box1, box2)));
+          },
+          returnPolicy)
+
+      .def(
+          "__floordiv__",
+          [](const BoxWrapper &box1, int other) {
+            return BoxWrapper(
+                boxFloor(boxDiv((BoxWrapper &)box1, sigInt(other))));
+          },
+          returnPolicy)
+
+      .def(
+          "__floordiv__",
+          [](const BoxWrapper &box1, float other) {
+            return BoxWrapper(
+                boxFloor(boxDiv((BoxWrapper &)box1, sigReal(other))));
+          },
+          returnPolicy)
+
+      .def(
           "__mod__",
           [](const BoxWrapper &box1, BoxWrapper &box2) {
             return BoxWrapper(boxFmod((BoxWrapper &)box1, box2));
@@ -176,9 +222,131 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           [](const BoxWrapper &box1, int other) {
             return BoxWrapper(boxFmod((BoxWrapper &)box1, boxInt(other)));
           },
+          returnPolicy)
+      .def(
+          "__lt__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxLT((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__le__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxLE((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__gt__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxGT((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__ge__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxGE((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__eq__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxEQ((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__ne__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxNE((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__pow__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxPow((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__lshift__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(
+                boxLeftShift((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__rshift__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(
+                boxARightShift((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__and__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxAND((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__xor__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxXOR((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__or__",
+          [](const BoxWrapper &box1, BoxWrapper &box2) {
+            return BoxWrapper(boxOR((BoxWrapper &)box1, box2));
+          },
+          returnPolicy)
+      .def(
+          "__neg__",
+          [](const BoxWrapper &box1) {
+            return BoxWrapper(boxSub(boxReal(0), (BoxWrapper &)box1));
+          },
+          returnPolicy)
+      .def(
+          "__abs__",
+          [](const BoxWrapper &box1) {
+            return BoxWrapper(boxAbs((BoxWrapper &)box1));
+          },
+          returnPolicy)
+      .def(
+          "__int__",
+          [](const BoxWrapper &box1) {
+            return BoxWrapper(boxIntCast((BoxWrapper &)box1));
+          },
+          returnPolicy)
+      .def(
+          "__float__",
+          [](const BoxWrapper &box1) {
+            return BoxWrapper(boxFloatCast((BoxWrapper &)box1));
+          },
+          returnPolicy)
+      .def(
+          "__floor__",
+          [](const BoxWrapper &box1) {
+            return BoxWrapper(boxFloor((BoxWrapper &)box1));
+          },
+          returnPolicy)
+      .def(
+          "__ceil__",
+          [](const BoxWrapper &box1) {
+            return BoxWrapper(boxCeil((BoxWrapper &)box1));
+          },
           returnPolicy);
 
   box_module
+      .def(
+          "getDefNameProperty",
+          [](const BoxWrapper &b) {
+            Box id;
+            bool res = getDefNameProperty((BoxWrapper &)b, id);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(id));
+          },
+          arg("box"),
+          "Return a tuple of (bool, Box). If the bool is True, the input box "
+          "was a definition of the second item in the tuple. Otherwise, the "
+          "second item should not be used.")
       .def(
           "boxInt", [](int val) { return BoxWrapper(boxInt(val)); }, arg("val"),
           returnPolicy)
@@ -262,7 +430,14 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           [](BoxWrapper &box1, BoxWrapper &box2, BoxWrapper &box3) {
             return BoxWrapper(boxRoute(box1, box2, box3));
           },
-          arg("box_n"), arg("box_m"), arg("box_r"), returnPolicy)
+          arg("box_n"), arg("box_m"), arg("box_r"),
+          "The route primitive facilitates the routing of signals in Faust. It "
+          "has the following syntax: route(A,B,a,b,c,d,...) or "
+          "route(A,B,(a,b),(c,d),...)\n* @param n -  the number of input "
+          "signals\n* @param m -  the number of output signals\n* @param r - "
+          "the routing description, a 'par' expression of a,b / (a,b) "
+          "input/output pairs",
+          returnPolicy)
 
       .def(
           "boxDelay",
@@ -273,7 +448,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
               return BoxWrapper(boxDelay());
             }
           },
-          arg("box1") = py::none(), arg("box2") = py::none(), returnPolicy)
+          arg("box1") = py::none(), arg("box2") = py::none(),
+          "Create a delayed box.", returnPolicy)
 
       .def(
           "boxIntCast",
@@ -338,7 +514,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             }
             return BoxWrapper(boxWaveform(waveform));
           },
-          arg("vals"), returnPolicy)
+          arg("vals"), "Create a waveform from a list of values.", returnPolicy)
       .def(
           "boxSoundfile",
           [](std::string &label, BoxWrapper &chan,
@@ -350,7 +526,13 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             }
           },
           arg("filepath"), arg("chan"), arg("part") = py::none(),
-          arg("ridx") = py::none(), returnPolicy)
+          arg("ridx") = py::none(),
+          "Create a soundfile from a path and channel count. The third "
+          "optional argument for the `part` is in the [0..255] range to select "
+          "a given sound number, a constant numerical expression. The fourth "
+          "optional argument for the `ridx` is the read index (an integer "
+          "between 0 and the selected sound length).",
+          returnPolicy)
 
       .def(
           "boxSelect2",
@@ -862,7 +1044,14 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           "isBoxNil", [](BoxWrapper &b) { return isNil(b); }, arg("box"))
 
       .def(
-          "isBoxAbstr", [](BoxWrapper &b) { return isBoxAbstr(b); }, arg("box"))
+          "isBoxAbstr",
+          [](BoxWrapper &b) {
+            Box x, y;
+            bool res = isBoxAbstr(b, x, y);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(x), BoxWrapper(y));
+          },
+          arg("box"))
 
       .def(
           "isBoxAccess",
@@ -872,7 +1061,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(b2), BoxWrapper(b3));
           },
-          arg("box_t"), returnPolicy)
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxAppl",
@@ -992,22 +1181,18 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             Box label, init, a_min, a_max, step;
             bool res = isBoxHSlider(b, label, init, a_min, a_max, step);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
-                BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
+                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                BoxWrapper(a_max), BoxWrapper(step));
           },
           arg("box"), returnPolicy)
 
       .def(
           "isBoxIdent",
           [](BoxWrapper &b) {
-            int argc = 256;
-            const char **str = new const char *[argc];
-            bool res = isBoxIdent(b, str);
-            for (int i = 0; i < argc; i++) {
-              str[i] = NULL;
-            }
-            delete[] str;
-            return res;
+            const char *str = nullptr;
+            bool res = isBoxIdent(b, &str);
+            std::string s = std::string(res ? str : "");
+            return py::make_tuple<py::return_value_policy::take_ownership>(res, s);
           },
           arg("box"), returnPolicy)
 
@@ -1024,7 +1209,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
       .def(
           "isBoxInt",
           [](BoxWrapper &b) {
-            int i;
+            int i = 0;
             bool res = isBoxInt(b, &i);
             return py::make_tuple<py::return_value_policy::take_ownership>(res,
                                                                            i);
@@ -1107,8 +1292,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             Box label, init, a_min, a_max, step;
             bool res = isBoxNumEntry(b, label, init, a_min, a_max, step);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
-                BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
+                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                BoxWrapper(a_max), BoxWrapper(step));
           },
           arg("box"), returnPolicy)
 
@@ -1159,7 +1344,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
       .def(
           "isBoxReal",
           [](BoxWrapper &b) {
-            double r;
+            double r = 0;
             bool res = isBoxReal(b, &r);
             return py::make_tuple<py::return_value_policy::take_ownership>(res,
                                                                            r);
@@ -1197,8 +1382,14 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"), returnPolicy)
 
       .def(
-          "isBoxSlot", [](BoxWrapper &b) { return isBoxSlot(b); }, arg("box"),
-          returnPolicy)
+          "isBoxSlot",
+          [](BoxWrapper &b) {
+            int i = 0;
+            bool res = isBoxSlot(b, &i);
+            return py::make_tuple<py::return_value_policy::take_ownership>(res,
+                                                                           i);
+          },
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxSoundfile",
@@ -1241,6 +1432,16 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"), returnPolicy)
 
       .def(
+          "isBoxVBarGraph",
+          [](BoxWrapper &b) {
+            Box label, a_min, a_max;
+            bool res = isBoxVBargraph(b, label, a_min, a_max);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
+          },
+          arg("box"), returnPolicy)
+
+      .def(
           "isBoxVGroup",
           [](BoxWrapper &b) {
             Box label, x;
@@ -1256,14 +1457,18 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             Box label, init, a_min, a_max, step;
             bool res = isBoxVSlider(b, label, init, a_min, a_max, step);
             return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(init),
-                BoxWrapper(a_min), BoxWrapper(a_max), BoxWrapper(step));
+                res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                BoxWrapper(a_max), BoxWrapper(step));
           },
           arg("box"), returnPolicy)
 
       .def(
           "isBoxWaveform", [](BoxWrapper &b) { return isBoxWaveform(b); },
           arg("box"), returnPolicy)
+
+      .def(
+          "isBoxWire", [](BoxWrapper &b) { return isBoxWire(b); }, arg("box"),
+          returnPolicy)
 
       .def(
           "isBoxWithLocalDef",
@@ -1371,3 +1576,5 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
 
       ;
 }
+
+#endif

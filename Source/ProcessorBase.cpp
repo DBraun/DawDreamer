@@ -194,11 +194,12 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo,
         continue;
       }
 
-      auto val = theParameter->sample(posInfo);
-      auto writePtr = m_recordedAutomationDict[name].getWritePointer(
-          0, (int)(*posInfo.getTimeInSamples()));
-
-      for (j = 0; j < numSamples; j++) {
+      float val = theParameter->sample(posInfo);
+      j = (int)(*posInfo.getTimeInSamples());
+      int jMax = std::min(j + numSamples,
+                          m_recordedAutomationDict[name].getNumSamples());
+      float* writePtr = m_recordedAutomationDict[name].getWritePointer(0, j);
+      for (; j < jMax; j++) {
         *writePtr++ = val;
       }
     }

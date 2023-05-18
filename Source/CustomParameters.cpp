@@ -15,8 +15,6 @@ bool AutomateParameter::setAutomation(py::array_t<float> input,
   m_ppqn = newPPQN;
 
   try {
-    myAutomation.clear();
-
     auto numSamples = input.shape(0);
 
     myAutomation = std::vector<float>(numSamples, 0.f);

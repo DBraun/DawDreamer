@@ -71,8 +71,11 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
   pluginFormatManager.addDefaultFormats();
 
-  juce::MessageManager::getInstance();  // to avoid runtime jassert(false)
-                                        // thrown by JUCE
+  {
+    std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
+    juce::MessageManager::getInstance();  // to avoid runtime jassert(false)
+                                          // thrown by JUCE
+  }
 
   for (int i = pluginFormatManager.getNumFormats(); --i >= 0;) {
     pluginList.scanAndAddFile(String(myPluginPath), true, pluginDescriptions,
@@ -81,6 +84,7 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
   if (myPlugin.get()) {
     std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
+    myPlugin.get()->releaseResources();
     myPlugin.reset();
     GLOBAL_PLUGIN_ACTIVE_COUNT--;
     if (GLOBAL_PLUGIN_ACTIVE_COUNT == 0) {
@@ -146,6 +150,7 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 PluginProcessor::~PluginProcessor() {
   if (myPlugin.get()) {
     std::lock_guard<std::mutex> lock(GLOBAL_PLUGIN_MUTEX);
+    myPlugin.get()->releaseResources();
     myPlugin.reset();
     GLOBAL_PLUGIN_ACTIVE_COUNT--;
     if (GLOBAL_PLUGIN_ACTIVE_COUNT == 0) {

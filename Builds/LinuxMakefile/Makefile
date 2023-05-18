@@ -39,7 +39,7 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.16" "-DJUCE_APP_VERSION_HEX=0x610" $(shell $(PKG_CONFIG) --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/boxes -I../../thirdparty/faust/compiler/documentator -I../../thirdparty/faust/compiler/draw -I../../thirdparty/faust/compiler/draw/device -I../../thirdparty/faust/compiler/draw/schema -I../../thirdparty/faust/compiler/errors -I../../thirdparty/faust/compiler/evaluate -I../../thirdparty/faust/compiler/extended -I../../thirdparty/faust/compiler/generator -I../../thirdparty/faust/compiler/generator/interpreter -I../../thirdparty/faust/compiler/normalize -I../../thirdparty/faust/compiler/parallelize -I../../thirdparty/faust/compiler/parser -I../../thirdparty/faust/compiler/patternmatcher -I../../thirdparty/faust/compiler/propagate -I../../thirdparty/faust/compiler/signals -I../../thirdparty/faust/compiler/tlib -I../../thirdparty/faust/compiler/transform -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.7.0" "-DJUCE_APP_VERSION_HEX=0x700" $(shell $(PKG_CONFIG) --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/boxes -I../../thirdparty/faust/compiler/documentator -I../../thirdparty/faust/compiler/draw -I../../thirdparty/faust/compiler/draw/device -I../../thirdparty/faust/compiler/draw/schema -I../../thirdparty/faust/compiler/errors -I../../thirdparty/faust/compiler/evaluate -I../../thirdparty/faust/compiler/extended -I../../thirdparty/faust/compiler/generator -I../../thirdparty/faust/compiler/generator/interpreter -I../../thirdparty/faust/compiler/normalize -I../../thirdparty/faust/compiler/parallelize -I../../thirdparty/faust/compiler/parser -I../../thirdparty/faust/compiler/patternmatcher -I../../thirdparty/faust/compiler/propagate -I../../thirdparty/faust/compiler/signals -I../../thirdparty/faust/compiler/tlib -I../../thirdparty/faust/compiler/transform -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include $(CPPFLAGS)
   JUCE_CPPFLAGS_DYNAMIC_LIBRARY :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0"
   JUCE_CFLAGS_DYNAMIC_LIBRARY := -fPIC -fvisibility=hidden
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
@@ -47,7 +47,7 @@ ifeq ($(CONFIG),Debug)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -g -ggdb -O0 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/lib -L../../thirdparty/libfaust/ubuntu-aarch64/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaust $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaustwithllvm $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
@@ -62,7 +62,7 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.6.16" "-DJUCE_APP_VERSION_HEX=0x610" $(shell $(PKG_CONFIG) --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/boxes -I../../thirdparty/faust/compiler/documentator -I../../thirdparty/faust/compiler/draw -I../../thirdparty/faust/compiler/draw/device -I../../thirdparty/faust/compiler/draw/schema -I../../thirdparty/faust/compiler/errors -I../../thirdparty/faust/compiler/evaluate -I../../thirdparty/faust/compiler/extended -I../../thirdparty/faust/compiler/generator -I../../thirdparty/faust/compiler/generator/interpreter -I../../thirdparty/faust/compiler/normalize -I../../thirdparty/faust/compiler/parallelize -I../../thirdparty/faust/compiler/parser -I../../thirdparty/faust/compiler/patternmatcher -I../../thirdparty/faust/compiler/propagate -I../../thirdparty/faust/compiler/signals -I../../thirdparty/faust/compiler/tlib -I../../thirdparty/faust/compiler/transform -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include -I../../thirdparty/rubberband -I../../thirdparty/rubberband/rubberband -I../../thirdparty/rubberband/src -I../../thirdparty/portable_endian/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DPIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==" "-DSAMPLER_SKIP_UI" "-DJUCE_MODAL_LOOPS_PERMITTED" "-DHAVE_LIBSAMPLERATE" "-DUSE_BUILTIN_FFT" "-DUSE_PTHREADS" "-DBUILD_DAWDREAMER_FAUST" "-DBUILD_DAWDREAMER_RUBBERBAND" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.7.0" "-DJUCE_APP_VERSION_HEX=0x700" $(shell $(PKG_CONFIG) --cflags alsa freetype2) -pthread -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK -I../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK -I../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK -I../../JuceLibraryCode -I../../JuceLibraryCode/modules -I../../thirdparty -I../../thirdparty/pybind11/include -I../../thirdparty/faust/architecture -I../../thirdparty/faust/compiler -I../../thirdparty/faust/compiler/boxes -I../../thirdparty/faust/compiler/documentator -I../../thirdparty/faust/compiler/draw -I../../thirdparty/faust/compiler/draw/device -I../../thirdparty/faust/compiler/draw/schema -I../../thirdparty/faust/compiler/errors -I../../thirdparty/faust/compiler/evaluate -I../../thirdparty/faust/compiler/extended -I../../thirdparty/faust/compiler/generator -I../../thirdparty/faust/compiler/generator/interpreter -I../../thirdparty/faust/compiler/normalize -I../../thirdparty/faust/compiler/parallelize -I../../thirdparty/faust/compiler/parser -I../../thirdparty/faust/compiler/patternmatcher -I../../thirdparty/faust/compiler/propagate -I../../thirdparty/faust/compiler/signals -I../../thirdparty/faust/compiler/tlib -I../../thirdparty/faust/compiler/transform -I../../thirdparty/faust/compiler/utils -I../../thirdparty/libsamplerate/src -I../../thirdparty/libsamplerate/include $(CPPFLAGS)
   JUCE_CPPFLAGS_DYNAMIC_LIBRARY :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0"
   JUCE_CFLAGS_DYNAMIC_LIBRARY := -fPIC -fvisibility=hidden
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
@@ -70,35 +70,12 @@ ifeq ($(CONFIG),Release)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/lib -L../../thirdparty/libfaust/ubuntu-aarch64/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaust $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Release/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2) -fvisibility=hidden -lrt -ldl -lpthread -lGL -lsamplerate -lfaustwithllvm $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
 
 OBJECTS_DYNAMIC_LIBRARY := \
-  $(JUCE_OBJDIR)/CompoundAudioCurve_16236773.o \
-  $(JUCE_OBJDIR)/ConstantAudioCurve_8e0f19ac.o \
-  $(JUCE_OBJDIR)/HighFrequencyAudioCurve_5ffd79ae.o \
-  $(JUCE_OBJDIR)/PercussiveAudioCurve_32850851.o \
-  $(JUCE_OBJDIR)/SilentAudioCurve_9b84f71d.o \
-  $(JUCE_OBJDIR)/SpectralDifferenceAudioCurve_f0b7c889.o \
-  $(JUCE_OBJDIR)/Profiler_f8fb8f37.o \
-  $(JUCE_OBJDIR)/AudioCurveCalculator_d95b8b23.o \
-  $(JUCE_OBJDIR)/FFT_b52ef4b6.o \
-  $(JUCE_OBJDIR)/Resampler_1f9a5937.o \
-  $(JUCE_OBJDIR)/kiss_fft_bedea746.o \
-  $(JUCE_OBJDIR)/kiss_fftr_1cf73ab6.o \
-  $(JUCE_OBJDIR)/resample_b2fa08ab.o \
-  $(JUCE_OBJDIR)/Allocators_560b78.o \
-  $(JUCE_OBJDIR)/sysutils_a5ab5e54.o \
-  $(JUCE_OBJDIR)/Thread_7ea7763a.o \
-  $(JUCE_OBJDIR)/VectorOpsComplex_448d5e31.o \
-  $(JUCE_OBJDIR)/rubberband-c_1ad4cbd5.o \
-  $(JUCE_OBJDIR)/RubberBandStretcher_a9e723d.o \
-  $(JUCE_OBJDIR)/StretchCalculator_e40c5ff7.o \
-  $(JUCE_OBJDIR)/StretcherChannelData_dda6dbf5.o \
-  $(JUCE_OBJDIR)/StretcherImpl_6118cfc2.o \
-  $(JUCE_OBJDIR)/StretcherProcess_5bac2397.o \
   $(JUCE_OBJDIR)/DataModel_e101b2.o \
   $(JUCE_OBJDIR)/MPESettingsDataModel_aeb1f3d1.o \
   $(JUCE_OBJDIR)/SamplerAudioProcessor_298eea40.o \
@@ -112,7 +89,6 @@ OBJECTS_DYNAMIC_LIBRARY := \
   $(JUCE_OBJDIR)/custom_pybind_wrappers_ac32b5b4.o \
   $(JUCE_OBJDIR)/RenderEngine_d1c4d401.o \
   $(JUCE_OBJDIR)/source_704c2604.o \
-  $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
   $(JUCE_OBJDIR)/include_juce_audio_basics_8a4e984a.o \
   $(JUCE_OBJDIR)/include_juce_audio_devices_63111d02.o \
   $(JUCE_OBJDIR)/include_juce_audio_formats_15f82001.o \
@@ -142,121 +118,6 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) : $(OBJECTS_DYNAMIC_LIBRARY) $(RES
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) $(OBJECTS_DYNAMIC_LIBRARY) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_DYNAMIC_LIBRARY) $(RESOURCES) $(TARGET_ARCH)
-
-$(JUCE_OBJDIR)/CompoundAudioCurve_16236773.o: ../../thirdparty/rubberband/src/audiocurves/CompoundAudioCurve.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling CompoundAudioCurve.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/ConstantAudioCurve_8e0f19ac.o: ../../thirdparty/rubberband/src/audiocurves/ConstantAudioCurve.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling ConstantAudioCurve.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/HighFrequencyAudioCurve_5ffd79ae.o: ../../thirdparty/rubberband/src/audiocurves/HighFrequencyAudioCurve.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling HighFrequencyAudioCurve.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/PercussiveAudioCurve_32850851.o: ../../thirdparty/rubberband/src/audiocurves/PercussiveAudioCurve.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling PercussiveAudioCurve.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/SilentAudioCurve_9b84f71d.o: ../../thirdparty/rubberband/src/audiocurves/SilentAudioCurve.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling SilentAudioCurve.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/SpectralDifferenceAudioCurve_f0b7c889.o: ../../thirdparty/rubberband/src/audiocurves/SpectralDifferenceAudioCurve.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling SpectralDifferenceAudioCurve.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/Profiler_f8fb8f37.o: ../../thirdparty/rubberband/src/base/Profiler.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling Profiler.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/AudioCurveCalculator_d95b8b23.o: ../../thirdparty/rubberband/src/dsp/AudioCurveCalculator.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling AudioCurveCalculator.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/FFT_b52ef4b6.o: ../../thirdparty/rubberband/src/dsp/FFT.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling FFT.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/Resampler_1f9a5937.o: ../../thirdparty/rubberband/src/dsp/Resampler.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling Resampler.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/kiss_fft_bedea746.o: ../../thirdparty/rubberband/src/kissfft/kiss_fft.c
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling kiss_fft.c"
-	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/kiss_fftr_1cf73ab6.o: ../../thirdparty/rubberband/src/kissfft/kiss_fftr.c
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling kiss_fftr.c"
-	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/resample_b2fa08ab.o: ../../thirdparty/rubberband/src/speex/resample.c
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling resample.c"
-	$(V_AT)$(CC) $(JUCE_CFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/Allocators_560b78.o: ../../thirdparty/rubberband/src/system/Allocators.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling Allocators.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/sysutils_a5ab5e54.o: ../../thirdparty/rubberband/src/system/sysutils.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling sysutils.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/Thread_7ea7763a.o: ../../thirdparty/rubberband/src/system/Thread.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling Thread.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/VectorOpsComplex_448d5e31.o: ../../thirdparty/rubberband/src/system/VectorOpsComplex.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling VectorOpsComplex.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/rubberband-c_1ad4cbd5.o: ../../thirdparty/rubberband/src/rubberband-c.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling rubberband-c.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/RubberBandStretcher_a9e723d.o: ../../thirdparty/rubberband/src/RubberBandStretcher.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling RubberBandStretcher.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/StretchCalculator_e40c5ff7.o: ../../thirdparty/rubberband/src/StretchCalculator.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling StretchCalculator.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/StretcherChannelData_dda6dbf5.o: ../../thirdparty/rubberband/src/StretcherChannelData.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling StretcherChannelData.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/StretcherImpl_6118cfc2.o: ../../thirdparty/rubberband/src/StretcherImpl.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling StretcherImpl.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/StretcherProcess_5bac2397.o: ../../thirdparty/rubberband/src/StretcherProcess.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling StretcherProcess.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/DataModel_e101b2.o: ../../Source/Sampler/Source/DataModels/DataModel.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
@@ -321,11 +182,6 @@ $(JUCE_OBJDIR)/RenderEngine_d1c4d401.o: ../../Source/RenderEngine.cpp
 $(JUCE_OBJDIR)/source_704c2604.o: ../../Source/source.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling source.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling BinaryData.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_audio_basics_8a4e984a.o: ../../JuceLibraryCode/include_juce_audio_basics.cpp
