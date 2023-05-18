@@ -16,6 +16,7 @@
       getUserData
       isProj
       isRec
+      isSigAssertBounds
       isSigAttach
       isSigBinOp
       isSigButton
@@ -50,7 +51,6 @@
       isSigSoundfileBuffer
       isSigSoundfileLength
       isSigSoundfileRate
-      isSigTable
       isSigVBargraph
       isSigVSlider
       isSigWRTbl
@@ -103,6 +103,7 @@
       sigReadOnlyTable
       sigReal
       sigRecursion
+      sigRecursionN
       sigRem
       sigRemainder
       sigRint
@@ -110,6 +111,7 @@
       sigSelect2
       sigSelect3
       sigSelf
+      sigSelfN
       sigSin
       sigSoundfile
       sigSqrt
@@ -121,6 +123,8 @@
       sigWriteReadTable
       sigXOR
       signalsToSource
+      simplifyToNormalForm
+      simplifyToNormalForm2
    
    
 

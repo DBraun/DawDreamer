@@ -90,6 +90,7 @@
       boxWriteReadTable
       boxXOR
       getBoxType
+      getDefNameProperty
       isBoxAbstr
       isBoxAccess
       isBoxAppl
@@ -135,9 +136,11 @@
       isBoxSplit
       isBoxSymbolic
       isBoxTGroup
+      isBoxVBarGraph
       isBoxVGroup
       isBoxVSlider
       isBoxWaveform
+      isBoxWire
       isBoxWithLocalDef
    
    
