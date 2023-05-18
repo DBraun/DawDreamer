@@ -1191,11 +1191,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           [](BoxWrapper &b) {
             const char *str = nullptr;
             bool res = isBoxIdent(b, &str);
-            std::string s;
-            if (res) {
-              s = str;
-              delete[] str;
-            }
+            std::string s = std::string(res ? str : "");
             return py::make_tuple<py::return_value_policy::take_ownership>(res, s);
           },
           arg("box"), returnPolicy)

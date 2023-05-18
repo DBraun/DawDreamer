@@ -134,16 +134,16 @@
                xcodeValidArchs="arm64,x86_64">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug-x86_64" isDebug="1" optimisation="1" targetName="dawdreamer.so"
-                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
-                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug/lib&#10;../../thirdparty/libsamplerate/build_debug/src"
+                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
+                       libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug/lib&#10;../../thirdparty/libsamplerate/build_debug/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
         <CONFIGURATION name="Release-x86_64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
-                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
-                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
+                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
+                       libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
         <CONFIGURATION name="Release-arm64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
-                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);&#10;/usr/local/include"
-                       libraryPath="$(pythonLocation)/lib&#10;/usr/local/lib&#10;../../thirdparty/libfaust/darwin-arm64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
+                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
+                       libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-arm64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
