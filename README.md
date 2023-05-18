@@ -107,7 +107,7 @@ EFFECT_PATH = "path/to/effect.dll"
 engine = daw.RenderEngine(SAMPLE_RATE, 512)
 engine.set_bpm(120.)
 
-synth = engine.plugin_path("synth", PLUGIN_PATH)
+synth = engine.make_plugin_processor("synth", PLUGIN_PATH)
 print('inputs:', synth.get_num_input_channels())
 print('inputs:', synth.get_num_output_channels())
 print(synth.get_parameters_description())
@@ -117,7 +117,7 @@ synth.set_parameter(7, .1234)
 # (MIDI note, velocity, start sec, duration sec)
 synth.add_midi_note(60, 100, 0.0, 2.)
 
-effect = engine.plugin_path("synth", EFFECT_PATH)
+effect = engine.make_plugin_processor("effect", EFFECT_PATH)
 
 engine.load_graph([
   (synth, []),
