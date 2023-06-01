@@ -12,7 +12,7 @@ import warnings
 from scipy import signal
 import numpy as np
 
-from dawdreamer.faust import createLibContext, destroyLibContext
+from dawdreamer.faust import createLibContext, destroyLibContext, FaustContext
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
@@ -27,10 +27,9 @@ def with_lib_context(func):
     """
 
     def wrapped(*args, **kwargs):
-        createLibContext()
-        result = func(*args, **kwargs)
-        destroyLibContext()
-        return result
+        with FaustContext():
+            result = func(*args, **kwargs)
+            return result
 
     return wrapped
 
@@ -518,6 +517,34 @@ def test20():
 
     f.compile_box(box)
     my_render(engine, f)
+
+
+# todo: this isn't a complete copy from the faust repo
+@with_lib_context
+def test23():
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    sl1 = boxHSlider("v:Oscillator/Freq1", boxReal(300), boxReal(100), boxReal(2000), boxReal(0.01))
+    sl2 = boxHSlider("v:Oscillator/Freq2", boxReal(300), boxReal(100), boxReal(2000), boxReal(0.01))
+    box = boxPar(osc(sl1), osc(sl2))
+    print('sl1.extract_name()', sl1.extract_name())
+    print('box.extract_name()', box.extract_name())
+    print('sl1.to_str()', sl1.to_str())
+    print('box.to_str()', box.to_str())
+
+    slider = isBoxHSlider(sl1)
+    if slider[0]:
+        label, init, theMin, theMax, step = slider[1:]
+        print('label.extract_name()', label.extract_name())
+        print('label.to_str()', label.to_str())
+
+    print(getDefNameProperty(sl1))
+    print(getDefNameProperty(box))
+    print(isBoxAbstr(sl1))
+    print(isBoxSlot(sl1))
+    print(isBoxIdent(sl1))
 
 
 @with_lib_context

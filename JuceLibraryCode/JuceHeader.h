@@ -29,7 +29,6 @@
 #include <juce_opengl/juce_opengl.h>
 #include <juce_video/juce_video.h>
 
-#include "BinaryData.h"
 
 #if defined (JUCE_PROJUCER_VERSION) && JUCE_PROJUCER_VERSION < JUCE_VERSION
  /** If you've hit this error then the version of the Projucer that was used to generate this project is
@@ -46,7 +45,7 @@ namespace ProjectInfo
 {
     const char* const  projectName    = "DawDreamer";
     const char* const  companyName    = "";
-    const char* const  versionString  = "0.6.16";
-    const int          versionNumber  = 0x610;
+    const char* const  versionString  = "0.7.1";
+    const int          versionNumber  = 0x701;
 }
 #endif

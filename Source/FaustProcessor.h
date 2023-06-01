@@ -5,21 +5,24 @@
 #include <iostream>
 #include <map>
 
-#include "TMutex.h"
-#include "faust/dsp/interpreter-dsp.h"
-#include "faust/dsp/libfaust-box.h"
-#include "faust/dsp/libfaust-signal.h"
-#include "faust/dsp/llvm-dsp.h"
-#include "faust/dsp/poly-interpreter-dsp.h"
-#include "faust/dsp/poly-llvm-dsp.h"
-#include "faust/export.h"
-#include "faust/gui/APIUI.h"
-#include "faust/gui/MidiUI.h"
-#include "faust/gui/SoundUI.h"
-#include "faust/midi/rt-midi.h"
-#include "faust/misc.h"
-#include "generator/libfaust.h"
-#include "tree.hh"
+#include <faust/compiler/utils/TMutex.h>
+#include <faust/dsp/interpreter-dsp.h>
+#include <faust/dsp/interpreter-dsp.h>
+#include <faust/dsp/libfaust-box.h>
+#include <faust/dsp/libfaust-signal.h>
+#include <faust/dsp/llvm-dsp.h>
+#include <faust/dsp/poly-interpreter-dsp.h>
+#include <faust/dsp/poly-llvm-dsp.h>
+#include <faust/export.h>
+#include <faust/gui/APIUI.h>
+#include <faust/gui/MidiUI.h>
+#include <faust/gui/SoundUI.h>
+#include <faust/midi/rt-midi.h>
+#include <faust/misc.h>
+#include <faust/compiler/generator/libfaust.h>
+
+// todo: don't include a .hh file
+#include <faust/compiler/tlib/tree.hh>
 
 std::string getPathToFaustLibraries();
 std::string getPathToArchitectureFiles();
@@ -39,7 +42,7 @@ class MySoundUI : public SoundUI {
     }
 
     // Get the soundfile.
-    *sf_zone = fSoundfileMap[saved_url_real];
+    *sf_zone = fSoundfileMap[saved_url_real].get();
   }
 
   virtual void addSoundfileFromBuffers(const char *label,
@@ -100,8 +103,7 @@ class MySoundUI : public SoundUI {
       // Share the same buffers for all other channels so that we have max_chan
       // channels available
       soundfile->shareBuffers(numChannels, MAX_CHAN);
-
-      fSoundfileMap[saved_url_real] = soundfile;
+      fSoundfileMap[saved_url_real] = std::shared_ptr<Soundfile>(soundfile);
     }
   }
 };

@@ -5,7 +5,7 @@
 #include "AbletonClipInfo.h"
 #include "ProcessorBase.h"
 #include "custom_pybind_wrappers.h"
-#include "rubberband/RubberBandStretcher.h"
+#include <rubberband/rubberband/RubberBandStretcher.h>
 
 class PlaybackWarpProcessor : public ProcessorBase {
  public:

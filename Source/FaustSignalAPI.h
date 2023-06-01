@@ -1,5 +1,7 @@
 #include "FaustProcessor.h"
 
+#ifdef BUILD_DAWDREAMER_FAUST
+
 #define TREE2STR(res, t) res ? tree2str(t->branch(0)) : ""
 
 inline void create_bindings_for_faust_signal(py::module &faust_module) {
@@ -35,6 +37,28 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
             return branches;
           },
           returnPolicy)
+      .def_property_readonly(
+          "xtended_name",
+          [](const SigWrapper &s1) { return xtendedName((SigWrapper &)s1); },
+          "Return the name of the xtended signal.")
+      .def_property_readonly(
+          "ffarity",
+          [](const SigWrapper &s1) { return ffarity((SigWrapper &)s1); },
+          "Return the arity of a foreign function.")
+      .def_property_readonly(
+          "xtended_arity",
+          [](const SigWrapper &s1) { return xtendedArity((SigWrapper &)s1); },
+          "Return the arity of the xtended signal.")
+      //.def(
+      //    "print_str",
+      //    [](const SigWrapper &s1, const bool shared, const int max_size) {
+      //      return printSignal((SigWrapper &)s1, shared, max_size);
+      //    },
+      //    arg("shared"), arg("max_size"),
+      //    "Return the signal as a string. The argument `shared` is whether "
+      //    "identical sub signals are printed as identifiers. The argument "
+      //    "`max_size` is the maximum number of characters to be printed "
+      //    "(possibly needed for big expressions in non shared mode).")
       .def("__add__",
            [](const SigWrapper &s1, SigWrapper &s2) {
              return SigWrapper(sigAdd((SigWrapper &)s1, s2));
@@ -119,6 +143,21 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
              return SigWrapper(sigDiv((SigWrapper &)s1, sigInt(other)));
            })
 
+      .def("__floordiv__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigFloor(sigDiv((SigWrapper &)s1, s2)));
+           })
+      .def("__floordiv__",
+           [](const SigWrapper &s1, float other) {
+             return SigWrapper(
+                 sigFloor(sigDiv((SigWrapper &)s1, sigReal(other))));
+           })
+      .def("__floordiv__",
+           [](const SigWrapper &s1, int other) {
+             return SigWrapper(
+                 sigFloor(sigDiv((SigWrapper &)s1, sigInt(other))));
+           })
+
       .def("__mod__",
            [](const SigWrapper &s1, SigWrapper &s2) {
              return SigWrapper(sigFmod((SigWrapper &)s1, s2));
@@ -127,8 +166,78 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
            [](const SigWrapper &s1, float other) {
              return SigWrapper(sigFmod((SigWrapper &)s1, sigReal(other)));
            })
-      .def("__mod__", [](const SigWrapper &s1, int other) {
-        return SigWrapper(sigFmod((SigWrapper &)s1, sigInt(other)));
+      .def("__lt__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigLT((SigWrapper &)s1, s2));
+           })
+      .def("__le__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigLE((SigWrapper &)s1, s2));
+           })
+      .def("__gt__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigGT((SigWrapper &)s1, s2));
+           })
+      .def("__ge__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigGE((SigWrapper &)s1, s2));
+           })
+      .def("__eq__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigEQ((SigWrapper &)s1, s2));
+           })
+      .def("__ne__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigNE((SigWrapper &)s1, s2));
+           })
+      .def("__pow__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigPow((SigWrapper &)s1, s2));
+           })
+      .def(
+          "__lshift__",
+          [](const SigWrapper &s1, SigWrapper &s2) {
+            return SigWrapper(sigLeftShift((SigWrapper &)s1, s2));
+          })
+      .def("__rshift__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(
+                 sigARightShift((SigWrapper &)s1, s2));
+           })
+      .def("__and__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigAND((SigWrapper &)s1, s2));
+           })
+      .def("__xor__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigXOR((SigWrapper &)s1, s2));
+           })
+      .def("__or__",
+           [](const SigWrapper &s1, SigWrapper &s2) {
+             return SigWrapper(sigOR((SigWrapper &)s1, s2));
+           })
+      .def("__neg__",
+           [](const SigWrapper &s1) {
+             return SigWrapper(sigSub(sigReal(0), (SigWrapper &)s1));
+           })
+      .def("__abs__",
+           [](const SigWrapper &s1) {
+             return SigWrapper(sigAbs((SigWrapper &)s1));
+           })
+      .def("__int__",
+           [](const SigWrapper &s1) {
+             return SigWrapper(sigIntCast((SigWrapper &)s1));
+           })
+      .def("__float__",
+           [](const SigWrapper &s1) {
+             return SigWrapper(sigFloatCast((SigWrapper &)s1));
+           })
+      .def("__floor__",
+           [](const SigWrapper &s1) {
+             return SigWrapper(sigFloor((SigWrapper &)s1));
+           })
+      .def("__ceil__", [](const SigWrapper &s1) {
+        return SigWrapper(sigCeil((SigWrapper &)s1));
       });
 
   // SIGNAL API
@@ -442,9 +551,34 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
 
       .def(
           "sigSelf", []() { return SigWrapper(sigSelf()); }, returnPolicy)
+
+      .def(
+          "sigSelfN", [](const int id) { return SigWrapper(sigSelfN(id)); },
+          arg("id"),
+          "`id` is the recursive signal index (starting from 0, up to the "
+          "number of outputs signals in the recursive block)",
+          returnPolicy)
+
       .def(
           "sigRecursion",
           [](SigWrapper &sig1) { return SigWrapper(sigRecursion(sig1)); },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "sigRecursionN",
+          [](const std::vector<SigWrapper> &signals) {
+            tvec rf;
+            for (SigWrapper s : signals) {
+              rf.push_back(s);
+            }
+
+            tvec b = sigRecursionN(rf);
+            std::vector<SigWrapper> out;
+            for (Signal s : b) {
+              out.push_back(s);
+            }
+            return out;
+          },
           arg("sig"), returnPolicy)
 
       .def(
@@ -508,6 +642,28 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
           arg("sig1"), arg("sig2"), returnPolicy)
 
       .def(
+          "simplifyToNormalForm",
+          [](SigWrapper &s1) { return SigWrapper(simplifyToNormalForm(s1)); },
+          arg("sig"), returnPolicy)
+
+      .def(
+          "simplifyToNormalForm2",
+          [](std::vector<SigWrapper> &wrappers) {
+            tvec siglist;
+            for (SigWrapper s : wrappers) {
+              siglist.push_back(s);
+            }
+            tvec b = simplifyToNormalForm2(siglist);
+            std::vector<SigWrapper> out;
+            for (Signal s : b) {
+              out.push_back(s);
+            }
+
+            return out;
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
           "sigSampleRate",
           []() {
             return SigWrapper(sigMin(
@@ -540,7 +696,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
       .def(
           "isSigReal",
           [](SigWrapper &s1) {
-            double r;
+            double r = 0;
             bool res = isSigReal(s1, &r);
             return py::make_tuple<py::return_value_policy::take_ownership>(res,
                                                                            r);
@@ -554,7 +710,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
       .def(
           "isSigInput",
           [](SigWrapper &s1) {
-            int i;
+            int i = 0;
             bool res = isSigInput(s1, &i);
             return py::make_tuple<py::return_value_policy::take_ownership>(res,
                                                                            i);
@@ -564,7 +720,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
       .def(
           "isSigOutput",
           [](SigWrapper &s1) {
-            int i;
+            int i = 0;
             Signal s2;
             bool res = isSigOutput(s1, &i, s2);
             return py::make_tuple<py::return_value_policy::take_ownership>(
@@ -647,16 +803,6 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
           arg("sig"), returnPolicy)
 
       .def(
-          "isSigTable",
-          [](SigWrapper &t) {
-            Signal id, n, sig;
-            bool res = isSigTable(t, id, n, sig);
-            return py::make_tuple<py::return_value_policy::take_ownership>(
-                res, SigWrapper(id), SigWrapper(n), SigWrapper(sig));
-          },
-          arg("sig"), returnPolicy)
-
-      .def(
           "isSigDocConstantTbl",
           [](SigWrapper &s) {
             Signal n, init;
@@ -698,9 +844,19 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
           arg("sig"), returnPolicy)
 
       .def(
+          "isSigAssertBounds",
+          [](SigWrapper &s) {
+            Signal s1, s2, s3;
+            bool res = isSigAssertBounds(s, s1, s2, s3);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, SigWrapper(s1), SigWrapper(s2), SigWrapper(s3));
+          },
+          arg("sig"), returnPolicy)
+
+      .def(
           "isProj",
           [](SigWrapper &s) {
-            int i;
+            int i = 0;
             Signal rgroup;
             bool res = isProj(s.ptr, &i, rgroup);
 
@@ -723,7 +879,7 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
           "isSigBinOp",
           [](SigWrapper &s) {
             Signal x, y;
-            int i;
+            int i = 0;
             bool res = isSigBinOp(s, &i, x, y);
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, i, SigWrapper(x), SigWrapper(y));
@@ -992,3 +1148,5 @@ inline void create_bindings_for_faust_signal(py::module &faust_module) {
 
       ;
 }
+
+#endif

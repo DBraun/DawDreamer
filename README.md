@@ -33,12 +33,24 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * MIDI file export in absolute time
 * Rendering and saving multiple processors simultaneously
 * Support for the [Faust Box](https://github.com/DBraun/DawDreamer/tree/main/examples/Box_API) and Signal APIs
-* Transpiling Faust code to [JAX/Flax](https://github.com/DBraun/DawDreamer/tree/main/examples/Faust_to_JAX) and other target languages
+* Transpiling Faust code to [JAX/Flax](https://github.com/DBraun/DawDreamer/tree/main/examples/Faust_to_JAX) and other target languages (C++, Rust, Wasm, etc.)
+* Machine learning experiments with [QDax](https://github.com/DBraun/DawDreamer/tree/main/examples/Faust_to_QDax)
+* [Multiprocessing support](https://github.com/DBraun/DawDreamer/tree/main/examples/multiprocessing_plugins)
 * Full support on macOS, Windows, Linux, Google Colab, and Ubuntu Dockerfile
 
 DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Installation
+
+macOS requirements:
+* 64-bit Python 3.9 or higher
+* macOS 11.0 or higher
+
+Windows requirements:
+* 64-bit Python 3.7 or higher
+
+Linux requirements:
+* 64-bit Python 3.7 or higher
 
 Install with [PyPI](https://pypi.org/project/dawdreamer/):
 
@@ -82,6 +94,42 @@ wavfile.write('sine_demo.wav', SAMPLE_RATE, audio.transpose())
 faust_processor.set_parameter("/MySine/freq", 880.)  # 880 Hz
 engine.render(4., beats=True)
 # and so on...
+```
+
+Next, let's make a graph with a VST instrument and effect. This graph will be simple, but you can make more complicated ones.
+
+```python
+import dawdreamer as daw
+from scipy.io import wavfile
+SAMPLE_RATE = 44100
+INSTRUMENT_PATH = "path/to/instrument.dll"
+EFFECT_PATH = "path/to/effect.dll"
+
+engine = daw.RenderEngine(SAMPLE_RATE, 512)
+engine.set_bpm(120.)
+
+synth = engine.make_plugin_processor("synth", PLUGIN_PATH)
+print('inputs:', synth.get_num_input_channels())
+print('inputs:', synth.get_num_output_channels())
+print(synth.get_parameters_description())
+
+synth.set_parameter(7, .1234)
+
+# (MIDI note, velocity, start sec, duration sec)
+synth.add_midi_note(60, 100, 0.0, 2.)
+
+effect = engine.make_plugin_processor("effect", EFFECT_PATH)
+
+engine.load_graph([
+  (synth, []),
+  (effect, [synth.get_name()])  # effect needs 2 channels, and "synth" provides those 2.
+  ])
+
+engine.render(4.)  # render 4 seconds.
+audio = engine.get_audio()
+wavfile.write('synth_demo.wav', SAMPLE_RATE, audio.transpose())
+synth.clear_midi()
+# add midi again, render again, and so on...
 ```
 
 Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki), [examples](https://github.com/DBraun/DawDreamer/tree/main/examples/), [API documentation](https://dirt.design/DawDreamer), and [tests](https://github.com/DBraun/DawDreamer/tree/main/tests). 

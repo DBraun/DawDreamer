@@ -182,7 +182,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
       "The Playback Warp Processor can play audio data while time-stretching and pitch-shifting it thanks to the Rubberband library \
 (https://github.com/breakfastquay/rubberband). This processor can load Ableton Live \".asd\" files to do beat-matching.";
 
-#include "rubberband/RubberBandStretcher.h"
+#include "rubberband/rubberband/RubberBandStretcher.h"
   using namespace RubberBand;
 
   py::enum_<RubberBandStretcher::Option>(playbackWarpProcessor, "option",

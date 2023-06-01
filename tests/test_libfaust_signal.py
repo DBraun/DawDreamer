@@ -130,6 +130,7 @@ def test6():
     my_render(engine, f)
 
 
+# todo: copy from signal-tester.cpp
 @with_lib_context
 def test_equivalent1():
 
@@ -154,6 +155,24 @@ def test_equivalent2():
     in1 = sigInput(0)
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
     signals.append(sigDelay(sigAdd(in1, sigReal(0.5)), sigReal(500)))
+
+    f.compile_signals(signals)
+    my_render(engine, f)
+
+
+@with_lib_context
+def test_normalform():
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    signals = []
+    signals.append(sigAdd(sigAdd(sigDelay(sigDelay(sigInput(0), sigReal(500)), sigReal(200)), sigReal(0.5)), sigReal(3)))
+    signals.append(sigMul(sigMul(sigDelay(sigInput(0), sigInt(500)), sigReal(0.5)), sigReal(4)))
+
+    # Compute normal form
+    nf = simplifyToNormalForm(signals[0])
+    nf2 = simplifyToNormalForm2(signals)
 
     f.compile_signals(signals)
     my_render(engine, f)
@@ -214,6 +233,25 @@ def test10():
     in1 = sigInput(0)
 
     signals.append(sigRecursion(sigAdd(sigSelf(), in1)))
+
+    f.compile_signals(signals)
+    my_render(engine, f)
+
+
+# Alternate way of writing
+@with_lib_context
+def test10bis():
+    """
+    process = + ~ _;
+    """
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    in1 = sigInput(0)
+    ins = []
+    ins.append(sigAdd(sigSelfN(0), in1))
+    signals = sigRecursionN(ins)
 
     f.compile_signals(signals)
     my_render(engine, f)

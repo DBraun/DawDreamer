@@ -1,6 +1,25 @@
 #include "PlaybackWarpProcessor.h"
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 
+#include <rubberband/src/RubberBandStretcher.cpp>
+#include <rubberband/src/common/StretchCalculator.cpp>
+#include <rubberband/src/common/Profiler.cpp>
+#include <rubberband/src/common/Resampler.cpp>
+#include <rubberband/src/common/FFT.cpp>
+#include <rubberband/src/common/Log.cpp>
+#include <rubberband/src/common/mathmisc.cpp>
+#include <rubberband/src/common/sysutils.cpp>
+#include <rubberband/src/common/Thread.cpp>
+#include <rubberband/src/faster/AudioCurveCalculator.cpp>
+#include <rubberband/src/faster/CompoundAudioCurve.cpp>
+#include <rubberband/src/faster/HighFrequencyAudioCurve.cpp>
+#include <rubberband/src/faster/R2Stretcher.cpp>
+#include <rubberband/src/faster/SilentAudioCurve.cpp>
+#include <rubberband/src/faster/PercussiveAudioCurve.cpp>
+#include <rubberband/src/faster/StretcherChannelData.cpp>
+#include <rubberband/src/faster/StretcherProcess.cpp>
+#include <rubberband/src/finer/R3Stretcher.cpp>
+
 PlaybackWarpProcessor::PlaybackWarpProcessor(
     std::string newUniqueName, std::vector<std::vector<float>> inputData,
     double sr, double data_sr)
