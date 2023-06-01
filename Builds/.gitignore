@@ -3,3 +3,4 @@ VisualStudio*/x64
 LinuxMakefile/*
 MacOSX/build/*
 MacOSX/RecentFiles*
+PythonApplication*/*.pyproj

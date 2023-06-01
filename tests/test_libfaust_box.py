@@ -12,7 +12,7 @@ import warnings
 from scipy import signal
 import numpy as np
 
-from dawdreamer.faust import createLibContext, destroyLibContext
+from dawdreamer.faust import createLibContext, destroyLibContext, FaustContext
 
 BUFFER_SIZE = 1
 SAMPLE_RATE = 44100
@@ -27,10 +27,9 @@ def with_lib_context(func):
     """
 
     def wrapped(*args, **kwargs):
-        createLibContext()
-        result = func(*args, **kwargs)
-        destroyLibContext()
-        return result
+        with FaustContext():
+            result = func(*args, **kwargs)
+            return result
 
     return wrapped
 

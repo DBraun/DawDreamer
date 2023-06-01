@@ -34,13 +34,13 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
 	N = int(duration * sr) # Number of samples 
 	return np.sin(np.pi*2.*freq*np.arange(N)/sr)
 
-def load_audio_file(file_path: str, duration=None):
+def load_audio_file(file_path: str, duration=None, offset=0):
 
 	file_path = str(file_path)
 
 	if USE_LIBROSA:
 
-		sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE)
+		sig, rate = librosa.load(file_path, duration=duration, mono=False, sr=SAMPLE_RATE, offset=offset)
 		assert(rate == SAMPLE_RATE)
 	
 	else:
