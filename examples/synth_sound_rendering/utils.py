@@ -10,6 +10,92 @@ import difflib
 import re
 import math
 
+tal_uno_to_dawdreamer_mapping = {
+    "@path": None,  # No suitable match
+    "@programname": None,  # No suitable match
+    "@category": None,  # No suitable match
+    "@modulation": "modulation",
+    "@dcolfovalue": "dco lfo value",
+    "@dcopwmvalue": "dco pwm value",
+    "@dcopwmmode": "dco pwm mode",
+    "@dcopulseenabled": "dco pulse enabled",
+    "@dcosawenabled": "dco saw enabled",
+    "@dcosuboscenabled": "dco sub osc enabled",
+    "@dcosuboscvolume": "dco sub osc volume",
+    "@dconoisevolume": "dco noise volume",
+    "@hpfvalue": "dco hp filter",
+    "@filtercutoff": "filter cutoff",
+    "@filterresonance": "filter resonance",
+    "@filterenvelopemode": "filter env mode",
+    "@filterenvelopevalue": "filter env",
+    "@filtermodulationvalue": "filter modulation",
+    "@filterkeyboardvalue": "filter keyboard",
+    "@volume": "master volume",
+    "@masterfinetune": "master fine tune",
+    "@octavetranspose": "master octave transpose",
+    "@vcamode": "vca mode",
+    "@adsrattack": "attack",
+    "@adsrdecay": "decay",
+    "@adsrsustain": "sustain",
+    "@adsrrelease": "release",
+    "@lforate": "lfo rate",
+    "@lfodelaytime": "lfo delay",
+    "@lfotriggermode": "lfo trigger mode",
+    "@lfomanualtriggerenabled": "lfo trigger enabled",
+    "@lfomanualtriggeractive": "lfo trigger active",
+    "@lfowaveform": "lfo waveform",
+    "@chorus1enable": "chorus 1",
+    "@chorus2enable": "chorus 2",
+    "@arpenabled": "arp enabled",
+    "@arpsyncenabled": "arp sync enabled",
+    "@arpmode": "arp mode",
+    "@arprange": "arp range",
+    "@arprate": "arp rate",
+    "@arpnotloadsettings": "arp locked",
+    "@controlvelocityvolume": "control velocity volume",
+    "@controlvelocityenvelope": "control velocity envelope",
+    "@controlbenderfilter": "control pitch bend filter",
+    "@controlbenderdco": "control pitch bend dco",
+    "@portamentomode": "portamento mode",
+    "@portamentointensity": "portamento intensity",
+    "@midilearn": "midi learn",
+    "@panic": "panic",
+    "@voicehold": "voice hold",
+    "@miditriggerarp16sync": "trigger arp by midi channel 16",
+    "@midiclocksync": "clock sync",
+    "@hostsync": "host sync",
+    "@maxpoly": "max voices",
+    "@keytranspose": "keytranspose",
+    "@arpsyncmode": None,  # No suitable match
+    "@arpspecialmode": "special mode",
+    "@lfoinverted": "lfo inverted",
+    "@portamentopoly": "portamento poly",
+    "@engineoff": "sound engine off",
+    "@pitchwheel": "pitch wheel",
+    "@modulationwheel": "modulation wheel",
+    "@midiclear": "midi clear",
+    "@midilock": "midi lock",
+    "@mpeEnabled": "MPE enabled",
+    "@portamentotimeenabled": "portamento time",
+    "@reverbDryWet": "FX Reverb Dry / Wet",
+    "@reverbSize": "FX Reverb Size",
+    "@reverbDelay": "FX Reverb Delay",
+    "@reverbTone": "FX Reverb Tone",
+    "@delayDryWet": "FX Delay Dry / Wet",
+    "@delayTime": "FX Delay Time",
+    "@delaySync": "FX Delay Sync",
+    "@delaySpread": "FX Delay Spread",
+    "@delayTone": "FX Delay Tone",
+    "@delayFeedback": "FX Delay Feedback",
+    "@mtsEnabled": "MTS Microtuning Active",
+    "@unisonovoices": "Unisono Voices",
+    "@unisonodetune": "Unisono Detune",
+    "@unsionospread": "Unisono Spread",
+    "@voicemode": "Voice Mode",
+    "tuningtable": None,  # No suitable match
+    "voicetunings": None,  # No suitable match
+}
+
 def piano_note_to_midi_note(piano_note):
     """
     Convert a string representation of a piano note to its corresponding MIDI note number.
@@ -78,7 +164,7 @@ def get_xml_preset_settings(preset_path: str):
 
     return preset_settings
 
-def make_json_parameter_mapping(plugin, preset_path:str, verbose=True):
+def make_json_parameter_mapping(plugin, preset_path:str, json_preset_folder=f'TAL-UNO_json_presets', verbose=True):
     """
     Read a preset file in XML format, apply the settings to the plugin, and create a JSON file
     that maps the preset parameters to the plugin parameters.
@@ -92,7 +178,6 @@ def make_json_parameter_mapping(plugin, preset_path:str, verbose=True):
         str: The name of the JSON file containing the parameter mapping.
     """
     # create the json preset folder if it does not already exist
-    json_preset_folder = f'TAL-UNO_json_presets'
     if not os.path.exists(json_preset_folder):
         os.mkdir(json_preset_folder)
 
@@ -122,49 +207,19 @@ def make_json_parameter_mapping(plugin, preset_path:str, verbose=True):
         # Iterate over each JSON key
         for key in json_keys:
             # specify the exceptions to map manually
-            exceptions = {
-                'volume':'master volume', 
-                'octavetranspose':'master octave transpose',
-                'adsrdecay':'decay',
-                'adsrsustain':'sustain',
-                'adsrrelease':'release',
-                'chorus1enable':'chorus 1',
-                'chorus2enable':'chorus 2',
-                'midiclocksync':'clock sync',
-                'miditriggerarp16sync':'trigger arp by midi channel 16'
-                }
+            try:
+                # get closest_match from exceptions list
+                closest_match = tal_uno_to_dawdreamer_mapping[key]
 
-            if key.split('@')[-1] not in exceptions: # find the closest match automatically           
-                # Find the closest match in the plugin parameter name list using max() and difflib.SequenceMatcher
-                closest_match = max(param_name_to_index.keys(), key=lambda param_name: difflib.SequenceMatcher(None, key, param_name).ratio())
-
-                if key.split('@')[-1][0] == closest_match[0]: # only continue if the first letters are the same and specified exceptions
-                    if verbose:
-                        print(f'match found for {key}; closest match: {closest_match}')
+                if closest_match is not None:
                     # Extract the value of the JSON key from the JSON string using regex
                     match_value = re.search(r'"{}":\s*"([\d.]+)"'.format(key), preset_settings)
                     if match_value:
                         param_value = float(match_value.group(1))
                         index = param_name_to_index[closest_match]
                         parameter_mapping[key] = {'match': closest_match, 'value': param_value, 'index': index}
-                else:
-                    if verbose:
-                        print(f'no match found for {key}; closest match: {closest_match}')
-            else:
-                # map manually
-                key_temp = key.split('@')[-1]
-
-                # get closest_match from exceptions list
-                closest_match = exceptions[key_temp]
-
-                # Extract the value of the JSON key from the JSON string using regex
-                match_value = re.search(r'"{}":\s*"([\d.]+)"'.format(key), preset_settings)
-                if match_value:
-                    param_value = float(match_value.group(1))
-                    index = param_name_to_index[closest_match]
-
-                parameter_mapping[key] = {'match': closest_match, 'value': param_value, 'index': index}
-        
+            except KeyError:
+                print(f'Key {key} was not found in mapping dictionary. Continuing...')
         
         with open(output_name, 'w') as outfile:
             json.dump(parameter_mapping, outfile)  
