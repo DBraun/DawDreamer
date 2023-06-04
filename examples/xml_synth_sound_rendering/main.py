@@ -22,7 +22,6 @@ import os
 import traceback
 from collections import namedtuple
 from glob import glob
-from os.path import basename
 from os import makedirs
 from pathlib import Path
 
@@ -32,8 +31,8 @@ import numpy as np
 from scipy.io import wavfile
 from tqdm import tqdm
 
-# import custom utils for helper functions (I can put these functions into this file if that would be preferred)
-from utils import make_json_parameter_mapping, load_xml_preset 
+# import custom utils for helper functions
+from utils import make_json_parameter_mapping, load_xml_preset
 
 Item = namedtuple("Item", "preset_path")
 
@@ -69,16 +68,17 @@ class TAL_UNO_Worker:
 
     def process_item(self, item: Item):
         preset_path = item.preset_path
-        json_mapping = make_json_parameter_mapping(self.synth, preset_path, os.path.join(os.path.dirname(__file__), 'parameter_mappings'))
+        json_mapping = make_json_parameter_mapping(self.synth, preset_path,
+            os.path.join(os.path.dirname(__file__), 'parameter_mappings'))
         self.synth = load_xml_preset(self.synth, json_mapping)
-        bname = basename(preset_path)
+        basename = os.path.basename(preset_path)
 
         for pitch in range(self.pitch_low, self.pitch_high+1):
             self.synth.add_midi_note(pitch, self.velocity, 0.0, self.note_duration)
             self.engine.render(self.render_duration)
             self.synth.clear_midi()
             audio = self.engine.get_audio()
-            output_path = self.output_dir / f'{pitch}_{bname}.wav'
+            output_path = self.output_dir / f'{pitch}_{basename}.wav'
             wavfile.write(str(output_path), self.sample_rate, audio.transpose())
 
     def run(self):
@@ -103,8 +103,9 @@ def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
     logger = logging.getLogger('dawdreamer')
     logger.setLevel(logging_level.upper())
 
-    # Glob all the preset file paths, looking shallowly only
-    preset_paths = list(glob(str(Path(preset_dir) / '*.pjunoxl'))) # the .pjunoxl is formatted just like an xml file
+    # Glob all the preset file paths, looking shallowly only.
+    # The .pjunoxl is formatted just like an xml file.
+    preset_paths = list(glob(str(Path(preset_dir) / '*.pjunoxl'))) 
 
     # Get num items so that the progress bar works well
     num_items = len(preset_paths)

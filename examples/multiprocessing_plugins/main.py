@@ -21,8 +21,7 @@ import time
 import traceback
 from collections import namedtuple
 from glob import glob
-from os.path import basename
-from os import makedirs
+import os
 from pathlib import Path
 
 # extra libraries to install with pip
@@ -67,14 +66,14 @@ class Worker:
     def process_item(self, item: Item):
         preset_path = item.preset_path
         self.synth.load_preset(preset_path)
-        bname = basename(preset_path)
+        basename = os.path.basename(preset_path)
 
         for pitch in range(self.pitch_low, self.pitch_high+1):
             self.synth.add_midi_note(pitch, self.velocity, 0.0, self.note_duration)
             self.engine.render(self.render_duration)
             self.synth.clear_midi()
             audio = self.engine.get_audio()
-            output_path = self.output_dir / f'{pitch}_{bname}.wav'
+            output_path = self.output_dir / f'{pitch}_{basename}.wav'
             wavfile.write(str(output_path), self.sample_rate, audio.transpose())
 
     def run(self):
@@ -124,7 +123,7 @@ def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
     logger.info(f'Pitch high: {pitch_high}')
     logger.info(f'Output directory: {output_dir}')
 
-    makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Create a multiprocessing Pool
     with multiprocessing.Pool(processes=num_processes) as pool:
@@ -168,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument('--pitch-high', default=64, help="Highest MIDI pitch to be used.")
     parser.add_argument('--render-duration', default=4, help="Render duration in seconds.")
     parser.add_argument('--num-workers', default=None, help="Number of workers to use.")
-    parser.add_argument('--output-dir', default='output', help="Output directory.")
+    parser.add_argument('--output-dir', default=os.path.join(os.path.dirname(__file__),'output'), help="Output directory.")
     parser.add_argument('--log-level', default='DEBUG', choices=['DEBUG','INFO','WARNING','ERROR','CRITICAL', 'NOTSET'], help="Logger level.")
     args = parser.parse_args()
 
