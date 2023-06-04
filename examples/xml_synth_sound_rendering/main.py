@@ -18,10 +18,11 @@
 import logging
 import multiprocessing
 import time
+import os
 import traceback
 from collections import namedtuple
 from glob import glob
-import os
+from os import makedirs
 from pathlib import Path
 
 # extra libraries to install with pip
@@ -30,11 +31,13 @@ import numpy as np
 from scipy.io import wavfile
 from tqdm import tqdm
 
+# import custom utils for helper functions
+from utils import make_json_parameter_mapping, load_xml_preset
 
 Item = namedtuple("Item", "preset_path")
 
 
-class Worker:
+class TAL_UNO_Worker:
 
     def __init__(self, queue: multiprocessing.Queue, plugin_path: str,
         sample_rate=44100, block_size=512, bpm=120, note_duration=2,
@@ -65,7 +68,9 @@ class Worker:
 
     def process_item(self, item: Item):
         preset_path = item.preset_path
-        self.synth.load_preset(preset_path)
+        json_mapping = make_json_parameter_mapping(self.synth, preset_path,
+            os.path.join(os.path.dirname(__file__), 'parameter_mappings'))
+        self.synth = load_xml_preset(self.synth, json_mapping)
         basename = os.path.basename(preset_path)
 
         for pitch in range(self.pitch_low, self.pitch_high+1):
@@ -98,8 +103,9 @@ def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
     logger = logging.getLogger('dawdreamer')
     logger.setLevel(logging_level.upper())
 
-    # Glob all the preset file paths, looking shallowly only
-    preset_paths = list(glob(str(Path(preset_dir) / '*.fxp')))
+    # Glob all the preset file paths, looking shallowly only.
+    # The .pjunoxl is formatted just like an xml file.
+    preset_paths = list(glob(str(Path(preset_dir) / '*.pjunoxl'))) 
 
     # Get num items so that the progress bar works well
     num_items = len(preset_paths)
@@ -123,13 +129,13 @@ def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
     logger.info(f'Pitch high: {pitch_high}')
     logger.info(f'Output directory: {output_dir}')
 
-    os.makedirs(output_dir, exist_ok=True)
+    makedirs(output_dir, exist_ok=True)
 
     # Create a multiprocessing Pool
     with multiprocessing.Pool(processes=num_processes) as pool:
         # Create and start a worker process for each CPU
         for i in range(num_processes):
-            worker = Worker(input_queue, plugin_path,
+            worker = TAL_UNO_Worker(input_queue, plugin_path,
                 note_duration=note_duration, render_duration=render_duration,
                 pitch_low=pitch_low, pitch_high=pitch_high,
                 output_dir=output_dir)

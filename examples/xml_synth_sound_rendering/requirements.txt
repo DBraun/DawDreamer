@@ -1,0 +1,7 @@
+dawdreamer
+librosa
+matplotlib
+numpy
+scipy
+tqdm
+xmltodict
