@@ -2,3 +2,5 @@ TAL-UNO_json_presets/
 .ipynb_checkpoints/
 __pycache__/
 output/
+.vscode/
+parameter_mappings/
