@@ -1425,7 +1425,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           "isBoxTGroup",
           [](BoxWrapper &b) {
             Box label, x;
-            bool res = isBoxSymbolic(b, label, x);
+            bool res = isBoxTGroup(b, label, x);
             return py::make_tuple<py::return_value_policy::take_ownership>(
                 res, BoxWrapper(label), BoxWrapper(x));
           },
