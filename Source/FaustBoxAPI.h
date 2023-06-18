@@ -184,8 +184,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
       .def(
           "__floordiv__",
           [](const BoxWrapper &box1, BoxWrapper &box2) {
-            return BoxWrapper(
-                boxFloor(boxDiv((BoxWrapper &)box1, box2)));
+            return BoxWrapper(boxFloor(boxDiv((BoxWrapper &)box1, box2)));
           },
           returnPolicy)
 
@@ -268,15 +267,13 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
       .def(
           "__lshift__",
           [](const BoxWrapper &box1, BoxWrapper &box2) {
-            return BoxWrapper(
-                boxLeftShift((BoxWrapper &)box1, box2));
+            return BoxWrapper(boxLeftShift((BoxWrapper &)box1, box2));
           },
           returnPolicy)
       .def(
           "__rshift__",
           [](const BoxWrapper &box1, BoxWrapper &box2) {
-            return BoxWrapper(
-                boxARightShift((BoxWrapper &)box1, box2));
+            return BoxWrapper(boxARightShift((BoxWrapper &)box1, box2));
           },
           returnPolicy)
       .def(
@@ -1192,7 +1189,8 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
             const char *str = nullptr;
             bool res = isBoxIdent(b, &str);
             std::string s = std::string(res ? str : "");
-            return py::make_tuple<py::return_value_policy::take_ownership>(res, s);
+            return py::make_tuple<py::return_value_policy::take_ownership>(res,
+                                                                           s);
           },
           arg("box"), returnPolicy)
 
@@ -1318,28 +1316,64 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim0", [](BoxWrapper &b) { return isBoxPrim0(b); }, arg("box"),
-          returnPolicy)
+          "isBoxPrim0",
+          [](BoxWrapper &b) {
+            prim0 p;
+            bool res = isBoxPrim0(b, &p);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, res ? prim0name(p) : "");
+          },
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim1", [](BoxWrapper &b) { return isBoxPrim1(b); }, arg("box"),
-          returnPolicy)
+          "isBoxPrim1",
+          [](BoxWrapper &b) {
+            prim1 p;
+            bool res = isBoxPrim1(b, &p);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, res ? prim1name(p) : "");
+          },
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim2", [](BoxWrapper &b) { return isBoxPrim2(b); }, arg("box"),
-          returnPolicy)
+          "isBoxPrim2",
+          [](BoxWrapper &b) {
+            prim2 p;
+            bool res = isBoxPrim2(b, &p);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, res ? prim2name(p) : "");
+          },
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim3", [](BoxWrapper &b) { return isBoxPrim3(b); }, arg("box"),
-          returnPolicy)
+          "isBoxPrim3",
+          [](BoxWrapper &b) {
+            prim3 p;
+            bool res = isBoxPrim3(b, &p);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, res ? prim3name(p) : "");
+          },
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim4", [](BoxWrapper &b) { return isBoxPrim4(b); }, arg("box"),
-          returnPolicy)
+          "isBoxPrim4",
+          [](BoxWrapper &b) {
+            prim4 p;
+            bool res = isBoxPrim4(b, &p);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, res ? prim4name(p) : "");
+          },
+          arg("box"), returnPolicy)
 
       .def(
-          "isBoxPrim5", [](BoxWrapper &b) { return isBoxPrim5(b); }, arg("box"),
-          returnPolicy)
+          "isBoxPrim5",
+          [](BoxWrapper &b) {
+            prim5 p;
+            bool res = isBoxPrim5(b, &p);
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, res ? prim5name(p) : "");
+          },
+          arg("box"), returnPolicy)
 
       .def(
           "isBoxReal",
@@ -1463,7 +1497,25 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"), returnPolicy)
 
       .def(
-          "isBoxWaveform", [](BoxWrapper &b) { return isBoxWaveform(b); },
+          "isBoxWaveform",
+          [](BoxWrapper &b) {
+            bool res = isBoxWaveform(b);
+            std::vector<float> vals;
+            if (res) {
+              double r = 0;
+              int j = 0;
+              const tvec br = b.ptr->branches();
+              for (int i = 0; i < br.size(); i++) {
+                if (isBoxReal(br[i], &r)) {
+                  vals.push_back(r);
+                } else if (isBoxInt(br[i], &j)) {
+                  vals.push_back(j);
+                }
+              }
+            }
+            return py::make_tuple<py::return_value_policy::take_ownership>(
+                res, vals);
+          },
           arg("box"), returnPolicy)
 
       .def(
