@@ -1153,7 +1153,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"), returnPolicy)
 
       .def(
-          "isBoxHBarGraph",
+          "isBoxHBargraph",
           [](BoxWrapper &b) {
             Box label, a_min, a_max;
             bool res = isBoxHBargraph(b, label, a_min, a_max);
@@ -1466,7 +1466,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           arg("box"), returnPolicy)
 
       .def(
-          "isBoxVBarGraph",
+          "isBoxVBargraph",
           [](BoxWrapper &b) {
             Box label, a_min, a_max;
             bool res = isBoxVBargraph(b, label, a_min, a_max);
