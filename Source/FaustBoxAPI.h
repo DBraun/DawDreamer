@@ -192,7 +192,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           "__floordiv__",
           [](const BoxWrapper &box1, int other) {
             return BoxWrapper(
-                boxFloor(boxDiv((BoxWrapper &)box1, sigInt(other))));
+                boxFloor(boxDiv((BoxWrapper &)box1, boxInt(other))));
           },
           returnPolicy)
 
@@ -200,7 +200,7 @@ inline void create_bindings_for_faust_box(py::module &faust_module) {
           "__floordiv__",
           [](const BoxWrapper &box1, float other) {
             return BoxWrapper(
-                boxFloor(boxDiv((BoxWrapper &)box1, sigReal(other))));
+                boxFloor(boxDiv((BoxWrapper &)box1, boxReal(other))));
           },
           returnPolicy)
 
