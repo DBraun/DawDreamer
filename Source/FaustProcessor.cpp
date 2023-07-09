@@ -524,16 +524,13 @@ bool FaustProcessor::compile() {
   m_ui = new APIUI();
   theDsp->buildUserInterface(m_ui);
 
-  // soundfile UI.
-  m_soundUI = new MySoundUI();
-  for (const auto& [label, buffers] : m_SoundfileMap) {
-    m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers,
-                                       (int)(mySampleRate + .5));
-  }
+  const int sr = (int)(mySampleRate + .5);
+
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
   theDsp->buildUserInterface(m_soundUI);
 
   // init
-  theDsp->init((int)(mySampleRate + .5));
+  theDsp->init(sr);
 
   createParameterLayout();
 
@@ -578,18 +575,18 @@ bool FaustProcessor::compileSignals(
 
   // create new factory
   bool is_polyphonic = m_nvoices > 0;
-  auto theDSP = m_dsp;
+  auto theDsp = m_dsp;
   if (is_polyphonic) {
     // Allocate polyphonic DSP
     m_dsp_poly =
         new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
-    theDSP = m_dsp_poly;
+    theDsp = m_dsp_poly;
   }
 
   // get channels
-  int inputs = theDSP->getNumInputs();
-  int outputs = theDSP->getNumOutputs();
+  int inputs = theDsp->getNumInputs();
+  int outputs = theDsp->getNumOutputs();
 
   m_numInputChannels = inputs;
   m_numOutputChannels = outputs;
@@ -606,18 +603,15 @@ bool FaustProcessor::compileSignals(
   }
 
   m_ui = new APIUI();
-  theDSP->buildUserInterface(m_ui);
+  theDsp->buildUserInterface(m_ui);
 
-  // soundfile UI.
-  m_soundUI = new MySoundUI();
-  for (const auto& [label, buffers] : m_SoundfileMap) {
-    m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers,
-                                       (int)(mySampleRate + .5));
-  }
-  theDSP->buildUserInterface(m_soundUI);
+  const int sr = (int)(mySampleRate + .5);
+
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  theDsp->buildUserInterface(m_soundUI);
 
   // init
-  theDSP->init((int)(mySampleRate + .5));
+  theDsp->init(sr);
 
   createParameterLayout();
 
@@ -655,18 +649,18 @@ bool FaustProcessor::compileBox(
 
   // create new factory
   bool is_polyphonic = m_nvoices > 0;
-  auto theDSP = m_dsp;
+  auto theDsp = m_dsp;
   if (is_polyphonic) {
     // Allocate polyphonic DSP
     m_dsp_poly =
         new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
-    theDSP = m_dsp_poly;
+    theDsp = m_dsp_poly;
   }
 
   // get channels
-  int inputs = theDSP->getNumInputs();
-  int outputs = theDSP->getNumOutputs();
+  int inputs = theDsp->getNumInputs();
+  int outputs = theDsp->getNumOutputs();
 
   m_numInputChannels = inputs;
   m_numOutputChannels = outputs;
@@ -681,18 +675,15 @@ bool FaustProcessor::compileBox(
   }
 
   m_ui = new APIUI();
-  theDSP->buildUserInterface(m_ui);
+  theDsp->buildUserInterface(m_ui);
 
-  // soundfile UI.
-  m_soundUI = new MySoundUI();
-  for (const auto& [label, buffers] : m_SoundfileMap) {
-    m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers,
-                                       (int)(mySampleRate + .5));
-  }
-  theDSP->buildUserInterface(m_soundUI);
+  const int sr = (int)(mySampleRate + .5);
+
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  theDsp->buildUserInterface(m_soundUI);
 
   // init
-  theDSP->init((int)(mySampleRate + .5));
+  theDsp->init(sr);
 
   createParameterLayout();
 
