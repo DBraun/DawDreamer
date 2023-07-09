@@ -541,7 +541,7 @@ bool FaustProcessor::compile() {
   return true;
 }
 
-void FaustProcessor::compileSignals(
+bool FaustProcessor::compileSignals(
     std::vector<SigWrapper>& wrappers,
     std::optional<std::vector<std::string>> in_argv) {
   clear();
@@ -622,9 +622,11 @@ void FaustProcessor::compileSignals(
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+  return true;
 }
 
-void FaustProcessor::compileBox(
+bool FaustProcessor::compileBox(
     BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
   clear();
 
@@ -697,6 +699,8 @@ void FaustProcessor::compileBox(
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 
   setMainBusInputsAndOutputs(inputs, outputs);
+
+  return true;
 }
 
 bool FaustProcessor::setDSPFile(const std::string& path) {
@@ -1075,125 +1079,6 @@ void FaustProcessor::setReleaseLength(double sec) {
   m_releaseLengthSec = sec;
   if (m_dsp_poly) {
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
-  }
-}
-
-#ifdef WIN32
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-// Find path to .dll */
-// https://stackoverflow.com/a/57738892/12327461
-HMODULE hMod;
-std::wstring MyDLLPathFull;
-std::wstring MyDLLDir;
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
-                      LPVOID lpReserved) {
-  switch (ul_reason_for_call) {
-    case DLL_PROCESS_ATTACH:
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-      break;
-  }
-  hMod = hModule;
-  const int BUFSIZE = 4096;
-  wchar_t buffer[BUFSIZE];
-  if (::GetModuleFileNameW(hMod, buffer, BUFSIZE - 1) <= 0) {
-    return TRUE;
-  }
-
-  MyDLLPathFull = buffer;
-
-  size_t found = MyDLLPathFull.find_last_of(L"/\\");
-  MyDLLDir = MyDLLPathFull.substr(0, found);
-
-  return TRUE;
-}
-
-#else
-
-// this applies to both __APPLE__ and linux?
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <dlfcn.h>
-
-// https://stackoverflow.com/a/51993539/911207
-const char* getMyDLLPath(void) {
-  Dl_info dl_info;
-  dladdr((void*)getMyDLLPath, &dl_info);
-  return (dl_info.dli_fname);
-}
-#endif
-
-std::string getPathToFaustLibraries() {
-  // Get the path to the directory containing basics.lib, stdfaust.lib etc.
-
-  try {
-#ifdef WIN32
-    const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
-    // std::cerr << "MyDLLDir: ";
-    // std::wcerr << MyDLLDir << L'\n';
-    // convert const wchar_t to char
-    // https://stackoverflow.com/a/4387335
-    const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
-    // Count required buffer size (plus one for null-terminator).
-    size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
-    char* char_shareFaustDir = new char[size];
-    std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
-
-    std::string p(char_shareFaustDir);
-
-    delete[] char_shareFaustDir;
-    return p;
-#else
-    // this applies to __APPLE__ and LINUX
-    const char* myDLLPath = getMyDLLPath();
-    // std::cerr << "myDLLPath: " << myDLLPath << std::endl;
-    std::filesystem::path p = std::filesystem::path(myDLLPath);
-    p = p.parent_path() / "faustlibraries";
-    return p.string();
-#endif
-  } catch (...) {
-    throw std::runtime_error("Error getting path to faustlibraries.");
-  }
-}
-
-std::string getPathToArchitectureFiles() {
-  // Get the path to the directory containing jax/minimal.py, unity/unity.cpp
-  // etc.
-
-  try {
-#ifdef WIN32
-    const std::wstring ws_shareFaustDir = MyDLLDir + L"\\architecture";
-    // std::cerr << "MyDLLDir: ";
-    // std::wcerr << MyDLLDir << L'\n';
-    // convert const wchar_t to char
-    // https://stackoverflow.com/a/4387335
-    const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
-    // Count required buffer size (plus one for null-terminator).
-    size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
-    char* char_shareFaustDir = new char[size];
-    std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
-
-    std::string p(char_shareFaustDir);
-
-    delete[] char_shareFaustDir;
-    return p;
-#else
-    // this applies to __APPLE__ and LINUX
-    const char* myDLLPath = getMyDLLPath();
-    // std::cerr << "myDLLPath: " << myDLLPath << std::endl;
-    std::filesystem::path p = std::filesystem::path(myDLLPath);
-    p = p.parent_path() / "architecture";
-    return p.string();
-#endif
-  } catch (...) {
-    throw std::runtime_error("Error getting path to architecture.");
   }
 }
 

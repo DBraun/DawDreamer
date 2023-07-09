@@ -164,6 +164,8 @@
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessor.cpp"/>
     <ClCompile Include="..\..\Source\Sampler\Source\SamplerAudioProcessorEditor.cpp"/>
     <ClCompile Include="..\..\Source\FaustProcessor.cpp"/>
+    <ClCompile Include="..\..\Source\FaustBoxAPI.cpp"/>
+    <ClCompile Include="..\..\Source\FaustSignalAPI.cpp"/>
     <ClCompile Include="..\..\Source\FilterProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PlaybackWarpProcessor.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>

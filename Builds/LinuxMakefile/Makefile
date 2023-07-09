@@ -81,6 +81,8 @@ OBJECTS_DYNAMIC_LIBRARY := \
   $(JUCE_OBJDIR)/SamplerAudioProcessor_298eea40.o \
   $(JUCE_OBJDIR)/SamplerAudioProcessorEditor_39db550d.o \
   $(JUCE_OBJDIR)/FaustProcessor_2056a3e0.o \
+  $(JUCE_OBJDIR)/FaustBoxAPI_5f675c8b.o \
+  $(JUCE_OBJDIR)/FaustSignalAPI_ca49a5a0.o \
   $(JUCE_OBJDIR)/FilterProcessor_8755f5b.o \
   $(JUCE_OBJDIR)/PlaybackWarpProcessor_eedba470.o \
   $(JUCE_OBJDIR)/PluginProcessor_a059e380.o \
@@ -142,6 +144,16 @@ $(JUCE_OBJDIR)/SamplerAudioProcessorEditor_39db550d.o: ../../Source/Sampler/Sour
 $(JUCE_OBJDIR)/FaustProcessor_2056a3e0.o: ../../Source/FaustProcessor.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling FaustProcessor.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/FaustBoxAPI_5f675c8b.o: ../../Source/FaustBoxAPI.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling FaustBoxAPI.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/FaustSignalAPI_ca49a5a0.o: ../../Source/FaustSignalAPI.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling FaustSignalAPI.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_DYNAMIC_LIBRARY) $(JUCE_CFLAGS_DYNAMIC_LIBRARY) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/FilterProcessor_8755f5b.o: ../../Source/FilterProcessor.cpp

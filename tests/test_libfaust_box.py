@@ -531,18 +531,18 @@ def test23():
     box = boxPar(osc(sl1), osc(sl2))
     print('sl1.extract_name()', sl1.extract_name())
     print('box.extract_name()', box.extract_name())
-    print('sl1.to_str()', sl1.to_str())
-    print('box.to_str()', box.to_str())
+    # print('sl1.print_str()', sl1.print_str(True, 10000))
+    # print('box.print_str()', box.print_str(True, 10000))
 
     slider = isBoxHSlider(sl1)
-    if slider[0]:
-        label, init, theMin, theMax, step = slider[1:]
-        print('label.extract_name()', label.extract_name())
-        print('label.to_str()', label.to_str())
+    assert slider[0]
+    label, init, theMin, theMax, step = slider[1:]
+    print('label.extract_name()', label.extract_name())
+    # print('label.print_str()', label.print_str(True, 10000))
 
-    print(getDefNameProperty(sl1))
-    print(getDefNameProperty(box))
-    print(isBoxAbstr(sl1))
+    # print(getDefNameProperty(sl1))
+    # print(getDefNameProperty(box))
+    # print(isBoxAbstr(sl1))
     print(isBoxSlot(sl1))
     print(isBoxIdent(sl1))
 

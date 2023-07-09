@@ -2,14 +2,10 @@
 #include "ProcessorBase.h"
 
 #ifdef BUILD_DAWDREAMER_FAUST
-#include <iostream>
 #include <map>
 
 #include <faust/compiler/utils/TMutex.h>
 #include <faust/dsp/interpreter-dsp.h>
-#include <faust/dsp/interpreter-dsp.h>
-#include <faust/dsp/libfaust-box.h>
-#include <faust/dsp/libfaust-signal.h>
 #include <faust/dsp/llvm-dsp.h>
 #include <faust/dsp/poly-interpreter-dsp.h>
 #include <faust/dsp/poly-llvm-dsp.h>
@@ -18,14 +14,9 @@
 #include <faust/gui/MidiUI.h>
 #include <faust/gui/SoundUI.h>
 #include <faust/midi/rt-midi.h>
-#include <faust/misc.h>
 #include <faust/compiler/generator/libfaust.h>
 
-// todo: don't include a .hh file
-#include <faust/compiler/tlib/tree.hh>
-
-std::string getPathToFaustLibraries();
-std::string getPathToArchitectureFiles();
+#include "FaustSignalAPI.h"
 
 class MySoundUI : public SoundUI {
  public:
@@ -106,22 +97,6 @@ class MySoundUI : public SoundUI {
       fSoundfileMap[saved_url_real] = std::shared_ptr<Soundfile>(soundfile);
     }
   }
-};
-
-struct SigWrapper {
-  CTree *ptr;
-  SigWrapper(Signal ptr) : ptr{ptr} {}
-  SigWrapper(float val) : ptr{sigReal(val)} {}
-  SigWrapper(int val) : ptr{sigInt(val)} {}
-  operator CTree *() { return ptr; }
-};
-
-struct BoxWrapper {
-  CTree *ptr;
-  BoxWrapper(Box ptr) : ptr{ptr} {}
-  BoxWrapper(float val) : ptr{boxReal(val)} {}
-  BoxWrapper(int val) : ptr{boxInt(val)} {}
-  operator CTree *() { return ptr; }
 };
 
 template <typename Ch, typename Traits = std::char_traits<Ch>,
@@ -306,10 +281,10 @@ class FaustProcessor : public ProcessorBase {
 
   // public libfaust API
  public:
-  void compileSignals(std::vector<SigWrapper> &wrappers,
+  bool compileSignals(std::vector<SigWrapper> &wrappers,
                       std::optional<std::vector<std::string>> in_argv);
 
-  void compileBox(BoxWrapper &box,
+  bool compileBox(BoxWrapper &box,
                   std::optional<std::vector<std::string>> in_argv);
 };
 
