@@ -1488,6 +1488,9 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module) {
           "The second argument `argv` is a list of strings to send to a Faust "
           "command line.");
 
+  py::implicitly_convertible<float, BoxWrapper>();
+  py::implicitly_convertible<int, BoxWrapper>();
+
   return box_module;
 }
 #endif

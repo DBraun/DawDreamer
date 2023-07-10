@@ -210,9 +210,9 @@ void create_bindings_for_faust_signal(py::module &faust_module,
              Box box1 = boxReal(0.5);
              Box box2 = boxCos();
              Box box3 = boxSeq(box1, box2);
-             //std::string code = printBox(box3, true, 10000);
+             // std::string code = printBox(box3, true, 10000);
              destroyLibContext();
-             //return code;
+             // return code;
            })
 
       .def("box_test3",
@@ -223,9 +223,9 @@ void create_bindings_for_faust_signal(py::module &faust_module,
              Box box1 = boxReal(0.5);
              Box box2 = boxWire();
              Box box3 = boxPar(box1, box2);
-             //std::string code = printBox(box3, true, 10000);
+             // std::string code = printBox(box3, true, 10000);
              destroyLibContext();
-             //return code;
+             // return code;
            })
 
       .def("sig_test1",
@@ -1134,5 +1134,8 @@ void create_bindings_for_faust_signal(py::module &faust_module,
           "to a Faust command line.")
 
       ;
+
+  py::implicitly_convertible<float, SigWrapper>();
+  py::implicitly_convertible<int, SigWrapper>();
 }
 #endif
