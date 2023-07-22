@@ -217,8 +217,9 @@ void ProcessorBase::reset() {
     std::string name =
         parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
     if (name.empty()) {
-      std::cerr << "Warning: parameter name at index " << i
-                << " has an empty name." << std::endl;
+      // todo: surface this as warning
+      // std::cerr << "Warning: parameter name at index " << i
+      //           << " has an empty name." << std::endl;
       i++;
       continue;
     }
