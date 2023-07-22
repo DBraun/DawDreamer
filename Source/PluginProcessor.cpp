@@ -397,8 +397,6 @@ void PluginProcessor::loadStateInformation(std::string filepath) {
   // loaded state to take effect in certain plugins. This allows us to call
   // load_state and not bother calling open_editor().
   StandalonePluginWindow tmp_window(*this, *myPlugin);
-  // juce::MessageManager::getInstance()->runDispatchLoopUntil(10); // todo:
-  // enable this and remove the above tmp_window
 }
 
 void PluginProcessor::saveStateInformation(std::string filepath) {
