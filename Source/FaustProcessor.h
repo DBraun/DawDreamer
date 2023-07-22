@@ -43,6 +43,12 @@ class MySoundUI : public SoundUI {
   void addSoundfile(const char *label, const char *url, Soundfile **sf_zone) {
     // Parse the possible list
     std::string saved_url_real = std::string(label);
+    if (fSoundfileMap.find(saved_url_real) != fSoundfileMap.end()) {
+      // Get the soundfile.
+      *sf_zone = fSoundfileMap[saved_url_real].get();
+      return;
+    }
+
     if (m_SoundfileMap->find(saved_url_real) != m_SoundfileMap->end()) {
       int total_length = 0;
       int numChannels = 1;  // start with at least 1 channel. This may
@@ -100,6 +106,8 @@ class MySoundUI : public SoundUI {
       soundfile->shareBuffers(numChannels, MAX_CHAN);
       fSoundfileMap[saved_url_real] = std::shared_ptr<Soundfile>(soundfile);
 
+      // Get the soundfile pointer
+      *sf_zone = fSoundfileMap[saved_url_real].get();
       return;
     }
 
