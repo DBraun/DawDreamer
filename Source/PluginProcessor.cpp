@@ -273,6 +273,16 @@ void PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
 
 void PluginProcessor::reset() {
   if (myPlugin.get()) {
+    // send All Notes Off MIDI message to all channels and then process it.
+    MidiBuffer midiBuffer;
+    for (int i = 1; i < 17; i++) {
+      midiBuffer.addEvent(MidiMessage::allNotesOff(i), 0);
+    }
+    AudioSampleBuffer buffer;
+    buffer.setSize(myPlugin->getTotalNumOutputChannels(), getBlockSize());
+    myPlugin->processBlock(buffer, midiBuffer);
+
+    // Now turn off all voices.
     myPlugin->reset();
   }
 
