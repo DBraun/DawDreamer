@@ -8,7 +8,7 @@ void ProcessorBase::setStateInformation(const void* data, int sizeInBytes) {}
 
 bool ProcessorBase::setAutomation(std::string& parameterName, py::array input,
                                   std::uint32_t ppqn) {
-  for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+  for (auto& uncastedParameter : this->getParameters()) {
     if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
             .toStdString() == parameterName) {
       auto parameter = (AutomateParameterFloat*)uncastedParameter;
@@ -23,7 +23,7 @@ bool ProcessorBase::setAutomation(std::string& parameterName, py::array input,
 
 bool ProcessorBase::setAutomationByIndex(int& index, py::array input,
                                          std::uint32_t ppqn) {
-  auto parameters = this->getParameterTree().getParameters(true);
+  auto parameters = this->getParameters();
   if (index < 0 || index >= parameters.size()) {
     throw std::runtime_error(
         "Failed to set automation for parameter at index " +
@@ -42,7 +42,7 @@ bool ProcessorBase::setAutomationVal(const char* parameterName, float val) {
 
 bool ProcessorBase::setAutomationValByStr(std::string& parameterName,
                                           float val) {
-  for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+  for (auto& uncastedParameter : this->getParameters()) {
     if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
             .toStdString() == parameterName) {
       auto parameter = (AutomateParameterFloat*)uncastedParameter;
@@ -56,7 +56,7 @@ bool ProcessorBase::setAutomationValByStr(std::string& parameterName,
 }
 
 bool ProcessorBase::setAutomationValByIndex(int index, float val) {
-  auto parameters = this->getParameterTree().getParameters(true);
+  auto parameters = this->getParameters();
   if (index < 0 || index >= parameters.size()) {
     throw std::runtime_error("Failed to set parameter at index " +
                              std::to_string(index));
@@ -67,8 +67,9 @@ bool ProcessorBase::setAutomationValByIndex(int index, float val) {
   return true;
 }
 
-std::vector<float> ProcessorBase::getAutomation(std::string& parameterName) {
-  for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+std::vector<float> ProcessorBase::getAutomation(
+    const std::string& parameterName) {
+  for (auto& uncastedParameter : this->getParameters()) {
     if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
             .toStdString() == parameterName) {
       auto parameter = (AutomateParameterFloat*)uncastedParameter;
@@ -80,8 +81,8 @@ std::vector<float> ProcessorBase::getAutomation(std::string& parameterName) {
                            parameterName);
 }
 
-std::vector<float> ProcessorBase::getAutomationByIndex(int& index) {
-  auto parameters = this->getParameterTree().getParameters(true);
+std::vector<float> ProcessorBase::getAutomationByIndex(const int& index) {
+  auto parameters = this->getParameters();
   if (index < 0 || index >= parameters.size()) {
     throw std::runtime_error(
         "Failed to get automation for parameter at index " +
@@ -98,9 +99,9 @@ float ProcessorBase::getAutomationVal(const char* parameterName,
   return getAutomationVal(s, posInfo);
 }
 
-float ProcessorBase::getAutomationVal(std::string& parameterName,
+float ProcessorBase::getAutomationVal(const std::string& parameterName,
                                       AudioPlayHead::PositionInfo& posInfo) {
-  for (auto& uncastedParameter : this->getParameterTree().getParameters(true)) {
+  for (auto& uncastedParameter : this->getParameters()) {
     if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
             .toStdString() == parameterName) {
       auto parameter = (AutomateParameterFloat*)
@@ -115,7 +116,7 @@ float ProcessorBase::getAutomationVal(std::string& parameterName,
                            parameterName);
 }
 
-float ProcessorBase::getAutomationAtZeroByIndex(int& index) {
+float ProcessorBase::getAutomationAtZeroByIndex(const int& index) {
   auto parameters = this->getParameters();
 
   if (index < 0 || index >= parameters.size()) {
@@ -130,7 +131,7 @@ float ProcessorBase::getAutomationAtZeroByIndex(int& index) {
   return parameter->sample(posInfo);
 }
 
-float ProcessorBase::getAutomationAtZero(std::string parameterName) {
+float ProcessorBase::getAutomationAtZero(const std::string& parameterName) {
   auto parameters = this->getParameters();
   for (auto& uncastedParameter : parameters) {
     if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
@@ -148,7 +149,7 @@ float ProcessorBase::getAutomationAtZero(std::string parameterName) {
 }
 
 py::array_t<float> ProcessorBase::getAutomationNumpy(
-    std::string& parameterName) {
+    const std::string& parameterName) {
   std::vector<float> data = getAutomation(parameterName);
 
   py::array_t<float, py::array::c_style> arr({(int)data.size()});
@@ -209,22 +210,23 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo,
 void ProcessorBase::reset() {
   m_recordedAutomationDict.clear();
 
-  const Array<AudioProcessorParameter*>& processorParams =
-      this->getParameters();
-
-  for (int i = 0; i < this->getNumParameters(); i++) {
+  int i = 0;
+  for (juce::AudioProcessorParameter* parameter : this->getParameters()) {
     // Note that we don't use label because it's sometimes blank. The same
     // choice must be made in recordAutomation()
-    std::string name = (processorParams[i])
-                           ->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
-                           .toStdString();
-    if (name.compare("") == 0) {
+    std::string name =
+        parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+    if (name.empty()) {
+      std::cerr << "Warning: parameter name at index " << i
+                << " has an empty name." << std::endl;
+      i++;
       continue;
     }
     juce::AudioSampleBuffer buffer;
     buffer.setSize(1, m_recordAutomation ? m_expectedRecordNumSamples : 0);
 
     m_recordedAutomationDict[name] = buffer;
+    i++;
   }
 }
 

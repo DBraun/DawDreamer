@@ -304,7 +304,7 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
     m_mainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
 
     m_positionInfo.setTimeInSamples(*m_positionInfo.getTimeInSamples() +
-                                   (int64_t)myBufferSize);
+                                    (int64_t)myBufferSize);
     m_positionInfo.setTimeInSeconds(double(*m_positionInfo.getTimeInSamples()) /
                                     mySampleRate);
     m_positionInfo.setPpqPosition(*m_positionInfo.getPpqPosition() +
