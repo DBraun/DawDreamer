@@ -235,19 +235,18 @@ void FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
     return;
   }
 
-  const Array<AudioProcessorParameter*>& processorParams =
-      this->getParameters();
-
   bool anyAutomation = false;
-  for (int i = 0; i < this->getNumParameters(); i++) {
+  int i = 0;
+  for (auto* parameter : getParameters()) {
     int faustIndex = m_map_juceIndex_to_faustIndex[i];
-    auto theParameter = (AutomateParameterFloat*)processorParams[i];
+    auto theParameter = (AutomateParameterFloat*)parameter;
 
     bool hasAutomation = theParameter->isAutomated();
     anyAutomation |= hasAutomation;
     if (hasAutomation) {
       m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
     }
+    i++;
   }
 
   // If polyphony is enabled and we're grouping voices,
@@ -284,16 +283,15 @@ void FaustProcessor::reset() {
     posInfo.setTimeInSeconds(0);
     posInfo.setPpqPosition(0);
 
-    const Array<AudioProcessorParameter*>& processorParams =
-        this->getParameters();
-
-    for (int i = 0; i < this->getNumParameters(); i++) {
+    int i = 0;
+    for (auto* parameter : getParameters()) {
       int faustIndex = m_map_juceIndex_to_faustIndex[i];
 
       m_ui->setParamValue(
-          faustIndex,
-          ((AutomateParameterFloat*)processorParams[i])->sample(posInfo));
+          faustIndex, ((AutomateParameterFloat*)parameter)->sample(posInfo));
+      i++;
     }
+
     if (m_nvoices > 0 && m_groupVoices) {
       // When you want to access shared memory:
       if (guiUpdateMutex.Lock()) {
@@ -823,7 +821,7 @@ void FaustProcessor::createParameterLayout() {
   this->setParameterTree(std::move(group));
 
   int i = 0;
-  for (auto* parameter : this->getParameters()) {
+  for (auto* parameter : getParameters()) {
     int j = m_map_juceIndex_to_faustIndex[i];
     // give it a valid single sample of automation.
     ProcessorBase::setAutomationValByIndex(i, m_ui->getParamInit(j));
@@ -838,7 +836,7 @@ py::list FaustProcessor::getPluginParametersDescription() {
 
   if (m_compileState) {
     int i = 0;
-    for (auto* parameter : this->getParameters()) {
+    for (auto* parameter : getParameters()) {
       std::string theName =
           parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
       std::string label = parameter->getLabel().toStdString();

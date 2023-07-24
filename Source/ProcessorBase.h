@@ -17,6 +17,9 @@ class ProcessorBase : public juce::AudioProcessor {
   //==============================================================================
   void prepareToPlay(double, int) override {}
   void releaseResources() override {}
+
+  // This is a good place to turn off all voices and possibly send MIDI off
+  // messages.
   virtual void reset() override;
 
   //
