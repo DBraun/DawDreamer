@@ -274,11 +274,14 @@ void PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
 void PluginProcessor::reset() {
   if (myPlugin.get()) {
     // send All Notes Off MIDI message to all channels and then process it.
+    // todo: is it possible to send all notes midi off without doing a
+    // processBlock?
     MidiBuffer midiBuffer;
     for (int i = 1; i < 17; i++) {
       midiBuffer.addEvent(MidiMessage::allNotesOff(i), 0);
     }
     AudioSampleBuffer buffer;
+
     buffer.setSize(myPlugin->getTotalNumOutputChannels(), getBlockSize());
     myPlugin->processBlock(buffer, midiBuffer);
 
