@@ -1,4 +1,4 @@
-﻿#ifdef BUILD_DAWDREAMER_FAUST
+#ifdef BUILD_DAWDREAMER_FAUST
 #include "FaustBoxAPI.h"
 
 #ifdef WIN32
@@ -39,6 +39,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
 #else
 
 // this applies to both __APPLE__ and linux?
+#include <filesystem>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
