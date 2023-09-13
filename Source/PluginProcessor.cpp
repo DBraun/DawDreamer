@@ -281,8 +281,10 @@ void PluginProcessor::reset() {
       midiBuffer.addEvent(MidiMessage::allNotesOff(i), 0);
     }
     AudioSampleBuffer buffer;
+      
+    int numChans = std::max(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
 
-    buffer.setSize(myPlugin->getTotalNumOutputChannels(), getBlockSize());
+    buffer.setSize(numChans, getBlockSize());
     myPlugin->processBlock(buffer, midiBuffer);
 
     // Now turn off all voices.
