@@ -1,13 +1,22 @@
-# check that these are right for your system:
-export PYTHONMAJOR=3.9
-export pythonLocation=/Library/Frameworks/Python.framework/Versions/3.9
+if [ -z "$PYTHONMAJOR" ]; then
+  echo "Build failed. You must set the environment variable PYTHONMAJOR to a value such as 3.11"
+  exit 1
+fi
 
-export ARCHS="arm64"
-export CFLAGS="-arch arm64"
-export ARCHFLAGS="-arch arm64"
-# export ARCHS="x86_64"
-# export CFLAGS="-arch x86_64"
-# export ARCHFLAGS="-arch x86_64"
+if [ -z "$pythonLocation" ]; then
+  echo "Build failed. You must set the environment variable pythonLocation to a value such as /Library/Frameworks/Python.framework/Versions/3.11"
+  exit 1
+fi
+
+if [[ $(uname -m) == 'arm64' ]]; then
+    export ARCHS="arm64"
+    export CFLAGS="-arch arm64"
+    export ARCHFLAGS="-arch arm64"
+else
+    export ARCHS="x86_64"
+    export CFLAGS="-arch x86_64"
+    export ARCHFLAGS="-arch x86_64"
+fi
 
 # Below this you shouldn't need to change anything.
 CONFIGURATION=Release-$ARCHS
