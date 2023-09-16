@@ -187,6 +187,12 @@ void create_bindings_for_faust_signal(py::module &faust_module,
             return SigWrapper(sigDelay(sig1, sig2));
           },
           arg("sig1"), arg("sig2"))
+      .def(
+          "sigDelay1",
+          [](SigWrapper &sig1) {
+            return SigWrapper(sigDelay1(sig1));
+          },
+          arg("sig1"))
 
       .def(
           "sigIntCast",
@@ -1065,4 +1071,3 @@ void create_bindings_for_faust_signal(py::module &faust_module,
   py::implicitly_convertible<float, SigWrapper>();
   py::implicitly_convertible<int, SigWrapper>();
 }
-#endif

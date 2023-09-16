@@ -657,6 +657,12 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module) {
           },
           arg("box1") = py::none())
       .def(
+          "boxRound",
+          [](std::optional<BoxWrapper> box1) {
+            return BoxWrapper(box1.has_value() ? boxRound(*box1) : boxRound());
+          },
+          arg("box1") = py::none())
+      .def(
           "boxLog",
           [](std::optional<BoxWrapper> box1) {
             return BoxWrapper(box1.has_value() ? boxLog(*box1) : boxLog());
