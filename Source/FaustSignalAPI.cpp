@@ -1071,3 +1071,5 @@ void create_bindings_for_faust_signal(py::module &faust_module,
   py::implicitly_convertible<float, SigWrapper>();
   py::implicitly_convertible<int, SigWrapper>();
 }
+
+#endif
