@@ -625,7 +625,7 @@ def test24b():
 
 
 @pytest.mark.parametrize("backend",
-    ['c', 'cmajor', 'cpp', 'csharp', 'dlang', 'java', 'jax', 'julia', 'rust', 'wasm', 'wast']
+    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'java', 'jax', 'jsfx', 'julia', 'rust', 'wasm', 'wast']
     )
 def test25a(backend):
 
@@ -646,8 +646,8 @@ def test25a(backend):
 
 
 @pytest.mark.parametrize("backend",
-    ['c', 'cmajor', 'cpp', 'csharp', 'dlang', 'java', 'jax', 'julia', 'rust', 'wasm', 'wast']
-)
+    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'java', 'jax', 'jsfx', 'julia', 'rust', 'wasm', 'wast']
+    )
 def test26a(backend):
 
     createLibContext()
