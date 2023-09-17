@@ -173,8 +173,7 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="dawdreamer" libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>

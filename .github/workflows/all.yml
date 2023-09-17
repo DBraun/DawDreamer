@@ -27,11 +27,11 @@ jobs:
       with:
         submodules: true
 
-    # - name: Set up QEMU for aarch64 on Linux
-    #   if: runner.os == 'Linux'
-    #   uses: docker/setup-qemu-action@v3
-    #   with:
-    #     platforms: all
+    - name: Set up QEMU for aarch64 on Linux
+      if: runner.os == 'Linux'
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: all
 
     - name: clean faust libraries
       run: |
@@ -69,12 +69,6 @@ jobs:
 
   build-ubuntu-docker:
     runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        include:
-        - { python-version: "3.10"}
-
     steps:
     - uses: actions/checkout@v3
       with:
