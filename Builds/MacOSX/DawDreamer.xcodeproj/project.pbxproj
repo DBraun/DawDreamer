@@ -43,12 +43,14 @@
 		BDBBC7F742E36F770A6A0D45 /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = 5F7714E09DFF1DD96B6A9E1A; };
 		BF362117EA445AAE01724022 /* CoreMedia.framework */ = {isa = PBXBuildFile; fileRef = 6A14048B99596E7E39EAE4DD; };
 		C0D03D32EA25F7011FECF9F6 /* IOKit.framework */ = {isa = PBXBuildFile; fileRef = E0756912D4AE6F8AF5A16B05; };
+		C35B14ADF95F2812599EB42D /* FaustBoxAPI.cpp */ = {isa = PBXBuildFile; fileRef = 405C5C02878443703995052F; };
 		C4250D079CD4B8F0C8D5FBBA /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 6FB346F5BB408E7040CFE133; };
 		C9200467702F9E5502DCC9F0 /* include_juce_video.mm */ = {isa = PBXBuildFile; fileRef = C519012CDDE2CA92FF58903A; };
 		D8E2F775028097109496AAA1 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 7EC708BB8670BC4B971F031E; };
 		D915E61C72D98F0B97F31690 /* StandalonePluginWindow.h */ = {isa = PBXBuildFile; fileRef = 44A26898F037A3E6B43EB911; };
 		DFE780784ED99EACC1B654A6 /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 06AE4EC72C9D2D0775EF879E; };
 		E358C00D8D92D35AFBC9944C /* FaustProcessor.cpp */ = {isa = PBXBuildFile; fileRef = BFD142EBB8AFBADC8AB04A8A; };
+		E3F94999130BC1FFAB7F9829 /* FaustSignalAPI.cpp */ = {isa = PBXBuildFile; fileRef = DA5D0A9D3542DCB5ACFC8FB8; };
 		E6C27C09FEC5B3BBEC75F414 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = E4E23DF360EE14C337676E2D; };
 		EA86121DEF6D619C58D1EAAA /* Dynamic Library */ = {isa = PBXBuildFile; fileRef = 14D8BBB0AE299D04ACF0C062; };
 		EC32BD72FBDEAD5B0AA0C704 /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = B2CCBF7C3614EE8B865D41C0; };
@@ -87,6 +89,7 @@
 		356CE6A2709276F08338A0F7 /* include_juce_audio_processors_ara.cpp */ /* include_juce_audio_processors_ara.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_ara.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_ara.cpp; sourceTree = SOURCE_ROOT; };
 		395AC07199E9D2807E5186E1 /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = ../../JuceLibraryCode/modules/juce_data_structures; sourceTree = SOURCE_ROOT; };
 		3AAA87ED81FE59EA46C6FE62 /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../JuceLibraryCode/modules/juce_core; sourceTree = SOURCE_ROOT; };
+		405C5C02878443703995052F /* FaustBoxAPI.cpp */ /* FaustBoxAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FaustBoxAPI.cpp; path = ../../Source/FaustBoxAPI.cpp; sourceTree = SOURCE_ROOT; };
 		41F9CCC5586A494C6A26B0B1 /* samplerate.h */ /* samplerate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = samplerate.h; path = ../../thirdparty/libsamplerate/include/samplerate.h; sourceTree = SOURCE_ROOT; };
 		42A1913A8354FD47FE96B6D2 /* FaustBoxAPI.h */ /* FaustBoxAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FaustBoxAPI.h; path = ../../Source/FaustBoxAPI.h; sourceTree = SOURCE_ROOT; };
 		44A26898F037A3E6B43EB911 /* StandalonePluginWindow.h */ /* StandalonePluginWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StandalonePluginWindow.h; path = ../../Source/StandalonePluginWindow.h; sourceTree = SOURCE_ROOT; };
@@ -151,6 +154,7 @@
 		D2350C56CE13419F5D6CF40E /* QuartzCore.framework */ /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		D28A24FB27CA55E92A5894F7 /* include_juce_audio_basics.mm */ /* include_juce_audio_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_basics.mm; path = ../../JuceLibraryCode/include_juce_audio_basics.mm; sourceTree = SOURCE_ROOT; };
 		D68C9F4F1959369550A30E40 /* ProcessorBase.h */ /* ProcessorBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ProcessorBase.h; path = ../../Source/ProcessorBase.h; sourceTree = SOURCE_ROOT; };
+		DA5D0A9D3542DCB5ACFC8FB8 /* FaustSignalAPI.cpp */ /* FaustSignalAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FaustSignalAPI.cpp; path = ../../Source/FaustSignalAPI.cpp; sourceTree = SOURCE_ROOT; };
 		DCD854F4B3B43A1DA45B9772 /* juce_graphics */ /* juce_graphics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_graphics; path = ../../JuceLibraryCode/modules/juce_graphics; sourceTree = SOURCE_ROOT; };
 		DE2959972547E114EB1E1FCD /* include_juce_data_structures.mm */ /* include_juce_data_structures.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_data_structures.mm; path = ../../JuceLibraryCode/include_juce_data_structures.mm; sourceTree = SOURCE_ROOT; };
 		E0756912D4AE6F8AF5A16B05 /* IOKit.framework */ /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
@@ -379,7 +383,9 @@
 				9ABCCF2DBAA01DE762D8BD60,
 				BFD142EBB8AFBADC8AB04A8A,
 				42A1913A8354FD47FE96B6D2,
+				405C5C02878443703995052F,
 				07B214A6EFC7D8F79AE04C14,
+				DA5D0A9D3542DCB5ACFC8FB8,
 				7332613820553661C4FA3CD8,
 				C503A9D9F3009D679DBFC556,
 				1799B9631459052DD116F71A,
@@ -470,7 +476,9 @@
 				B942805B7846AE297800EF37,
 				E358C00D8D92D35AFBC9944C,
 				4C644DD67DA8AE6ECBFDF0CB,
+				C35B14ADF95F2812599EB42D,
 				EE4E774C44FDAA05F600FD00,
+				E3F94999130BC1FFAB7F9829,
 				7C6656C8A61187E3C9113001,
 				210F38443F9D77354A4B28EB,
 				92F6A21BA484A258A4EF5F23,
@@ -619,8 +627,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.7.1",
-					"JUCE_APP_VERSION_HEX=0x701",
+					"JUCE_APP_VERSION=0.7.2",
+					"JUCE_APP_VERSION_HEX=0x702",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -715,8 +723,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.7.1",
-					"JUCE_APP_VERSION_HEX=0x701",
+					"JUCE_APP_VERSION=0.7.2",
+					"JUCE_APP_VERSION_HEX=0x702",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -812,8 +820,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.7.1",
-					"JUCE_APP_VERSION_HEX=0x701",
+					"JUCE_APP_VERSION=0.7.2",
+					"JUCE_APP_VERSION_HEX=0x702",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",

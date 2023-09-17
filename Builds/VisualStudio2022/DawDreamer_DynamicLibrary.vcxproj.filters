@@ -643,6 +643,12 @@
     <ClCompile Include="..\..\Source\FaustProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\FaustBoxAPI.cpp">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\FaustSignalAPI.cpp">
+      <Filter>DawDreamer\Processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\FilterProcessor.cpp">
       <Filter>DawDreamer\Processors</Filter>
     </ClCompile>

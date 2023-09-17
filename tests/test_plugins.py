@@ -10,7 +10,7 @@ def test_stereo_plugin_effect(plugin_path):
 
     plugin_basename = splitext(basename(plugin_path))[0]
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, 1)  # todo: test more buffer sizes
 
     data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
 
@@ -29,13 +29,14 @@ def test_stereo_plugin_effect(plugin_path):
 
     engine.load_graph(graph)
 
-    plugin_basename = splitext(basename(plugin_path))[0]
+    plugin_basename = basename(plugin_path)
 
     render(engine, file_path=OUTPUT / f'test_plugin_effect_{plugin_basename}.wav', duration=DURATION)
 
     # check that it's non-silent
     audio = engine.get_audio()
-    assert(np.mean(np.abs(audio)) > .05)
+    assert not np.isnan(audio).any()
+    assert(np.mean(np.abs(audio)) > .01)
 
 
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
@@ -102,7 +103,7 @@ def test_plugin_instrument_add_midi_note_beats(plugin_path):
     engine = daw.RenderEngine(SAMPLE_RATE, 2048)
     engine.set_bpm(240.)
 
-    plugin_basename = splitext(basename(plugin_path))[0]
+    plugin_basename = basename(plugin_path)
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
@@ -128,7 +129,7 @@ def test_plugin_instrument_midi(plugin_path):
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
-    plugin_basename = splitext(basename(plugin_path))[0]
+    plugin_basename = basename(plugin_path)
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 

@@ -18,6 +18,8 @@ class PluginProcessor : public ProcessorBase {
 
   void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
+  void releaseResources() override;
+
   void processBlock(juce::AudioSampleBuffer& buffer,
                     juce::MidiBuffer& midiBuffer) override;
 
@@ -43,7 +45,6 @@ class PluginProcessor : public ProcessorBase {
   void setPatch(const PluginPatch patch);
 
   std::string getParameterAsText(const int parameter);
-  void setParameter(int parameterIndex, float newValue) override;
   const PluginPatch getPatch();
   const size_t getPluginParameterSize();
 
@@ -113,9 +114,9 @@ class PluginProcessorWrapper : public PluginProcessor {
 
   py::list wrapperGetPatch();
 
-  std::string wrapperGetParameterName(int parameter);
+  std::string wrapperGetParameterName(const int& parameter);
 
-  bool wrapperSetParameter(int parameterIndex, float value);
+  bool wrapperSetParameter(const int& parameterIndex, const float& value);
 
   int wrapperGetPluginParameterSize();
 

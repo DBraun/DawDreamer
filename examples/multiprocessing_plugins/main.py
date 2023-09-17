@@ -89,9 +89,9 @@ class Worker:
             return traceback.format_exc()
 
 
-def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
-    pitch_low=60, pitch_high=60, num_workers=None, output_dir='output',
-    logging_level='DEBUG'):
+def main(plugin_path, preset_dir, sample_rate=44100, bpm=120, note_duration=2,
+    render_duration=4, pitch_low=60, pitch_high=60, num_workers=None,
+    output_dir='output', logging_level='INFO'):
 
     # Create logger
     logging.basicConfig()
@@ -115,7 +115,7 @@ def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
     # The number of workers to spawn
     num_processes = num_workers or multiprocessing.cpu_count()
 
-    # Debug info
+    # Log info
     logger.info(f'Note duration: {note_duration}')
     logger.info(f'Render duration: {render_duration}')
     logger.info(f'Using num workers: {num_processes}')
@@ -129,10 +129,10 @@ def main(plugin_path, preset_dir, note_duration=2, render_duration=4,
     with multiprocessing.Pool(processes=num_processes) as pool:
         # Create and start a worker process for each CPU
         for i in range(num_processes):
-            worker = Worker(input_queue, plugin_path,
-                note_duration=note_duration, render_duration=render_duration,
-                pitch_low=pitch_low, pitch_high=pitch_high,
-                output_dir=output_dir)
+            worker = Worker(input_queue, plugin_path, sample_rate=sample_rate,
+                bpm=bpm, note_duration=note_duration,
+                render_duration=render_duration, pitch_low=pitch_low,
+                pitch_high=pitch_high, output_dir=output_dir)
             async_result = pool.apply_async(worker.run)
             workers.append(async_result)
 
@@ -162,15 +162,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--plugin', required=True, help="Path to plugin instrument (.dll, .vst3).")
     parser.add_argument('--preset-dir', required=True, help="Directory path of plugin presets.")
-    parser.add_argument('--note-duration', default=2, help="Note duration in seconds.")
-    parser.add_argument('--pitch-low', default=60, help="Lowest MIDI pitch to be used.")
-    parser.add_argument('--pitch-high', default=64, help="Highest MIDI pitch to be used.")
-    parser.add_argument('--render-duration', default=4, help="Render duration in seconds.")
-    parser.add_argument('--num-workers', default=None, help="Number of workers to use.")
+    parser.add_argument('--sample-rate', default=44100, type=int, help="Sample rate for the plugin.")
+    parser.add_argument('--bpm', default=120, type=float, help="Beats per minute for the Render Engine.")
+    parser.add_argument('--note-duration', default=2, type=float, help="Note duration in seconds.")
+    parser.add_argument('--pitch-low', default=60, type=int, help="Lowest MIDI pitch to be used (inclusive).")
+    parser.add_argument('--pitch-high', default=60, type=int, help="Highest MIDI pitch to be used (inclusive).")
+    parser.add_argument('--render-duration', default=4, type=float, help="Render duration in seconds.")
+    parser.add_argument('--num-workers', default=None, type=int, help="Number of workers to use.")
     parser.add_argument('--output-dir', default=os.path.join(os.path.dirname(__file__),'output'), help="Output directory.")
-    parser.add_argument('--log-level', default='DEBUG', choices=['DEBUG','INFO','WARNING','ERROR','CRITICAL', 'NOTSET'], help="Logger level.")
+    parser.add_argument('--log-level', default='INFO', choices=['DEBUG','INFO','WARNING','ERROR','CRITICAL', 'NOTSET'], help="Logger level.")
     args = parser.parse_args()
 
-    main(args.plugin, args.preset_dir, args.note_duration, args.render_duration,
-        args.pitch_low, args.pitch_high, args.num_workers, args.output_dir,
+    main(args.plugin, args.preset_dir, args.sample_rate, args.bpm, args.note_duration,
+        args.render_duration, args.pitch_low, args.pitch_high, args.num_workers, args.output_dir,
         args.log_level)

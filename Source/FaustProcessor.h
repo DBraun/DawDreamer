@@ -2,14 +2,9 @@
 #include "ProcessorBase.h"
 
 #ifdef BUILD_DAWDREAMER_FAUST
-#include <iostream>
-#include <map>
-
+#include <faust/compiler/generator/libfaust.h>
 #include <faust/compiler/utils/TMutex.h>
 #include <faust/dsp/interpreter-dsp.h>
-#include <faust/dsp/interpreter-dsp.h>
-#include <faust/dsp/libfaust-box.h>
-#include <faust/dsp/libfaust-signal.h>
 #include <faust/dsp/llvm-dsp.h>
 #include <faust/dsp/poly-interpreter-dsp.h>
 #include <faust/dsp/poly-llvm-dsp.h>
@@ -18,42 +13,48 @@
 #include <faust/gui/MidiUI.h>
 #include <faust/gui/SoundUI.h>
 #include <faust/midi/rt-midi.h>
-#include <faust/misc.h>
-#include <faust/compiler/generator/libfaust.h>
 
-// todo: don't include a .hh file
-#include <faust/compiler/tlib/tree.hh>
+#include <map>
 
-std::string getPathToFaustLibraries();
-std::string getPathToArchitectureFiles();
+#include "FaustSignalAPI.h"
 
+/*
+A custom implementation of SoundUI. For a requested soundfile primitive in
+Faust, we first try to find it in our Python dictionary of buffers. If it's not
+found, we resort to using the parent's JuceReader implementation which is still
+capable of loading wav files directly from the filesystem.
+*/
 class MySoundUI : public SoundUI {
+ private:
+  std::map<std::string, std::vector<juce::AudioSampleBuffer>> *m_SoundfileMap;
+  int m_sampleRate = -1;
+
  public:
-  void addSoundfile(const char *label, const char *filename,
-                    Soundfile **sf_zone) override {
+  MySoundUI(
+      std::map<std::string, std::vector<juce::AudioSampleBuffer>> *soundfileMap,
+      const std::string &sound_directory = "", int sample_rate = -1,
+      SoundfileReader *reader = nullptr, bool is_double = false)
+      : SoundUI(sound_directory, sample_rate, reader, is_double) {
+    jassert(soundfileMap);
+    m_SoundfileMap = soundfileMap;
+    m_sampleRate = sample_rate;
+  }
+
+  void addSoundfile(const char *label, const char *url, Soundfile **sf_zone) {
     // Parse the possible list
     std::string saved_url_real = std::string(label);
-    if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
-      // If failure, use 'defaultsound'
-      *sf_zone = defaultsound;
-      throw std::runtime_error("addSoundfile : soundfile for " +
-                               std::string(label) + " cannot be created !");
+    if (fSoundfileMap.find(saved_url_real) != fSoundfileMap.end()) {
+      // Get the soundfile.
+      *sf_zone = fSoundfileMap[saved_url_real].get();
       return;
     }
 
-    // Get the soundfile.
-    *sf_zone = fSoundfileMap[saved_url_real].get();
-  }
-
-  virtual void addSoundfileFromBuffers(const char *label,
-                                       std::vector<AudioSampleBuffer> buffers,
-                                       int sample_rate) {
-    // Parse the possible list
-    std::string saved_url_real = std::string(label);
-    if (fSoundfileMap.find(saved_url_real) == fSoundfileMap.end()) {
+    if (m_SoundfileMap->find(saved_url_real) != m_SoundfileMap->end()) {
       int total_length = 0;
-      int numChannels = 1;  // start with at least 1 channel. This may increase
-                            // due to code below.
+      int numChannels = 1;  // start with at least 1 channel. This may
+                            // increase due to code below.
+
+      auto buffers = m_SoundfileMap->at(saved_url_real);
 
       for (auto &buffer : buffers) {
         total_length += buffer.getNumSamples();
@@ -76,7 +77,7 @@ class MySoundUI : public SoundUI {
         int numSamples = buffer.getNumSamples();
 
         soundfile->fLength[i] = numSamples;
-        soundfile->fSR[i] = sample_rate;
+        soundfile->fSR[i] = m_sampleRate;
         soundfile->fOffset[i] = offset;
 
         void *tmpBuffers = alloca(soundfile->fChannels * sizeof(float *));
@@ -100,28 +101,20 @@ class MySoundUI : public SoundUI {
         soundfile->emptyFile(i, offset);
       }
 
-      // Share the same buffers for all other channels so that we have max_chan
-      // channels available
+      // Share the same buffers for all other channels so that we have
+      // max_chan channels available
       soundfile->shareBuffers(numChannels, MAX_CHAN);
       fSoundfileMap[saved_url_real] = std::shared_ptr<Soundfile>(soundfile);
+
+      // Get the soundfile pointer
+      *sf_zone = fSoundfileMap[saved_url_real].get();
+      return;
     }
+
+    // The requested sound url wasn't in our python dictionary, so use the
+    // inherited method to load it from the filesystem.
+    SoundUI::addSoundfile(label, url, sf_zone);
   }
-};
-
-struct SigWrapper {
-  CTree *ptr;
-  SigWrapper(Signal ptr) : ptr{ptr} {}
-  SigWrapper(float val) : ptr{sigReal(val)} {}
-  SigWrapper(int val) : ptr{sigInt(val)} {}
-  operator CTree *() { return ptr; }
-};
-
-struct BoxWrapper {
-  CTree *ptr;
-  BoxWrapper(Box ptr) : ptr{ptr} {}
-  BoxWrapper(float val) : ptr{boxReal(val)} {}
-  BoxWrapper(int val) : ptr{boxInt(val)} {}
-  operator CTree *() { return ptr; }
 };
 
 template <typename Ch, typename Traits = std::char_traits<Ch>,
@@ -238,6 +231,12 @@ class FaustProcessor : public ProcessorBase {
 
   std::string getFaustLibrariesPath() { return m_faustLibrariesPath; }
 
+  void setFaustAssetsPath(std::string faustAssetsPath) {
+    m_faustAssetsPath = faustAssetsPath;
+  }
+
+  std::string getFaustAssetsPath() { return m_faustAssetsPath; }
+
   std::map<std::string, std::vector<juce::AudioSampleBuffer>> m_SoundfileMap;
 
   void saveMIDI(std::string &savePath);
@@ -269,6 +268,7 @@ class FaustProcessor : public ProcessorBase {
   std::string m_autoImport;
   std::string m_code;
   std::string m_faustLibrariesPath = "";
+  std::string m_faustAssetsPath = "";
 
   int m_nvoices = 0;
   bool m_dynamicVoices = true;
@@ -306,10 +306,10 @@ class FaustProcessor : public ProcessorBase {
 
   // public libfaust API
  public:
-  void compileSignals(std::vector<SigWrapper> &wrappers,
+  bool compileSignals(std::vector<SigWrapper> &wrappers,
                       std::optional<std::vector<std::string>> in_argv);
 
-  void compileBox(BoxWrapper &box,
+  bool compileBox(BoxWrapper &box,
                   std::optional<std::vector<std::string>> in_argv);
 };
 
@@ -387,6 +387,10 @@ inline void create_bindings_for_faust_processor(py::module &m) {
                     &FaustProcessor::setFaustLibrariesPath,
                     "Absolute path to directory containing your custom "
                     "\".lib\" files containing Faust code.")
+      .def_property("faust_assets_path", &FaustProcessor::getFaustAssetsPath,
+                    &FaustProcessor::setFaustAssetsPath,
+                    "Absolute path to directory containing audio files to be "
+                    "used by Faust.")
       .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents,
                              "The number of MIDI events stored in the buffer. \
 		Note that note-ons and note-offs are counted separately.")

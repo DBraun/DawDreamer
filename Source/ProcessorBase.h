@@ -17,7 +17,10 @@ class ProcessorBase : public juce::AudioProcessor {
   //==============================================================================
   void prepareToPlay(double, int) override {}
   void releaseResources() override {}
-  void reset() override;
+
+  // This is a good place to turn off all voices and possibly send MIDI off
+  // messages.
+  virtual void reset() override;
 
   //
   void setPlayHead(AudioPlayHead* newPlayHead) override {
@@ -74,14 +77,14 @@ class ProcessorBase : public juce::AudioProcessor {
 
   float getAutomationVal(const char* parameterName,
                          AudioPlayHead::PositionInfo& posInfo);
-  float getAutomationVal(std::string& parameterName,
+  float getAutomationVal(const std::string& parameterName,
                          AudioPlayHead::PositionInfo& posInfo);
-  float getAutomationAtZero(std::string parameterName);
-  float getAutomationAtZeroByIndex(int& index);
+  float getAutomationAtZero(const std::string& parameterName);
+  float getAutomationAtZeroByIndex(const int& index);
 
-  std::vector<float> getAutomation(std::string& parameterName);
-  std::vector<float> getAutomationByIndex(int& index);
-  py::array_t<float> getAutomationNumpy(std::string& parameterName);
+  std::vector<float> getAutomation(const std::string& parameterName);
+  std::vector<float> getAutomationByIndex(const int& index);
+  py::array_t<float> getAutomationNumpy(const std::string& parameterName);
   py::dict getAutomationAll();
 
   //==============================================================================

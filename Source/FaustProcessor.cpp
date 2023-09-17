@@ -235,19 +235,18 @@ void FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
     return;
   }
 
-  const Array<AudioProcessorParameter*>& processorParams =
-      this->getParameters();
-
   bool anyAutomation = false;
-  for (int i = 0; i < this->getNumParameters(); i++) {
+  int i = 0;
+  for (auto* parameter : getParameters()) {
     int faustIndex = m_map_juceIndex_to_faustIndex[i];
-    auto theParameter = (AutomateParameterFloat*)processorParams[i];
+    auto theParameter = (AutomateParameterFloat*)parameter;
 
     bool hasAutomation = theParameter->isAutomated();
     anyAutomation |= hasAutomation;
     if (hasAutomation) {
       m_ui->setParamValue(faustIndex, theParameter->sample(posInfo));
     }
+    i++;
   }
 
   // If polyphony is enabled and we're grouping voices,
@@ -284,16 +283,15 @@ void FaustProcessor::reset() {
     posInfo.setTimeInSeconds(0);
     posInfo.setPpqPosition(0);
 
-    const Array<AudioProcessorParameter*>& processorParams =
-        this->getParameters();
-
-    for (int i = 0; i < this->getNumParameters(); i++) {
+    int i = 0;
+    for (auto* parameter : getParameters()) {
       int faustIndex = m_map_juceIndex_to_faustIndex[i];
 
       m_ui->setParamValue(
-          faustIndex,
-          ((AutomateParameterFloat*)processorParams[i])->sample(posInfo));
+          faustIndex, ((AutomateParameterFloat*)parameter)->sample(posInfo));
+      i++;
     }
+
     if (m_nvoices > 0 && m_groupVoices) {
       // When you want to access shared memory:
       if (guiUpdateMutex.Lock()) {
@@ -524,16 +522,13 @@ bool FaustProcessor::compile() {
   m_ui = new APIUI();
   theDsp->buildUserInterface(m_ui);
 
-  // soundfile UI.
-  m_soundUI = new MySoundUI();
-  for (const auto& [label, buffers] : m_SoundfileMap) {
-    m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers,
-                                       (int)(mySampleRate + .5));
-  }
+  const int sr = (int)(mySampleRate + .5);
+
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
   theDsp->buildUserInterface(m_soundUI);
 
   // init
-  theDsp->init((int)(mySampleRate + .5));
+  theDsp->init(sr);
 
   createParameterLayout();
 
@@ -541,7 +536,7 @@ bool FaustProcessor::compile() {
   return true;
 }
 
-void FaustProcessor::compileSignals(
+bool FaustProcessor::compileSignals(
     std::vector<SigWrapper>& wrappers,
     std::optional<std::vector<std::string>> in_argv) {
   clear();
@@ -578,18 +573,18 @@ void FaustProcessor::compileSignals(
 
   // create new factory
   bool is_polyphonic = m_nvoices > 0;
-  auto theDSP = m_dsp;
+  auto theDsp = m_dsp;
   if (is_polyphonic) {
     // Allocate polyphonic DSP
     m_dsp_poly =
         new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
-    theDSP = m_dsp_poly;
+    theDsp = m_dsp_poly;
   }
 
   // get channels
-  int inputs = theDSP->getNumInputs();
-  int outputs = theDSP->getNumOutputs();
+  int inputs = theDsp->getNumInputs();
+  int outputs = theDsp->getNumOutputs();
 
   m_numInputChannels = inputs;
   m_numOutputChannels = outputs;
@@ -606,25 +601,24 @@ void FaustProcessor::compileSignals(
   }
 
   m_ui = new APIUI();
-  theDSP->buildUserInterface(m_ui);
+  theDsp->buildUserInterface(m_ui);
 
-  // soundfile UI.
-  m_soundUI = new MySoundUI();
-  for (const auto& [label, buffers] : m_SoundfileMap) {
-    m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers,
-                                       (int)(mySampleRate + .5));
-  }
-  theDSP->buildUserInterface(m_soundUI);
+  const int sr = (int)(mySampleRate + .5);
+
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  theDsp->buildUserInterface(m_soundUI);
 
   // init
-  theDSP->init((int)(mySampleRate + .5));
+  theDsp->init(sr);
 
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+  return true;
 }
 
-void FaustProcessor::compileBox(
+bool FaustProcessor::compileBox(
     BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
   clear();
 
@@ -653,18 +647,18 @@ void FaustProcessor::compileBox(
 
   // create new factory
   bool is_polyphonic = m_nvoices > 0;
-  auto theDSP = m_dsp;
+  auto theDsp = m_dsp;
   if (is_polyphonic) {
     // Allocate polyphonic DSP
     m_dsp_poly =
         new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
-    theDSP = m_dsp_poly;
+    theDsp = m_dsp_poly;
   }
 
   // get channels
-  int inputs = theDSP->getNumInputs();
-  int outputs = theDSP->getNumOutputs();
+  int inputs = theDsp->getNumInputs();
+  int outputs = theDsp->getNumOutputs();
 
   m_numInputChannels = inputs;
   m_numOutputChannels = outputs;
@@ -679,24 +673,23 @@ void FaustProcessor::compileBox(
   }
 
   m_ui = new APIUI();
-  theDSP->buildUserInterface(m_ui);
+  theDsp->buildUserInterface(m_ui);
 
-  // soundfile UI.
-  m_soundUI = new MySoundUI();
-  for (const auto& [label, buffers] : m_SoundfileMap) {
-    m_soundUI->addSoundfileFromBuffers(label.c_str(), buffers,
-                                       (int)(mySampleRate + .5));
-  }
-  theDSP->buildUserInterface(m_soundUI);
+  const int sr = (int)(mySampleRate + .5);
+
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  theDsp->buildUserInterface(m_soundUI);
 
   // init
-  theDSP->init((int)(mySampleRate + .5));
+  theDsp->init(sr);
 
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 
   setMainBusInputsAndOutputs(inputs, outputs);
+
+  return true;
 }
 
 bool FaustProcessor::setDSPFile(const std::string& path) {
@@ -828,7 +821,7 @@ void FaustProcessor::createParameterLayout() {
   this->setParameterTree(std::move(group));
 
   int i = 0;
-  for (auto* parameter : this->getParameters()) {
+  for (auto* parameter : getParameters()) {
     int j = m_map_juceIndex_to_faustIndex[i];
     // give it a valid single sample of automation.
     ProcessorBase::setAutomationValByIndex(i, m_ui->getParamInit(j));
@@ -843,7 +836,7 @@ py::list FaustProcessor::getPluginParametersDescription() {
 
   if (m_compileState) {
     int i = 0;
-    for (auto* parameter : this->getParameters()) {
+    for (auto* parameter : getParameters()) {
       std::string theName =
           parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
       std::string label = parameter->getLabel().toStdString();
@@ -1075,125 +1068,6 @@ void FaustProcessor::setReleaseLength(double sec) {
   m_releaseLengthSec = sec;
   if (m_dsp_poly) {
     m_dsp_poly->setReleaseLength(m_releaseLengthSec);
-  }
-}
-
-#ifdef WIN32
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-// Find path to .dll */
-// https://stackoverflow.com/a/57738892/12327461
-HMODULE hMod;
-std::wstring MyDLLPathFull;
-std::wstring MyDLLDir;
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
-                      LPVOID lpReserved) {
-  switch (ul_reason_for_call) {
-    case DLL_PROCESS_ATTACH:
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-      break;
-  }
-  hMod = hModule;
-  const int BUFSIZE = 4096;
-  wchar_t buffer[BUFSIZE];
-  if (::GetModuleFileNameW(hMod, buffer, BUFSIZE - 1) <= 0) {
-    return TRUE;
-  }
-
-  MyDLLPathFull = buffer;
-
-  size_t found = MyDLLPathFull.find_last_of(L"/\\");
-  MyDLLDir = MyDLLPathFull.substr(0, found);
-
-  return TRUE;
-}
-
-#else
-
-// this applies to both __APPLE__ and linux?
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <dlfcn.h>
-
-// https://stackoverflow.com/a/51993539/911207
-const char* getMyDLLPath(void) {
-  Dl_info dl_info;
-  dladdr((void*)getMyDLLPath, &dl_info);
-  return (dl_info.dli_fname);
-}
-#endif
-
-std::string getPathToFaustLibraries() {
-  // Get the path to the directory containing basics.lib, stdfaust.lib etc.
-
-  try {
-#ifdef WIN32
-    const std::wstring ws_shareFaustDir = MyDLLDir + L"\\faustlibraries";
-    // std::cerr << "MyDLLDir: ";
-    // std::wcerr << MyDLLDir << L'\n';
-    // convert const wchar_t to char
-    // https://stackoverflow.com/a/4387335
-    const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
-    // Count required buffer size (plus one for null-terminator).
-    size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
-    char* char_shareFaustDir = new char[size];
-    std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
-
-    std::string p(char_shareFaustDir);
-
-    delete[] char_shareFaustDir;
-    return p;
-#else
-    // this applies to __APPLE__ and LINUX
-    const char* myDLLPath = getMyDLLPath();
-    // std::cerr << "myDLLPath: " << myDLLPath << std::endl;
-    std::filesystem::path p = std::filesystem::path(myDLLPath);
-    p = p.parent_path() / "faustlibraries";
-    return p.string();
-#endif
-  } catch (...) {
-    throw std::runtime_error("Error getting path to faustlibraries.");
-  }
-}
-
-std::string getPathToArchitectureFiles() {
-  // Get the path to the directory containing jax/minimal.py, unity/unity.cpp
-  // etc.
-
-  try {
-#ifdef WIN32
-    const std::wstring ws_shareFaustDir = MyDLLDir + L"\\architecture";
-    // std::cerr << "MyDLLDir: ";
-    // std::wcerr << MyDLLDir << L'\n';
-    // convert const wchar_t to char
-    // https://stackoverflow.com/a/4387335
-    const wchar_t* wc_shareFaustDir = ws_shareFaustDir.c_str();
-    // Count required buffer size (plus one for null-terminator).
-    size_t size = (wcslen(wc_shareFaustDir) + 1) * sizeof(wchar_t);
-    char* char_shareFaustDir = new char[size];
-    std::wcstombs(char_shareFaustDir, wc_shareFaustDir, size);
-
-    std::string p(char_shareFaustDir);
-
-    delete[] char_shareFaustDir;
-    return p;
-#else
-    // this applies to __APPLE__ and LINUX
-    const char* myDLLPath = getMyDLLPath();
-    // std::cerr << "myDLLPath: " << myDLLPath << std::endl;
-    std::filesystem::path p = std::filesystem::path(myDLLPath);
-    p = p.parent_path() / "architecture";
-    return p.string();
-#endif
-  } catch (...) {
-    throw std::runtime_error("Error getting path to architecture.");
   }
 }
 
