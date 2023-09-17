@@ -66,7 +66,7 @@ jobs:
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
-        CIBW_TEST_SKIP: "*311*"
+        CIBW_TEST_SKIP: "*37* *38* *39* *311*"  # Only care about 310 (current Google Colab version)
 
     - uses: actions/upload-artifact@v3
       with:
@@ -225,8 +225,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
         CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
-        # todo: want to test Python 3.11
-        CIBW_TEST_SKIP: "*311* *arm64*"
+        CIBW_TEST_SKIP: "*arm64*"
 
     - uses: actions/upload-artifact@v3
       with:
