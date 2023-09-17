@@ -62,7 +62,7 @@ jobs:
           export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && pip install --upgrade pip && sh -v build_linux.sh
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer:$PWD/thirdparty/libfaust/ubuntu-x86_64/Release/lib && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
-        CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile jax flax optax
+        CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile jax[cpu] flax
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
@@ -89,152 +89,152 @@ jobs:
     - name: Build Docker image
       run: docker build -t dawdreamer .
 
-  build-windows:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-        - { os: windows-2022, python-version: "3.7", CIBW-BUILD: "cp37*"}
-        - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
-        - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
-        - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
-        - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
+  # build-windows:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       include:
+  #       - { os: windows-2022, python-version: "3.7", CIBW-BUILD: "cp37*"}
+  #       - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
+  #       - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
+  #       - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
+  #       - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       submodules: true
 
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+  #   - name: Setup Python ${{ matrix.python-version }}
+  #     uses: actions/setup-python@v4
+  #     with:
+  #       python-version: ${{ matrix.python-version }}
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+  #   - name: Add msbuild to PATH
+  #     uses: microsoft/setup-msbuild@v1.1
 
-    - name: Get CMake
-      uses: lukka/get-cmake@latest
+  #   - name: Get CMake
+  #     uses: lukka/get-cmake@latest
 
-    - name: clean faust libraries
-      run: |
-        Remove-Item -Recurse -Force "dawdreamer/faustlibraries/.git"
+  #   - name: clean faust libraries
+  #     run: |
+  #       Remove-Item -Recurse -Force "dawdreamer/faustlibraries/.git"
 
-    - name: Download libfaust
-      shell: cmd
-      run: |
-        cd thirdparty/libfaust
-        call download_libfaust.bat
+  #   - name: Download libfaust
+  #     shell: cmd
+  #     run: |
+  #       cd thirdparty/libfaust
+  #       call download_libfaust.bat
 
-    - name: Build libsamplerate
-      run: |
-        cd thirdparty/libsamplerate
-        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
-        cd build_release
-        msbuild libsamplerate.sln /property:Configuration=Release
+  #   - name: Build libsamplerate
+  #     run: |
+  #       cd thirdparty/libsamplerate
+  #       cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+  #       cd build_release
+  #       msbuild libsamplerate.sln /property:Configuration=Release
 
-    - name: Build Windows (Release)
-      run: |
-        msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
+  #   - name: Build Windows (Release)
+  #     run: |
+  #       msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
 
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel
+  #   - name: Install cibuildwheel
+  #     run: python -m pip install cibuildwheel
 
-    - name: Build Wheels
-      run: |
-        python -m cibuildwheel --output-dir wheelhouse
-      env:
-        PYTHONMAJOR: ${{ matrix.python-version }}
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -v ."
-        CIBW_ARCHS: auto64
-        CIBW_BUILD: ${{matrix.CIBW-BUILD}}
+  #   - name: Build Wheels
+  #     run: |
+  #       python -m cibuildwheel --output-dir wheelhouse
+  #     env:
+  #       PYTHONMAJOR: ${{ matrix.python-version }}
+  #       CIBW_BUILD_VERBOSITY: 1
+  #       CIBW_TEST_REQUIRES: -r test-requirements.txt
+  #       CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -v ."
+  #       CIBW_ARCHS: auto64
+  #       CIBW_BUILD: ${{matrix.CIBW-BUILD}}
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: my-wheel-artifact
-        path: ./wheelhouse/*.whl
+  #   - uses: actions/upload-artifact@v3
+  #     with:
+  #       name: my-wheel-artifact
+  #       path: ./wheelhouse/*.whl
 
-    - name: "Build docs for GitHub pages"
-      if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
-      shell: cmd
-      run: |
-        pip install -U sphinx
-        cd docs && make.bat html
-    - name: Deploy docs
-      uses: peaceiris/actions-gh-pages@v3
-      # todo: make condition for being on main branch
-      if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html
+  #   - name: "Build docs for GitHub pages"
+  #     if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
+  #     shell: cmd
+  #     run: |
+  #       pip install -U sphinx
+  #       cd docs && make.bat html
+  #   - name: Deploy docs
+  #     uses: peaceiris/actions-gh-pages@v3
+  #     # todo: make condition for being on main branch
+  #     if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
+  #     with:
+  #       github_token: ${{ secrets.GITHUB_TOKEN }}
+  #       publish_dir: ./docs/_build/html
 
-  build-macos:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-        - { os: macos-11, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
-        - { os: macos-11, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
-        - { os: macos-11, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
+  # build-macos:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       include:
+  #       - { os: macos-11, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
+  #       - { os: macos-11, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
+  #       - { os: macos-11, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
+  #       - { os: macos-11, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
+  #       - { os: macos-11, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
+  #       - { os: macos-11, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with:
+  #       submodules: true
 
-    - name: Get CMake
-      uses: lukka/get-cmake@latest
+  #   - name: Get CMake
+  #     uses: lukka/get-cmake@latest
 
-    - name: Build libsamplerate
-      run: |
-        cd thirdparty/libsamplerate
-        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="${{matrix.ARCHS}}" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
-        make --directory=build_release
-        cd ../..
+  #   - name: Build libsamplerate
+  #     run: |
+  #       cd thirdparty/libsamplerate
+  #       cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="${{matrix.ARCHS}}" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+  #       make --directory=build_release
+  #       cd ../..
 
-    - name: clean faust libraries
-      run: |
-        rm -rf dawdreamer/faustlibraries/.git
+  #   - name: clean faust libraries
+  #     run: |
+  #       rm -rf dawdreamer/faustlibraries/.git
 
-    - name: Download libfaust
-      run: |
-        cd thirdparty/libfaust
-        sh download_libfaust.sh
+  #   - name: Download libfaust
+  #     run: |
+  #       cd thirdparty/libfaust
+  #       sh download_libfaust.sh
 
-    - name: Build wheels ${{ matrix.python-version }}
-      uses: pypa/cibuildwheel@v2.12.3
-      env:
-        # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
-        PYTHONMAJOR: ${{ matrix.python-version }}
-        MACOSX_DEPLOYMENT_TARGET: 11.0
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_BEFORE_BUILD: |
-          export pythonLocation=$(python3-config --prefix)
-          otool -L $pythonLocation/bin/python3
-          xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/ CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
-          cd Builds/MacOSX/build/Release-${{matrix.ARCHS}}
-          mv dawdreamer.so.dylib dawdreamer.so
-        CIBW_TEST_REQUIRES: -r test-requirements.txt
-        CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -v ."
-        CIBW_BUILD: ${{matrix.build}}
-        CIBW_ARCHS: auto64
-        CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
-        CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
-        # todo: want to test Python 3.11
-        CIBW_TEST_SKIP: "*311* *arm64*"
+  #   - name: Build wheels ${{ matrix.python-version }}
+  #     uses: pypa/cibuildwheel@v2.12.3
+  #     env:
+  #       # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
+  #       PYTHONMAJOR: ${{ matrix.python-version }}
+  #       MACOSX_DEPLOYMENT_TARGET: 11.0
+  #       CIBW_BUILD_VERBOSITY: 1
+  #       CIBW_BEFORE_BUILD: |
+  #         export pythonLocation=$(python3-config --prefix)
+  #         otool -L $pythonLocation/bin/python3
+  #         xcodebuild ARCHS="${{matrix.ARCHS}}" ONLY_ACTIVE_ARCH=NO -configuration Release-${{matrix.ARCHS}} -project Builds/MacOSX/DawDreamer.xcodeproj/ CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
+  #         cd Builds/MacOSX/build/Release-${{matrix.ARCHS}}
+  #         mv dawdreamer.so.dylib dawdreamer.so
+  #       CIBW_TEST_REQUIRES: -r test-requirements.txt
+  #       CIBW_TEST_COMMAND: "cd {project}/tests; python -m pytest -v ."
+  #       CIBW_BUILD: ${{matrix.build}}
+  #       CIBW_ARCHS: auto64
+  #       CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
+  #       CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
+  #       # todo: want to test Python 3.11
+  #       CIBW_TEST_SKIP: "*311* *arm64*"
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: my-wheel-artifact
-        path: ./wheelhouse/*.whl
+  #   - uses: actions/upload-artifact@v3
+  #     with:
+  #       name: my-wheel-artifact
+  #       path: ./wheelhouse/*.whl
 
   upload-pypi:
-    needs: [build-windows, build-ubuntu, build-macos]
+    needs: [build-ubuntu]
     runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
     if: github.event_name == 'release' && github.event.action == 'published'
