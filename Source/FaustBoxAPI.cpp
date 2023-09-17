@@ -146,11 +146,9 @@ void add_unary_operation(py::class_<BoxWrapper> &cls, const char *name,
   });
 }
 
-py::module_ &create_bindings_for_faust_box(py::module &faust_module) {
+py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module &box_module) {
   using arg = py::arg;
   using kw_only = py::kw_only;
-
-  auto box_module = faust_module.def_submodule("box");
 
   box_module.doc() = R"pbdoc(
         The Faust Box API

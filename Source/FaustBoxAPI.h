@@ -37,6 +37,6 @@ std::string getPathToFaustLibraries();
 
 std::string getPathToArchitectureFiles();
 
-py::module_ &create_bindings_for_faust_box(py::module &faust_module);
+py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module& box_module);
 
 #endif
