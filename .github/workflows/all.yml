@@ -13,15 +13,14 @@ jobs:
     strategy:
       matrix:
         include:
-        - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_x86_64"}
         - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
         - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
         - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
         - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
-        # - { python-version: "3.7", pythonLibPath: "/opt/python/cp37-cp37m/lib", pythonInclude: "/opt/python/cp37-cp37m/include/python3.7m", cibwbuild: "cp37-manylinux_aarch64"}
         # - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_aarch64"}
         # - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_aarch64"}
         # - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_aarch64"}
+        # - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_aarch64"}
 
     steps:
     - uses: actions/checkout@v3
@@ -51,7 +50,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.12.3
+      uses: pypa/cibuildwheel@v2.15.0
       env:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
@@ -66,7 +65,7 @@ jobs:
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
-        CIBW_TEST_SKIP: "*37* *38* *39* *311*"  # Only care about 310 (current Google Colab version)
+        CIBW_TEST_SKIP: "*38* *39* *311*"  # Only care about 310 (current Google Colab version)
 
     - uses: actions/upload-artifact@v3
       with:
@@ -79,7 +78,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - { python-version: "3.9"}
+        - { python-version: "3.10"}
 
     steps:
     - uses: actions/checkout@v3
@@ -94,7 +93,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - { os: windows-2022, python-version: "3.7", CIBW-BUILD: "cp37*"}
         - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
         - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
         - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
@@ -207,7 +205,7 @@ jobs:
         sh download_libfaust.sh
 
     - name: Build wheels ${{ matrix.python-version }}
-      uses: pypa/cibuildwheel@v2.12.3
+      uses: pypa/cibuildwheel@v2.15.0
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-version }}
