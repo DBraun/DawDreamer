@@ -27,11 +27,11 @@ jobs:
       with:
         submodules: true
 
-    - name: Set up QEMU for aarch64 on Linux
-      if: runner.os == 'Linux'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: all
+    # - name: Set up QEMU for aarch64 on Linux
+    #   if: runner.os == 'Linux'
+    #   uses: docker/setup-qemu-action@v3
+    #   with:
+    #     platforms: all
 
     - name: clean faust libraries
       run: |
@@ -64,7 +64,7 @@ jobs:
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile flax
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && pytest -v ."
         CIBW_ARCHS: auto64
-        CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
+        CIBW_ARCHS_LINUX: auto64 aarch64  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
         CIBW_TEST_SKIP: "*38* *39* *311*"  # Only care about 310 (current Google Colab version)
 
     - uses: actions/upload-artifact@v3

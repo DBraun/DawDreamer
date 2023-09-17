@@ -24,12 +24,12 @@ RUN /bin/bash -c "source test-env/bin/activate && pip install librosa scipy nump
 # Build wheel
 WORKDIR /DawDreamer
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer:/DawDreamer/thirdparty/libfaust/ubuntu-x86_64/Release/lib
-RUN python3.10 -m build --wheel
+RUN python -m build --wheel
 
 # Install wheel
 WORKDIR /DawDreamer
-RUN python3.10 -m pip install dist/dawdreamer*.whl
+RUN pip install dist/dawdreamer*.whl
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
-RUN python3.10 -m pytest -v .
+RUN pytest -v .

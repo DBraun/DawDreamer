@@ -10,7 +10,7 @@ def test_stereo_plugin_effect(plugin_path):
 
     plugin_basename = splitext(basename(plugin_path))[0]
 
-    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    engine = daw.RenderEngine(SAMPLE_RATE, 1)  # todo: test more buffer sizes
 
     data = load_audio_file(ASSETS / "575854__yellowtree__d-b-funk-loop.wav", DURATION+.1)
 
@@ -35,6 +35,7 @@ def test_stereo_plugin_effect(plugin_path):
 
     # check that it's non-silent
     audio = engine.get_audio()
+    assert not np.isnan(audio).any()
     assert(np.mean(np.abs(audio)) > .01)
 
 
