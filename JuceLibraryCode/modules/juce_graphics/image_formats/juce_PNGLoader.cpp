@@ -58,14 +58,13 @@ namespace pnglibNamespace
    using std::free;
   #endif
 
-   JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcomma",
-                                        "-Wfloat-equal",
+   JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsign-conversion",
                                         "-Wimplicit-fallthrough",
-                                        "-Wmaybe-uninitialized",
-                                        "-Wnull-pointer-subtraction",
-                                        "-Wsign-conversion",
                                         "-Wtautological-constant-out-of-range-compare",
-                                        "-Wzero-as-null-pointer-constant")
+                                        "-Wzero-as-null-pointer-constant",
+                                        "-Wcomma",
+                                        "-Wmaybe-uninitialized",
+                                        "-Wnull-pointer-subtraction")
 
   #undef check
   using std::abs;

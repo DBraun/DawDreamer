@@ -39,7 +39,7 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     }
     else
     {
-        setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
+        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
         updatePosition (area, Desktop::getInstance().getDisplays().getDisplayForRect (area)->userArea);
         addToDesktop (ComponentPeer::windowIsTemporary);
 
@@ -67,7 +67,7 @@ public:
 
     void timerCallback() override
     {
-        if (! detail::WindowingHelpers::isForegroundOrEmbeddedProcess (&callout))
+        if (! isForegroundOrEmbeddedProcess (&callout))
             callout.dismiss();
     }
 
@@ -99,6 +99,7 @@ int CallOutBox::getBorderSize() const noexcept
 void CallOutBox::lookAndFeelChanged()
 {
     resized();
+    repaint();
 }
 
 void CallOutBox::paint (Graphics& g)

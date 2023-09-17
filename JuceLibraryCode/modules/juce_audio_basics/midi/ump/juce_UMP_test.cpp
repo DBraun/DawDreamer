@@ -48,18 +48,18 @@ public:
 
             forEachNonSysExTestMessage (random, [&] (const MidiMessage& m)
             {
-                const auto packets = toMidi1 (m);
+                Packets packets;
+                Conversion::toMidi1 (m, packets);
                 expect (packets.size() == 1);
 
                 // Make sure that the message type is correct
-                const auto msgType = Utils::getMessageType (packets.data()[0]);
-                expect (msgType == ((m.getRawData()[0] >> 0x4) == 0xf ? 0x1 : 0x2));
+                expect (Utils::getMessageType (packets.data()[0]) == ((m.getRawData()[0] >> 0x4) == 0xf ? 0x1 : 0x2));
 
                 translator.dispatch (View {packets.data() },
                                      0,
-                                     [&] (const BytestreamMidiView& roundTripped)
+                                     [&] (const MidiMessage& roundTripped)
                                      {
-                                         expect (equal (m, roundTripped.getMessage()));
+                                         expect (equal (m, roundTripped));
                                      });
             });
         }
@@ -68,7 +68,8 @@ public:
         {
             {
                 // Zero length message
-                const auto packets = toMidi1 (createRandomSysEx (random, 0));
+                Packets packets;
+                Conversion::toMidi1 (createRandomSysEx (random, 0), packets);
                 expect (packets.size() == 2);
 
                 expect (packets.data()[0] == 0x30000000);
@@ -77,50 +78,51 @@ public:
 
             {
                 const auto message = createRandomSysEx (random, 1);
-                const auto packets = toMidi1 (message);
+                Packets packets;
+                Conversion::toMidi1 (message, packets);
                 expect (packets.size() == 2);
 
                 const auto* sysEx = message.getSysExData();
-                expect (packets.data()[0] == Utils::bytesToWord (std::byte { 0x30 },
-                                                                 std::byte { 0x01 },
-                                                                 std::byte { sysEx[0] },
-                                                                 std::byte { 0 }));
+                expect (packets.data()[0] == Utils::bytesToWord (0x30, 0x01, sysEx[0], 0));
                 expect (packets.data()[1] == 0x00000000);
             }
 
             {
                 const auto message = createRandomSysEx (random, 6);
-                const auto packets = toMidi1 (message);
+                Packets packets;
+                Conversion::toMidi1 (message, packets);
                 expect (packets.size() == 2);
 
                 const auto* sysEx = message.getSysExData();
-                expect (packets.data()[0] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x06 },     std::byte { sysEx[0] }, std::byte { sysEx[1] }));
-                expect (packets.data()[1] == Utils::bytesToWord (std::byte { sysEx[2] }, std::byte { sysEx[3] }, std::byte { sysEx[4] }, std::byte { sysEx[5] }));
+                expect (packets.data()[0] == Utils::bytesToWord (0x30,     0x06,     sysEx[0], sysEx[1]));
+                expect (packets.data()[1] == Utils::bytesToWord (sysEx[2], sysEx[3], sysEx[4], sysEx[5]));
             }
 
             {
                 const auto message = createRandomSysEx (random, 12);
-                const auto packets = toMidi1 (message);
+                Packets packets;
+                Conversion::toMidi1 (message, packets);
                 expect (packets.size() == 4);
 
                 const auto* sysEx = message.getSysExData();
-                expect (packets.data()[0] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x16 },     std::byte { sysEx[0] },  std::byte { sysEx[1] }));
-                expect (packets.data()[1] == Utils::bytesToWord (std::byte { sysEx[2] }, std::byte { sysEx[3] }, std::byte { sysEx[4] },  std::byte { sysEx[5] }));
-                expect (packets.data()[2] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x36 },     std::byte { sysEx[6] },  std::byte { sysEx[7] }));
-                expect (packets.data()[3] == Utils::bytesToWord (std::byte { sysEx[8] }, std::byte { sysEx[9] }, std::byte { sysEx[10] }, std::byte { sysEx[11] }));
+                expect (packets.data()[0] == Utils::bytesToWord (0x30,     0x16,     sysEx[0],  sysEx[1]));
+                expect (packets.data()[1] == Utils::bytesToWord (sysEx[2], sysEx[3], sysEx[4],  sysEx[5]));
+                expect (packets.data()[2] == Utils::bytesToWord (0x30,     0x36,     sysEx[6],  sysEx[7]));
+                expect (packets.data()[3] == Utils::bytesToWord (sysEx[8], sysEx[9], sysEx[10], sysEx[11]));
             }
 
             {
                 const auto message = createRandomSysEx (random, 13);
-                const auto packets = toMidi1 (message);
+                Packets packets;
+                Conversion::toMidi1 (message, packets);
                 expect (packets.size() == 6);
 
                 const auto* sysEx = message.getSysExData();
-                expect (packets.data()[0] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x16 },     std::byte { sysEx[0] },  std::byte { sysEx[1] }));
-                expect (packets.data()[1] == Utils::bytesToWord (std::byte { sysEx[2] }, std::byte { sysEx[3] }, std::byte { sysEx[4] },  std::byte { sysEx[5] }));
-                expect (packets.data()[2] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x26 },     std::byte { sysEx[6] },  std::byte { sysEx[7] }));
-                expect (packets.data()[3] == Utils::bytesToWord (std::byte { sysEx[8] }, std::byte { sysEx[9] }, std::byte { sysEx[10] }, std::byte { sysEx[11] }));
-                expect (packets.data()[4] == Utils::bytesToWord (std::byte { 0x30 },     std::byte { 0x31 },     std::byte { sysEx[12] }, std::byte { 0 }));
+                expect (packets.data()[0] == Utils::bytesToWord (0x30,     0x16,     sysEx[0],  sysEx[1]));
+                expect (packets.data()[1] == Utils::bytesToWord (sysEx[2], sysEx[3], sysEx[4],  sysEx[5]));
+                expect (packets.data()[2] == Utils::bytesToWord (0x30,     0x26,     sysEx[6],  sysEx[7]));
+                expect (packets.data()[3] == Utils::bytesToWord (sysEx[8], sysEx[9], sysEx[10], sysEx[11]));
+                expect (packets.data()[4] == Utils::bytesToWord (0x30,     0x31,     sysEx[12], 0));
                 expect (packets.data()[5] == 0x00000000);
             }
         }
@@ -131,15 +133,15 @@ public:
         const auto checkRoundTrip = [&] (const MidiBuffer& expected)
         {
             for (const auto meta : expected)
-                Conversion::toMidi1 (ump::BytestreamMidiView (meta), [&] (const auto p) { packets.add (p); });
+                Conversion::toMidi1 (meta.getMessage(), packets);
 
             MidiBuffer output;
             converter.dispatch (packets.data(),
                                 packets.data() + packets.size(),
                                 0,
-                                [&] (const BytestreamMidiView& roundTripped)
+                                [&] (const MidiMessage& roundTripped)
                                 {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+                                    output.addEvent (roundTripped, int (roundTripped.getTimeStamp()));
                                 });
             packets.clear();
 
@@ -159,7 +161,8 @@ public:
         beginTest ("UMP SysEx7 messages interspersed with utility messages convert to bytestream");
         {
             const auto sysEx = createRandomSysEx (random, 100);
-            const auto originalPackets = toMidi1 (sysEx);
+            Packets originalPackets;
+            Conversion::toMidi1 (sysEx, originalPackets);
 
             Packets modifiedPackets;
 
@@ -180,9 +183,9 @@ public:
             converter.dispatch (modifiedPackets.data(),
                                 modifiedPackets.data() + modifiedPackets.size(),
                                 0,
-                                [&] (const BytestreamMidiView& roundTripped)
+                                [&] (const MidiMessage& roundTripped)
                                 {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+                                    output.addEvent (roundTripped, int (roundTripped.getTimeStamp()));
                                 });
 
             // All Utility messages should have been ignored
@@ -195,7 +198,8 @@ public:
         beginTest ("UMP SysEx7 messages interspersed with System Realtime messages convert to bytestream");
         {
             const auto sysEx = createRandomSysEx (random, 200);
-            const auto originalPackets = toMidi1 (sysEx);
+            Packets originalPackets;
+            Conversion::toMidi1 (sysEx, originalPackets);
 
             Packets modifiedPackets;
             MidiBuffer realtimeMessages;
@@ -218,9 +222,9 @@ public:
             converter.dispatch (modifiedPackets.data(),
                                 modifiedPackets.data() + modifiedPackets.size(),
                                 0,
-                                [&] (const BytestreamMidiView& roundTripped)
+                                [&] (const MidiMessage& roundTripped)
                                 {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+                                    output.addEvent (roundTripped, int (roundTripped.getTimeStamp()));
                                 });
 
             const auto numOutputs = output.getNumEvents();
@@ -254,7 +258,8 @@ public:
         beginTest ("UMP SysEx7 messages interspersed with System Realtime and Utility messages convert to bytestream");
         {
             const auto sysEx = createRandomSysEx (random, 300);
-            const auto originalPackets = toMidi1 (sysEx);
+            Packets originalPackets;
+            Conversion::toMidi1 (sysEx, originalPackets);
 
             Packets modifiedPackets;
             MidiBuffer realtimeMessages;
@@ -285,9 +290,9 @@ public:
             converter.dispatch (modifiedPackets.data(),
                                 modifiedPackets.data() + modifiedPackets.size(),
                                 0,
-                                [&] (const BytestreamMidiView& roundTripped)
+                                [&] (const MidiMessage& roundTripped)
                                 {
-                                    output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+                                    output.addEvent (roundTripped, int (roundTripped.getTimeStamp()));
                                 });
 
             const auto numOutputs = output.getNumEvents();
@@ -331,14 +336,19 @@ public:
                 Packets p;
 
                 for (const auto meta : noteOn)
-                    Conversion::toMidi1 (ump::BytestreamMidiView (meta), [&] (const auto packet) { p.add (packet); });
+                    Conversion::toMidi1 (meta.getMessage(), p);
 
                 return p;
             }();
 
             const auto sysEx = createRandomSysEx (random, 300);
 
-            const auto originalPackets = toMidi1 (sysEx);
+            const auto originalPackets = [&]
+            {
+                Packets p;
+                Conversion::toMidi1 (sysEx, p);
+                return p;
+            }();
 
             const auto modifiedPackets = [&]
             {
@@ -368,9 +378,9 @@ public:
                 converter.dispatch (p.data(),
                                     p.data() + p.size(),
                                     0,
-                                    [&] (const BytestreamMidiView& roundTripped)
+                                    [&] (const MidiMessage& roundTripped)
                                     {
-                                        output.addEvent (roundTripped.getMessage(), int (roundTripped.timestamp));
+                                        output.addEvent (roundTripped, int (roundTripped.getTimeStamp()));
                                     });
             };
 
@@ -380,7 +390,8 @@ public:
             expect (equal (output, noteOn));
 
             const auto newSysEx = createRandomSysEx (random, 300);
-            const auto newSysExPackets = toMidi1 (newSysEx);
+            Packets newSysExPackets;
+            Conversion::toMidi1 (newSysEx, newSysExPackets);
 
             // If we push another midi event without interrupting it,
             // it should get through without being modified,
@@ -667,17 +678,12 @@ public:
 
         beginTest ("MIDI 2 -> 1 messages which don't convert");
         {
-            const std::byte opcodes[] { std::byte { 0x0 },
-                                        std::byte { 0x1 },
-                                        std::byte { 0x4 },
-                                        std::byte { 0x5 },
-                                        std::byte { 0x6 },
-                                        std::byte { 0xf } };
+            const uint8_t opcodes[] { 0x0, 0x1, 0x4, 0x5, 0x6, 0xf };
 
             for (const auto opcode : opcodes)
             {
                 Packets midi2;
-                midi2.add (PacketX2 { Utils::bytesToWord (std::byte { 0x40 }, std::byte { opcode << 0x4 }, std::byte { 0 }, std::byte { 0 }), 0x0 });
+                midi2.add (PacketX2 { Utils::bytesToWord (0x40, (uint8_t) (opcode << 0x4), 0, 0), 0x0 });
                 checkMidi2ToMidi1Conversion (midi2, {});
             }
         }
@@ -779,7 +785,7 @@ public:
             for (const auto cc : CCs)
             {
                 Packets midi1;
-                midi1.add (PacketX1 { Utils::bytesToWord (std::byte { 0x20 }, std::byte { 0xb0 }, std::byte { cc }, std::byte { 0x00 }) });
+                midi1.add (PacketX1 { Utils::bytesToWord (0x20, 0xb0, cc, 0x00) });
 
                 checkMidi1ToMidi2Conversion (midi1, {});
             }
@@ -868,13 +874,6 @@ public:
     }
 
 private:
-    static Packets toMidi1 (const MidiMessage& msg)
-    {
-        Packets packets;
-        Conversion::toMidi1 (ump::BytestreamMidiView (&msg), [&] (const auto p) { packets.add (p); });
-        return packets;
-    }
-
     static Packets convertMidi2ToMidi1 (const Packets& midi2)
     {
         Packets r;
@@ -935,10 +934,10 @@ private:
     {
         const auto status = random.nextInt (3);
 
-        return PacketX1 { Utils::bytesToWord (std::byte { 0 },
-                                              std::byte (status << 0x4),
-                                              std::byte (status == 0 ? 0 : random.nextInt (0x100)),
-                                              std::byte (status == 0 ? 0 : random.nextInt (0x100))) };
+        return PacketX1 { Utils::bytesToWord (0,
+                                              uint8_t (status << 0x4),
+                                              uint8_t (status == 0 ? 0 : random.nextInt (0x100)),
+                                              uint8_t (status == 0 ? 0 : random.nextInt (0x100))) };
     }
 
     PacketX1 createRandomRealtimeUMP (Random& random)
@@ -947,19 +946,19 @@ private:
         {
             switch (random.nextInt (6))
             {
-                case 0: return std::byte { 0xf8 };
-                case 1: return std::byte { 0xfa };
-                case 2: return std::byte { 0xfb };
-                case 3: return std::byte { 0xfc };
-                case 4: return std::byte { 0xfe };
-                case 5: return std::byte { 0xff };
+                case 0: return 0xf8;
+                case 1: return 0xfa;
+                case 2: return 0xfb;
+                case 3: return 0xfc;
+                case 4: return 0xfe;
+                case 5: return 0xff;
             }
 
             jassertfalse;
-            return std::byte { 0x00 };
+            return 0x00;
         }();
 
-        return PacketX1 { Utils::bytesToWord (std::byte { 0x10 }, status, std::byte { 0x00 }, std::byte { 0x00 }) };
+        return PacketX1 { Utils::bytesToWord (0x10, uint8_t (status), 0x00, 0x00) };
     }
 
     template <typename Fn>

@@ -216,9 +216,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
         pimpl->bind();
 
        #if ! JUCE_ANDROID
-        if (! pimpl->context.isCoreProfile())
-            glEnable (GL_TEXTURE_2D);
-
+        glEnable (GL_TEXTURE_2D);
         clearGLError();
        #endif
         glBindTexture (GL_TEXTURE_2D, p->textureID);

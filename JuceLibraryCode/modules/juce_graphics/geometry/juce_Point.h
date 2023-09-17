@@ -54,19 +54,14 @@ public:
     /** Copies this point from another one. */
     Point& operator= (const Point&) = default;
 
-    constexpr inline bool operator== (Point other) const noexcept
-    {
-        const auto tie = [] (const Point& p) { return std::tie (p.x, p.y); };
-        return tie (*this) == tie (other);
-    }
-
-    constexpr inline bool operator!= (Point other) const noexcept      { return ! operator== (other); }
+    constexpr inline bool operator== (Point other) const noexcept      { return x == other.x && y == other.y; }
+    constexpr inline bool operator!= (Point other) const noexcept      { return x != other.x || y != other.y; }
 
     /** Returns true if the point is (0, 0). */
-    constexpr bool isOrigin() const noexcept                           { return operator== (Point()); }
+    constexpr bool isOrigin() const noexcept                           { return x == ValueType() && y == ValueType(); }
 
     /** Returns true if the coordinates are finite values. */
-    constexpr inline bool isFinite() const noexcept                    { return juce_isfinite (x) && juce_isfinite (y); }
+    constexpr inline bool isFinite() const noexcept                    { return juce_isfinite(x) && juce_isfinite(y); }
 
     /** Returns the point's x coordinate. */
     constexpr inline ValueType getX() const noexcept                   { return x; }

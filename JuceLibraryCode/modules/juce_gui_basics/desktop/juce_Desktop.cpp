@@ -27,7 +27,7 @@ namespace juce
 {
 
 Desktop::Desktop()
-    : mouseSources (new detail::MouseInputSourceList()),
+    : mouseSources (new MouseInputSource::SourceList()),
       masterScaleFactor ((float) getDefaultMasterScale()),
       nativeDarkModeChangeDetectorImpl (createNativeDarkModeChangeDetectorImpl())
 {
@@ -353,7 +353,7 @@ void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
 {
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    if (! approximatelyEqual (masterScaleFactor, newScaleFactor))
+    if (masterScaleFactor != newScaleFactor)
     {
         masterScaleFactor = newScaleFactor;
         displays->refresh();

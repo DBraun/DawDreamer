@@ -76,9 +76,6 @@ public:
         tickDisabledColourId    = 0x1006503   /**< The colour to use for the disabled tick mark and/or outline. */
     };
 
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
-
 protected:
     //==============================================================================
     /** @internal */
@@ -87,6 +84,8 @@ protected:
     void colourChanged() override;
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleButton)
 };
 

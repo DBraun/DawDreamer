@@ -424,9 +424,6 @@ public:
     */
     void setNormalisableRange (NormalisableRange<double> newNormalisableRange);
 
-    /** Returns the slider's normalisable range. */
-    NormalisableRange<double> getNormalisableRange() const noexcept;
-
     /** Returns the slider's range. */
     Range<double> getRange() const noexcept;
 
@@ -935,11 +932,6 @@ public:
                                                  const Slider::SliderStyle style,
                                                  Slider&) = 0;
 
-        virtual void drawLinearSliderOutline (Graphics&,
-                                              int x, int y, int width, int height,
-                                              const Slider::SliderStyle,
-                                              Slider&) = 0;
-
         virtual void drawLinearSliderThumb (Graphics&,
                                             int x, int y, int width, int height,
                                             float sliderPos,
@@ -1001,8 +993,6 @@ public:
     void mouseEnter (const MouseEvent&) override;
     /** @internal */
     bool keyPressed (const KeyPress&) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     //==============================================================================
    #ifndef DOXYGEN
@@ -1024,6 +1014,7 @@ private:
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
     std::unique_ptr<Pimpl> pimpl;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void init (SliderStyle, TextEntryBoxPosition);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)

@@ -150,7 +150,7 @@ public:
     template <class ValueType>
     void expectEquals (ValueType actual, ValueType expected, String failureMessage = String())
     {
-        bool result = exactlyEqual (actual, expected);
+        bool result = actual == expected;
         expectResultAndPrint (actual, expected, result, "", failureMessage);
     }
 
@@ -160,7 +160,7 @@ public:
     template <class ValueType>
     void expectNotEquals (ValueType value, ValueType valueToCompareTo, String failureMessage = String())
     {
-        bool result = ! exactlyEqual (value, valueToCompareTo);
+        bool result = value != valueToCompareTo;
         expectResultAndPrint (value, valueToCompareTo, result, "unequal to", failureMessage);
     }
 

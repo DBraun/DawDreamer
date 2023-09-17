@@ -48,7 +48,6 @@
 		C9200467702F9E5502DCC9F0 /* include_juce_video.mm */ = {isa = PBXBuildFile; fileRef = C519012CDDE2CA92FF58903A; };
 		D8E2F775028097109496AAA1 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 7EC708BB8670BC4B971F031E; };
 		D915E61C72D98F0B97F31690 /* StandalonePluginWindow.h */ = {isa = PBXBuildFile; fileRef = 44A26898F037A3E6B43EB911; };
-		DF5374E67F8812D79694279E /* Security.framework */ = {isa = PBXBuildFile; fileRef = B243F8F5ADFF280683E55EE1; };
 		DFE780784ED99EACC1B654A6 /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 06AE4EC72C9D2D0775EF879E; };
 		E358C00D8D92D35AFBC9944C /* FaustProcessor.cpp */ = {isa = PBXBuildFile; fileRef = BFD142EBB8AFBADC8AB04A8A; };
 		E3F94999130BC1FFAB7F9829 /* FaustSignalAPI.cpp */ = {isa = PBXBuildFile; fileRef = DA5D0A9D3542DCB5ACFC8FB8; };
@@ -142,7 +141,6 @@
 		AB39C0017B2EE44B9E510D89 /* PlaybackWarpProcessor.cpp */ /* PlaybackWarpProcessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PlaybackWarpProcessor.cpp; path = ../../Source/PlaybackWarpProcessor.cpp; sourceTree = SOURCE_ROOT; };
 		AD248A6B37034D215326CB7F /* juce_audio_processors */ /* juce_audio_processors */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors; path = ../../JuceLibraryCode/modules/juce_audio_processors; sourceTree = SOURCE_ROOT; };
 		B1FAEBBC0B8073BAE84C5665 /* PlaybackProcessor.h */ /* PlaybackProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PlaybackProcessor.h; path = ../../Source/PlaybackProcessor.h; sourceTree = SOURCE_ROOT; };
-		B243F8F5ADFF280683E55EE1 /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B2CCBF7C3614EE8B865D41C0 /* include_juce_graphics.mm */ /* include_juce_graphics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_graphics.mm; path = ../../JuceLibraryCode/include_juce_graphics.mm; sourceTree = SOURCE_ROOT; };
 		B9149690533DD3D5D70543AA /* WaveformEditor.h */ /* WaveformEditor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WaveformEditor.h; path = ../../Source/Sampler/Source/Components/WaveformEditor.h; sourceTree = SOURCE_ROOT; };
 		BFD142EBB8AFBADC8AB04A8A /* FaustProcessor.cpp */ /* FaustProcessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FaustProcessor.cpp; path = ../../Source/FaustProcessor.cpp; sourceTree = SOURCE_ROOT; };
@@ -196,7 +194,6 @@
 				C0D03D32EA25F7011FECF9F6,
 				29782FB7B1C181EA8900F409,
 				8CB86F722980F4262C64B7D7,
-				DF5374E67F8812D79694279E,
 				31D395DB17463EFA64FFF6EE,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -317,7 +314,6 @@
 				E0756912D4AE6F8AF5A16B05,
 				1B24D4A69BF5E24D9E0DB1E5,
 				D2350C56CE13419F5D6CF40E,
-				B243F8F5ADFF280683E55EE1,
 				7FC28740B3DC997941439C94,
 			);
 			name = Frameworks;

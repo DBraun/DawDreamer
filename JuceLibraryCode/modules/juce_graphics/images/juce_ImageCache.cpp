@@ -30,12 +30,7 @@ struct ImageCache::Pimpl     : private Timer,
                                private DeletedAtShutdown
 {
     Pimpl() = default;
-
-    ~Pimpl() override
-    {
-        stopTimer();
-        clearSingletonInstance();
-    }
+    ~Pimpl() override { clearSingletonInstance(); }
 
     JUCE_DECLARE_SINGLETON (ImageCache::Pimpl, false)
 

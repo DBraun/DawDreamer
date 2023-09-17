@@ -25,11 +25,7 @@ namespace juce
 
 class AudioIODevice;
 
-/**
-    Additional information that may be passed to the AudioIODeviceCallback.
-
-    @tags{Audio}
-*/
+/** Additional information that may be passed to the AudioIODeviceCallback. */
 struct AudioIODeviceCallbackContext
 {
     /** If the host provides this information, this field will be set to point to

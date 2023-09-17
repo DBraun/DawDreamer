@@ -27,13 +27,13 @@ namespace juce
 {
 
 #if JUCE_MAC
- #include "../native/juce_CameraDevice_mac.h"
+ #include "../native/juce_mac_CameraDevice.h"
 #elif JUCE_WINDOWS
- #include "../native/juce_CameraDevice_windows.h"
+ #include "../native/juce_win32_CameraDevice.h"
 #elif JUCE_IOS
- #include "../native/juce_CameraDevice_ios.h"
+ #include "../native/juce_ios_CameraDevice.h"
 #elif JUCE_ANDROID
- #include "../native/juce_CameraDevice_android.h"
+ #include "../native/juce_android_CameraDevice.h"
 #endif
 
 #if JUCE_ANDROID || JUCE_IOS

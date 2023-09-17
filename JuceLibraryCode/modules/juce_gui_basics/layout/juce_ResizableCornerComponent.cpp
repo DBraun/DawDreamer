@@ -45,7 +45,7 @@ void ResizableCornerComponent::paint (Graphics& g)
                                         isMouseButtonDown());
 }
 
-void ResizableCornerComponent::mouseDown (const MouseEvent& e)
+void ResizableCornerComponent::mouseDown (const MouseEvent&)
 {
     if (component == nullptr)
     {
@@ -54,13 +54,6 @@ void ResizableCornerComponent::mouseDown (const MouseEvent& e)
     }
 
     originalBounds = component->getBounds();
-
-    using Zone = ResizableBorderComponent::Zone;
-    const Zone zone { Zone::bottom | Zone::right };
-
-    if (auto* peer = component->getPeer())
-        if (&peer->getComponent() == component)
-            peer->startHostManagedResize (peer->globalToLocal (localPointToGlobal (e.getPosition())), zone);
 
     if (constrainer != nullptr)
         constrainer->resizeStart();

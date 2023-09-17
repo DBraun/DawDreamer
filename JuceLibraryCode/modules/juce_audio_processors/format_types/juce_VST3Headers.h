@@ -32,49 +32,44 @@
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 6330 6001 28199)
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
-                                     "-Wcast-align",
-                                     "-Wclass-memaccess",
-                                     "-Wcomma",
-                                     "-Wconversion",
-                                     "-Wcpp",
-                                     "-Wdelete-non-virtual-dtor",
-                                     "-Wdeprecated",
-                                     "-Wdeprecated-copy-dtor",
-                                     "-Wdeprecated-declarations",
-                                     "-Wdeprecated-register",
-                                     "-Wextra",
-                                     "-Wextra-semi",
-                                     "-Wfloat-equal",
-                                     "-Wformat",
-                                     "-Wformat-truncation=",
-                                     "-Wformat=",
-                                     "-Wignored-qualifiers",
-                                     "-Winconsistent-missing-destructor-override",
-                                     "-Wint-to-pointer-cast",
-                                     "-Wlogical-op-parentheses",
-                                     "-Wmaybe-uninitialized",
-                                     "-Wmissing-braces",
-                                     "-Wmissing-field-initializers",
-                                     "-Wmissing-prototypes",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-dtor",
                                      "-Wnon-virtual-dtor",
-                                     "-Woverloaded-virtual",
-                                     "-Wparentheses",
-                                     "-Wpedantic",
-                                     "-Wpragma-pack",
-                                     "-Wredundant-decls",
+                                     "-Wdeprecated",
                                      "-Wreorder",
-                                     "-Wshadow",
-                                     "-Wshadow-field",
-                                     "-Wsign-compare",
-                                     "-Wsign-conversion",
-                                     "-Wswitch-default",
-                                     "-Wtype-limits",
                                      "-Wunsequenced",
-                                     "-Wunused-but-set-variable",
-                                     "-Wunused-function",
+                                     "-Wint-to-pointer-cast",
                                      "-Wunused-parameter",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wconversion",
+                                     "-Woverloaded-virtual",
+                                     "-Wshadow",
+                                     "-Wdeprecated-register",
+                                     "-Wunused-function",
+                                     "-Wsign-conversion",
+                                     "-Wsign-compare",
+                                     "-Wdelete-non-virtual-dtor",
+                                     "-Wdeprecated-declarations",
+                                     "-Wextra-semi",
+                                     "-Wmissing-braces",
+                                     "-Wswitch-default",
+                                     "-Wshadow-field",
+                                     "-Wpragma-pack",
+                                     "-Wcomma",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Winconsistent-missing-destructor-override",
+                                     "-Wcast-align",
+                                     "-Wignored-qualifiers",
+                                     "-Wmissing-field-initializers",
+                                     "-Wformat=",
+                                     "-Wformat",
+                                     "-Wpedantic",
+                                     "-Wextra",
+                                     "-Wclass-memaccess",
+                                     "-Wmissing-prototypes",
+                                     "-Wtype-limits",
+                                     "-Wcpp",
+                                     "-W#warnings",
+                                     "-Wmaybe-uninitialized",
+                                     "-Wunused-but-set-variable")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -92,7 +87,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/base/conststringtable.h>
  #include <pluginterfaces/base/funknown.h>
  #include <pluginterfaces/base/ipluginbase.h>
- #include <pluginterfaces/base/iplugincompatibility.h>
  #include <pluginterfaces/base/ustring.h>
  #include <pluginterfaces/gui/iplugview.h>
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
@@ -113,7 +107,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
  #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.h>
- #include <public.sdk/source/vst/utility/uid.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 
@@ -121,10 +114,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
-
- #ifndef NOMINMAX
-  #define NOMINMAX // Some of the steinberg sources don't set this before including windows.h
- #endif
 
  #include <base/source/baseiids.cpp>
  #include <base/source/fbuffer.cpp>
@@ -148,11 +137,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
   #include <base/source/flock.cpp>
  #endif
 
-#pragma push_macro ("True")
-#undef True
-#pragma push_macro ("False")
-#undef False
-
  #include <base/source/updatehandler.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
@@ -160,24 +144,18 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/base/ustring.cpp>
  #include <pluginterfaces/gui/iplugview.h>
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
- #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
+ #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.cpp>
  #include <public.sdk/source/common/pluginview.cpp>
- #include <public.sdk/source/vst/hosting/hostclasses.cpp>
- #include <public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp>
- #include <public.sdk/source/vst/utility/stringconvert.cpp>
- #include <public.sdk/source/vst/utility/uid.h>
+ #include <public.sdk/source/vst/vsteditcontroller.cpp>
  #include <public.sdk/source/vst/vstbus.cpp>
+ #include <public.sdk/source/vst/vstinitiids.cpp>
  #include <public.sdk/source/vst/vstcomponent.cpp>
  #include <public.sdk/source/vst/vstcomponentbase.cpp>
- #include <public.sdk/source/vst/vsteditcontroller.cpp>
- #include <public.sdk/source/vst/vstinitiids.cpp>
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
-
-#pragma pop_macro ("True")
-#pragma pop_macro ("False")
+ #include <public.sdk/source/vst/hosting/hostclasses.cpp>
 
  #if VST_VERSION >= 0x03060c   // 3.6.12
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>

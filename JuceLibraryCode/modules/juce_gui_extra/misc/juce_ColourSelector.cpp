@@ -100,7 +100,7 @@ public:
 
     void updateIfNeeded()
     {
-        if (! approximatelyEqual (lastHue, h))
+        if (lastHue != h)
         {
             lastHue = h;
             colours = {};
@@ -454,7 +454,7 @@ void ColourSelector::setHue (float newH)
 {
     newH = jlimit (0.0f, 1.0f, newH);
 
-    if (! approximatelyEqual (h, newH))
+    if (h != newH)
     {
         h = newH;
         colour = Colour (h, s, v, colour.getFloatAlpha());
@@ -467,7 +467,7 @@ void ColourSelector::setSV (float newS, float newV)
     newS = jlimit (0.0f, 1.0f, newS);
     newV = jlimit (0.0f, 1.0f, newV);
 
-    if (! approximatelyEqual (s, newS) || ! approximatelyEqual (v, newV))
+    if (s != newS || v != newV)
     {
         s = newS;
         v = newV;

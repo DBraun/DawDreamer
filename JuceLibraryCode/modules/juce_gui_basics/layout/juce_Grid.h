@@ -156,6 +156,9 @@ public:
     /** Creates an empty Grid container with default parameters. */
     Grid() = default;
 
+    /** Destructor */
+    ~Grid() noexcept = default;
+
     //==============================================================================
     /** Specifies the alignment of content inside the items along the rows. */
     JustifyItems   justifyItems   = JustifyItems::stretch;
@@ -213,7 +216,10 @@ public:
 
 private:
     //==============================================================================
-    struct Helpers;
+    struct SizeCalculation;
+    struct PlacementHelpers;
+    struct AutoPlacement;
+    struct BoxAlignment;
 };
 
 constexpr Grid::Px operator"" _px (long double px)          { return Grid::Px { px }; }

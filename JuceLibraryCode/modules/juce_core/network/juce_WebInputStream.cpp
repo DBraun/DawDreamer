@@ -61,8 +61,11 @@ StringPairArray WebInputStream::parseHttpHeaders (const String& headerData)
     StringPairArray headerPairs;
     auto headerLines = StringArray::fromLines (headerData);
 
-    for (const auto& headersEntry : headerLines)
+    // ignore the first line as this is the status line
+    for (int i = 1; i < headerLines.size(); ++i)
     {
+        const auto& headersEntry = headerLines[i];
+
         if (headersEntry.isNotEmpty())
         {
             const auto key = headersEntry.upToFirstOccurrenceOf (": ", false, false);

@@ -55,7 +55,7 @@ public:
     /** Sets the length of the ramp used for smoothing gain changes. */
     void setRampDurationSeconds (double newDurationSeconds) noexcept
     {
-        if (! approximatelyEqual (rampDurationSeconds, newDurationSeconds))
+        if (rampDurationSeconds != newDurationSeconds)
         {
             rampDurationSeconds = newDurationSeconds;
             reset();

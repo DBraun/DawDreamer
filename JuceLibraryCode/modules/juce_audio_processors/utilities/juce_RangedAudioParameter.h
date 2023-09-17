@@ -36,8 +36,6 @@ namespace juce
     i.e. the identifiers AudioParameterFloatAttributes and RangedAudioParameterAttributes<float>
     should not be interchangable because we might need to add float-specific attributes in
     the future. Users should not refer directly to RangedAudioParameterAttributes.
-
-    @tags{Audio}
 */
 template <typename Derived, typename Value>
 class RangedAudioParameterAttributes

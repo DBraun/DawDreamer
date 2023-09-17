@@ -237,8 +237,7 @@ public:
     SmoothedValue (FloatType initialValue) noexcept
     {
         // Multiplicative smoothed values cannot ever reach 0!
-        jassert (! (std::is_same_v<SmoothingType, ValueSmoothingTypes::Multiplicative>
-                    && approximatelyEqual (initialValue, (FloatType) 0)));
+        jassert (! (std::is_same_v<SmoothingType, ValueSmoothingTypes::Multiplicative> && initialValue == 0));
 
         // Visual Studio can't handle base class initialisation with CRTP
         this->currentValue = initialValue;
@@ -271,7 +270,7 @@ public:
     */
     void setTargetValue (FloatType newValue) noexcept
     {
-        if (approximatelyEqual (newValue, this->target))
+        if (newValue == this->target)
             return;
 
         if (stepsToTarget <= 0)
@@ -281,8 +280,7 @@ public:
         }
 
         // Multiplicative smoothed values cannot ever reach 0!
-        jassert (! (std::is_same_v<SmoothingType, ValueSmoothingTypes::Multiplicative>
-                    && approximatelyEqual (newValue, (FloatType) 0)));
+        jassert (! (std::is_same_v<SmoothingType, ValueSmoothingTypes::Multiplicative> && newValue == 0));
 
         this->target = newValue;
         this->countdown = stepsToTarget;

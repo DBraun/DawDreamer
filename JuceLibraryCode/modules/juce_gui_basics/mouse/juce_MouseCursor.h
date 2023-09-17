@@ -180,7 +180,7 @@ private:
 
     class PlatformSpecificHandle;
 
-    friend class detail::MouseInputSourceImpl;
+    friend class MouseInputSourceInternal;
     void showInWindow (ComponentPeer*) const;
     PlatformSpecificHandle* getHandle() const noexcept;
 

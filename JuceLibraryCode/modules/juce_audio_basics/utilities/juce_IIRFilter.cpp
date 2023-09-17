@@ -23,8 +23,6 @@
 namespace juce
 {
 
-constexpr auto minimumDecibels = -300.0f;
-
 IIRCoefficients::IIRCoefficients() noexcept
 {
     zeromem (coefficients, sizeof (coefficients));
@@ -46,7 +44,7 @@ IIRCoefficients& IIRCoefficients::operator= (const IIRCoefficients& other) noexc
 IIRCoefficients::IIRCoefficients (double c1, double c2, double c3,
                                   double c4, double c5, double c6) noexcept
 {
-    const auto a = 1.0 / c4;
+    auto a = 1.0 / c4;
 
     coefficients[0] = (float) (c1 * a);
     coefficients[1] = (float) (c2 * a);
@@ -69,9 +67,9 @@ IIRCoefficients IIRCoefficients::makeLowPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    const auto nSquared = n * n;
-    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    auto nSquared = n * n;
+    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1,
                             c1 * 2.0,
@@ -95,9 +93,9 @@ IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto n = std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    const auto nSquared = n * n;
-    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    auto n = std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    auto nSquared = n * n;
+    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1,
                             c1 * -2.0,
@@ -121,9 +119,9 @@ IIRCoefficients IIRCoefficients::makeBandPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    const auto nSquared = n * n;
-    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    auto nSquared = n * n;
+    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1 * n / Q,
                             0.0,
@@ -147,9 +145,9 @@ IIRCoefficients IIRCoefficients::makeNotchFilter (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    const auto nSquared = n * n;
-    const auto c1 = 1.0 / (1.0 + n / Q + nSquared);
+    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    auto nSquared = n * n;
+    auto c1 = 1.0 / (1.0 + n / Q + nSquared);
 
     return IIRCoefficients (c1 * (1.0 + nSquared),
                             2.0 * c1 * (1.0 - nSquared),
@@ -173,9 +171,9 @@ IIRCoefficients IIRCoefficients::makeAllPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    const auto nSquared = n * n;
-    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    auto nSquared = n * n;
+    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1 * (1.0 - n / Q + nSquared),
                             c1 * 2.0 * (1.0 - nSquared),
@@ -194,13 +192,13 @@ IIRCoefficients IIRCoefficients::makeLowShelf (double sampleRate,
     jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, minimumDecibels));
-    const auto aminus1 = A - 1.0;
-    const auto aplus1 = A + 1.0;
-    const auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
-    const auto coso = std::cos (omega);
-    const auto beta = std::sin (omega) * std::sqrt (A) / Q;
-    const auto aminus1TimesCoso = aminus1 * coso;
+    auto A = jmax (0.0f, std::sqrt (gainFactor));
+    auto aminus1 = A - 1.0;
+    auto aplus1 = A + 1.0;
+    auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
+    auto coso = std::cos (omega);
+    auto beta = std::sin (omega) * std::sqrt (A) / Q;
+    auto aminus1TimesCoso = aminus1 * coso;
 
     return IIRCoefficients (A * (aplus1 - aminus1TimesCoso + beta),
                             A * 2.0 * (aminus1 - aplus1 * coso),
@@ -219,13 +217,13 @@ IIRCoefficients IIRCoefficients::makeHighShelf (double sampleRate,
     jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, minimumDecibels));
-    const auto aminus1 = A - 1.0;
-    const auto aplus1 = A + 1.0;
-    const auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
-    const auto coso = std::cos (omega);
-    const auto beta = std::sin (omega) * std::sqrt (A) / Q;
-    const auto aminus1TimesCoso = aminus1 * coso;
+    auto A = jmax (0.0f, std::sqrt (gainFactor));
+    auto aminus1 = A - 1.0;
+    auto aplus1 = A + 1.0;
+    auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
+    auto coso = std::cos (omega);
+    auto beta = std::sin (omega) * std::sqrt (A) / Q;
+    auto aminus1TimesCoso = aminus1 * coso;
 
     return IIRCoefficients (A * (aplus1 + aminus1TimesCoso + beta),
                             A * -2.0 * (aminus1 + aplus1 * coso),
@@ -244,12 +242,12 @@ IIRCoefficients IIRCoefficients::makePeakFilter (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, minimumDecibels));
-    const auto omega = (MathConstants<double>::twoPi * jmax (frequency, 2.0)) / sampleRate;
-    const auto alpha = 0.5 * std::sin (omega) / Q;
-    const auto c2 = -2.0 * std::cos (omega);
-    const auto alphaTimesA = alpha * A;
-    const auto alphaOverA = alpha / A;
+    auto A = jmax (0.0f, std::sqrt (gainFactor));
+    auto omega = (MathConstants<double>::twoPi * jmax (frequency, 2.0)) / sampleRate;
+    auto alpha = 0.5 * std::sin (omega) / Q;
+    auto c2 = -2.0 * std::cos (omega);
+    auto alphaTimesA = alpha * A;
+    auto alphaOverA = alpha / A;
 
     return IIRCoefficients (1.0 + alphaTimesA,
                             c2,

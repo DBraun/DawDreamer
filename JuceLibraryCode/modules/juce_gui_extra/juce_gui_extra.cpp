@@ -59,7 +59,7 @@
  #if JUCE_PUSH_NOTIFICATIONS
   #import <Foundation/NSUserNotification.h>
 
-  #include "native/juce_PushNotifications_mac.cpp"
+  #include "native/juce_mac_PushNotifications.cpp"
  #endif
 
 //==============================================================================
@@ -68,13 +68,13 @@
 
  #if JUCE_PUSH_NOTIFICATIONS
   #import <UserNotifications/UserNotifications.h>
-  #include "native/juce_PushNotifications_ios.cpp"
+  #include "native/juce_ios_PushNotifications.cpp"
  #endif
 
 //==============================================================================
 #elif JUCE_ANDROID
  #if JUCE_PUSH_NOTIFICATIONS
-  #include "native/juce_PushNotifications_android.cpp"
+  #include "native/juce_android_PushNotifications.cpp"
  #endif
 
 //==============================================================================
@@ -141,49 +141,49 @@
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_MAC
-  #include "native/juce_NSViewFrameWatcher_mac.h"
-  #include "native/juce_NSViewComponent_mac.mm"
-  #include "native/juce_AppleRemote_mac.mm"
-  #include "native/juce_SystemTrayIcon_mac.cpp"
+  #include "native/juce_mac_NSViewFrameWatcher.h"
+  #include "native/juce_mac_NSViewComponent.mm"
+  #include "native/juce_mac_AppleRemote.mm"
+  #include "native/juce_mac_SystemTrayIcon.cpp"
  #endif
 
  #if JUCE_IOS
-  #include "native/juce_UIViewComponent_ios.mm"
+  #include "native/juce_ios_UIViewComponent.mm"
  #endif
 
  #if JUCE_WEB_BROWSER
-  #include "native/juce_WebBrowserComponent_mac.mm"
+  #include "native/juce_mac_WebBrowserComponent.mm"
  #endif
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include "native/juce_ActiveXComponent_windows.cpp"
- #include "native/juce_HWNDComponent_windows.cpp"
+ #include "native/juce_win32_ActiveXComponent.cpp"
+ #include "native/juce_win32_HWNDComponent.cpp"
  #if JUCE_WEB_BROWSER
-  #include "native/juce_WebBrowserComponent_windows.cpp"
+  #include "native/juce_win32_WebBrowserComponent.cpp"
  #endif
- #include "native/juce_SystemTrayIcon_windows.cpp"
+ #include "native/juce_win32_SystemTrayIcon.cpp"
 
 //==============================================================================
 #elif JUCE_LINUX || JUCE_BSD
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
- #include <juce_gui_basics/native/juce_ScopedWindowAssociation_linux.h>
- #include "native/juce_XEmbedComponent_linux.cpp"
+ #include <juce_gui_basics/native/x11/juce_linux_ScopedWindowAssociation.h>
+ #include "native/juce_linux_XEmbedComponent.cpp"
 
  #if JUCE_WEB_BROWSER
-  #include "native/juce_WebBrowserComponent_linux.cpp"
+  #include "native/juce_linux_X11_WebBrowserComponent.cpp"
  #endif
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
- #include "native/juce_SystemTrayIcon_linux.cpp"
+ #include "native/juce_linux_X11_SystemTrayIcon.cpp"
 
 //==============================================================================
 #elif JUCE_ANDROID
  #include "native/juce_AndroidViewComponent.cpp"
 
  #if JUCE_WEB_BROWSER
-  #include "native/juce_WebBrowserComponent_android.cpp"
+  #include "native/juce_android_WebBrowserComponent.cpp"
  #endif
 #endif

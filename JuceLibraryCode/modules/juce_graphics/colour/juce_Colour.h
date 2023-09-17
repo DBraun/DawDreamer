@@ -194,11 +194,7 @@ public:
 
     /** Returns a premultiplied ARGB pixel object that represents this colour.
     */
-    PixelARGB getPixelARGB() const noexcept;
-
-    /** Returns an ARGB pixel object that represents this colour.
-    */
-    PixelARGB getNonPremultipliedPixelARGB() const noexcept;
+    const PixelARGB getPixelARGB() const noexcept;
 
     /** Returns a 32-bit integer that represents this colour.
 

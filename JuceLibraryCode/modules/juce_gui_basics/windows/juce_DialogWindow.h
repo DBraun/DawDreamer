@@ -255,9 +255,6 @@ public:
     */
     virtual bool escapeKeyPressed();
 
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
-
 protected:
     //==============================================================================
     /** @internal */
@@ -268,6 +265,8 @@ protected:
     float getDesktopScaleFactor() const override { return desktopScale * Desktop::getInstance().getGlobalScaleFactor(); }
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
     float desktopScale = 1.0f;
     bool escapeKeyTriggersCloseButton;
 

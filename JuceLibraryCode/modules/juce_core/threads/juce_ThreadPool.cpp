@@ -25,9 +25,8 @@ namespace juce
 
 struct ThreadPool::ThreadPoolThread  : public Thread
 {
-    ThreadPoolThread (ThreadPool& p, const Options& options)
-       : Thread { options.threadName, options.threadStackSizeBytes },
-         pool { p }
+    ThreadPoolThread (ThreadPool& p, size_t stackSize)
+       : Thread ("Pool", stackSize), pool (p)
     {
     }
 
@@ -94,24 +93,18 @@ ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 }
 
 //==============================================================================
-ThreadPool::ThreadPool (const Options& options)
+ThreadPool::ThreadPool (int numThreads, size_t threadStackSize, Thread::Priority priority)
 {
-    // not much point having a pool without any threads!
-    jassert (options.numberOfThreads > 0);
+    jassert (numThreads > 0); // not much point having a pool without any threads!
 
-    for (int i = jmax (1, options.numberOfThreads); --i >= 0;)
-        threads.add (new ThreadPoolThread (*this, options));
+    for (int i = jmax (1, numThreads); --i >= 0;)
+        threads.add (new ThreadPoolThread (*this, threadStackSize));
 
     for (auto* t : threads)
-        t->startThread (options.desiredThreadPriority);
+        t->startThread (priority);
 }
 
-ThreadPool::ThreadPool (int numberOfThreads,
-                        size_t threadStackSizeBytes,
-                        Thread::Priority desiredThreadPriority)
-    : ThreadPool { Options{}.withNumberOfThreads (numberOfThreads)
-                            .withThreadStackSizeBytes (threadStackSizeBytes)
-                            .withDesiredThreadPriority (desiredThreadPriority) }
+ThreadPool::ThreadPool() : ThreadPool (SystemStats::getNumCpus(), 0, Thread::Priority::normal)
 {
 }
 
@@ -169,13 +162,13 @@ void ThreadPool::addJob (std::function<void()> jobToRun)
 {
     struct LambdaJobWrapper  : public ThreadPoolJob
     {
-        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (std::move (j)) {}
+        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (j) {}
         JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }
 
         std::function<void()> job;
     };
 
-    addJob (new LambdaJobWrapper (std::move (jobToRun)), true);
+    addJob (new LambdaJobWrapper (jobToRun), true);
 }
 
 int ThreadPool::getNumJobs() const noexcept

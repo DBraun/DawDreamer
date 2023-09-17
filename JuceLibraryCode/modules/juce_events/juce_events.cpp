@@ -60,7 +60,6 @@
 #include "messages/juce_MessageManager.cpp"
 #include "broadcasters/juce_ActionBroadcaster.cpp"
 #include "broadcasters/juce_AsyncUpdater.cpp"
-#include "broadcasters/juce_LockingAsyncUpdater.cpp"
 #include "broadcasters/juce_ChangeBroadcaster.cpp"
 #include "timers/juce_MultiTimer.cpp"
 #include "timers/juce_Timer.cpp"
@@ -73,26 +72,25 @@
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 
- #include "native/juce_MessageQueue_mac.h"
+ #include "native/juce_osx_MessageQueue.h"
 
  #if JUCE_MAC
-  #include "native/juce_MessageManager_mac.mm"
+  #include "native/juce_mac_MessageManager.mm"
  #else
-  #include "native/juce_MessageManager_ios.mm"
+  #include "native/juce_ios_MessageManager.mm"
  #endif
 
 #elif JUCE_WINDOWS
- #include "native/juce_RunningInUnity.h"
- #include "native/juce_Messaging_windows.cpp"
+ #include "native/juce_win32_Messaging.cpp"
  #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
-  #include "native/juce_WinRTWrapper_windows.cpp"
+  #include "native/juce_win32_WinRTWrapper.cpp"
  #endif
 
 #elif JUCE_LINUX || JUCE_BSD
- #include "native/juce_EventLoopInternal_linux.h"
- #include "native/juce_Messaging_linux.cpp"
+ #include "native/juce_linux_EventLoopInternal.h"
+ #include "native/juce_linux_Messaging.cpp"
 
 #elif JUCE_ANDROID
- #include "native/juce_Messaging_android.cpp"
+ #include "native/juce_android_Messaging.cpp"
 
 #endif

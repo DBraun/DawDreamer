@@ -282,9 +282,6 @@ public:
         virtual BorderSize<int> getLabelBorderSize (Label&) = 0;
     };
 
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
-
 protected:
     //==============================================================================
     /** Creates the TextEditor component that will be used when the user has clicked on the label.
@@ -359,6 +356,7 @@ private:
     bool lossOfFocusDiscardsChanges = false;
     bool leftOfOwnerComp = false;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool updateFromTextEditorContents (TextEditor&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label)

@@ -108,11 +108,14 @@ void MPEZoneLayout::processNextMidiEvent (const MidiMessage& message)
     if (! message.isController())
         return;
 
-    if (auto parsed = rpnDetector.tryParse (message.getChannel(),
+    MidiRPNMessage rpn;
+
+    if (rpnDetector.parseControllerMessage (message.getChannel(),
                                             message.getControllerNumber(),
-                                            message.getControllerValue()))
+                                            message.getControllerValue(),
+                                            rpn))
     {
-        processRpnMessage (*parsed);
+        processRpnMessage (rpn);
     }
 }
 

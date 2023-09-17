@@ -176,6 +176,26 @@ bool BufferingAudioReader::readNextBufferChunk()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
+static bool operator== (const AudioBuffer<float>& a, const AudioBuffer<float>& b)
+{
+    if (a.getNumChannels() != b.getNumChannels() || a.getNumSamples() != b.getNumSamples())
+        return false;
+
+    for (int channel = 0; channel < a.getNumChannels(); ++channel)
+    {
+        auto* aPtr = a.getReadPointer (channel);
+        auto* bPtr = b.getReadPointer (channel);
+
+        if (std::vector<float> (aPtr, aPtr + a.getNumSamples())
+            != std::vector<float> (bPtr, bPtr + b.getNumSamples()))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static bool isSilent (const AudioBuffer<float>& b)
 {
     for (int channel = 0; channel < b.getNumChannels(); ++channel)
@@ -187,16 +207,15 @@ static bool isSilent (const AudioBuffer<float>& b)
 
 struct TestAudioFormatReader  : public AudioFormatReader
 {
-    explicit TestAudioFormatReader (const AudioBuffer<float>* b)
+    explicit TestAudioFormatReader (AudioBuffer<float>& b)
         : AudioFormatReader (nullptr, {}),
           buffer (b)
     {
-        jassert (buffer != nullptr);
         sampleRate            = 44100.0f;
         bitsPerSample         = 32;
         usesFloatingPointData = true;
-        lengthInSamples       = buffer->getNumSamples();
-        numChannels           = (unsigned int) buffer->getNumChannels();
+        lengthInSamples       = buffer.getNumSamples();
+        numChannels           = (unsigned int) buffer.getNumChannels();
     }
 
     bool readSamples (int* const* destChannels, int numDestChannels, int startOffsetInDestBuffer,
@@ -215,7 +234,7 @@ struct TestAudioFormatReader  : public AudioFormatReader
                 dest += startOffsetInDestBuffer;
 
                 if (j < (int) numChannels)
-                    FloatVectorOperations::copy (dest, buffer->getReadPointer (j, (int) startSampleInFile), numSamples);
+                    FloatVectorOperations::copy (dest, buffer.getReadPointer (j, (int) startSampleInFile), numSamples);
                 else
                     FloatVectorOperations::clear (dest, numSamples);
             }
@@ -224,19 +243,8 @@ struct TestAudioFormatReader  : public AudioFormatReader
         return true;
     }
 
-    const AudioBuffer<float>* buffer;
+    const AudioBuffer<float>& buffer;
 };
-
-static AudioBuffer<float> generateTestBuffer (Random& random, int bufferSize)
-{
-    AudioBuffer<float> buffer { 2, bufferSize };
-
-    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-            buffer.setSample (channel, sample, random.nextFloat());
-
-    return buffer;
-}
 
 class BufferingAudioReaderTests  : public UnitTest
 {
@@ -250,54 +258,44 @@ public:
 
         beginTest ("Timeout");
         {
-            struct BlockingReader  : public TestAudioFormatReader
+            struct BlockingReader  : public AudioFormatReader
             {
-                explicit BlockingReader (const AudioBuffer<float>* b)
-                    : TestAudioFormatReader (b)
+                BlockingReader()
+                    : AudioFormatReader (nullptr, {})
                 {
+                    sampleRate            = 44100.0f;
+                    bitsPerSample         = 32;
+                    usesFloatingPointData = true;
+                    lengthInSamples       = 1024;
+                    numChannels           = 2;
                 }
 
-                bool readSamples (int* const* destChannels,
-                                  int numDestChannels,
-                                  int startOffsetInDestBuffer,
-                                  int64 startSampleInFile,
-                                  int numSamples) override
+                bool readSamples (int* const*, int, int, int64, int) override
                 {
                     Thread::sleep (100);
-                    return TestAudioFormatReader::readSamples (destChannels, numDestChannels, startOffsetInDestBuffer, startSampleInFile, numSamples);
+                    return true;
                 }
             };
 
-            Random random { getRandom() };
-
-            const auto blockingBuffer = generateTestBuffer (random, 1024);
-            expect (! isSilent (blockingBuffer));
-
-            BufferingAudioReader bufferingReader (new BlockingReader (&blockingBuffer), timeSlice, 64);
+            BufferingAudioReader bufferingReader (new BlockingReader(), timeSlice, 64);
             bufferingReader.setReadTimeout (10);
 
-            const auto originalBuffer = generateTestBuffer (random, 1024);
-            expect (! isSilent (originalBuffer));
-            expect (originalBuffer != blockingBuffer);
+            AudioBuffer<float> readBuffer { 2, 1024 };
 
-            auto readBuffer = originalBuffer;
-            expect (readBuffer == originalBuffer);
-
+            readBuffer.clear();
             read (bufferingReader, readBuffer);
-            expect (readBuffer != originalBuffer);
+
             expect (isSilent (readBuffer));
         }
 
         beginTest ("Read samples");
         {
-            Random random { getRandom() };
-
             for (auto i = 4; i < 18; ++i)
             {
                 const auto backgroundBufferSize = 1 << i;
-                const auto buffer = generateTestBuffer (random, backgroundBufferSize);
+                auto buffer = generateTestBuffer (backgroundBufferSize);
 
-                BufferingAudioReader bufferingReader (new TestAudioFormatReader (&buffer), timeSlice, backgroundBufferSize);
+                BufferingAudioReader bufferingReader (new TestAudioFormatReader (buffer), timeSlice, backgroundBufferSize);
                 bufferingReader.setReadTimeout (-1);
 
                 AudioBuffer<float> readBuffer { buffer.getNumChannels(), buffer.getNumSamples() };
@@ -309,6 +307,19 @@ public:
     }
 
 private:
+    AudioBuffer<float> generateTestBuffer (int bufferSize) const
+    {
+        auto random = getRandom();
+
+        AudioBuffer<float> buffer { 2, random.nextInt ({ bufferSize, bufferSize * 10 }) };
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+                buffer.setSample (channel, sample, random.nextFloat());
+
+        return buffer;
+    }
+
     void read (BufferingAudioReader& reader, AudioBuffer<float>& readBuffer)
     {
         constexpr int blockSize = 1024;

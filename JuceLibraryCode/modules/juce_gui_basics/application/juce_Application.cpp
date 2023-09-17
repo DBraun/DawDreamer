@@ -83,12 +83,16 @@ bool JUCEApplication::perform (const InvocationInfo& info)
 }
 
 //==============================================================================
+#if JUCE_MAC
+ extern void juce_initialiseMacMainMenu();
+#endif
+
 bool JUCEApplication::initialiseApp()
 {
     if (JUCEApplicationBase::initialiseApp())
     {
        #if JUCE_MAC
-        initialiseMacMainMenu(); // (needs to get the app's name)
+        juce_initialiseMacMainMenu(); // (needs to get the app's name)
        #endif
 
         return true;

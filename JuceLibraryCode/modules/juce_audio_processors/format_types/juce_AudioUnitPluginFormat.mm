@@ -42,8 +42,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 #include <CoreAudioKit/AUViewController.h>
 
-#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
-#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
+#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
+#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
 #include "juce_AU_Shared.h"
 
 namespace juce
@@ -506,16 +507,40 @@ using AudioUnitCreationCallback = std::function<void (AudioUnit, OSStatus)>;
 
 static void createAudioUnit (VersionedAudioComponent versionedComponent, AudioUnitCreationCallback callback)
 {
+    struct AUAsyncInitializationCallback
+    {
+        typedef void (^AUCompletionCallbackBlock)(AudioComponentInstance, OSStatus);
+
+        explicit AUAsyncInitializationCallback (AudioUnitCreationCallback inOriginalCallback)
+            : originalCallback (std::move (inOriginalCallback))
+        {
+            block = CreateObjCBlock (this, &AUAsyncInitializationCallback::completion);
+        }
+
+        AUCompletionCallbackBlock getBlock() noexcept       { return block; }
+
+        void completion (AudioComponentInstance audioUnit, OSStatus err)
+        {
+            originalCallback (audioUnit, err);
+
+            delete this;
+        }
+
+        double sampleRate;
+        int framesPerBuffer;
+        AudioUnitCreationCallback originalCallback;
+
+        ObjCBlock<AUCompletionCallbackBlock> block;
+    };
+
+    auto callbackBlock = new AUAsyncInitializationCallback (std::move (callback));
+
     if (versionedComponent.isAUv3)
     {
         if (@available (macOS 10.11, *))
         {
-            AudioComponentInstantiate (versionedComponent.audioComponent,
-                                       kAudioComponentInstantiation_LoadOutOfProcess,
-                                       ^(AudioComponentInstance audioUnit, OSStatus err)
-                                       {
-                                           callback (audioUnit, err);
-                                       });
+            AudioComponentInstantiate (versionedComponent.audioComponent, kAudioComponentInstantiation_LoadOutOfProcess,
+                                       callbackBlock->getBlock());
 
             return;
         }
@@ -523,7 +548,7 @@ static void createAudioUnit (VersionedAudioComponent versionedComponent, AudioUn
 
     AudioComponentInstance audioUnit;
     auto err = AudioComponentInstanceNew (versionedComponent.audioComponent, &audioUnit);
-    callback (err != noErr ? nullptr : audioUnit, err);
+    callbackBlock->completion (err != noErr ? nullptr : audioUnit, err);
 }
 
 struct AudioComponentResult
@@ -1247,7 +1272,7 @@ public:
 
                     AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sampleRate, &sampleRateSize);
 
-                    if (! approximatelyEqual (sampleRate, sr))
+                    if (sampleRate != sr)
                     {
                         if (isAUv3) // setting kAudioUnitProperty_SampleRate fails on AUv3s
                         {
@@ -2591,6 +2616,9 @@ public:
     {
         addAndMakeVisible (wrapper);
 
+        viewControllerCallback =
+            CreateObjCBlock (this, &AudioUnitPluginWindowCocoa::requestViewControllerCallback);
+
         setOpaque (true);
         setVisible (true);
         setSize (100, 100);
@@ -2646,6 +2674,7 @@ private:
     AudioUnitFormatHelpers::AutoResizingNSViewComponent wrapper;
 
     typedef void (^ViewControllerCallbackBlock)(AUViewControllerBase *);
+    ObjCBlock<ViewControllerCallbackBlock> viewControllerCallback;
 
     bool waitingForViewCallback = false;
 
@@ -2699,9 +2728,12 @@ private:
                 && dataSize == sizeof (ViewControllerCallbackBlock))
         {
             waitingForViewCallback = true;
-            auto callback = ^(AUViewControllerBase* controller) { this->requestViewControllerCallback (controller); };
+            ViewControllerCallbackBlock callback;
+            callback = viewControllerCallback;
 
-            if (noErr == AudioUnitSetProperty (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global, 0, &callback, dataSize))
+            ViewControllerCallbackBlock* info = &callback;
+
+            if (noErr == AudioUnitSetProperty (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global, 0, info, dataSize))
                 return true;
 
             waitingForViewCallback = false;
@@ -2739,7 +2771,7 @@ private:
             if (@available (macOS 10.11, *))
                 size = [controller preferredContentSize];
 
-            if (approximatelyEqual (size.width, 0.0) || approximatelyEqual (size.height, 0.0))
+            if (size.width == 0 || size.height == 0)
                 size = controller.view.frame.size;
 
             return CGSizeMake (jmax ((CGFloat) 20.0f, size.width),

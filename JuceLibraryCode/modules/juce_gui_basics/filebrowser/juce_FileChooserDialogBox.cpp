@@ -115,7 +115,7 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     if (parentComp != nullptr)
         parentComp->addAndMakeVisible (this);
     else
-        setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
+        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 }
 
 FileChooserDialogBox::~FileChooserDialogBox()
@@ -182,26 +182,28 @@ void FileChooserDialogBox::fileDoubleClicked (const File&)
 void FileChooserDialogBox::fileClicked (const File&, const MouseEvent&) {}
 void FileChooserDialogBox::browserRootChanged (const File&) {}
 
+void FileChooserDialogBox::okToOverwriteFileCallback (int result, FileChooserDialogBox* box)
+{
+    if (result != 0 && box != nullptr)
+        box->exitModalState (1);
+}
+
 void FileChooserDialogBox::okButtonPressed()
 {
     if (warnAboutOverwritingExistingFiles
          && content->chooserComponent.isSaveMode()
          && content->chooserComponent.getSelectedFile(0).exists())
     {
-        auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                               TRANS ("File already exists"),
-                                                               TRANS ("There's already a file called: FLNM")
-                                                                  .replace ("FLNM", content->chooserComponent.getSelectedFile(0).getFullPathName())
-                                                                 + "\n\n"
-                                                                 + TRANS ("Are you sure you want to overwrite it?"),
-                                                               TRANS ("Overwrite"),
-                                                               TRANS ("Cancel"),
-                                                               this);
-        messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
-        {
-            if (result != 0)
-                exitModalState (1);
-        });
+        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
+                                      TRANS("File already exists"),
+                                      TRANS("There's already a file called: FLNM")
+                                         .replace ("FLNM", content->chooserComponent.getSelectedFile(0).getFullPathName())
+                                        + "\n\n"
+                                        + TRANS("Are you sure you want to overwrite it?"),
+                                      TRANS("Overwrite"),
+                                      TRANS("Cancel"),
+                                      this,
+                                      ModalCallbackFunction::forComponent (okToOverwriteFileCallback, this));
     }
     else
     {
@@ -249,12 +251,9 @@ void FileChooserDialogBox::createNewFolderConfirmed (const String& nameFromDialo
         auto parent = content->chooserComponent.getRoot();
 
         if (! parent.getChildFile (name).createDirectory())
-        {
-            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
-                                                             TRANS ("New Folder"),
-                                                             TRANS ("Couldn't create the folder!"));
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
-        }
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
+                                              TRANS ("New Folder"),
+                                              TRANS ("Couldn't create the folder!"));
 
         content->chooserComponent.refresh();
     }

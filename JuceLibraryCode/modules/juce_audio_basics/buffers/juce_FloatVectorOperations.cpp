@@ -1676,7 +1676,7 @@ public:
         static bool areAllValuesEqual (const ValueType* d, int num, ValueType target)
         {
             while (--num >= 0)
-                if (! exactlyEqual (*d++, target))
+                if (*d++ != target)
                     return false;
 
             return true;

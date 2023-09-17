@@ -51,7 +51,7 @@ void BufferingAudioSource::prepareToPlay (int samplesPerBlockExpected, double ne
 {
     auto bufferSizeNeeded = jmax (samplesPerBlockExpected * 2, numberOfSamplesToBuffer);
 
-    if (! approximatelyEqual (newSampleRate, sampleRate)
+    if (newSampleRate != sampleRate
          || bufferSizeNeeded != buffer.getNumSamples()
          || ! isPrepared)
     {

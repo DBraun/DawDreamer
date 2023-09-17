@@ -482,30 +482,17 @@ Font LookAndFeel_V4::getAlertWindowFont()           { return { 14.0f }; }
 
 //==============================================================================
 void LookAndFeel_V4::drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                      int width, int height, double progress,
-                                      const String& textToShow)
+                                      int width, int height, double progress, const String& textToShow)
 {
-    switch (progressBar.getResolvedStyle())
-    {
-        case ProgressBar::Style::linear:
-            drawLinearProgressBar (g, progressBar, width, height, progress, textToShow);
-            break;
-
-        case ProgressBar::Style::circular:
-            drawCircularProgressBar (g, progressBar, textToShow);
-            break;
-    }
+    if (width == height)
+        drawCircularProgressBar (g, progressBar, textToShow);
+    else
+        drawLinearProgressBar (g, progressBar, width, height, progress, textToShow);
 }
 
-ProgressBar::Style LookAndFeel_V4::getDefaultProgressBarStyle (const ProgressBar& progressBar)
-{
-    return progressBar.getWidth() == progressBar.getHeight() ? ProgressBar::Style::circular
-                                                             : ProgressBar::Style::linear;
-}
-
-void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, const ProgressBar& progressBar,
-                                            int width, int height, double progress,
-                                            const String& textToShow)
+void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBar,
+                                            int width, int height,
+                                            double progress, const String& textToShow)
 {
     auto background = progressBar.findColour (ProgressBar::backgroundColourId);
     auto foreground = progressBar.findColour (ProgressBar::foregroundColourId);
@@ -562,20 +549,18 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, const ProgressBar& prog
     }
 }
 
-void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, const ProgressBar& progressBar,
-                                              const String& textToShow)
+void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progressBar, const String& progressText)
 {
-    const auto background = progressBar.findColour (ProgressBar::backgroundColourId);
-    const auto foreground = progressBar.findColour (ProgressBar::foregroundColourId);
+    auto background = progressBar.findColour (ProgressBar::backgroundColourId);
+    auto foreground = progressBar.findColour (ProgressBar::foregroundColourId);
 
-    const auto barBounds = progressBar.getLocalBounds().reduced (2, 2).toFloat();
-    const auto size = jmin (barBounds.getWidth(), barBounds.getHeight());
+    auto barBounds = progressBar.getLocalBounds().reduced (2, 2).toFloat();
 
-    const auto rotationInDegrees  = static_cast<float> ((Time::getMillisecondCounter() / 10) % 360);
-    const auto normalisedRotation = rotationInDegrees / 360.0f;
+    auto rotationInDegrees  = static_cast<float> ((Time::getMillisecondCounter() / 10) % 360);
+    auto normalisedRotation = rotationInDegrees / 360.0f;
 
-    constexpr auto rotationOffset = 22.5f;
-    constexpr auto maxRotation    = 315.0f;
+    auto rotationOffset = 22.5f;
+    auto maxRotation    = 315.0f;
 
     auto startInDegrees = rotationInDegrees;
     auto endInDegrees   = startInDegrees + rotationOffset;
@@ -596,8 +581,8 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, const ProgressBar& pr
     Path arcPath2;
     arcPath2.addCentredArc (barBounds.getCentreX(),
                             barBounds.getCentreY(),
-                            size * 0.5f,
-                            size * 0.5f, 0.0f,
+                            barBounds.getWidth() * 0.5f,
+                            barBounds.getHeight() * 0.5f, 0.0f,
                             0.0f,
                             MathConstants<float>::twoPi,
                             true);
@@ -607,8 +592,8 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, const ProgressBar& pr
     Path arcPath;
     arcPath.addCentredArc (barBounds.getCentreX(),
                            barBounds.getCentreY(),
-                           size * 0.5f,
-                           size * 0.5f,
+                           barBounds.getWidth() * 0.5f,
+                           barBounds.getHeight() * 0.5f,
                            0.0f,
                            degreesToRadians (startInDegrees),
                            degreesToRadians (endInDegrees),
@@ -617,11 +602,11 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, const ProgressBar& pr
     arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * MathConstants<float>::pi * 2.25f, barBounds.getCentreX(), barBounds.getCentreY()));
     g.strokePath (arcPath, PathStrokeType (4.0f));
 
-    if (textToShow.isNotEmpty())
+    if (progressText.isNotEmpty())
     {
         g.setColour (progressBar.findColour (TextButton::textColourOffId));
         g.setFont ({ 12.0f, Font::italic });
-        g.drawText (textToShow, barBounds, Justification::centred, false);
+        g.drawText (progressText, barBounds, Justification::centred, false);
     }
 }
 
@@ -971,8 +956,6 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
         g.setColour (slider.findColour (Slider::trackColourId));
         g.fillRect (slider.isHorizontal() ? Rectangle<float> (static_cast<float> (x), (float) y + 0.5f, sliderPos - (float) x, (float) height - 1.0f)
                                           : Rectangle<float> ((float) x + 0.5f, sliderPos, (float) width - 1.0f, (float) y + ((float) height - sliderPos)));
-
-        drawLinearSliderOutline (g, x, y, width, height, style, slider);
     }
     else
     {
@@ -1055,9 +1038,6 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
                              trackWidth * 2.0f, pointerColour, 3);
             }
         }
-
-        if (slider.isBar())
-            drawLinearSliderOutline (g, x, y, width, height, style, slider);
     }
 }
 
@@ -1153,8 +1133,8 @@ void LookAndFeel_V4::drawTooltip (Graphics& g, const String& text, int width, in
     g.setColour (findColour (TooltipWindow::outlineColourId));
     g.drawRoundedRectangle (bounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
 
-    detail::LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
-        .draw (g, { static_cast<float> (width), static_cast<float> (height) });
+    LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
+                       .draw (g, { static_cast<float> (width), static_cast<float> (height) });
 }
 
 //==============================================================================

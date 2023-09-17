@@ -189,8 +189,8 @@ public:
         }
         else
         {
-            if (approximatelyEqual (viewBoxW, 0.0f))  newState.viewBoxW = newState.width;
-            if (approximatelyEqual (viewBoxH, 0.0f))  newState.viewBoxH = newState.height;
+            if (viewBoxW == 0.0f)  newState.viewBoxW = newState.width;
+            if (viewBoxH == 0.0f)  newState.viewBoxH = newState.height;
         }
 
         newState.parseSubElements (xml, *drawable);

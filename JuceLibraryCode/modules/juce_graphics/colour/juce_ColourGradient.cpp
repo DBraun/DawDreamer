@@ -30,7 +30,7 @@ ColourGradient::ColourGradient() noexcept  : isRadial (false)
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);
-    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED jassert (! exactlyEqual (point1.x, 987654.0f));
+    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED   jassert (point1.x != 987654.0f);
    #else
     #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED
    #endif
@@ -174,7 +174,7 @@ void ColourGradient::setColour (int index, Colour newColour) noexcept
 
 Colour ColourGradient::getColourAtPosition (double position) const noexcept
 {
-    jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // the first colour specified has to go at position 0
+    jassert (colours.getReference(0).position == 0.0); // the first colour specified has to go at position 0
 
     if (position <= 0 || colours.size() <= 1)
         return colours.getReference(0).colour;
@@ -199,30 +199,31 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
     jassert (numEntries > 0);
-    jassert (approximatelyEqual (colours.getReference(0).position, 0.0)); // The first colour specified has to go at position 0
+    jassert (colours.getReference(0).position == 0.0); // The first colour specified has to go at position 0
 
+    auto pix1 = colours.getReference (0).colour.getPixelARGB();
     int index = 0;
 
-    for (int j = 0; j < colours.size() - 1; ++j)
+    for (int j = 1; j < colours.size(); ++j)
     {
-        const auto& o = colours.getReference (j + 0);
-        const auto& p = colours.getReference (j + 1);
-        const auto numToDo = roundToInt (p.position * (numEntries - 1)) - index;
-        const auto pix1 = o.colour.getNonPremultipliedPixelARGB();
-        const auto pix2 = p.colour.getNonPremultipliedPixelARGB();
+        auto& p = colours.getReference (j);
+        auto numToDo = roundToInt (p.position * (numEntries - 1)) - index;
+        auto pix2 = p.colour.getPixelARGB();
 
-        for (auto i = 0; i < numToDo; ++i)
+        for (int i = 0; i < numToDo; ++i)
         {
-            auto blended = pix1;
-            blended.tween (pix2, (uint32) ((i << 8) / numToDo));
-            blended.premultiply();
+            jassert (index >= 0 && index < numEntries);
 
-            jassert (0 <= index && index < numEntries);
-            lookupTable[index++] = blended;
+            lookupTable[index] = pix1;
+            lookupTable[index].tween (pix2, (uint32) ((i << 8) / numToDo));
+            ++index;
         }
+
+        pix1 = pix2;
     }
 
-    std::fill (lookupTable + index, lookupTable + numEntries, colours.getLast().colour.getPixelARGB());
+    while (index < numEntries)
+        lookupTable [index++] = pix1;
 }
 
 int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock<PixelARGB>& lookupTable) const
@@ -258,13 +259,12 @@ bool ColourGradient::isInvisible() const noexcept
 
 bool ColourGradient::ColourPoint::operator== (ColourPoint other) const noexcept
 {
-    const auto tie = [] (const ColourPoint& p) { return std::tie (p.position, p.colour); };
-    return tie (*this) == tie (other);
+    return position == other.position && colour == other.colour;
 }
 
 bool ColourGradient::ColourPoint::operator!= (ColourPoint other) const noexcept
 {
-    return ! operator== (other);
+    return position != other.position || colour != other.colour;
 }
 
 } // namespace juce

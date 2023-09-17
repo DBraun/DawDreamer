@@ -39,7 +39,7 @@ class ProcessorChainTest : public UnitTest
         template <typename Context>
         void process (const Context& context) noexcept
         {
-            bufferWasClear = approximatelyEqual (context.getInputBlock().getSample (0, 0), 0.0f);
+            bufferWasClear = context.getInputBlock().getSample (0, 0) == 0;
 
             if (! context.isBypassed)
                 context.getOutputBlock().add (AddValue);

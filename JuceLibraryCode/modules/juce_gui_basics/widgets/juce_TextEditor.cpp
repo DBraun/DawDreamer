@@ -948,6 +948,8 @@ TextEditor::TextEditor (const String& name, juce_wchar passwordChar)
 
 TextEditor::~TextEditor()
 {
+    giveAwayKeyboardFocus();
+
     if (auto* peer = getPeer())
         peer->refreshTextInputTarget();
 
@@ -1120,6 +1122,7 @@ void TextEditor::lookAndFeelChanged()
 {
     caret.reset();
     recreateCaret();
+    repaint();
 }
 
 void TextEditor::parentHierarchyChanged()
@@ -2071,7 +2074,7 @@ bool TextEditor::moveCaretToTop (bool selecting)
 bool TextEditor::moveCaretToStartOfLine (bool selecting)
 {
     const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
-    return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getCentreY()), selecting);
+    return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getY()), selecting);
 }
 
 bool TextEditor::moveCaretToEnd (bool selecting)
@@ -2082,7 +2085,7 @@ bool TextEditor::moveCaretToEnd (bool selecting)
 bool TextEditor::moveCaretToEndOfLine (bool selecting)
 {
     const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
-    return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getCentreY()), selecting);
+    return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
 }
 
 bool TextEditor::deleteBackwards (bool moveInWholeWordSteps)

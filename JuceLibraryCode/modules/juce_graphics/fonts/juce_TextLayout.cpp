@@ -294,7 +294,7 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
         maxWidth -= 10.0f;
     }
 
-    if (! approximatelyEqual (bestWidth, maxWidth))
+    if (bestWidth != maxWidth)
         createLayout (text, bestWidth, maxHeight);
 }
 

@@ -712,17 +712,7 @@ public final class ComponentPeerView extends ViewGroup
             cached = null;
             target = null;
 
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                super.closeConnection();
-
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                    setImeConsumesInput (false);
-            }
-            else
-            {
-                finishComposingText();
-            }
+            super.closeConnection();
         }
 
         private ComponentPeerView view;
@@ -888,7 +878,6 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     //==============================================================================
-    private native View getNativeView (long host, int virtualViewId);
     private native boolean populateAccessibilityNodeInfo (long host, int virtualViewId, AccessibilityNodeInfo info);
     private native boolean handlePerformAction (long host, int virtualViewId, int action, Bundle arguments);
     private native Integer getInputFocusViewId (long host);
@@ -906,11 +895,6 @@ public final class ComponentPeerView extends ViewGroup
         {
             if (host == 0)
                 return null;
-
-            View nativeView = getNativeView (host, virtualViewId);
-
-            if (nativeView != null)
-                return nativeView.createAccessibilityNodeInfo();
 
             final AccessibilityNodeInfo nodeInfo;
 

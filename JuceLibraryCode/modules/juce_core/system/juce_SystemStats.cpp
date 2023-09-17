@@ -60,64 +60,24 @@ String SystemStats::getJUCEVersion()
 
 StringArray SystemStats::getDeviceIdentifiers()
 {
-    for (const auto flag : { MachineIdFlags::fileSystemId, MachineIdFlags::macAddresses  })
-        if (auto ids = getMachineIdentifiers (flag); ! ids.isEmpty())
-            return ids;
-
-    jassertfalse; // Failed to create any IDs!
-    return {};
-}
-
-String getLegacyUniqueDeviceID();
-
-StringArray SystemStats::getMachineIdentifiers (MachineIdFlags flags)
-{
-    auto macAddressProvider = [] (StringArray& arr)
-    {
-        for (const auto& mac : MACAddress::getAllAddresses())
-            arr.add (mac.toString());
-    };
-
-    auto fileSystemProvider = [] (StringArray& arr)
-    {
-       #if JUCE_WINDOWS
-        File f (File::getSpecialLocation (File::windowsSystemDirectory));
-       #else
-        File f ("~");
-       #endif
-        if (auto num = f.getFileIdentifier())
-            arr.add (String::toHexString ((int64) num));
-    };
-
-    auto legacyIdProvider = [] ([[maybe_unused]] StringArray& arr)
-    {
-       #if JUCE_WINDOWS
-        arr.add (getLegacyUniqueDeviceID());
-       #endif
-    };
-
-    auto uniqueIdProvider = [] (StringArray& arr)
-    {
-        arr.add (getUniqueDeviceID());
-    };
-
-    struct Provider { MachineIdFlags flag; void (*func) (StringArray&); };
-    static const Provider providers[] =
-    {
-        { MachineIdFlags::macAddresses,   macAddressProvider },
-        { MachineIdFlags::fileSystemId,   fileSystemProvider },
-        { MachineIdFlags::legacyUniqueId, legacyIdProvider },
-        { MachineIdFlags::uniqueId,       uniqueIdProvider }
-    };
-
     StringArray ids;
 
-    for (const auto& provider : providers)
+   #if JUCE_WINDOWS
+    File f (File::getSpecialLocation (File::windowsSystemDirectory));
+   #else
+    File f ("~");
+   #endif
+    if (auto num = f.getFileIdentifier())
     {
-        if (hasBitValueSet (flags, provider.flag))
-            provider.func (ids);
+        ids.add (String::toHexString ((int64) num));
+    }
+    else
+    {
+        for (auto& address : MACAddress::getAllAddresses())
+            ids.add (address.toString());
     }
 
+    jassert (! ids.isEmpty()); // Failed to create any IDs!
     return ids;
 }
 
@@ -217,7 +177,7 @@ String SystemStats::getStackBacktrace()
     auto frames = backtrace (stack, numElementsInArray (stack));
     char** frameStrings = backtrace_symbols (stack, frames);
 
-    for (auto i = (decltype (frames)) 0; i < frames; ++i)
+    for (int i = 0; i < frames; ++i)
         result << frameStrings[i] << newLine;
 
     ::free (frameStrings);
@@ -270,8 +230,13 @@ void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
 bool SystemStats::isRunningInAppExtensionSandbox() noexcept
 {
    #if JUCE_MAC || JUCE_IOS
-    static bool isRunningInAppSandbox = [&]
+    static bool firstQuery = true;
+    static bool isRunningInAppSandbox = false;
+
+    if (firstQuery)
     {
+        firstQuery = false;
+
         File bundle = File::getSpecialLocation (File::invokedExecutableFile).getParentDirectory();
 
        #if JUCE_MAC
@@ -279,10 +244,8 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
        #endif
 
         if (bundle.isDirectory())
-            return bundle.getFileExtension() == ".appex";
-
-        return false;
-    }();
+            isRunningInAppSandbox = (bundle.getFileExtension() == ".appex");
+    }
 
     return isRunningInAppSandbox;
    #else

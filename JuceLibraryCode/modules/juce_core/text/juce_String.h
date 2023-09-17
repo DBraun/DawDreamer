@@ -1117,7 +1117,7 @@ public:
     {
         jassert (numberOfSignificantFigures > 0);
 
-        if (exactlyEqual (number, DecimalType()))
+        if (number == 0)
         {
             if (numberOfSignificantFigures > 1)
             {

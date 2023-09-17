@@ -28,8 +28,6 @@ namespace juce
 
 /**
     Combines a parameter ID and a version hint.
-
-    @tags{Audio}
 */
 class ParameterID
 {
@@ -64,8 +62,6 @@ private:
 /**
     An instance of this class may be passed to the constructor of an AudioProcessorParameterWithID
     to set optional characteristics of that parameter.
-
-    @tags{Audio}
 */
 class AudioProcessorParameterWithIDAttributes
 {

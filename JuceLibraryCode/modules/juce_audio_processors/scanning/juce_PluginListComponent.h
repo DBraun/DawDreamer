@@ -130,8 +130,6 @@ private:
     class Scanner;
     std::unique_ptr<Scanner> currentScanner;
 
-    ScopedMessageBox messageBox;
-
     void scanFinished (const StringArray&, const std::vector<String>&);
     void updateList();
     void removeMissingPlugins();

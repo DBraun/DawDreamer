@@ -818,114 +818,6 @@ struct ShaderPrograms  : public ReferenceCountedObject
 };
 
 //==============================================================================
-struct TraitsVAO
-{
-    static bool isCoreProfile()
-    {
-       #if JUCE_OPENGL_ES
-        return true;
-       #else
-        clearGLError();
-        GLint mask = 0;
-        glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
-
-        // The context isn't aware of the profile mask, so it pre-dates the core profile
-        if (glGetError() == GL_INVALID_ENUM)
-            return false;
-
-        // Also assumes a compatibility profile if the mask is completely empty for some reason
-        return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) != 0;
-       #endif
-    }
-
-    /*  Returns true if the context requires a non-zero vertex array object (VAO) to be bound.
-
-        If the context is a compatibility context, we can just pretend that VAOs don't exist,
-        and use the default VAO all the time instead. This provides a more consistent experience
-        in user code, which might make calls (like glVertexPointer()) that only work when VAO 0 is
-        bound in OpenGL 3.2+.
-    */
-    static bool shouldUseCustomVAO()
-    {
-       #if JUCE_OPENGL_ES
-        return false;
-       #else
-        return isCoreProfile();
-       #endif
-    }
-
-    static constexpr auto value = GL_VERTEX_ARRAY_BINDING;
-    static constexpr auto& gen = glGenVertexArrays;
-    static constexpr auto& del = glDeleteVertexArrays;
-    template <typename T>
-    static void bind (T x) { gl::glBindVertexArray (static_cast<GLuint> (x)); }
-    static constexpr auto predicate = shouldUseCustomVAO;
-};
-
-struct TraitsArrayBuffer
-{
-    static constexpr auto value = GL_ARRAY_BUFFER_BINDING;
-    static constexpr auto& gen = glGenBuffers;
-    static constexpr auto& del = glDeleteBuffers;
-    template <typename T>
-    static void bind (T x) { gl::glBindBuffer (GL_ARRAY_BUFFER, static_cast<GLuint> (x)); }
-    static bool predicate() { return true; }
-};
-
-struct TraitsElementArrayBuffer
-{
-    static constexpr auto value = GL_ELEMENT_ARRAY_BUFFER_BINDING;
-    static constexpr auto& gen = glGenBuffers;
-    static constexpr auto& del = glDeleteBuffers;
-    template <typename T>
-    static void bind (T x) { gl::glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint> (x)); }
-    static bool predicate() { return true; }
-};
-
-template <typename Traits>
-class SavedBinding
-{
-public:
-    SavedBinding() = default;
-
-    ~SavedBinding()
-    {
-        if (! Traits::predicate())
-            return;
-
-        Traits::bind (values.previous);
-        Traits::del (1, &values.current);
-    }
-
-    void bind() const { Traits::bind (values.current); }
-
-    JUCE_DECLARE_NON_COPYABLE (SavedBinding)
-    JUCE_DECLARE_NON_MOVEABLE (SavedBinding)
-
-private:
-    struct Values
-    {
-        GLint previous{};
-        GLuint current{};
-    };
-
-    Values values = []
-    {
-        if (! Traits::predicate())
-            return Values{};
-
-        GLint previous{};
-        glGetIntegerv (Traits::value, &previous);
-
-        GLuint current{};
-        Traits::gen (1, &current);
-        Traits::bind (current);
-
-        return Values { previous, current };
-    }();
-};
-
-//==============================================================================
 struct StateHelpers
 {
     struct BlendingMode
@@ -1194,7 +1086,7 @@ struct StateHelpers
         GLuint currentTextureID[numTextures];
         int texturesEnabled = 0, currentActiveTexture = -1;
         const OpenGLContext& context;
-        const bool needsToEnableTexture = ! context.isCoreProfile();
+        const bool needsToEnableTexture = contextRequiresTexture2DEnableDisable();
 
         ActiveTextures& operator= (const ActiveTextures&);
     };
@@ -1247,7 +1139,7 @@ struct StateHelpers
 
                 JUCE_CHECK_OPENGL_ERROR;
                 PixelARGB lookup[gradientTextureSize];
-                gradient.createLookupTable (lookup);
+                gradient.createLookupTable (lookup, gradientTextureSize);
                 gradientTextures.getUnchecked (activeGradientIndex)->loadARGB (lookup, gradientTextureSize, 1);
             }
 
@@ -1272,6 +1164,9 @@ struct StateHelpers
         ~ShaderQuadQueue() noexcept
         {
             static_assert (sizeof (VertexInfo) == 8, "Sanity check VertexInfo size");
+            context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
+            context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+            context.extensions.glDeleteBuffers (2, buffers);
         }
 
         void initialise() noexcept
@@ -1295,10 +1190,10 @@ struct StateHelpers
                 indexData[i + 5] = (GLushort) (v + 3);
             }
 
-            savedElementArrayBuffer.bind();
+            context.extensions.glGenBuffers (2, buffers);
+            context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
             context.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof (indexData), indexData, GL_STATIC_DRAW);
-
-            savedArrayBuffer.bind();
+            context.extensions.glBindBuffer (GL_ARRAY_BUFFER, buffers[1]);
             context.extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertexData), vertexData, GL_STREAM_DRAW);
             JUCE_CHECK_OPENGL_ERROR
         }
@@ -1382,8 +1277,7 @@ struct StateHelpers
 
         enum { maxNumQuads = 256 };
 
-        SavedBinding<TraitsArrayBuffer> savedArrayBuffer;
-        SavedBinding<TraitsElementArrayBuffer> savedElementArrayBuffer;
+        GLuint buffers[2];
         VertexInfo vertexData[maxNumQuads * 4];
         GLushort indexData[maxNumQuads * 6];
         const OpenGLContext& context;
@@ -1685,7 +1579,6 @@ struct GLState
 
 private:
     GLuint previousFrameBufferTarget;
-    SavedBinding<TraitsVAO> savedVAOBinding;
 };
 
 //==============================================================================
@@ -1891,10 +1784,7 @@ struct NonShaderContext   : public LowLevelGraphicsSoftwareRenderer
 
        #if ! JUCE_ANDROID
         target.context.extensions.glActiveTexture (GL_TEXTURE0);
-
-        if (! target.context.isCoreProfile())
-            glEnable (GL_TEXTURE_2D);
-
+        glEnable (GL_TEXTURE_2D);
         clearGLError();
        #endif
 

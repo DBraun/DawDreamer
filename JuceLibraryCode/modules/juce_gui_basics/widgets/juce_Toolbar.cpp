@@ -682,7 +682,7 @@ public:
     bool canModalEventBeSentToComponent (const Component* comp) override
     {
         return toolbar.isParentOf (comp)
-                 || dynamic_cast<const detail::ToolbarItemDragAndDropOverlayComponent*> (comp) != nullptr;
+                 || dynamic_cast<const ToolbarItemComponent::ItemDragAndDropOverlayComponent*> (comp) != nullptr;
     }
 
     void positionNearBar()

@@ -97,7 +97,6 @@ public:
     void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
     void drawSpinningWaitAnimation (Graphics&, const Colour& colour, int x, int y, int w, int h) override;
     bool isProgressBarOpaque (ProgressBar&) override;
-    ProgressBar::Style getDefaultProgressBarStyle (const ProgressBar&) override;
 
     //==============================================================================
     bool areScrollbarButtonsVisible() override;
@@ -151,7 +150,6 @@ public:
 
     //==============================================================================
     void drawBubble (Graphics&, BubbleComponent&, const Point<float>& tip, const Rectangle<float>& body) override;
-    void setComponentEffectForBubbleComponent (BubbleComponent& bubbleComponent) override;
 
     void drawLasso (Graphics&, Component&) override;
 
@@ -248,10 +246,6 @@ public:
     void drawLinearSliderBackground (Graphics&, int x, int y, int width, int height,
                                      float sliderPos, float minSliderPos, float maxSliderPos,
                                      const Slider::SliderStyle, Slider&) override;
-
-    void drawLinearSliderOutline (Graphics&, int x, int y, int width, int height,
-                                  const Slider::SliderStyle, Slider&) override;
-
 
     void drawLinearSliderThumb (Graphics&, int x, int y, int width, int height,
                                 float sliderPos, float minSliderPos, float maxSliderPos,
@@ -418,7 +412,6 @@ public:
 private:
     //==============================================================================
     std::unique_ptr<Drawable> folderImage, documentImage;
-    DropShadowEffect bubbleShadow;
 
     void drawShinyButtonShape (Graphics&,
                                float x, float y, float w, float h, float maxCornerSize,

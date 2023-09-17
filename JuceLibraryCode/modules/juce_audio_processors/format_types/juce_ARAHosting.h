@@ -107,8 +107,6 @@ struct ConversionFunctions
     when the lifetime of the helper class object ends.
 
     You shouldn't use this class directly but instead inherit from the helper classes.
-
-    @tags{ARA}
 */
 template <typename Base, typename PtrIn>
 class ManagedARAHandle
@@ -281,8 +279,6 @@ private:
 
 /** This class is used internally by PlaybackRegionRegistry to be notified when a PlaybackRegion
     object is deleted.
-
-    @tags{ARA}
 */
 struct DeletionListener
 {
@@ -657,8 +653,6 @@ using EditorRendererInterface   = PlaybackRegionRegistry<ARA::ARAEditorRendererR
 
     Returned by ARAHostDocumentController::bindDocumentToPluginInstance(). The corresponding
     ARAHostDocumentController must remain valid as long as the plugin extension is in use.
-
-    @tags{ARA}
 */
 class PlugInExtensionInstance final
 {

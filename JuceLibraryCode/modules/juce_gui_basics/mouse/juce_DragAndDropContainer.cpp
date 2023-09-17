@@ -98,12 +98,12 @@ public:
             // (note: use a local copy of this in case the callback runs
             // a modal loop and deletes this object before the method completes)
             auto details = sourceDetails;
+            DragAndDropTarget* finalTarget = nullptr;
 
             auto wasVisible = isVisible();
             setVisible (false);
-            const auto [finalTarget, unused, localPosition] = findTarget (e.getScreenPosition());
-            ignoreUnused (unused);
-            details.localPosition = localPosition;
+            Component* unused;
+            finalTarget = findTarget (e.getScreenPosition(), details.localPosition, unused);
 
             if (wasVisible) // fade the component and remove it - it'll be deleted later by the timer callback
                 dismissWithAnimation (finalTarget == nullptr);
@@ -133,8 +133,8 @@ public:
 
         setNewScreenPos (screenPos);
 
-        const auto [newTarget, newTargetComp, localPosition] = findTarget (screenPos);
-        details.localPosition = localPosition;
+        Component* newTargetComp;
+        auto* newTarget = findTarget (screenPos, details.localPosition, newTargetComp);
 
         setVisible (newTarget == nullptr || newTarget->shouldDrawDragImageWhenOver());
 
@@ -288,7 +288,8 @@ private:
         return getLocalPoint (sourceComponent, offsetInSource) - getLocalPoint (sourceComponent, Point<int>());
     }
 
-    std::tuple<DragAndDropTarget*, Component*, Point<int>> findTarget (Point<int> screenPos) const
+    DragAndDropTarget* findTarget (Point<int> screenPos, Point<int>& relativePos,
+                                   Component*& resultComponent) const
     {
         auto* hit = getParentComponent();
 
@@ -304,13 +305,20 @@ private:
         while (hit != nullptr)
         {
             if (auto* ddt = dynamic_cast<DragAndDropTarget*> (hit))
+            {
                 if (ddt->isInterestedInDragSource (details))
-                    return std::tuple (ddt, hit, hit->getLocalPoint (nullptr, screenPos));
+                {
+                    relativePos = hit->getLocalPoint (nullptr, screenPos);
+                    resultComponent = hit;
+                    return ddt;
+                }
+            }
 
             hit = hit->getParentComponent();
         }
 
-        return {};
+        resultComponent = nullptr;
+        return nullptr;
     }
 
     void setNewScreenPos (Point<int> screenPos)

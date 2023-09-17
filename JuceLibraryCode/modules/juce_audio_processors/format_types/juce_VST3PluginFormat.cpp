@@ -94,6 +94,7 @@ static int warnOnFailureIfImplemented (int result) noexcept
  #define warnOnFailureIfImplemented(x) x
 #endif
 
+enum class Direction { input, output };
 enum class MediaKind { audio, event };
 
 static Vst::MediaType toVstType (MediaKind x) { return x == MediaKind::audio ? Vst::kAudio : Vst::kEvent; }
@@ -186,66 +187,6 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
 
     if (description.manufacturerName.trim().isEmpty())
         description.manufacturerName = toString (object.vendor).trim();
-}
-
-static std::vector<PluginDescription> createPluginDescriptions (const File& pluginFile, const Steinberg::ModuleInfo& info)
-{
-    std::vector<PluginDescription> result;
-
-    const auto araMainFactoryClassNames = [&]
-    {
-        std::unordered_set<String> factories;
-
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
-        for (const auto& c : info.classes)
-            if (c.category == kARAMainFactoryClass)
-                factories.insert (CharPointer_UTF8 (c.name.c_str()));
-       #endif
-
-        return factories;
-    }();
-
-    for (const auto& c : info.classes)
-    {
-        if (c.category != kVstAudioEffectClass)
-            continue;
-
-        PluginDescription description;
-
-        description.fileOrIdentifier    = pluginFile.getFullPathName();
-        description.lastFileModTime     = pluginFile.getLastModificationTime();
-        description.lastInfoUpdateTime  = Time::getCurrentTime();
-        description.manufacturerName    = CharPointer_UTF8 (info.factoryInfo.vendor.c_str());
-        description.name                = CharPointer_UTF8 (info.name.c_str());
-        description.descriptiveName     = CharPointer_UTF8 (info.name.c_str());
-        description.pluginFormatName    = "VST3";
-        description.numInputChannels    = 0;
-        description.numOutputChannels   = 0;
-        description.hasARAExtension     = araMainFactoryClassNames.find (description.name) != araMainFactoryClassNames.end();
-
-        const auto uid = VST3::UID::fromString (c.cid);
-
-        if (! uid)
-            continue;
-
-        description.deprecatedUid       = getHashForRange (uid->data());
-        description.uniqueId            = getHashForRange (getNormalisedTUID (uid->data()));
-
-        StringArray categories;
-
-        for (const auto& category : c.subCategories)
-            categories.add (CharPointer_UTF8 (category.c_str()));
-
-        description.category = categories.joinIntoString ("|");
-
-        description.isInstrument = std::any_of (c.subCategories.begin(),
-                                                c.subCategories.end(),
-                                                [] (const auto& subcategory) { return subcategory == "Instrument"; });
-
-        result.push_back (description);
-    }
-
-    return result;
 }
 
 static void createPluginDescription (PluginDescription& description,
@@ -436,7 +377,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     //==============================================================================
     tresult PLUGIN_API requestOpenEditor ([[maybe_unused]] FIDString name) override
     {
-        // This request cannot currently be surfaced in the JUCE public API
+        jassertfalse;
         return kResultFalse;
     }
 
@@ -873,49 +814,26 @@ private:
 };
 
 //==============================================================================
-struct DescriptionLister
+struct DescriptionFactory
 {
-    static std::vector<PluginDescription> tryLoadFast (const File& file, const File& moduleinfo)
+    DescriptionFactory (VST3HostContext* host, IPluginFactory* pluginFactory)
+        : vst3HostContext (host), factory (pluginFactory)
     {
-        if (! moduleinfo.existsAsFile())
-            return {};
-
-        MemoryBlock mb;
-
-        if (! moduleinfo.loadFileAsData (mb))
-            return {};
-
-        const std::string_view blockAsStringView (static_cast<const char*> (mb.getData()), mb.getSize());
-        const auto parsed = Steinberg::ModuleInfoLib::parseJson (blockAsStringView, nullptr);
-
-        if (! parsed)
-            return {};
-
-        return createPluginDescriptions (file, *parsed);
+        jassert (pluginFactory != nullptr);
     }
 
-    static std::vector<PluginDescription> findDescriptionsFast (const File& file)
+    virtual ~DescriptionFactory() {}
+
+    Result findDescriptionsAndPerform (const File& file)
     {
-        const auto moduleinfoNewLocation = file.getChildFile ("Contents").getChildFile ("Resources").getChildFile ("moduleinfo.json");
-
-        if (const auto loaded = tryLoadFast (file, moduleinfoNewLocation); ! loaded.empty())
-            return loaded;
-
-        return tryLoadFast (file, file.getChildFile ("Contents").getChildFile ("moduleinfo.json"));
-    }
-
-    static std::vector<PluginDescription> findDescriptionsSlow (VST3HostContext& host,
-                                                                IPluginFactory& factory,
-                                                                const File& file)
-    {
-        std::vector<PluginDescription> result;
-
         StringArray foundNames;
         PFactoryInfo factoryInfo;
-        factory.getFactoryInfo (&factoryInfo);
+        factory->getFactoryInfo (&factoryInfo);
         auto companyName = toString (factoryInfo.vendor).trim();
 
-        auto numClasses = factory.countClasses();
+        Result result (Result::ok());
+
+        auto numClasses = factory->countClasses();
 
         // Every ARA::IMainFactory must have a matching Steinberg::IComponent.
         // The match is determined by the two classes having the same name.
@@ -925,7 +843,7 @@ struct DescriptionLister
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
-            factory.getClassInfo (i, &info);
+            factory->getClassInfo (i, &info);
             if (std::strcmp (info.category, kARAMainFactoryClass) == 0)
                 araMainFactoryClassNames.insert (info.name);
         }
@@ -934,7 +852,7 @@ struct DescriptionLister
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
-            factory.getClassInfo (i, &info);
+            factory->getClassInfo (i, &info);
 
             if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
                 continue;
@@ -951,13 +869,13 @@ struct DescriptionLister
                 VSTComSmartPtr<IPluginFactory2> pf2;
                 VSTComSmartPtr<IPluginFactory3> pf3;
 
-                if (pf2.loadFrom (&factory))
+                if (pf2.loadFrom (factory))
                 {
                     info2.reset (new PClassInfo2());
                     pf2->getClassInfo2 (i, info2.get());
                 }
 
-                if (pf3.loadFrom (&factory))
+                if (pf3.loadFrom (factory))
                 {
                     infoW.reset (new PClassInfoW());
                     pf3->getClassInfoUnicode (i, infoW.get());
@@ -971,9 +889,9 @@ struct DescriptionLister
             {
                 VSTComSmartPtr<Vst::IComponent> component;
 
-                if (component.loadFrom (&factory, info.cid))
+                if (component.loadFrom (factory, info.cid))
                 {
-                    if (component->initialize (host.getFUnknown()) == kResultOk)
+                    if (component->initialize (vst3HostContext->getFUnknown()) == kResultOk)
                     {
                         auto numInputs  = getNumSingleDirectionChannelsFor (component, Direction::input);
                         auto numOutputs = getNumSingleDirectionChannelsFor (component, Direction::output);
@@ -998,11 +916,41 @@ struct DescriptionLister
                 desc.hasARAExtension = true;
 
             if (desc.uniqueId != 0)
-                result.push_back (desc);
+                result = performOnDescription (desc);
+
+            if (result.failed())
+                break;
         }
 
         return result;
     }
+
+    virtual Result performOnDescription (PluginDescription&) = 0;
+
+private:
+    VSTComSmartPtr<VST3HostContext> vst3HostContext;
+    VSTComSmartPtr<IPluginFactory> factory;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DescriptionFactory)
+};
+
+struct DescriptionLister  : public DescriptionFactory
+{
+    DescriptionLister (VST3HostContext* host, IPluginFactory* pluginFactory)
+        : DescriptionFactory (host, pluginFactory)
+    {
+    }
+
+    Result performOnDescription (PluginDescription& desc)
+    {
+        list.add (new PluginDescription (desc));
+        return Result::ok();
+    }
+
+    OwnedArray<PluginDescription> list;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DescriptionLister)
 };
 
 //==============================================================================
@@ -1409,11 +1357,9 @@ private:
                 if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
                     continue;
 
-                const auto uniqueId = getHashForRange (getNormalisedTUID (info.cid));
-                const auto deprecatedUid = getHashForRange (info.cid);
-
                 if (toString (info.name).trim() == description.name
-                    && (uniqueId == description.uniqueId || deprecatedUid == description.deprecatedUid))
+                    && (getHashForRange (getNormalisedTUID (info.cid)) == description.uniqueId
+                        || getHashForRange (info.cid) == description.deprecatedUid))
                 {
                     name = description.name;
                     return true;
@@ -1496,10 +1442,9 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& m
 }
 
 //==============================================================================
-struct VST3PluginWindow final : public AudioProcessorEditor,
-                                private ComponentMovementWatcher,
-                                private ComponentBoundsConstrainer,
-                                private IPlugFrame
+struct VST3PluginWindow : public AudioProcessorEditor,
+                          private ComponentMovementWatcher,
+                          private IPlugFrame
 {
     VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
         : AudioProcessorEditor (owner),
@@ -1512,15 +1457,12 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
         setSize (10, 10);
         setOpaque (true);
         setVisible (true);
-        setConstrainer (this);
 
         warnOnFailure (view->setFrame (this));
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
         setContentScaleFactor();
         resizeToFit();
-
-        setResizable (view->canResize() == kResultTrue, false);
     }
 
     ~VST3PluginWindow() override
@@ -1586,19 +1528,6 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
     bool keyPressed (const KeyPress& /*key*/) override  { return true; }
 
 private:
-    void checkBounds (Rectangle<int>& bounds,
-                      const Rectangle<int>&,
-                      const Rectangle<int>&,
-                      bool,
-                      bool,
-                      bool,
-                      bool) override
-    {
-        auto rect = componentToVST3Rect (bounds);
-        view->checkSizeConstraint (&rect);
-        bounds = vst3ToComponentRect (rect);
-    }
-
     //==============================================================================
     void componentPeerChanged() override {}
 
@@ -2244,7 +2173,7 @@ public:
         for (const auto* item : queues)
         {
             auto* ptr = item->ptr.get();
-            callback (ptr->getParameterIndex(), ptr->getParameterId(), ptr->get());
+            callback (ptr->getParameterIndex(), ptr->get());
         }
     }
 
@@ -2530,33 +2459,34 @@ public:
         return module != nullptr ? module->getName() : String();
     }
 
-    std::vector<Vst::SpeakerArrangement> getActualArrangements (bool isInput) const
+    void repopulateArrangements (Array<Vst::SpeakerArrangement>& inputArrangements, Array<Vst::SpeakerArrangement>& outputArrangements) const
     {
-        std::vector<Vst::SpeakerArrangement> result;
+        inputArrangements.clearQuick();
+        outputArrangements.clearQuick();
 
-        const auto numBuses = getBusCount (isInput);
+        auto numInputAudioBuses  = getBusCount (true);
+        auto numOutputAudioBuses = getBusCount (false);
 
-        for (auto i = 0; i < numBuses; ++i)
-            result.push_back (getArrangementForBus (processor, isInput, i));
+        for (int i = 0; i < numInputAudioBuses; ++i)
+            inputArrangements.add (getArrangementForBus (processor, true, i));
 
-        return result;
+        for (int i = 0; i < numOutputAudioBuses; ++i)
+            outputArrangements.add (getArrangementForBus (processor, false, i));
     }
 
-    std::optional<std::vector<Vst::SpeakerArrangement>> busLayoutsToArrangements (bool isInput) const
+    void processorLayoutsToArrangements (Array<Vst::SpeakerArrangement>& inputArrangements, Array<Vst::SpeakerArrangement>& outputArrangements)
     {
-        std::vector<Vst::SpeakerArrangement> result;
+        inputArrangements.clearQuick();
+        outputArrangements.clearQuick();
 
-        const auto numBuses = getBusCount (isInput);
+        auto numInputBuses  = getBusCount (true);
+        auto numOutputBuses = getBusCount (false);
 
-        for (auto i = 0; i < numBuses; ++i)
-        {
-            if (const auto arr = getVst3SpeakerArrangement (getBus (isInput, i)->getLastEnabledLayout()))
-                result.push_back (*arr);
-            else
-                return {};
-        }
+        for (int i = 0; i < numInputBuses; ++i)
+            inputArrangements.add (getVst3SpeakerArrangement (getBus (true, i)->getLastEnabledLayout()));
 
-        return result;
+        for (int i = 0; i < numOutputBuses; ++i)
+            outputArrangements.add (getVst3SpeakerArrangement (getBus (false, i)->getLastEnabledLayout()));
     }
 
     void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override
@@ -2570,7 +2500,7 @@ public:
 
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
-              && approximatelyEqual (getSampleRate(), newSampleRate)
+              && getSampleRate() == newSampleRate
               && getBlockSize() == estimatedSamplesPerBlock)
             return;
 
@@ -2591,21 +2521,21 @@ public:
 
         holder->initialise();
 
-        auto inArrangements  = busLayoutsToArrangements (true) .value_or (std::vector<SpeakerArrangement>{});
-        auto outArrangements = busLayoutsToArrangements (false).value_or (std::vector<SpeakerArrangement>{});
+        Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
+        processorLayoutsToArrangements (inputArrangements, outputArrangements);
 
         // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
         SpeakerArrangement nullArrangement = {};
-        auto* inData  = inArrangements .empty() ? &nullArrangement : inArrangements .data();
-        auto* outData = outArrangements.empty() ? &nullArrangement : outArrangements.data();
+        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
 
-        warnOnFailure (processor->setBusArrangements (inData,  static_cast<int32> (inArrangements .size()),
-                                                      outData, static_cast<int32> (outArrangements.size())));
+        warnOnFailure (processor->setBusArrangements (inputArrangementData,  inputArrangements.size(),
+                                                      outputArrangementData, outputArrangements.size()));
 
-        const auto inArrActual  = getActualArrangements (true);
-        const auto outArrActual = getActualArrangements (false);
+        Array<Vst::SpeakerArrangement> actualInArr, actualOutArr;
+        repopulateArrangements (actualInArr, actualOutArr);
 
-        jassert (inArrActual == inArrangements && outArrActual == outArrangements);
+        jassert (actualInArr == inputArrangements && actualOutArr == outputArrangements);
 
         // Needed for having the same sample rate in processBlock(); some plugins need this!
         setRateAndBufferSizeDetails (newSampleRate, estimatedSamplesPerBlock);
@@ -2753,12 +2683,9 @@ public:
 
         processor->process (data);
 
-        outputParameterChanges->forEach ([&] (Steinberg::int32 index, Vst::ParamID id, float value)
+        outputParameterChanges->forEach ([&] (Steinberg::int32 index, float value)
         {
-            cachedParamValues.setWithoutNotifying (index, value);
-
-            if (auto* param = getParameterForID (id))
-                param->setValueWithoutUpdatingProcessor (value);
+            parameterDispatcher.push (index, value);
         });
 
         midiMessages.clear();
@@ -2780,8 +2707,9 @@ public:
 
         // not much we can do to check the layout while the audio processor is running
         // Let's at least check if it is a VST3 compatible layout
-        for (const auto isInput : { true, false })
+        for (int dir = 0; dir < 2; ++dir)
         {
+            bool isInput = (dir == 0);
             auto n = getBusCount (isInput);
 
             for (int i = 0; i < n; ++i)
@@ -2794,8 +2722,9 @@ public:
 
     bool syncBusLayouts (const BusesLayout& layouts) const
     {
-        for (const auto isInput : { true, false })
+        for (int dir = 0; dir < 2; ++dir)
         {
+            bool isInput = (dir == 0);
             auto n = getBusCount (isInput);
             const Vst::BusDirection vstDir = (isInput ? Vst::kInput : Vst::kOutput);
 
@@ -2808,49 +2737,34 @@ public:
             }
         }
 
-        const auto getPotentialArrangements = [&] (bool isInput) -> std::optional<std::vector<Vst::SpeakerArrangement>>
+        Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
+
+        for (int i = 0; i < layouts.inputBuses.size(); ++i)
         {
-            std::vector<Vst::SpeakerArrangement> result;
-
-            for (int i = 0; i < layouts.getBuses (isInput).size(); ++i)
-            {
-                const auto& requested = layouts.getChannelSet (isInput, i);
-
-                if (const auto arr = getVst3SpeakerArrangement (requested.isDisabled() ? getBus (isInput, i)->getLastEnabledLayout() : requested))
-                    result.push_back (*arr);
-                else
-                    return {};
-            }
-
-            return result;
-        };
-
-        auto inArrangements  = getPotentialArrangements (true);
-        auto outArrangements = getPotentialArrangements (false);
-
-        if (! inArrangements.has_value() || ! outArrangements.has_value())
-        {
-            // This bus layout can't be represented as a VST3 speaker arrangement
-            return false;
+            const auto& requested = layouts.getChannelSet (true, i);
+            inputArrangements.add (getVst3SpeakerArrangement (requested.isDisabled() ? getBus (true, i)->getLastEnabledLayout() : requested));
         }
 
-        auto& inputArrangements  = *inArrangements;
-        auto& outputArrangements = *outArrangements;
+        for (int i = 0; i < layouts.outputBuses.size(); ++i)
+        {
+            const auto& requested = layouts.getChannelSet (false, i);
+            outputArrangements.add (getVst3SpeakerArrangement (requested.isDisabled() ? getBus (false, i)->getLastEnabledLayout() : requested));
+        }
 
         // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
         Vst::SpeakerArrangement nullArrangement = {};
-        auto* inputArrangementData  = inputArrangements .empty() ? &nullArrangement : inputArrangements .data();
-        auto* outputArrangementData = outputArrangements.empty() ? &nullArrangement : outputArrangements.data();
+        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
 
-        if (processor->setBusArrangements (inputArrangementData,  static_cast<int32> (inputArrangements .size()),
-                                           outputArrangementData, static_cast<int32> (outputArrangements.size())) != kResultTrue)
+        if (processor->setBusArrangements (inputArrangementData, inputArrangements.size(),
+                                           outputArrangementData, outputArrangements.size()) != kResultTrue)
             return false;
 
         // check if the layout matches the request
-        const auto inArrActual  = getActualArrangements (true);
-        const auto outArrActual = getActualArrangements (false);
+        Array<Vst::SpeakerArrangement> actualIn, actualOut;
+        repopulateArrangements (actualIn, actualOut);
 
-        return (inArrActual == inputArrangements && outArrActual == outputArrangements);
+        return (actualIn == inputArrangements && actualOut == outputArrangements);
     }
 
     bool canApplyBusesLayout (const BusesLayout& layouts) const override
@@ -3093,7 +3007,7 @@ public:
             {
                 if (componentStream != nullptr)
                 {
-                    Steinberg::int64 result;
+                    int64 result;
                     componentStream->seek (0, IBStream::kIBSeekSet, &result);
                     setComponentStateAndResetParameters (*componentStream);
                 }
@@ -3454,8 +3368,9 @@ private:
         VSTComSmartPtr<Vst::IAudioProcessor> processor;
         processor.loadFrom (component.get());
 
-        for (const auto isInput : { true, false })
+        for (int dirIdx = 0; dirIdx < 2; ++dirIdx)
         {
+            const bool isInput = (dirIdx == 0);
             const Vst::BusDirection dir = (isInput ? Vst::kInput : Vst::kOutput);
             const int numBuses = component->getBusCount (Vst::kAudio, dir);
 
@@ -3471,8 +3386,7 @@ private:
 
                 Vst::SpeakerArrangement arr;
                 if (processor != nullptr && processor->getBusArrangement (dir, i, arr) == kResultOk)
-                    if (const auto set = getChannelSetForSpeakerArrangement (arr))
-                        layout = *set;
+                    layout = getChannelSetForSpeakerArrangement (arr);
 
                 busProperties.addBus (isInput, toString (info.name), layout,
                                       (info.flags & Vst::BusInfo::kDefaultActive) != 0);
@@ -3504,7 +3418,7 @@ private:
         //   call was processBlockBypassed, otherwise do nothing
         if (processBlockBypassedCalled)
         {
-            if (bypassParam != nullptr && (approximatelyEqual (bypassParam->getValue(), 0.0f) || ! lastProcessBlockCallWasBypass))
+            if (bypassParam != nullptr && (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass))
                 bypassParam->setValue (1.0f);
         }
         else
@@ -3690,7 +3604,7 @@ tresult VST3HostContext::performEdit (Vst::ParamID paramID, Vst::ParamValue valu
         param->setValueNotifyingHost ((float) valueNormalised);
 
         // did the plug-in already update the parameter internally
-        if (! approximatelyEqual (plugin->editController->getParamNormalized (paramID), valueNormalised))
+        if (plugin->editController->getParamNormalized (paramID) != (float) valueNormalised)
             return plugin->editController->setParamNormalized (paramID, valueNormalised);
 
         return kResultTrue;
@@ -3863,18 +3777,7 @@ bool VST3PluginFormat::setStateFromVSTPresetFile (AudioPluginInstance* api, cons
 
 void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
-    if (! fileMightContainThisPluginType (fileOrIdentifier))
-        return;
-
-    if (const auto fast = DescriptionLister::findDescriptionsFast (File (fileOrIdentifier)); ! fast.empty())
-    {
-        for (const auto& d : fast)
-            results.add (new PluginDescription (d));
-
-        return;
-    }
-
-    for (const auto& file : getLibraryPaths (fileOrIdentifier))
+    if (fileMightContainThisPluginType (fileOrIdentifier))
     {
         /**
             Since there is no apparent indication if a VST3 plugin is a shell or not,
@@ -3882,16 +3785,21 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
             for every housed plugin.
         */
 
-        VSTComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (file)
-                                                              .getPluginFactory());
+        VSTComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (fileOrIdentifier)
+                                                                                    .getPluginFactory());
 
-        if (pluginFactory == nullptr)
-            continue;
+        if (pluginFactory != nullptr)
+        {
+            VSTComSmartPtr<VST3HostContext> host (new VST3HostContext());
+            DescriptionLister lister (host, pluginFactory);
+            lister.findDescriptionsAndPerform (File (fileOrIdentifier));
 
-        VSTComSmartPtr<VST3HostContext> host (new VST3HostContext());
-
-        for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
-            results.add (new PluginDescription (d));
+            results.addCopiesOf (lister.list);
+        }
+        else
+        {
+            jassertfalse;
+        }
     }
 }
 
@@ -3912,11 +3820,12 @@ void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& descripti
 }
 
 static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat& format,
-                                                                const PluginDescription& description,
-                                                                const File& file)
+                                                                const PluginDescription& description)
 {
     if (! format.fileMightContainThisPluginType (description.fileOrIdentifier))
         return nullptr;
+
+    const File file { description.fileOrIdentifier };
 
     struct ScopedWorkingDirectory
     {
@@ -3945,33 +3854,15 @@ static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat
     return instance;
 }
 
-StringArray VST3PluginFormat::getLibraryPaths (const String& fileOrIdentifier)
-{
-   #if JUCE_WINDOWS
-    if (! File (fileOrIdentifier).existsAsFile())
-    {
-        StringArray files;
-        recursiveFileSearch (files, fileOrIdentifier, true);
-        return files;
-    }
-   #endif
-
-    return { fileOrIdentifier };
-}
-
 void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
                                              double, int, PluginCreationCallback callback)
 {
-    for (const auto& file : getLibraryPaths (description.fileOrIdentifier))
-    {
-        if (auto result = createVST3Instance (*this, description, file))
-        {
-            callback (std::move (result), {});
-            return;
-        }
-    }
+    auto result = createVST3Instance (*this, description);
 
-    callback (nullptr, TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3"));
+    const auto errorMsg = result == nullptr ? TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3")
+                                            : String();
+
+    callback (std::move (result), errorMsg);
 }
 
 bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
@@ -3983,7 +3874,12 @@ bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdent
 {
     auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
 
-    return f.hasFileExtension (".vst3") && f.exists();
+    return f.hasFileExtension (".vst3")
+          #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
+           && f.exists();
+          #else
+           && f.existsAsFile();
+          #endif
 }
 
 String VST3PluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)

@@ -392,14 +392,7 @@ void ComboBox::enablementChanged()
 
 void ComboBox::colourChanged()
 {
-    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
-    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
-
-    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
-    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
-    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-    repaint();
+    lookAndFeelChanged();
 }
 
 void ComboBox::parentHierarchyChanged()
@@ -409,6 +402,8 @@ void ComboBox::parentHierarchyChanged()
 
 void ComboBox::lookAndFeelChanged()
 {
+    repaint();
+
     {
         std::unique_ptr<Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
         jassert (newLabel != nullptr);
@@ -438,7 +433,14 @@ void ComboBox::lookAndFeelChanged()
     label->addMouseListener (this, false);
     label->setAccessible (labelEditableState == labelIsEditable);
 
-    colourChanged();
+    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
+    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
+
+    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
+    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
+    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
+    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+
     resized();
 }
 
@@ -586,7 +588,7 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 
 void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && ! approximatelyEqual (wheel.deltaY, 0.0f))
+    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
     {
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
 

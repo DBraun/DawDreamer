@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,8 +50,7 @@ Bus::Bus (const TChar* _name, BusType _busType, int32 _flags)
 //------------------------------------------------------------------------
 bool Bus::getInfo (BusInfo& info)
 {
-	memset (info.name, 0, sizeof (String128));
-	name.copy (info.name, 128);
+	name.copyTo16 (info.name, 0, str16BufferSize (info.name) - 1);
 	info.busType = busType;
 	info.flags = flags;
 	return true;

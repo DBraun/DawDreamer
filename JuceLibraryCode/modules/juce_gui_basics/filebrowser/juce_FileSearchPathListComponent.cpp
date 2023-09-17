@@ -129,7 +129,7 @@ void FileSearchPathListComponent::paintListBoxItem (int rowNumber, Graphics& g, 
     f.setHorizontalScale (0.9f);
     g.setFont (f);
 
-    g.drawText (path.getRawString (rowNumber),
+    g.drawText (path[rowNumber].getFullPathName(),
                 4, 0, width - 6, height,
                 Justification::centredLeft, true);
 }
@@ -145,7 +145,7 @@ void FileSearchPathListComponent::deleteKeyPressed (int row)
 
 void FileSearchPathListComponent::returnKeyPressed (int row)
 {
-    chooser = std::make_unique<FileChooser> (TRANS("Change folder..."), path.getRawString (row), "*");
+    chooser = std::make_unique<FileChooser> (TRANS("Change folder..."), path[row], "*");
     auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
     chooser->launchAsync (chooserFlags, [this, row] (const FileChooser& fc)
@@ -258,7 +258,7 @@ void FileSearchPathListComponent::moveSelection (int delta)
 
         if (currentRow != newRow)
         {
-            const auto f = File::createFileWithoutCheckingPath (path.getRawString (currentRow));
+            auto f = path[currentRow];
             path.remove (currentRow);
             path.add (f, newRow);
             listBox.selectRow (newRow);

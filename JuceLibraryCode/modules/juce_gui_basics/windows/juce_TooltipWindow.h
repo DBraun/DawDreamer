@@ -132,8 +132,6 @@ public:
     //==============================================================================
     /** @internal */
     float getDesktopScaleFactor() const override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -147,6 +145,7 @@ private:
     enum ShownManually { yes, no };
     void displayTipInternal (Point<int>, const String&, ShownManually);
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
     void mouseDown (const MouseEvent&) override;

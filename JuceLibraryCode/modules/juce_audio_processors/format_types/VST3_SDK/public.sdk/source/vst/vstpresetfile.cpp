@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,7 +35,9 @@
 //-----------------------------------------------------------------------------
 
 #include "vstpresetfile.h"
+
 #include <algorithm>
+
 
 namespace Steinberg {
 namespace Vst {
@@ -176,7 +178,7 @@ bool PresetFile::loadPreset (IBStream* stream, const FUID& classID, IComponent* 
 }
 
 //------------------------------------------------------------------------
-PresetFile::PresetFile (IBStream* stream) : stream (stream)
+PresetFile::PresetFile (IBStream* stream) : stream (stream), entryCount (0)
 {
 	memset (entries, 0, sizeof (entries));
 
@@ -488,12 +490,13 @@ bool PresetFile::storeComponentState (IBStream* componentStream)
 bool PresetFile::restoreComponentState (IComponent* component)
 {
 	const Entry* e = getEntry (kComponentState);
-	if (!e)
-		return false;
-	
-	auto readOnlyBStream = owned (new ReadOnlyBStream (stream, e->offset, e->size));
-	return verify (component->setState (readOnlyBStream));
-	
+	if (e)
+	{
+		auto* readOnlyBStream = new ReadOnlyBStream (stream, e->offset, e->size);
+		FReleaser readOnlyBStreamReleaser (readOnlyBStream);
+		return verify (component->setState (readOnlyBStream));
+	}
+	return false;
 }
 
 //------------------------------------------------------------------------
@@ -502,7 +505,8 @@ bool PresetFile::restoreComponentState (IEditController* editController)
 	const Entry* e = getEntry (kComponentState);
 	if (e)
 	{
-		auto readOnlyBStream = owned (new ReadOnlyBStream (stream, e->offset, e->size));
+		auto* readOnlyBStream = new ReadOnlyBStream (stream, e->offset, e->size);
+		FReleaser readOnlyBStreamReleaser (readOnlyBStream);
 		return verify (editController->setComponentState (readOnlyBStream));
 	}
 	return false;
@@ -542,7 +546,8 @@ bool PresetFile::restoreControllerState (IEditController* editController)
 	const Entry* e = getEntry (kControllerState);
 	if (e)
 	{
-		auto readOnlyBStream = owned (new ReadOnlyBStream (stream, e->offset, e->size));
+		auto* readOnlyBStream = new ReadOnlyBStream (stream, e->offset, e->size);
+		FReleaser readOnlyBStreamReleaser (readOnlyBStream);
 		return verify (editController->setState (readOnlyBStream));
 	}
 	return false;
@@ -598,8 +603,9 @@ bool PresetFile::restoreProgramData (IProgramListData* programListData,
 				return false;
 
 			int32 alreadyRead = sizeof (int32);
-			auto readOnlyBStream = owned (
-			    new ReadOnlyBStream (stream, e->offset + alreadyRead, e->size - alreadyRead));
+			auto* readOnlyBStream =
+			    new ReadOnlyBStream (stream, e->offset + alreadyRead, e->size - alreadyRead);
+			FReleaser readOnlyBStreamReleaser (readOnlyBStream);
 			return programListData && verify (programListData->setProgramData (
 			                              savedProgramListID, programIndex, readOnlyBStream));
 		}
@@ -633,8 +639,9 @@ bool PresetFile::restoreProgramData (IUnitData* unitData, UnitID* unitId)
 				return false;
 
 			int32 alreadyRead = sizeof (int32);
-			auto readOnlyBStream = owned (
-				new ReadOnlyBStream (stream, e->offset + alreadyRead, e->size - alreadyRead));
+			auto* readOnlyBStream =
+			    new ReadOnlyBStream (stream, e->offset + alreadyRead, e->size - alreadyRead);
+			FReleaser readOnlyStreamReleaser (readOnlyBStream);
 			return (unitData && verify (unitData->setUnitData (savedUnitID, readOnlyBStream)));
 		}
 	}
@@ -655,8 +662,9 @@ bool PresetFile::restoreProgramData (IUnitInfo* unitInfo, int32 unitProgramListI
 				return false;
 
 			int32 alreadyRead = sizeof (int32);
-			auto readOnlyBStream = owned (
-			    new ReadOnlyBStream (stream, e->offset + alreadyRead, e->size - alreadyRead));
+			auto* readOnlyBStream =
+			    new ReadOnlyBStream (stream, e->offset + alreadyRead, e->size - alreadyRead);
+			FReleaser readOnlyStreamReleaser (readOnlyBStream);
 			return (unitInfo && unitInfo->setUnitProgramData (unitProgramListID, programIndex,
 			                                                  readOnlyBStream));
 		}
@@ -780,7 +788,7 @@ tresult PLUGIN_API ReadOnlyBStream::read (void* buffer, int32 numBytes, int32* n
 	if (!sourceStream)
 		return kNotInitialized;
 
-	int32 maxBytesToRead = static_cast<int32> (sectionSize - seekPosition);
+	int32 maxBytesToRead = (int32) (sectionSize - seekPosition);
 	if (numBytes > maxBytesToRead)
 		numBytes = maxBytesToRead;
 	if (numBytes <= 0)

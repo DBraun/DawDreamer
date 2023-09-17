@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -39,19 +39,19 @@
 #include "pluginterfaces/vst/ivstpluginterfacesupport.h"
 
 #include <vector>
+#include "base/source/fobject.h"
 
 namespace Steinberg {
 namespace Vst {
 
 //------------------------------------------------------------------------
-/** Example implementation of IPlugInterfaceSupport.
+/** Implementation's example of IPlugInterfaceSupport.
 \ingroup hostingBase
 */
-class PlugInterfaceSupport : public IPlugInterfaceSupport
+class PlugInterfaceSupport : public FObject, public IPlugInterfaceSupport
 {
 public:
 	PlugInterfaceSupport ();
-	virtual ~PlugInterfaceSupport () = default;
 
 	//--- IPlugInterfaceSupport ---------
 	tresult PLUGIN_API isPlugInterfaceSupported (const TUID _iid) SMTG_OVERRIDE;
@@ -59,7 +59,11 @@ public:
 	void addPlugInterfaceSupported (const TUID _iid);
 	bool removePlugInterfaceSupported (const TUID _iid);
 
-	DECLARE_FUNKNOWN_METHODS
+	OBJ_METHODS (PlugInterfaceSupport, FObject)
+	REFCOUNT_METHODS (FObject)
+	DEFINE_INTERFACES
+		DEF_INTERFACE (IPlugInterfaceSupport)
+	END_DEFINE_INTERFACES (FObject)
 
 private:
 	std::vector<FUID> mFUIDArray;

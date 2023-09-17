@@ -23,411 +23,98 @@
 namespace juce
 {
 
-//==============================================================================
-class HighResolutionTimer::Impl : private PlatformTimerListener
+class HighResolutionTimer::Pimpl : public Thread
 {
+    using steady_clock = std::chrono::steady_clock;
+    using milliseconds = std::chrono::milliseconds;
+
 public:
-    explicit Impl (HighResolutionTimer& o)
-        : owner { o } {}
-
-    void startTimer (int newIntervalMs)
+    explicit Pimpl (HighResolutionTimer& ownerRef)
+        : Thread ("HighResolutionTimerThread"),
+          owner (ownerRef)
     {
-        shouldCancelCallbacks.store (true);
+    }
 
-        const auto shouldWaitForPendingCallbacks = [&]
+    using Thread::isThreadRunning;
+
+    void start (int periodMs)
+    {
         {
-            const std::scoped_lock lock { timerMutex };
+            const std::scoped_lock lk { mutex };
+            periodMillis = periodMs;
+            nextTickTime = steady_clock::now() + milliseconds (periodMillis);
+        }
 
-            if (timer.getIntervalMs() > 0)
-                timer.cancelTimer();
+        waitEvent.notify_one();
 
-            jassert (timer.getIntervalMs() == 0);
-
-            if (newIntervalMs > 0)
-                timer.startTimer (jmax (0, newIntervalMs));
-
-            return callbackThreadId != std::this_thread::get_id()
-                && timer.getIntervalMs() <= 0;
-        }();
-
-        if (shouldWaitForPendingCallbacks)
-            std::scoped_lock lock { callbackMutex };
+        if (! isThreadRunning())
+            startThread (Thread::Priority::high);
     }
 
-    int getIntervalMs() const
+    void stop()
     {
-        const std::scoped_lock lock { timerMutex };
-        return timer.getIntervalMs();
+        {
+            const std::scoped_lock lk { mutex };
+            periodMillis = 0;
+        }
+
+        waitEvent.notify_one();
+
+        if (Thread::getCurrentThreadId() != getThreadId())
+            stopThread (-1);
     }
 
-    bool isTimerRunning() const
+    int getPeriod() const
     {
-        return getIntervalMs() > 0;
+        return periodMillis;
     }
 
 private:
-    void onTimerExpired() final
+    void run() override
     {
-        callbackThreadId.store (std::this_thread::get_id());
-
+        for (;;)
         {
-            std::scoped_lock lock { callbackMutex };
-
-            if (isTimerRunning())
             {
-                try
-                {
-                    owner.hiResTimerCallback();
-                }
-                catch (...)
-                {
-                    // Exceptions thrown in a timer callback won't be
-                    // propagated to the main thread, it's best to find
-                    // a way to avoid them if possible
-                    jassertfalse;
-                }
-            }
-        }
+                std::unique_lock lk { mutex };
 
-        callbackThreadId.store ({});
+                if (waitEvent.wait_until (lk, nextTickTime, [this] { return periodMillis == 0; }))
+                    break;
+
+                nextTickTime = steady_clock::now() + milliseconds (periodMillis);
+            }
+
+            owner.hiResTimerCallback();
+        }
     }
 
     HighResolutionTimer& owner;
-    mutable std::mutex timerMutex;
-    std::mutex callbackMutex;
-    std::atomic<std::thread::id> callbackThreadId{};
-    std::atomic<bool> shouldCancelCallbacks { false };
-    PlatformTimer timer { *this };
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Impl)
-    JUCE_DECLARE_NON_MOVEABLE (Impl)
+    std::atomic<int> periodMillis { 0 };
+    steady_clock::time_point nextTickTime;
+    std::mutex mutex;
+    std::condition_variable waitEvent;
 };
 
-//==============================================================================
 HighResolutionTimer::HighResolutionTimer()
-    : impl (std::make_unique<Impl> (*this)) {}
+    : pimpl (new Pimpl (*this))
+{
+}
 
 HighResolutionTimer::~HighResolutionTimer()
 {
-    // You *must* call stopTimer from the derived class destructor to
-    // avoid data races on the timer's vtable
-    jassert (! isTimerRunning());
     stopTimer();
 }
 
-void HighResolutionTimer::startTimer (int newIntervalMs)
+void HighResolutionTimer::startTimer (int periodMs)
 {
-    impl->startTimer (newIntervalMs);
+    pimpl->start (jmax (1, periodMs));
 }
 
 void HighResolutionTimer::stopTimer()
 {
-    impl->startTimer (0);
+    pimpl->stop();
 }
 
-int HighResolutionTimer::getTimerInterval() const noexcept
-{
-    return impl->getIntervalMs();
-}
-
-bool HighResolutionTimer::isTimerRunning() const noexcept
-{
-    return impl->isTimerRunning();
-}
-
-//==============================================================================
-#if JUCE_UNIT_TESTS
-
-class HighResolutionTimerTests : public UnitTest
-{
-public:
-    HighResolutionTimerTests()
-        : UnitTest ("HighResolutionTimer", UnitTestCategories::threads) {}
-
-    void runTest() override
-    {
-        constexpr int maximumTimeoutMs {30'000};
-
-        beginTest ("Start/stop a timer");
-        {
-            WaitableEvent timerFiredOnce;
-            WaitableEvent timerFiredTwice;
-
-            Timer timer {[&, callbackCount = 0] () mutable
-            {
-                switch (++callbackCount)
-                {
-                    case 1: timerFiredOnce.signal(); return;
-                    case 2: timerFiredTwice.signal(); return;
-                    default: return;
-                }
-            }};
-
-            expect (! timer.isTimerRunning());
-            expect (timer.getTimerInterval() == 0);
-
-            timer.startTimer (1);
-            expect (timer.isTimerRunning());
-            expect (timer.getTimerInterval() == 1);
-            expect (timerFiredOnce.wait (maximumTimeoutMs));
-            expect (timerFiredTwice.wait (maximumTimeoutMs));
-
-            timer.stopTimer();
-            expect (! timer.isTimerRunning());
-            expect (timer.getTimerInterval() == 0);
-        }
-
-        beginTest ("Stop a timer from the timer callback");
-        {
-            WaitableEvent stoppedTimer;
-
-            auto timerCallback = [&](Timer& timer)
-            {
-                expect (timer.isTimerRunning());
-                timer.stopTimer();
-                expect (! timer.isTimerRunning());
-                stoppedTimer.signal();
-            };
-
-            Timer timer {[&]{ timerCallback (timer); }};
-            timer.startTimer (1);
-            expect (stoppedTimer.wait (maximumTimeoutMs));
-        }
-
-        beginTest ("Restart a timer from the timer callback");
-        {
-            WaitableEvent restartTimer;
-            WaitableEvent timerRestarted;
-            WaitableEvent timerFiredAfterRestart;
-
-            Timer timer {[&, callbackCount = 0] () mutable
-            {
-                switch (++callbackCount)
-                {
-                    case 1:
-                        expect (restartTimer.wait (maximumTimeoutMs));
-                        expect (timer.getTimerInterval() == 1);
-
-                        timer.startTimer (2);
-                        expect (timer.getTimerInterval() == 2);
-                        timerRestarted.signal();
-                        return;
-
-                    case 2:
-                        expect (timer.getTimerInterval() == 2);
-                        timerFiredAfterRestart.signal();
-                        return;
-
-                    default:
-                        return;
-                }
-            }};
-
-            timer.startTimer (1);
-            expect (timer.getTimerInterval() == 1);
-
-            restartTimer.signal();
-            expect (timerRestarted.wait (maximumTimeoutMs));
-            expect (timer.getTimerInterval() == 2);
-            expect (timerFiredAfterRestart.wait (maximumTimeoutMs));
-
-            timer.stopTimer();
-        }
-
-        beginTest ("Calling stopTimer on a timer, waits for any timer callbacks to finish");
-        {
-            WaitableEvent timerCallbackStarted;
-            WaitableEvent stoppingTimer;
-            std::atomic<bool> timerCallbackFinished { false };
-
-            Timer timer {[&, callbackCount = 0] () mutable
-            {
-                switch (++callbackCount)
-                {
-                    case 1:
-                        timerCallbackStarted.signal();
-                        expect (stoppingTimer.wait (maximumTimeoutMs));
-                        Thread::sleep (10);
-                        timerCallbackFinished = true;
-                        return;
-
-                    default:
-                        return;
-                }
-            }};
-
-            timer.startTimer (1);
-            expect (timerCallbackStarted.wait (maximumTimeoutMs));
-
-            stoppingTimer.signal();
-            timer.stopTimer();
-            expect (timerCallbackFinished);
-        }
-
-        beginTest ("Calling stopTimer on a timer, waits for any timer callbacks to finish, even if the timer callback calls stopTimer first");
-        {
-            WaitableEvent stoppedFromInsideTimerCallback;
-            WaitableEvent stoppingFromOutsideTimerCallback;
-            std::atomic<bool> timerCallbackFinished { false };
-
-            Timer timer {[&]()
-            {
-                timer.stopTimer();
-                stoppedFromInsideTimerCallback.signal();
-                expect (stoppingFromOutsideTimerCallback.wait (maximumTimeoutMs));
-                Thread::sleep (10);
-                timerCallbackFinished = true;
-
-            }};
-
-            timer.startTimer (1);
-            expect (stoppedFromInsideTimerCallback.wait (maximumTimeoutMs));
-
-            stoppingFromOutsideTimerCallback.signal();
-            timer.stopTimer();
-            expect (timerCallbackFinished);
-        }
-
-        beginTest ("Adjusting a timer period from outside the timer callback doesn't cause data races");
-        {
-            WaitableEvent timerCallbackStarted;
-            WaitableEvent timerRestarted;
-            WaitableEvent timerFiredAfterRestart;
-            std::atomic<int> lastCallbackCount {0};
-
-            Timer timer {[&, callbackCount = 0] () mutable
-            {
-                switch (++callbackCount)
-                {
-                    case 1:
-                        expect (timer.getTimerInterval() == 1);
-                        timerCallbackStarted.signal();
-                        Thread::sleep (10);
-                        lastCallbackCount = 1;
-                        return;
-
-                    case 2:
-                        expect (timerRestarted.wait (maximumTimeoutMs));
-                        expect (timer.getTimerInterval() == 2);
-                        lastCallbackCount = 2;
-                        timerFiredAfterRestart.signal();
-                        return;
-
-                    default:
-                        return;
-                }
-            }};
-
-            timer.startTimer (1);
-            expect (timerCallbackStarted.wait (maximumTimeoutMs));
-
-            timer.startTimer (2);
-            timerRestarted.signal();
-
-            expect (timerFiredAfterRestart.wait (maximumTimeoutMs));
-            expect (lastCallbackCount == 2);
-
-            timer.stopTimer();
-            expect (lastCallbackCount == 2);
-        }
-
-        beginTest ("A timer can be restarted externally, after being stopped internally");
-        {
-            WaitableEvent timerStopped;
-            WaitableEvent timerFiredAfterRestart;
-
-            Timer timer {[&, callbackCount = 0] () mutable
-            {
-                switch (++callbackCount)
-                {
-                    case 1:
-                        timer.stopTimer();
-                        timerStopped.signal();
-                        return;
-
-                    case 2:
-                        timerFiredAfterRestart.signal();
-                        return;
-
-                    default:
-                        return;
-                }
-            }};
-
-            expect (! timer.isTimerRunning());
-            timer.startTimer (1);
-            expect (timer.isTimerRunning());
-
-            expect (timerStopped.wait (maximumTimeoutMs));
-            expect (! timer.isTimerRunning());
-
-            timer.startTimer (1);
-            expect (timer.isTimerRunning());
-            expect (timerFiredAfterRestart.wait (maximumTimeoutMs));
-        }
-
-        beginTest ("Calls to `startTimer` and `getTimerInterval` succeed while a callback is blocked");
-        {
-            WaitableEvent timerBlocked;
-            WaitableEvent unblockTimer;
-
-            Timer timer {[&]
-            {
-                timerBlocked.signal();
-                unblockTimer.wait();
-                timer.stopTimer();
-            }};
-
-            timer.startTimer (1);
-            timerBlocked.wait();
-
-            expect (timer.getTimerInterval() == 1);
-            timer.startTimer (2);
-            expect (timer.getTimerInterval() == 2);
-
-            unblockTimer.signal();
-            timer.stopTimer();
-        }
-
-        beginTest ("Stress test");
-        {
-            constexpr auto maxNumTimers { 100 };
-
-            std::vector<std::unique_ptr<Timer>> timers;
-            timers.reserve (maxNumTimers);
-
-            for (int i = 0; i < maxNumTimers; ++i)
-            {
-                auto timer = std::make_unique<Timer> ([]{});
-                timer->startTimer (1);
-
-                if (! timer->isTimerRunning())
-                    break;
-
-                timers.push_back (std::move (timer));
-            }
-
-            expect (timers.size() >= 16);
-        }
-    }
-
-    class Timer : public HighResolutionTimer
-    {
-    public:
-        explicit Timer (std::function<void()> fn)
-            : callback (std::move (fn)) {}
-
-        ~Timer() override { stopTimer(); }
-
-        void hiResTimerCallback() override { callback(); }
-
-    private:
-        std::function<void()> callback;
-    };
-};
-
-static HighResolutionTimerTests highResolutionTimerTests;
-
-#endif
+bool HighResolutionTimer::isTimerRunning() const noexcept     { return getTimerInterval() != 0; }
+int HighResolutionTimer::getTimerInterval() const noexcept    { return pimpl->getPeriod(); }
 
 } // namespace juce

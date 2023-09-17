@@ -647,7 +647,7 @@ static AudioBuffer<float> resampleImpulseResponse (const AudioBuffer<float>& buf
                                                    const double srcSampleRate,
                                                    const double destSampleRate)
 {
-    if (approximatelyEqual (srcSampleRate, destSampleRate))
+    if (srcSampleRate == destSampleRate)
         return buf;
 
     const auto factorReading = srcSampleRate / destSampleRate;

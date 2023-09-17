@@ -29,8 +29,6 @@ namespace juce
 /** Properties of an AudioParameterFloat.
 
     @see AudioParameterFloat(), RangedAudioParameterAttributes()
-
-    @tags{Audio}
 */
 class AudioParameterFloatAttributes : public RangedAudioParameterAttributes<AudioParameterFloatAttributes, float> {};
 

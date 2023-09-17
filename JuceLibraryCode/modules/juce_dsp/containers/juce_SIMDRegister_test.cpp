@@ -117,12 +117,19 @@ public:
     template <typename type>
     static bool allValuesEqualTo (const SIMDRegister<type>& vec, const type scalar)
     {
-        alignas (sizeof (SIMDRegister<type>)) type elements[SIMDRegister<type>::SIMDNumElements];
+       #ifdef _MSC_VER
+        __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+       #else
+        type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+       #endif
 
         vec.copyToRawArray (elements);
 
         // as we do not want to rely on the access operator we cast this to a primitive pointer
-        return std::all_of (std::begin (elements), std::end (elements), [scalar] (const auto x) { return exactlyEqual (x, scalar); });
+        for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
+            if (elements[i] != scalar) return false;
+
+        return true;
     }
 
     template <typename type>
@@ -300,7 +307,7 @@ public:
             const SIMDRegister<type>& b = a;
 
             for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-                u.expect (exactlyEqual (b[i], array[i]));
+                u.expect (b[i] == array[i]);
         }
     };
 
@@ -532,8 +539,8 @@ public:
                 // do check
                 for (size_t j = 0; j < SIMDRegister<type>::SIMDNumElements; ++j)
                 {
-                    array_eq  [j] = (  exactlyEqual (array_a[j], array_b[j])) ? static_cast<MaskType> (-1) : 0;
-                    array_neq [j] = (! exactlyEqual (array_a[j], array_b[j])) ? static_cast<MaskType> (-1) : 0;
+                    array_eq  [j] = (array_a[j] == array_b[j]) ? static_cast<MaskType> (-1) : 0;
+                    array_neq [j] = (array_a[j] != array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_lt  [j] = (array_a[j] <  array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_le  [j] = (array_a[j] <= array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_gt  [j] = (array_a[j] >  array_b[j]) ? static_cast<MaskType> (-1) : 0;

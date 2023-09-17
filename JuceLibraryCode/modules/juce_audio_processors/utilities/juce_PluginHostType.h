@@ -78,7 +78,6 @@ public:
         MagixSequoia,               /**< Represents Magix Sequoia. */
         MergingPyramix,             /**< Represents Merging Pyramix. */
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
-        Maschine,                   /**< Represents Native Instruments Maschine. */
         pluginval,                  /**< Represents pluginval. */
         Reaper,                     /**< Represents Cockos Reaper. */
         Reason,                     /**< Represents Reason. */
@@ -204,8 +203,6 @@ public:
     bool isWavelab() const noexcept           { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelab8 || type == SteinbergWavelabGeneric; }
     /** Returns true if the host is Steinberg WaveLab 6 or below. */
     bool isWavelabLegacy() const noexcept     { return type == SteinbergWavelab5 || type == SteinbergWavelab6; }
-    /** Returns true if the host is Native Instruments Maschine. */
-    bool isMaschine() const noexcept          { return type == Maschine; }
 
     //==============================================================================
     /** Returns a human-readable description of the host. */

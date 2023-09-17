@@ -114,9 +114,6 @@ protected:
     ARA::PlugIn::ContentReader* doCreatePlaybackRegionContentReader (ARA::PlugIn::PlaybackRegion* playbackRegion,
                                                                      ARA::ARAContentType type,
                                                                      const ARA::ARAContentTimeRange* range) noexcept override;
-    void doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion,
-                                             ARA::ARATimeDuration* headTime,
-                                             ARA::ARATimeDuration* tailTime) noexcept override;
 
     //==============================================================================
     // ARAAudioSource analysis
@@ -662,13 +659,6 @@ ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::ARADocumentCont
     return specialisation->doCreatePlaybackRegionContentReader (playbackRegion, type, range);
 }
 
-void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion,
-                                                                                                         ARA::ARATimeDuration* headTime,
-                                                                                                         ARA::ARATimeDuration* tailTime) noexcept
-{
-    specialisation->doGetPlaybackRegionHeadAndTailTime (playbackRegion, headTime, tailTime);
-}
-
 bool ARADocumentControllerSpecialisation::ARADocumentControllerImpl::doIsAudioSourceContentAnalysisIncomplete (const ARA::PlugIn::AudioSource* audioSource,
                                                                                                                ARA::ARAContentType type) noexcept
 {
@@ -923,14 +913,6 @@ ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreatePlaybac
     jassertfalse;
 
     return nullptr;
-}
-
-void ARADocumentControllerSpecialisation::doGetPlaybackRegionHeadAndTailTime ([[maybe_unused]] const ARA::PlugIn::PlaybackRegion* playbackRegion,
-                                                                              ARA::ARATimeDuration* headTime,
-                                                                              ARA::ARATimeDuration* tailTime)
-{
-    *headTime = 0.0;
-    *tailTime = 0.0;
 }
 
 bool ARADocumentControllerSpecialisation::doIsAudioSourceContentAnalysisIncomplete ([[maybe_unused]] const ARA::PlugIn::AudioSource* audioSource,

@@ -57,8 +57,9 @@ PathStrokeType::~PathStrokeType() noexcept
 
 bool PathStrokeType::operator== (const PathStrokeType& other) const noexcept
 {
-    const auto tie = [] (const PathStrokeType& p) { return std::tie (p.thickness, p.jointStyle, p.endStyle); };
-    return tie (*this) == tie (other);
+    return thickness == other.thickness
+        && jointStyle == other.jointStyle
+        && endStyle == other.endStyle;
 }
 
 bool PathStrokeType::operator!= (const PathStrokeType& other) const noexcept
@@ -69,128 +70,122 @@ bool PathStrokeType::operator!= (const PathStrokeType& other) const noexcept
 //==============================================================================
 namespace PathStrokeHelpers
 {
-    struct LineIntersection
+    static bool lineIntersection (const float x1, const float y1,
+                                  const float x2, const float y2,
+                                  const float x3, const float y3,
+                                  const float x4, const float y4,
+                                  float& intersectionX,
+                                  float& intersectionY,
+                                  float& distanceBeyondLine1EndSquared) noexcept
     {
-        Point<float> point;
-        float distanceBeyondLine1EndSquared;
-        bool intersects;
-    };
-
-    static LineIntersection lineIntersection (const float x1, const float y1,
-                                              const float x2, const float y2,
-                                              const float x3, const float y3,
-                                              const float x4, const float y4)
-    {
-        if (! approximatelyEqual (x2, x3) || ! approximatelyEqual (y2, y3))
+        if (x2 != x3 || y2 != y3)
         {
-            const auto dx1 = x2 - x1;
-            const auto dy1 = y2 - y1;
-            const auto dx2 = x4 - x3;
-            const auto dy2 = y4 - y3;
-            const auto divisor = dx1 * dy2 - dx2 * dy1;
+            auto dx1 = x2 - x1;
+            auto dy1 = y2 - y1;
+            auto dx2 = x4 - x3;
+            auto dy2 = y4 - y3;
+            auto divisor = dx1 * dy2 - dx2 * dy1;
 
-            if (approximatelyEqual (divisor, 0.0f))
+            if (divisor == 0.0f)
             {
-                if (! ((approximatelyEqual (dx1, 0.0f) && approximatelyEqual (dy1, 0.0f))
-                       || (approximatelyEqual (dx2, 0.0f) && approximatelyEqual (dy2, 0.0f))))
+                if (! ((dx1 == 0.0f && dy1 == 0.0f) || (dx2 == 0.0f && dy2 == 0.0f)))
                 {
-                    if (approximatelyEqual (dy1, 0.0f) && ! approximatelyEqual (dy2, 0.0f))
+                    if (dy1 == 0.0f && dy2 != 0.0f)
                     {
-                        const auto along = (y1 - y3) / dy2;
-                        const auto intersectionX = x3 + along * dx2;
-                        const auto intersectionY = y1;
+                        auto along = (y1 - y3) / dy2;
+                        intersectionX = x3 + along * dx2;
+                        intersectionY = y1;
 
-                        const auto distance = square (intersectionX - x2);
-                        const auto distanceBeyondLine1EndSquared = (x2 > x1) == (intersectionX < x2)
-                                                                 ? -distance
-                                                                 : distance;
+                        distanceBeyondLine1EndSquared = intersectionX - x2;
+                        distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
+                        if ((x2 > x1) == (intersectionX < x2))
+                            distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
 
-                        return { { intersectionX, intersectionY },
-                                 distanceBeyondLine1EndSquared,
-                                 along >= 0 && along <= 1.0f };
+                        return along >= 0 && along <= 1.0f;
                     }
 
-                    if (approximatelyEqual (dy2, 0.0f) && ! approximatelyEqual (dy1, 0.0f))
+                    if (dy2 == 0.0f && dy1 != 0.0f)
                     {
-                        const auto along = (y3 - y1) / dy1;
-                        const auto intersectionX = x1 + along * dx1;
-                        const auto intersectionY = y3;
+                        auto along = (y3 - y1) / dy1;
+                        intersectionX = x1 + along * dx1;
+                        intersectionY = y3;
 
-                        const auto distance = square ((along - 1.0f) * dx1);
-                        const auto distanceBeyondLine1EndSquared = along < 1.0f ? -distance : distance;
+                        distanceBeyondLine1EndSquared = (along - 1.0f) * dx1;
+                        distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
+                        if (along < 1.0f)
+                            distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
 
-                        return { { intersectionX, intersectionY },
-                                 distanceBeyondLine1EndSquared,
-                                 along >= 0 && along <= 1.0f };
+                        return along >= 0 && along <= 1.0f;
                     }
 
-                    if (approximatelyEqual (dx1, 0.0f) && ! approximatelyEqual (dx2, 0.0f))
+                    if (dx1 == 0.0f && dx2 != 0.0f)
                     {
-                        const auto along = (x1 - x3) / dx2;
-                        const auto intersectionX = x1;
-                        const auto intersectionY = y3 + along * dy2;
+                        auto along = (x1 - x3) / dx2;
+                        intersectionX = x1;
+                        intersectionY = y3 + along * dy2;
 
-                        const auto distance = square (intersectionY - y2);
-                        const auto distanceBeyondLine1EndSquared = (y2 > y1) == (intersectionY < y2)
-                                                                 ? -distance
-                                                                 : distance;
+                        distanceBeyondLine1EndSquared = intersectionY - y2;
+                        distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
 
-                        return { { intersectionX, intersectionY },
-                                 distanceBeyondLine1EndSquared,
-                                 along >= 0 && along <= 1.0f };
+                        if ((y2 > y1) == (intersectionY < y2))
+                            distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
+
+                        return along >= 0 && along <= 1.0f;
                     }
 
-                    if (approximatelyEqual (dx2, 0.0f) && ! approximatelyEqual (dx1, 0.0f))
+                    if (dx2 == 0.0f && dx1 != 0.0f)
                     {
-                        const auto along = (x3 - x1) / dx1;
-                        const auto intersectionX = x3;
-                        const auto intersectionY = y1 + along * dy1;
+                        auto along = (x3 - x1) / dx1;
+                        intersectionX = x3;
+                        intersectionY = y1 + along * dy1;
 
-                        const auto distance = square ((along - 1.0f) * dy1);
-                        const auto distanceBeyondLine1EndSquared = along < 1.0f ? -distance : distance;
+                        distanceBeyondLine1EndSquared = (along - 1.0f) * dy1;
+                        distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
+                        if (along < 1.0f)
+                            distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
 
-                        return { { intersectionX, intersectionY },
-                                 distanceBeyondLine1EndSquared,
-                                 along >= 0 && along <= 1.0f };
+                        return along >= 0 && along <= 1.0f;
                     }
                 }
 
-                const auto intersectionX = 0.5f * (x2 + x3);
-                const auto intersectionY = 0.5f * (y2 + y3);
+                intersectionX = 0.5f * (x2 + x3);
+                intersectionY = 0.5f * (y2 + y3);
 
-                const auto distanceBeyondLine1EndSquared = 0.0f;
-
-                return { { intersectionX, intersectionY },
-                         distanceBeyondLine1EndSquared,
-                         false };
+                distanceBeyondLine1EndSquared = 0.0f;
+                return false;
             }
 
-            const auto along = ((y1 - y3) * dx2 - (x1 - x3) * dy2) / divisor;
+            auto along1 = ((y1 - y3) * dx2 - (x1 - x3) * dy2) / divisor;
 
-            const auto intersectionX = x1 + along * dx1;
-            const auto intersectionY = y1 + along * dy1;
+            intersectionX = x1 + along1 * dx1;
+            intersectionY = y1 + along1 * dy1;
 
-            if (along >= 0 && along <= 1.0f)
+            if (along1 >= 0 && along1 <= 1.0f)
             {
-                const auto along2 = ((y1 - y3) * dx1 - (x1 - x3) * dy1) / divisor;
+                auto along2 = ((y1 - y3) * dx1 - (x1 - x3) * dy1) / divisor;
 
                 if (along2 >= 0 && along2 <= 1.0f)
                 {
-                    return { { intersectionX, intersectionY },
-                             0.0f,
-                             true };
+                    distanceBeyondLine1EndSquared = 0.0f;
+                    return true;
                 }
             }
 
-            const auto distance = square (along - 1.0f) * (dx1 * dx1 + dy1 * dy1);
-            const auto distanceBeyondLine1EndSquared = along < 1.0f ? -distance : distance;
+            distanceBeyondLine1EndSquared = along1 - 1.0f;
+            distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
+            distanceBeyondLine1EndSquared *= (dx1 * dx1 + dy1 * dy1);
 
-            return { { intersectionX, intersectionY },
-                     distanceBeyondLine1EndSquared,
-                     false };
+            if (along1 < 1.0f)
+                distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
+
+            return false;
         }
 
-        return { Point { x2, y2 }, 0.0f, true };
+        intersectionX = x2;
+        intersectionY = y2;
+
+        distanceBeyondLine1EndSquared = 0.0f;
+        return true;
     }
 
     static void addEdgeAndJoint (Path& destPath,
@@ -203,29 +198,31 @@ namespace PathStrokeHelpers
                                  const float midX, const float midY)
     {
         if (style == PathStrokeType::beveled
-            || (approximatelyEqual (x3, x4) && approximatelyEqual (y3, y4))
-            || (approximatelyEqual (x1, x2) && approximatelyEqual (y1, y2)))
+            || (x3 == x4 && y3 == y4)
+            || (x1 == x2 && y1 == y2))
         {
             destPath.lineTo (x2, y2);
             destPath.lineTo (x3, y3);
         }
         else
         {
-            const auto intersection = lineIntersection (x1, y1, x2, y2, x3, y3, x4, y4);
+            float jx, jy, distanceBeyondLine1EndSquared;
 
             // if they intersect, use this point..
-            if (intersection.intersects)
+            if (lineIntersection (x1, y1, x2, y2,
+                                  x3, y3, x4, y4,
+                                  jx, jy, distanceBeyondLine1EndSquared))
             {
-                destPath.lineTo (intersection.point);
+                destPath.lineTo (jx, jy);
             }
             else
             {
                 if (style == PathStrokeType::mitered)
                 {
-                    if (0.0f < intersection.distanceBeyondLine1EndSquared
-                        && intersection.distanceBeyondLine1EndSquared < maxMiterExtensionSquared)
+                    if (distanceBeyondLine1EndSquared < maxMiterExtensionSquared
+                        && distanceBeyondLine1EndSquared > 0.0f)
                     {
-                        destPath.lineTo (intersection.point);
+                        destPath.lineTo (jx, jy);
                     }
                     else
                     {
@@ -304,7 +301,7 @@ namespace PathStrokeHelpers
             auto dy = y2 - y1;
             auto len = juce_hypot (dx, dy);
 
-            if (approximatelyEqual (len, 0.0f))
+            if (len == 0.0f)
             {
                 offx1 = offx2 = x1;
                 offy1 = offy2 = y1;
@@ -613,7 +610,7 @@ namespace PathStrokeHelpers
             {
                 auto len = std::sqrt (hypotSquared);
 
-                if (approximatelyEqual (len, 0.0f))
+                if (len == 0.0f)
                 {
                     l.rx1 = l.rx2 = l.lx1 = l.lx2 = l.x1;
                     l.ry1 = l.ry2 = l.ly1 = l.ly2 = l.y1;

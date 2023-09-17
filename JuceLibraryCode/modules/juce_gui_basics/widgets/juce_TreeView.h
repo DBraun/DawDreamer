@@ -921,8 +921,6 @@ public:
     void itemDragExit (const SourceDetails&) override;
     /** @internal */
     void itemDropped (const SourceDetails&) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     friend class TreeViewItem;
@@ -935,6 +933,7 @@ private:
     class TreeAccessibilityHandler;
     struct InsertPoint;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void itemsChanged() noexcept;
     void updateVisibleItems (std::optional<Point<int>> viewportPosition = {});
     void updateButtonUnderMouse (const MouseEvent&);

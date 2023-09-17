@@ -84,7 +84,7 @@ void ParameterAttachment::callIfParameterValueChanged (float newDenormalisedValu
 {
     const auto newValue = normalise (newDenormalisedValue);
 
-    if (! approximatelyEqual (parameter.getValue(), newValue))
+    if (parameter.getValue() != newValue)
         callback (newValue);
 }
 

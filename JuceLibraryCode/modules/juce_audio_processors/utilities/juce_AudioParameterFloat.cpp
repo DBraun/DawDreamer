@@ -44,7 +44,7 @@ AudioParameterFloat::AudioParameterFloat (const ParameterID& idToUse,
         {
             int numDecimalPlaces = 7;
 
-            if (! approximatelyEqual (range.interval, 0.0f))
+            if (range.interval != 0.0f)
             {
                 if (approximatelyEqual (std::abs (range.interval - std::floor (range.interval)), 0.0f))
                     return 0;
@@ -95,7 +95,7 @@ void AudioParameterFloat::valueChanged (float)                           {}
 
 AudioParameterFloat& AudioParameterFloat::operator= (float newValue)
 {
-    if (! approximatelyEqual ((float) value, newValue))
+    if (value != newValue)
         setValueNotifyingHost (convertTo0to1 (newValue));
 
     return *this;

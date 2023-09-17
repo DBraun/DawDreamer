@@ -269,7 +269,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     if (auto* currentlyModal = getModalComponent (0))
     {
-        detail::FocusRestorer focusRestorer;
+        FocusRestorer focusRestorer;
         bool finished = false;
 
         attachCallback (currentlyModal, ModalCallbackFunction::create ([&] (int r) { returnValue = r; finished = true; }));

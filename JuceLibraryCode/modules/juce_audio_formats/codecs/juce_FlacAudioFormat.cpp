@@ -111,16 +111,15 @@ namespace FlacNamespace
  #endif
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                      "-Wdeprecated-register",
-                                      "-Wfloat-equal",
-                                      "-Wimplicit-fallthrough",
-                                      "-Wlanguage-extension-token",
-                                      "-Wredundant-decls",
                                       "-Wshadow",
-                                      "-Wsign-conversion",
-                                      "-Wswitch-default",
+                                      "-Wdeprecated-register",
                                       "-Wswitch-enum",
-                                      "-Wzero-as-null-pointer-constant")
+                                      "-Wswitch-default",
+                                      "-Wimplicit-fallthrough",
+                                      "-Wzero-as-null-pointer-constant",
+                                      "-Wsign-conversion",
+                                      "-Wredundant-decls",
+                                      "-Wlanguage-extension-token")
 
  #if JUCE_INTEL
   #if JUCE_32BIT

@@ -74,8 +74,6 @@ public:
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 
 private:

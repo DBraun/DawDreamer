@@ -35,10 +35,10 @@ namespace KeyboardFocusTraverserHelpers
     }
 
     static Component* traverse (Component* current, Component* container,
-                                detail::FocusHelpers::NavigationDirection direction)
+                                FocusHelpers::NavigationDirection direction)
     {
-        if (auto* comp = detail::FocusHelpers::navigateFocus (current, container, direction,
-                                                              &Component::isKeyboardFocusContainer))
+        if (auto* comp = FocusHelpers::navigateFocus (current, container, direction,
+                                                      &Component::isKeyboardFocusContainer))
         {
             if (isKeyboardFocusable (comp, container))
                 return comp;
@@ -53,13 +53,13 @@ namespace KeyboardFocusTraverserHelpers
 Component* KeyboardFocusTraverser::getNextComponent (Component* current)
 {
     return KeyboardFocusTraverserHelpers::traverse (current, current->findKeyboardFocusContainer(),
-                                                    detail::FocusHelpers::NavigationDirection::forwards);
+                                                    FocusHelpers::NavigationDirection::forwards);
 }
 
 Component* KeyboardFocusTraverser::getPreviousComponent (Component* current)
 {
     return KeyboardFocusTraverserHelpers::traverse (current, current->findKeyboardFocusContainer(),
-                                                    detail::FocusHelpers::NavigationDirection::backwards);
+                                                    FocusHelpers::NavigationDirection::backwards);
 }
 
 Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentComponent)
@@ -74,9 +74,9 @@ Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentCompone
 std::vector<Component*> KeyboardFocusTraverser::getAllComponents (Component* parentComponent)
 {
     std::vector<Component*> components;
-    detail::FocusHelpers::findAllComponents (parentComponent,
-                                             components,
-                                             &Component::isKeyboardFocusContainer);
+    FocusHelpers::findAllComponents (parentComponent,
+                                     components,
+                                     &Component::isKeyboardFocusContainer);
 
     auto removePredicate = [parentComponent] (const Component* comp)
     {

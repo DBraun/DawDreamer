@@ -81,12 +81,12 @@
 #if JUCE_USE_SIMD
  #if JUCE_INTEL
   #ifdef __AVX2__
-   #include "native/juce_SIMDNativeOps_avx.cpp"
+   #include "native/juce_avx_SIMDNativeOps.cpp"
   #else
-   #include "native/juce_SIMDNativeOps_sse.cpp"
+   #include "native/juce_sse_SIMDNativeOps.cpp"
   #endif
  #elif JUCE_ARM
-  #include "native/juce_SIMDNativeOps_neon.cpp"
+  #include "native/juce_neon_SIMDNativeOps.cpp"
  #else
   #error "SIMD register support not implemented for this platform"
  #endif
