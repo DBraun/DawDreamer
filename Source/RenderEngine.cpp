@@ -209,8 +209,8 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
 
   auto numberOfBuffers =
       myBufferSize == 1 ? numRenderedSamples
-                        : (int64_t)std::ceil(((double)numRenderedSamples - 1.) /
-                                             myBufferSize);
+                        : (int64_t)std::ceil(((double)numRenderedSamples) /
+                                             (double)myBufferSize);
 
   bool graphIsConnected = true;
   int audioBufferNumChans = 0;
