@@ -2,6 +2,9 @@ FROM quay.io/pypa/manylinux2014_x86_64
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# get pip
+RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python3.10 get-pip.py
+
 # clone repo by copying in
 COPY . /DawDreamer
 
@@ -16,18 +19,17 @@ RUN sh -v build_linux.sh
 # Setup python virtual environment and requirements
 WORKDIR /DawDreamer
 RUN python3.10 -m venv test-env
-RUN source test-env/bin/activate
-RUN python -m pip install librosa scipy numpy pytest build wheel
+RUN /bin/bash -c "source test-env/bin/activate && pip install librosa scipy numpy pytest build wheel"
 
 # Build wheel
 WORKDIR /DawDreamer
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer:/DawDreamer/thirdparty/libfaust/ubuntu-x86_64/Release/lib
-RUN python -m build --wheel
+RUN python3.10 -m build --wheel
 
 # Install wheel
 WORKDIR /DawDreamer
-RUN python -m pip install dist/dawdreamer*.whl
+RUN python3.10 -m pip install dist/dawdreamer*.whl
 
 # Run all Tests
 WORKDIR /DawDreamer/tests
-RUN python -m pytest -v .
+RUN python3.10 -m pytest -v .
