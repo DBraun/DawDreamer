@@ -13,7 +13,6 @@
 
    .. autosummary::
    
-      getUserData
       isProj
       isRec
       isSigAssertBounds
@@ -71,6 +70,7 @@
       sigCheckbox
       sigCos
       sigDelay
+      sigDelay1
       sigDiv
       sigEQ
       sigExp

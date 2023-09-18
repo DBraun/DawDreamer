@@ -46,6 +46,7 @@
       ~FaustProcessor.code
       ~FaustProcessor.compiled
       ~FaustProcessor.dynamic_voices
+      ~FaustProcessor.faust_assets_path
       ~FaustProcessor.faust_libraries_path
       ~FaustProcessor.group_voices
       ~FaustProcessor.n_midi_events

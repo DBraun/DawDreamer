@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>dawdreamer.faust.box &#8212; DawDreamer 0.7.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <title>dawdreamer.faust.box &#8212; DawDreamer 0.7.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=cb78ac32" />
+    <script src="../_static/documentation_options.js?v=6dfdf7c3"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="dawdreamer.faust.signal" href="dawdreamer.faust.signal.html" />
@@ -32,9 +32,9 @@
           <div class="body" role="main">
             
   <section id="module-dawdreamer.faust.box">
-<span id="dawdreamer-faust-box"></span><h1>dawdreamer.faust.box<a class="headerlink" href="#module-dawdreamer.faust.box" title="Permalink to this heading">¶</a></h1>
+<span id="dawdreamer-faust-box"></span><h1>dawdreamer.faust.box<a class="headerlink" href="#module-dawdreamer.faust.box" title="Link to this heading">¶</a></h1>
 <section id="the-faust-box-api">
-<h2>The Faust Box API<a class="headerlink" href="#the-faust-box-api" title="Permalink to this heading">¶</a></h2>
+<h2>The Faust Box API<a class="headerlink" href="#the-faust-box-api" title="Link to this heading">¶</a></h2>
 <blockquote>
 <div><p>For reference: <a class="reference external" href="https://faustdoc.grame.fr/tutorials/box-api/">https://faustdoc.grame.fr/tutorials/box-api/</a></p>
 </div></blockquote>
@@ -136,8 +136,8 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxHBargraph</span></code>(label, min, max, step)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxHSlider</span></code>(*args, **kwargs)</p></td>
-<td><p>Overloaded function.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxHSlider</span></code>(label, init, min, max, step)</p></td>
+<td><p>Create a horizontal slider.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxInt</span></code>(val)</p></td>
 <td><p></p></td>
@@ -178,8 +178,8 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxNE</span></code>([box1, box2])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxNumEntry</span></code>(*args, **kwargs)</p></td>
-<td><p>Overloaded function.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxNumEntry</span></code>(label, init, min, max, step)</p></td>
+<td><p>Create a numerical entry.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxOR</span></code>([box1, box2])</p></td>
 <td><p></p></td>
@@ -217,68 +217,74 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxRint</span></code>([box1])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxRoute</span></code>(box_n, box_m, box_r)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxRound</span></code>([box1])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxRoute</span></code>(box_n, box_m, box_r)</p></td>
 <td><p>The route primitive facilitates the routing of signals in Faust.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSampleRate</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSampleRate</span></code>()</p></td>
 <td><p>Return a box representing the constant sample rate, such as 44100.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSelect2</span></code>([selector, box1, box2])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSelect2</span></code>([selector, box1, box2])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSelect3</span></code>([selector, box1, box2, box3])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSelect3</span></code>([selector, box1, box2, box3])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSeq</span></code>(box1, box2)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSeq</span></code>(box1, box2)</p></td>
 <td><p>The sequential composition of two blocks (e.g., A:B) expects: outputs(A)=inputs(B)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSin</span></code>([box1])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSin</span></code>([box1])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSoundfile</span></code>(filepath, chan[, part, ridx])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSoundfile</span></code>(filepath, chan[, part, ridx])</p></td>
 <td><p>Create a soundfile from a path and channel count.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSplit</span></code>(box1, box2)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSplit</span></code>(box1, box2)</p></td>
 <td><p>The split composition (e.g., A&lt;:B) operator is used to distribute the outputs of A to the inputs of B.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSqrt</span></code>([box1])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSqrt</span></code>([box1])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSub</span></code>([box1, box2])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxSub</span></code>([box1, box2])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxTan</span></code>([box1])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxTan</span></code>([box1])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxToSignals</span></code>(box)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxToSignals</span></code>(box)</p></td>
 <td><p>Convert a box to a list of signals.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxToSource</span></code>(box, language, class_name[, argv])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxToSource</span></code>(box, language, class_name[, argv])</p></td>
 <td><p>Turn a box into source code in a target language such as &quot;cpp&quot;.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxVBargraph</span></code>(label, min, max, step)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxVBargraph</span></code>(label, min, max, step)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxVSlider</span></code>(*args, **kwargs)</p></td>
-<td><p>Overloaded function.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxVSlider</span></code>(label, init, min, max, step)</p></td>
+<td><p>Create a vertical slider.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxWaveform</span></code>(vals)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxWaveform</span></code>(vals)</p></td>
 <td><p>Create a waveform from a list of values.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxWire</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxWire</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxWriteReadTable</span></code>([n, init, widx, wsig, ridx])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxWriteReadTable</span></code>([n, init, widx, wsig, ridx])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxXOR</span></code>([box1, box2])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxXOR</span></code>([box1, box2])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getBoxType</span></code>(box)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getBoxType</span></code>(box)</p></td>
 <td><p>Return a size-3 tuple of (whether the type is valid, number of inputs, number of outputs) of a box.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefNameProperty</span></code>(box)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDefNameProperty</span></code>(box)</p></td>
 <td><p>Return a tuple of (bool, Box).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getUserData</span></code>(box)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxAbstr</span></code>(box)</p></td>
 <td><p></p></td>
@@ -319,7 +325,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxFVar</span></code>(box)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxHBarGraph</span></code>(box)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxHBargraph</span></code>(box)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxHGroup</span></code>(box)</p></td>
@@ -415,7 +421,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxTGroup</span></code>(box)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxVBarGraph</span></code>(box)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxVBargraph</span></code>(box)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isBoxVGroup</span></code>(box)</p></td>
@@ -531,7 +537,7 @@
       &copy;2023, David Braun.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |

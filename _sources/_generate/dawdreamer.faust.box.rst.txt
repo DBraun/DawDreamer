@@ -70,6 +70,7 @@
       boxRem
       boxRemainder
       boxRint
+      boxRound
       boxRoute
       boxSampleRate
       boxSelect2
@@ -91,6 +92,7 @@
       boxXOR
       getBoxType
       getDefNameProperty
+      getUserData
       isBoxAbstr
       isBoxAccess
       isBoxAppl
@@ -104,7 +106,7 @@
       isBoxFConst
       isBoxFFun
       isBoxFVar
-      isBoxHBarGraph
+      isBoxHBargraph
       isBoxHGroup
       isBoxHSlider
       isBoxIPar
@@ -136,7 +138,7 @@
       isBoxSplit
       isBoxSymbolic
       isBoxTGroup
-      isBoxVBarGraph
+      isBoxVBargraph
       isBoxVGroup
       isBoxVSlider
       isBoxWaveform
