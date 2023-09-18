@@ -44,14 +44,8 @@ jobs:
         cd thirdparty/libfaust
         sh download_libfaust.sh
 
-    # todo: probably don't need to install Python
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.12.3
+      uses: pypa/cibuildwheel@v2.15.0
       env:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
@@ -59,19 +53,29 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_BEFORE_BUILD_LINUX:
-          export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && pip install --upgrade pip && sh -v build_linux.sh
+          export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && sh -v build_linux.sh
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer:$PWD/thirdparty/libfaust/ubuntu-x86_64/Release/lib && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile jax[cpu] flax
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
-        CIBW_ARCHS_LINUX: "auto aarch64"  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
+        CIBW_ARCHS_LINUX: auto64 aarch64  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
         CIBW_TEST_SKIP: "*38* *39* *311*"  # Only care about 310 (current Google Colab version)
 
     - uses: actions/upload-artifact@v3
       with:
         name: my-wheel-artifact
         path: ./wheelhouse/*.whl
+
+  build-ubuntu-docker:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Build Docker image
+      run: docker build -t dawdreamer .
 
   build-windows:
     runs-on: ${{ matrix.os }}
@@ -140,7 +144,7 @@ jobs:
         path: ./wheelhouse/*.whl
 
     - name: "Build docs for GitHub pages"
-      if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
+      if: ${{ matrix.python-version == '3.9' && github.event_name == 'release' && github.event.action == 'published' }}
       shell: cmd
       run: |
         pip install -U sphinx
@@ -148,20 +152,10 @@ jobs:
     - name: Deploy docs
       uses: peaceiris/actions-gh-pages@v3
       # todo: make condition for being on main branch
-      if: ${{ matrix.python-version == '3.8' && github.event_name == 'release' && github.event.action == 'published' }}
+      if: ${{ matrix.python-version == '3.9' && github.event_name == 'release' && github.event.action == 'published' }}
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/_build/html
-
-  build-ubuntu-docker:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-
-    - name: Build Docker image
-      run: docker build -t dawdreamer .
 
   build-macos:
     runs-on: ${{ matrix.os }}
@@ -200,7 +194,7 @@ jobs:
         sh download_libfaust.sh
 
     - name: Build wheels ${{ matrix.python-version }}
-      uses: pypa/cibuildwheel@v2.12.3
+      uses: pypa/cibuildwheel@v2.15.0
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-version }}
