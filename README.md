@@ -58,7 +58,7 @@ Install with [PyPI](https://pypi.org/project/dawdreamer/):
 
 ## API Documentation
 
-[https://dirt.design/DawDreamer/](https://dirt.design/DawDreamer/)
+[https://dirt.design/DawDreamer/](https://dirt.design/DawDreamer/dawdreamer.html)
 
 ## Basic Example
 
