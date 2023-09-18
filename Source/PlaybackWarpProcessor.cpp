@@ -337,8 +337,7 @@ void PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer,
 
     m_nonInterleavedBuffer.setSize(m_numChannels, 1);
 
-    // can we read from the playback data or are we out of bounds and we need to
-    // pass zeros to rubberband?
+    // Can we read from the playback data?
     const int last_sample = myPlaybackData.getNumSamples() - 1;
     if (sampleReadIndex > -1 && sampleReadIndex <= last_sample) {
       for (int chan = 0; chan < m_numChannels; chan++) {
@@ -346,8 +345,7 @@ void PlaybackWarpProcessor::processBlock(juce::AudioSampleBuffer& buffer,
                                         sampleReadIndex, 1);
       }
     } else {
-      // pass zeros because the requested clip loop parameters are asking for
-      // out of bounds samples.
+      // We are asking for out of bounds samples, so pass zeros.
       m_nonInterleavedBuffer.clear();
     }
 

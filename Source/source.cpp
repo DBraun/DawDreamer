@@ -1,4 +1,3 @@
-#include "FaustBoxAPI.h"
 #include "FaustSignalAPI.h"
 #include "RenderEngine.h"
 
@@ -475,9 +474,10 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
       .def(py::init<>())
       .def("__enter__", &DawDreamerFaustLibContext::enter)
       .def("__exit__", &DawDreamerFaustLibContext::exit);
-
-  create_bindings_for_faust_box(faust);
-  create_bindings_for_faust_signal(faust);
+                             
+  auto box_module = faust.def_submodule("box");
+  create_bindings_for_faust_box(faust, box_module);
+  create_bindings_for_faust_signal(faust, box_module);
 
 #endif
 

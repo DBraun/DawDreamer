@@ -84,10 +84,10 @@ ALL_PLUGIN_EFFECTS = []
 
 if platform.system() == "Darwin":
 
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")  # sometimes returns nan in GitHub Action
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.component") 
-	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "DimensionExpander.vst")
 
-	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")
+	# append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst")  # sometimes returns array of zeros in GitHub Action
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.vst3")
 	append_if_exists(ALL_PLUGIN_EFFECTS, PLUGINS / "RoughRider3.component")
 

@@ -5,7 +5,7 @@ BUFFER_SIZE = 1
 from itertools import product
 
 @pytest.mark.parametrize("duration,buffer_size", product(
-    [(44099.5/44100), (44100.5/44100), 1., (4./44100)],
+    [(44099/44100), (44099.5/44100), (44100.5/44100), 1., (4./44100)],
     [1, 2, 4, 8, 16, 128, 2048]))
 def test_faust_passthrough(duration, buffer_size):
 
@@ -33,8 +33,7 @@ def test_faust_passthrough(duration, buffer_size):
 
     assert data.shape[1] == audio.shape[1]
 
-    # todo: shouldn't need to trim one sample like this
-    min_length = min(audio.shape[1], data.shape[1]) - 1
+    min_length = min(audio.shape[1], data.shape[1])
     data = data[:,:min_length]
     audio = audio[:,:min_length]
 

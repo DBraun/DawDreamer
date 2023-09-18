@@ -414,7 +414,11 @@ def test18():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box = boxSoundfile("mySound[url:{'tango.wav'}]", boxInt(2), boxInt(0), boxInt(0))
+    chans = boxInt(2)  # must be compile-time constant
+    part = boxInt(0)  # optional
+    ridx = boxInt(0)  # optional
+    _ = boxSoundfile("mySound[url:{'tango.wav'}]", chans)
+    box = boxSoundfile("mySound[url:{'tango.wav'}]", chans, part, ridx)
 
     # Note that the "tango.wav" is not actually opened.
     # If tango.wav existed, we could open it with librosa and then pass it via set_soundfiles.
@@ -427,6 +431,33 @@ def test18():
    
     f.compile_box(box)
     my_render(engine, f)
+
+
+@with_lib_context
+def test18b():
+    """
+    process = 0,0 : soundfile("sound[url:{'tango.wav'}]", 2);
+    """
+
+    # Same as previous, but we load from audio file instead of numpy array
+
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    f = engine.make_faust_processor("my_faust")
+
+    chans = boxInt(2)  # must be compile-time constant
+    part = boxInt(0)  # optional
+    ridx = boxIntCast(phasor(boxReal(1.)) * 44100.)  # optional (read index in samples)
+    box = boxSoundfile("mySound[url:{'60988__folktelemetry__crash-fast-14.wav'}]", chans, part, ridx)
+
+    f.faust_assets_path = str(ASSETS)
+   
+    f.compile_box(box)
+    my_render(engine, f)
+    audio = engine.get_audio()
+
+    audio = audio[2:, :]  # drop the first two channels (num samples, sample rate)
+
+    assert np.abs(audio).mean() > .001
 
 
 @with_lib_context
@@ -531,18 +562,18 @@ def test23():
     box = boxPar(osc(sl1), osc(sl2))
     print('sl1.extract_name()', sl1.extract_name())
     print('box.extract_name()', box.extract_name())
-    print('sl1.to_str()', sl1.to_str())
-    print('box.to_str()', box.to_str())
+    # print('sl1.print_str()', sl1.print_str(True, 10000))
+    # print('box.print_str()', box.print_str(True, 10000))
 
     slider = isBoxHSlider(sl1)
-    if slider[0]:
-        label, init, theMin, theMax, step = slider[1:]
-        print('label.extract_name()', label.extract_name())
-        print('label.to_str()', label.to_str())
+    assert slider[0]
+    label, init, theMin, theMax, step = slider[1:]
+    print('label.extract_name()', label.extract_name())
+    # print('label.print_str()', label.print_str(True, 10000))
 
-    print(getDefNameProperty(sl1))
-    print(getDefNameProperty(box))
-    print(isBoxAbstr(sl1))
+    # print(getDefNameProperty(sl1))
+    # print(getDefNameProperty(box))
+    # print(isBoxAbstr(sl1))
     print(isBoxSlot(sl1))
     print(isBoxIdent(sl1))
 
@@ -594,7 +625,7 @@ def test24b():
 
 
 @pytest.mark.parametrize("backend",
-    ['c', 'cmajor', 'cpp', 'csharp', 'dlang', 'java', 'jax', 'julia', 'rust', 'wasm', 'wast']
+    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'java', 'jax', 'jsfx', 'julia', 'rust', 'wasm', 'wast']
     )
 def test25a(backend):
 
@@ -615,8 +646,8 @@ def test25a(backend):
 
 
 @pytest.mark.parametrize("backend",
-    ['c', 'cmajor', 'cpp', 'csharp', 'dlang', 'java', 'jax', 'julia', 'rust', 'wasm', 'wast']
-)
+    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'java', 'jax', 'jsfx', 'julia', 'rust', 'wasm', 'wast']
+    )
 def test26a(backend):
 
     createLibContext()

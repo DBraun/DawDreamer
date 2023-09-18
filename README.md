@@ -143,3 +143,4 @@ DawDreamer is licensed under GPLv3 to make it easier to comply with all of the d
 * [jgefele](https://github.com/jgefele)
 * [harritaylor](https://github.com/harritaylor)
 * [cannoneyed](https://github.com/cannoneyed/)
+

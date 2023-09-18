@@ -1,5 +1,3 @@
-#pragma once
-
 #include "PluginProcessor.h"
 
 #include <filesystem>
@@ -83,16 +81,14 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock) {
 
   String errorMessage;
 
+  myPlugin = pluginFormatManager.createPluginInstance(
+      *pluginDescriptions[0], sampleRate, samplesPerBlock, errorMessage);
 
-    myPlugin = pluginFormatManager.createPluginInstance(
-        *pluginDescriptions[0], sampleRate, samplesPerBlock, errorMessage);
-
-    if (myPlugin.get() == nullptr) {
-      throw std::runtime_error("PluginProcessor::loadPlugin error: " +
-                               errorMessage.toStdString());
-    }
-    // We loaded the plugin.
-  
+  if (myPlugin.get() == nullptr) {
+    throw std::runtime_error("PluginProcessor::loadPlugin error: " +
+                             errorMessage.toStdString());
+  }
+  // We loaded the plugin.
 
   auto outputs = myPlugin->getTotalNumOutputChannels();
 
@@ -166,8 +162,15 @@ void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
   myPlugin->prepareToPlay(sampleRate, samplesPerBlock);
 }
 
+void PluginProcessor::releaseResources() {
+  THROW_ERROR_IF_NO_PLUGIN
+  myPlugin->releaseResources();
+}
+
 void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer,
                                    juce::MidiBuffer& midiBuffer) {
+  juce::ScopedNoDenormals noDenormals;
+
   // todo: PluginProcessor should be able to use the incoming midiBuffer too.
 
   THROW_ERROR_IF_NO_PLUGIN
@@ -246,16 +249,17 @@ void PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
   auto allParameters = this->getParameters();
 
   for (juce::AudioProcessorParameter* parameter : myPlugin->getParameters()) {
-    auto name = parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH);
-
-    if (name.compare("") == 0 || !parameter->isAutomatable()) {
+    if (!parameter->isAutomatable()) {
       i++;
       continue;
     }
 
     auto theParameter = (AutomateParameterFloat*)allParameters.getUnchecked(i);
 
+    // only need to update if it's an automated parameter (there are multiple
+    // samples to choose from)
     if (theParameter->isAutomated()) {
+      // parameter->setValue(theParameter->sample(posInfo));
       parameter->beginChangeGesture();
       parameter->setValueNotifyingHost(theParameter->sample(posInfo));
       parameter->endChangeGesture();
@@ -267,6 +271,21 @@ void PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
 
 void PluginProcessor::reset() {
   if (myPlugin.get()) {
+    // send All Notes Off MIDI message to all channels and then process it.
+    // todo: is it possible to send all notes midi off without doing a
+    // processBlock?
+    MidiBuffer midiBuffer;
+    for (int i = 1; i < 17; i++) {
+      midiBuffer.addEvent(MidiMessage::allNotesOff(i), 0);
+    }
+    AudioSampleBuffer buffer;
+      
+    int numChans = std::max(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
+
+    buffer.setSize(numChans, getBlockSize());
+    myPlugin->processBlock(buffer, midiBuffer);
+
+    // Now turn off all voices.
     myPlugin->reset();
   }
 
@@ -301,7 +320,7 @@ bool PluginProcessor::loadPreset(const std::string& path) {
   THROW_ERROR_IF_NO_PLUGIN
 
   try {
-    if (!std::filesystem::exists(path.c_str())) {
+    if (!std::filesystem::exists(path)) {
       throw std::runtime_error("File not found: " + path);
     }
 
@@ -315,7 +334,8 @@ bool PluginProcessor::loadPreset(const std::string& path) {
 
     int i = 0;
     for (auto* parameter : myPlugin->getParameters()) {
-      setParameter(i, parameter->getValue());
+      auto value = parameter->getValue();
+      ProcessorBase::setAutomationValByIndex(i, value);
       i++;
     }
 
@@ -336,7 +356,7 @@ bool PluginProcessor::loadVST3Preset(const std::string& path) {
                              path);
   }
 
-  if (!std::filesystem::exists(path.c_str())) {
+  if (!std::filesystem::exists(path)) {
     throw std::runtime_error("Preset file not found: " + path);
   }
 
@@ -350,7 +370,8 @@ bool PluginProcessor::loadVST3Preset(const std::string& path) {
 
   int i = 0;
   for (auto* parameter : myPlugin->getParameters()) {
-    setParameter(i, parameter->getValue());
+    auto value = parameter->getValue();
+    ProcessorBase::setAutomationValByIndex(i, value);
     i++;
   }
 
@@ -358,7 +379,7 @@ bool PluginProcessor::loadVST3Preset(const std::string& path) {
 }
 
 void PluginProcessor::loadStateInformation(std::string filepath) {
-  if (!std::filesystem::exists(filepath.c_str())) {
+  if (!std::filesystem::exists(filepath)) {
     throw std::runtime_error("File not found: " + filepath);
   }
 
@@ -425,9 +446,13 @@ void PluginProcessor::createParameterLayout() {
 }
 
 void PluginProcessor::setPatch(const PluginPatch patch) {
+  int i = 0;
+  const Array<AudioProcessorParameter*>& pluginParameters =
+      myPlugin->getParameters();
   for (auto pair : patch) {
     if (pair.first < myPlugin->getNumParameters()) {
-      setParameter(pair.first, pair.second);
+      pluginParameters.getUnchecked(pair.first)->setValue(pair.second);
+      ProcessorBase::setAutomationValByIndex(pair.first, pair.second);
     } else {
       throw std::runtime_error(
           "RenderEngine::setPatch error: Incorrect parameter index!"
@@ -435,6 +460,7 @@ void PluginProcessor::setPatch(const PluginPatch patch) {
           std::to_string(pair.first) +
           "\n- Max index: " + std::to_string(myPlugin->getNumParameters() - 1));
     }
+    i++;
   }
 }
 
@@ -452,22 +478,6 @@ int PluginProcessor::getLatencySamples() {
 std::string PluginProcessor::getParameterAsText(const int parameter) {
   THROW_ERROR_IF_NO_PLUGIN
   return myPlugin->getParameterText(parameter).toStdString();
-}
-
-//==============================================================================
-void PluginProcessor::setParameter(const int parameterIndex,
-                                   const float value) {
-  THROW_ERROR_IF_NO_PLUGIN
-
-  auto parameters = myPlugin->getParameters();
-
-  if (parameterIndex < 0 || parameterIndex >= parameters.size()) {
-    throw std::runtime_error("Parameter not found for index: " +
-                             std::to_string(parameterIndex));
-  }
-  parameters.getUnchecked(parameterIndex)->setValue(value);
-
-  ProcessorBase::setAutomationValByIndex(parameterIndex, value);
 }
 
 //==============================================================================
@@ -508,7 +518,7 @@ int PluginProcessor::getNumMidiEvents() {
 
 bool PluginProcessor::loadMidi(const std::string& path, bool clearPrevious,
                                bool isBeats, bool allEvents) {
-  if (!std::filesystem::exists(path.c_str())) {
+  if (!std::filesystem::exists(path)) {
     throw std::runtime_error("File not found: " + path);
   }
 
@@ -631,21 +641,25 @@ py::list PluginProcessorWrapper::wrapperGetPatch() {
   return customBoost::pluginPatchToListOfTuples(PluginProcessor::getPatch());
 }
 
-std::string PluginProcessorWrapper::wrapperGetParameterName(int parameter) {
+std::string PluginProcessorWrapper::wrapperGetParameterName(
+    const int& parameter) {
   return myPlugin->getParameterName(parameter).toStdString();
 }
 
-bool PluginProcessorWrapper::wrapperSetParameter(int parameterIndex,
-                                                 float value) {
+bool PluginProcessorWrapper::wrapperSetParameter(const int& parameterIndex,
+                                                 const float& value) {
   THROW_ERROR_IF_NO_PLUGIN
 
-  auto parameters = myPlugin->getParameters();
-
-  if (parameterIndex < 0 || parameterIndex >= parameters.size()) {
+  if (parameterIndex < 0 || parameterIndex >= getParameters().size()) {
     throw std::runtime_error("Parameter not found for index: " +
                              std::to_string(parameterIndex));
   }
-  parameters.getUnchecked(parameterIndex)->setValue(value);
+
+  auto pluginParameter = myPlugin->getParameters().getUnchecked(parameterIndex);
+  pluginParameter->setValue(value);
+  // pluginParameter->beginChangeGesture();
+  // pluginParameter->setValueNotifyingHost(value);
+  // pluginParameter->endChangeGesture();
 
   return ProcessorBase::setAutomationValByIndex(parameterIndex, value);
 }
@@ -662,7 +676,7 @@ py::list PluginProcessorWrapper::getPluginParametersDescription() {
   // get the parameters as an AudioProcessorParameter array
   const Array<AudioProcessorParameter*>& processorParams =
       myPlugin->getParameters();
-  for (int i = 0; i < myPlugin->getNumParameters(); i++) {
+  for (int i = 0; i < processorParams.size(); i++) {
     std::string theName = (processorParams[i])
                               ->getName(DAW_PARAMETER_MAX_NAME_LENGTH)
                               .toStdString();

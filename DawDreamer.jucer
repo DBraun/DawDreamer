@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.7.1"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.7.2"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
@@ -87,9 +87,12 @@
             file="Source/FaustProcessor.h"/>
       <FILE id="TwJEHz" name="FaustProcessor.cpp" compile="1" resource="0"
             file="Source/FaustProcessor.cpp"/>
-      <FILE id="CzVHWE" name="FaustBoxAPI.h" compile="1" resource="0" file="Source/FaustBoxAPI.h"/>
-      <FILE id="cbiWR9" name="FaustSignalAPI.h" compile="1" resource="0"
+      <FILE id="CzVHWE" name="FaustBoxAPI.h" compile="0" resource="0" file="Source/FaustBoxAPI.h"/>
+      <FILE id="qVaVsT" name="FaustBoxAPI.cpp" compile="1" resource="0" file="Source/FaustBoxAPI.cpp"/>
+      <FILE id="cbiWR9" name="FaustSignalAPI.h" compile="0" resource="0"
             file="Source/FaustSignalAPI.h"/>
+      <FILE id="CCmZvB" name="FaustSignalAPI.cpp" compile="1" resource="0"
+            file="Source/FaustSignalAPI.cpp"/>
       <FILE id="QYs4bq" name="FilterProcessor.cpp" compile="1" resource="0"
             file="Source/FilterProcessor.cpp"/>
       <FILE id="eNraDK" name="FilterProcessor.h" compile="0" resource="0"
@@ -170,8 +173,7 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="dawdreamer"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="dawdreamer" libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>

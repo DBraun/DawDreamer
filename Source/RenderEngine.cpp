@@ -60,13 +60,13 @@ bool RenderEngine::loadGraph(DAG inDagNodes) {
 
 bool RenderEngine::connectGraph() {
   // remove all connections
-  for (auto connection : m_mainProcessorGraph->getConnections()) {
+  for (auto& connection : m_mainProcessorGraph->getConnections()) {
     m_mainProcessorGraph->removeConnection(connection);
   }
 
   m_connectedProcessors.clear();
 
-  for (auto entry : m_stringDag) {
+  for (auto& entry : m_stringDag) {
     if (m_UniqueNameToNodeID.find(entry.first) == m_UniqueNameToNodeID.end()) {
       m_stringDag.clear();
       throw std::runtime_error(
@@ -96,7 +96,7 @@ bool RenderEngine::connectGraph() {
 
     auto inputNames = entry.second;
 
-    for (auto inputName : inputNames) {
+    for (const std::string& inputName : inputNames) {
       if (m_UniqueNameToNodeID.find(inputName) == m_UniqueNameToNodeID.end()) {
         m_stringDag.clear();
         throw std::runtime_error(
@@ -209,13 +209,13 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
 
   auto numberOfBuffers =
       myBufferSize == 1 ? numRenderedSamples
-                        : (int64_t)std::ceil(((double)numRenderedSamples - 1.) /
-                                             myBufferSize);
+                        : (int64_t)std::ceil(((double)numRenderedSamples) /
+                                             (double)myBufferSize);
 
   bool graphIsConnected = true;
   int audioBufferNumChans = 0;
 
-  for (auto entry : m_stringDag) {
+  for (auto& entry : m_stringDag) {
     if (m_UniqueNameToNodeID.find(entry.first) == m_UniqueNameToNodeID.end()) {
       throw std::runtime_error(
           "Unable to find processor named: " + entry.first + ".");
@@ -266,7 +266,7 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
 
   bool lastProcessorRecordEnable = false;
 
-  for (auto entry : m_stringDag) {
+  for (auto& entry : m_stringDag) {
     auto node =
         m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
     auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
@@ -291,7 +291,7 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
 
   MidiBuffer renderMidiBuffer;
 
-  auto stepInMinutes = double(myBufferSize) / (mySampleRate * 60);
+  double stepInMinutes = double(myBufferSize) / (mySampleRate * 60);
 
   for (int64_t i = 0; i < numberOfBuffers; ++i) {
     m_positionInfo.setBpm(getBPM(*m_positionInfo.getPpqPosition()));
@@ -304,7 +304,7 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
     m_mainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
 
     m_positionInfo.setTimeInSamples(*m_positionInfo.getTimeInSamples() +
-                                   (int64_t)myBufferSize);
+                                    (int64_t)myBufferSize);
     m_positionInfo.setTimeInSeconds(double(*m_positionInfo.getTimeInSamples()) /
                                     mySampleRate);
     m_positionInfo.setPpqPosition(*m_positionInfo.getPpqPosition() +
