@@ -792,18 +792,7 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
                 boxVSlider(label, boxInit, boxMin, boxMax, boxStep));
           },
           arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a vertical slider. All the args except the first are "
-          "Boxes.")
-      .def(
-          "boxVSlider",
-          [](std::string &label, float init, float minVal, float maxVal,
-             float step) {
-            return BoxWrapper(boxVSlider(label, boxReal(init), boxReal(minVal),
-                                         boxReal(maxVal), boxReal(step)));
-          },
-          arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a vertical slider. All the args except the first are "
-          "floats.")
+          "Create a vertical slider.")
       .def(
           "boxHSlider",
           [](std::string &label, BoxWrapper &boxInit, BoxWrapper &boxMin,
@@ -812,18 +801,7 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
                 boxHSlider(label, boxInit, boxMin, boxMax, boxStep));
           },
           arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a horizontal slider. All the args except the first are "
-          "Boxes.")
-      .def(
-          "boxHSlider",
-          [](std::string &label, float init, float minVal, float maxVal,
-             float step) {
-            return BoxWrapper(boxHSlider(label, boxReal(init), boxReal(minVal),
-                                         boxReal(maxVal), boxReal(step)));
-          },
-          arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a horizontal slider. All the args except the first "
-          "are floats.")
+          "Create a horizontal slider.")
 
       .def(
           "boxNumEntry",
@@ -833,18 +811,7 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
                 boxNumEntry(label, boxInit, boxMin, boxMax, boxStep));
           },
           arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a num entry. All the args except the first are "
-          "Boxes.")
-      .def(
-          "boxNumEntry",
-          [](std::string &label, float init, float minVal, float maxVal,
-             float step) {
-            return BoxWrapper(boxNumEntry(label, boxReal(init), boxReal(minVal),
-                                          boxReal(maxVal), boxReal(step)));
-          },
-          arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
-          "Create a num entry. All the args except the first are "
-          "floats.")
+          "Create a numerical entry.")
 
       .def(
           "boxVBargraph",
