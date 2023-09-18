@@ -212,7 +212,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
         CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
-        CIBW_TEST_SKIP: "*311* *arm64*"  # Skip 311 because some vst effects output silence on GitHub Actions only
+        CIBW_TEST_SKIP: "*arm64*"
 
     - uses: actions/upload-artifact@v3
       with:
