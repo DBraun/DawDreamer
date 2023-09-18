@@ -2,5 +2,6 @@ VisualStudio*/.vs
 VisualStudio*/x64
 LinuxMakefile/*
 MacOSX/build/*
+MacOSX/DawDreamer.xcodeproj/xcuserdata/*
 MacOSX/RecentFiles*
 PythonApplication*/*.pyproj

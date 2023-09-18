@@ -47,10 +47,10 @@ macOS requirements:
 * macOS 11.0 or higher
 
 Windows requirements:
-* 64-bit Python 3.7 or higher
+* 64-bit Python 3.8 or higher
 
 Linux requirements:
-* 64-bit Python 3.7 or higher
+* 64-bit Python 3.8 or higher
 
 Install with [PyPI](https://pypi.org/project/dawdreamer/):
 
@@ -143,4 +143,3 @@ DawDreamer is licensed under GPLv3 to make it easier to comply with all of the d
 * [jgefele](https://github.com/jgefele)
 * [harritaylor](https://github.com/harritaylor)
 * [cannoneyed](https://github.com/cannoneyed/)
-
