@@ -178,6 +178,21 @@ void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer,
   auto posInfo = getPlayHead()->getPosition();
 
   myRenderMidiBuffer.clear();
+    
+  const bool isPlaying = posInfo->getIsPlaying();
+    
+  if (!isPlaying) {
+    // send All Notes Off MIDI message to all channels and then process it.
+    // todo: is it possible to send all notes midi off without doing a
+    // processBlock?
+    for (int i = 1; i < 17; i++) {
+      myRenderMidiBuffer.addEvent(MidiMessage::allNotesOff(i), 0);
+    }
+    myPlugin->processBlock(buffer, myRenderMidiBuffer);
+
+    ProcessorBase::processBlock(buffer, midiBuffer);
+    return;
+  }
 
   {
     auto start = *posInfo->getTimeInSamples();
@@ -271,21 +286,6 @@ void PluginProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo,
 
 void PluginProcessor::reset() {
   if (myPlugin.get()) {
-    // send All Notes Off MIDI message to all channels and then process it.
-    // todo: is it possible to send all notes midi off without doing a
-    // processBlock?
-    MidiBuffer midiBuffer;
-    for (int i = 1; i < 17; i++) {
-      midiBuffer.addEvent(MidiMessage::allNotesOff(i), 0);
-    }
-    AudioSampleBuffer buffer;
-      
-    int numChans = std::max(myPlugin->getTotalNumInputChannels(), myPlugin->getTotalNumOutputChannels());
-
-    buffer.setSize(numChans, getBlockSize());
-    myPlugin->processBlock(buffer, midiBuffer);
-
-    // Now turn off all voices.
     myPlugin->reset();
   }
 
