@@ -314,6 +314,11 @@ bool RenderEngine::render(const double renderLength, bool isBeats) {
   m_positionInfo.setIsPlaying(false);
   m_positionInfo.setIsRecording(false);
 
+  // processBlock once more because PluginProcessor will look at
+  // the playhead's isPlaying value, which was just set to false,
+  // to know that we should send MIDI note off messages to all channels.
+  m_mainProcessorGraph->processBlock(audioBuffer, renderMidiBuffer);
+
   // restore the record-enable of the last processor.
   if (m_stringDag.size()) {
     auto node = m_mainProcessorGraph->getNodeForId(

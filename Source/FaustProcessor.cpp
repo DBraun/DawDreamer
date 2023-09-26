@@ -105,6 +105,12 @@ void FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer,
                                   juce::MidiBuffer& midiBuffer) {
   // todo: Faust should be able to use the incoming midiBuffer too.
   auto posInfo = getPlayHead()->getPosition();
+    
+  const bool isPlaying = posInfo->getIsPlaying();
+  if (!isPlaying) {
+    ProcessorBase::processBlock(buffer, midiBuffer);
+    return;
+  }
 
   if (!m_compileState) {
     throw std::runtime_error(

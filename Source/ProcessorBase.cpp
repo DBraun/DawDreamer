@@ -121,7 +121,7 @@ float ProcessorBase::getAutomationAtZeroByIndex(const int& index) {
 
   if (index < 0 || index >= parameters.size()) {
     throw std::runtime_error(
-        "Failed to get automation value for parameter at index: " + index);
+        "Failed to get automation value for parameter at index: " + std::to_string(index));
   }
 
   auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
@@ -237,6 +237,10 @@ void ProcessorBase::processBlock(juce::AudioSampleBuffer& buffer,
     return;
   }
   auto posInfo = getPlayHead()->getPosition();
+  const bool isRecording = posInfo->getIsRecording();
+  if (!isRecording) {
+    return;
+  }
 
   const int numberChannels = myRecordBuffer.getNumChannels();
   int numSamplesToCopy =
