@@ -212,7 +212,14 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
   cls.def(py::init<float>(), arg("val"), "Init with a float")
       .def(py::init<int>(), arg("val"), "Init with an int")
       .def("__repr__",
-           [](const BoxWrapper &b) { return tree2str((BoxWrapper &)b); })
+           [](const BoxWrapper &b) {
+          try {
+              return tree2str((BoxWrapper &)b);
+          } catch (faustexception &e) {
+              return "UNKNOWN";
+          }
+          return "UNKNOWN";
+      })
       .def(
           "extract_name",
           [](const BoxWrapper &b) { return extractName((BoxWrapper &)b); },
@@ -868,23 +875,23 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
             const char *argv[512];
 
             auto pathToFaustLibraries = getPathToFaustLibraries();
-            if (pathToFaustLibraries == "") {
+            if (pathToFaustLibraries.empty()) {
               throw std::runtime_error("Unable to load Faust Libraries.");
             }
 
             argv[argc++] = "-I";
-            argv[argc++] = pathToFaustLibraries.c_str();
+            argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
             if (in_argv.has_value()) {
               for (auto v : *in_argv) {
-                argv[argc++] = v.c_str();
+                argv[argc++] = strdup(v.c_str());
               }
             }
 
             Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv,
                                  &inputs, &outputs, error_msg);
 
-            if (error_msg != "") {
+            if (!error_msg.empty()) {
               throw std::runtime_error(error_msg);
             }
 
@@ -1409,12 +1416,12 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
              std::optional<std::vector<std::string>> in_argv) {
             auto pathToFaustLibraries = getPathToFaustLibraries();
 
-            if (pathToFaustLibraries == "") {
+            if (pathToFaustLibraries.empty()) {
               throw std::runtime_error("Unable to load Faust Libraries.");
             }
 
             auto pathToArchitecture = getPathToArchitectureFiles();
-            if (pathToArchitecture == "") {
+            if (pathToArchitecture.empty()) {
               throw std::runtime_error(
                   "Unable to find Faust architecture files.");
             }
@@ -1423,17 +1430,17 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
             const char *argv[512];
 
             argv[argc++] = "-I";
-            argv[argc++] = pathToFaustLibraries.c_str();
+            argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
             argv[argc++] = "-cn";
-            argv[argc++] = class_name.c_str();
+            argv[argc++] = strdup(class_name.c_str());
 
             argv[argc++] = "-A";
-            argv[argc++] = pathToArchitecture.c_str();
+            argv[argc++] = strdup(pathToArchitecture.c_str());
 
             if (in_argv.has_value()) {
               for (auto &v : *in_argv) {
-                argv[argc++] = v.c_str();
+                argv[argc++] = strdup(v.c_str());
               }
             }
 
@@ -1459,9 +1466,15 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           "Turn a box into source code in a target language such as \"cpp\". "
           "The second argument `argv` is a list of strings to send to a Faust "
           "command line.");
+    
+  py::enum_<SType>(box_module, "SType")
+    .value("kSInt", SType::kSInt)
+    .value("kSReal", SType::kSReal)
+    .export_values();
 
   py::implicitly_convertible<float, BoxWrapper>();
   py::implicitly_convertible<int, BoxWrapper>();
+  py::implicitly_convertible<int, SType>();
 
   return box_module;
 }

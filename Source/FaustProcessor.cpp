@@ -539,6 +539,7 @@ bool FaustProcessor::compile() {
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kPoly : kMono;
+
   return true;
 }
 
@@ -546,9 +547,19 @@ bool FaustProcessor::compileSignals(
     std::vector<SigWrapper>& wrappers,
     std::optional<std::vector<std::string>> in_argv) {
   clear();
+    
+  auto pathToFaustLibraries = getPathToFaustLibraries();
 
   int argc = 0;
   const char* argv[64];
+    
+  argv[argc++] = "-I";
+  argv[argc++] = pathToFaustLibraries.c_str();
+
+  if (!m_faustLibrariesPath.empty()) {
+    argv[argc++] = "-I";
+    argv[argc++] = m_faustLibrariesPath.c_str();
+  }
 
   if (in_argv.has_value()) {
     for (auto& s : *in_argv) {
@@ -628,8 +639,18 @@ bool FaustProcessor::compileBox(
     BoxWrapper& box, std::optional<std::vector<std::string>> in_argv) {
   clear();
 
+  auto pathToFaustLibraries = getPathToFaustLibraries();
+    
   int argc = 0;
   const char* argv[512];
+        
+  argv[argc++] = "-I";
+  argv[argc++] = pathToFaustLibraries.c_str();
+
+  if (!m_faustLibrariesPath.empty()) {
+    argv[argc++] = "-I";
+    argv[argc++] = m_faustLibrariesPath.c_str();
+  }
 
   if (in_argv.has_value()) {
     for (auto& s : *in_argv) {
@@ -669,6 +690,8 @@ bool FaustProcessor::compileBox(
   m_numInputChannels = inputs;
   m_numOutputChannels = outputs;
 
+  setMainBusInputsAndOutputs(inputs, outputs);
+    
   // make new UI
   if (is_polyphonic) {
     m_midi_handler = rt_midi("my_midi");
@@ -692,8 +715,6 @@ bool FaustProcessor::compileBox(
   createParameterLayout();
 
   m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
-
-  setMainBusInputsAndOutputs(inputs, outputs);
 
   return true;
 }

@@ -1030,7 +1030,7 @@ void create_bindings_for_faust_signal(py::module &faust_module,
 
             auto pathToFaustLibraries = getPathToFaustLibraries();
 
-            if (pathToFaustLibraries == "") {
+            if (pathToFaustLibraries.empty()) {
               throw std::runtime_error("Unable to load Faust Libraries.");
             }
 
@@ -1038,14 +1038,14 @@ void create_bindings_for_faust_signal(py::module &faust_module,
             const char *argv[64];
 
             argv[argc++] = "-I";
-            argv[argc++] = pathToFaustLibraries.c_str();
+            argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
             argv[argc++] = "-cn";
-            argv[argc++] = class_name.c_str();
+            argv[argc++] = strdup(class_name.c_str());
 
             if (in_argv.has_value()) {
               for (auto v : *in_argv) {
-                argv[argc++] = v.c_str();
+                argv[argc++] = strdup(v.c_str());
               }
             }
 
@@ -1054,7 +1054,7 @@ void create_bindings_for_faust_signal(py::module &faust_module,
             std::string source_code = createSourceFromSignals(
                 "dawdreamer", signals, lang, argc, argv, error_msg);
 
-            if (error_msg != "") {
+            if (!error_msg.empty()) {
               throw std::runtime_error(error_msg);
             }
 
