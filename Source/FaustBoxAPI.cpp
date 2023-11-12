@@ -835,6 +835,13 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           arg("label"), arg("box"), "Create a vgroup.")
 
       .def(
+          "boxTGroup",
+          [](std::string &label, BoxWrapper &box1) {
+            return BoxWrapper(boxTGroup(label, box1));
+          },
+          arg("label"), arg("box"), "Create a tgroup.")
+
+      .def(
           "boxVBargraph",
           [](std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax,
              BoxWrapper &box) {
