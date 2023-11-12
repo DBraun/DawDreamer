@@ -821,6 +821,20 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           "Create a numerical entry.")
 
       .def(
+          "boxHGroup",
+          [](std::string &label, BoxWrapper &box1) {
+            return BoxWrapper(boxHGroup(label, box1));
+          },
+          arg("label"), arg("box"), "Create an hgroup.")
+
+      .def(
+          "boxVGroup",
+          [](std::string &label, BoxWrapper &box1) {
+            return BoxWrapper(boxHGroup(label, box1));
+          },
+          arg("label"), arg("box"), "Create a vgroup.")
+
+      .def(
           "boxVBargraph",
           [](std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax,
              BoxWrapper &box) {
