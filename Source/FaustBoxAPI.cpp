@@ -146,7 +146,8 @@ void add_unary_operation(py::class_<BoxWrapper> &cls, const char *name,
   });
 }
 
-py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module &box_module) {
+py::module_ &create_bindings_for_faust_box(py::module &faust_module,
+                                           py::module &box_module) {
   using arg = py::arg;
   using kw_only = py::kw_only;
 
@@ -163,6 +164,13 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
     )pbdoc";
 
   py::class_<BoxWrapper> cls(box_module, "Box");
+
+  cls.def_property_readonly("inputs", &BoxWrapper::getInputs,
+                            "Get the box's number of inputs.");
+  cls.def_property_readonly("outputs", &BoxWrapper::getOutputs,
+                            "Get the box's number of outputs.");
+  cls.def_property_readonly("valid", &BoxWrapper::getValid,
+                            "Get a bool for whether the box is valid.");
 
   add_operation(cls, "__add__", static_cast<Box (*)(Box, Box)>(boxAdd));
   add_operation(cls, "__radd__", static_cast<Box (*)(Box, Box)>(boxAdd));
@@ -213,13 +221,13 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
       .def(py::init<int>(), arg("val"), "Init with an int")
       .def("__repr__",
            [](const BoxWrapper &b) {
-          try {
-              return tree2str((BoxWrapper &)b);
-          } catch (faustexception &e) {
-              return "UNKNOWN";
-          }
-          return "UNKNOWN";
-      })
+             try {
+               return tree2str((BoxWrapper &)b);
+             } catch (faustexception &e) {
+               return "UNKNOWN";
+             }
+             return "UNKNOWN";
+           })
       .def(
           "extract_name",
           [](const BoxWrapper &b) { return extractName((BoxWrapper &)b); },
@@ -1487,11 +1495,11 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           "Turn a box into source code in a target language such as \"cpp\". "
           "The second argument `argv` is a list of strings to send to a Faust "
           "command line.");
-    
+
   py::enum_<SType>(box_module, "SType")
-    .value("kSInt", SType::kSInt)
-    .value("kSReal", SType::kSReal)
-    .export_values();
+      .value("kSInt", SType::kSInt)
+      .value("kSReal", SType::kSReal)
+      .export_values();
 
   py::implicitly_convertible<float, BoxWrapper>();
   py::implicitly_convertible<int, BoxWrapper>();
