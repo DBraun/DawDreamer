@@ -1425,21 +1425,6 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
           arg("box"))
 
       .def(
-          "getBoxType",
-          [](BoxWrapper s1) {
-            int inputs, outputs;
-            try {
-              bool result = getBoxType(s1, &inputs, &outputs);
-              return py::make_tuple(result, inputs, outputs);
-            } catch (std::exception &e) {
-              throw std::runtime_error(e.what());
-            }
-          },
-          arg("box"),
-          "Return a size-3 tuple of (whether the type is valid, number of "
-          "inputs, number of outputs) of a box.")
-
-      .def(
           "boxToSource",
           [](BoxWrapper &box, std::string &lang, std::string &class_name,
              std::optional<std::vector<std::string>> in_argv) {
