@@ -14,6 +14,8 @@ namespace py = pybind11;
 
 struct BoxWrapper {
   CTree *ptr;
+  BoxWrapper(Box ptr, int inputs, int outputs)
+      : ptr{ptr}, mInputs{inputs}, mOutputs{outputs} {}
   BoxWrapper(Box ptr) : ptr{ptr} {}
   BoxWrapper(float val) : ptr{boxReal(val)} {}
   BoxWrapper(int val) : ptr{boxInt(val)} {}

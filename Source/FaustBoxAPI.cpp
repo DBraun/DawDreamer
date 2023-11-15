@@ -924,8 +924,7 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
               throw std::runtime_error(error_msg);
             }
 
-            return py::make_tuple<py::return_value_policy::take_ownership>(
-                BoxWrapper(box), inputs, outputs);
+            return BoxWrapper(box, inputs, outputs);
           },
           arg("dsp_code"), arg("argv") = py::none(),
           "Convert Faust DSP code to a Box. This returns a tuple of the box, "

@@ -58,7 +58,7 @@ def test1():
     process = fi.lowpass(1, cutoff);
     """
 
-    box, inputs, outputs = boxFromDSP(faust_code)
+    box = boxFromDSP(faust_code)
 
     module_name = "MyDSP"
 

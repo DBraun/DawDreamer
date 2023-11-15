@@ -117,7 +117,7 @@ class ModularSynth:
         self._MODS[f'env{i}_D'] = (boxWire() + boxHSlider(f"h:Env {i}/[2]Decay", 20, 0., 10_000, .001)) / 1_000
         self._MODS[f'env{i}_S'] = (boxWire() + boxHSlider(f"h:Env {i}/[3]Sustain", 0.5, 0., 10_000, .001))
         self._MODS[f'env{i}_R'] = (boxWire() + boxHSlider(f"h:Env {i}/[4]Release", 200, 0., 10_000, .001)) / 1_000
-        self._MODS[f'env{i}'] = boxFromDSP(f"process = en.ahdsre;")[0]
+        self._MODS[f'env{i}'] = boxFromDSP(f"process = en.ahdsre;")
 
     def _make_lfo(self, i: int, trigger_choice):
 
@@ -126,7 +126,7 @@ class ModularSynth:
         self._MODS[f'lfo{i}_gain'] = boxMax(boxReal(0), boxWire() + boxHSlider(f"h:LFO {i}/[0]Gain", 1, 0, 10, .001))
         self._MODS[f'lfo{i}_freq'] = boxWire() + boxHSlider(f"h:LFO {i}/[1]Freq", 2, 0, 10, .001)
 
-        self._MODS[f'lfo{i}'] = boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")[0]
+        self._MODS[f'lfo{i}'] = boxFromDSP(f"""process(gain, freq, gate) = gain * os.osc(freq);""")
 
     def _get_wavecycle_data(self, choice) -> List[float]:
 
@@ -188,7 +188,7 @@ class ModularSynth:
           result = it.frdtable(LAGRANGE_ORDER, S, waveform_data, ridx) * gain : sp.panner(pan);
         }};
         """
-        self._MODS[f'sub'] = boxFromDSP(dsp_code)[0]
+        self._MODS[f'sub'] = boxFromDSP(dsp_code)
 
 
     def _make_osc(self, x: str, choice, unison: int):
@@ -273,7 +273,7 @@ class ModularSynth:
         }};
         """
 
-        self._MODS[f'osc{x}'] = boxFromDSP(dsp_code)[0]
+        self._MODS[f'osc{x}'] = boxFromDSP(dsp_code)
 
     def _make_filter(self, choice):
 
@@ -296,7 +296,7 @@ class ModularSynth:
         else:
             raise ValueError(f"Unexpected filter choice: {choice}.")
 
-        self._MODS['filter'] = boxFromDSP(dsp)[0]
+        self._MODS['filter'] = boxFromDSP(dsp)
 
 
     def _make_reverb(self):
@@ -374,7 +374,7 @@ class ModularSynth:
 
         """
 
-        self._MODS['delay'] = boxFromDSP(dsp_code)[0]
+        self._MODS['delay'] = boxFromDSP(dsp_code)
 
     @staticmethod
     def _parse_modulations(all_modulations):

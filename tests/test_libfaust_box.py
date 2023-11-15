@@ -611,8 +611,8 @@ def test24b():
     f = engine.make_faust_processor("my_faust")
 
     def test_bus(n):
-        box, inputs, outputs = boxFromDSP(f'process = si.bus({n});')
-        assert inputs ==  n and outputs == n
+        box = boxFromDSP(f'process = si.bus({n});')
+        assert box.inputs ==  n and box.outputs == n
 
     # test ascending and then descending.
     test_bus(3)
@@ -630,7 +630,7 @@ def test25a(backend):
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box, inputs, outputs = boxFromDSP('process = os.osc(440);')
+    box = boxFromDSP('process = os.osc(440);')
 
     source_code = boxToSource(box, backend, "MyDSP")
     assert source_code != ''
@@ -651,9 +651,9 @@ def test26a(backend):
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    filter, inputs, outputs = boxFromDSP('process = fi.lowpass(5);')
-    assert inputs == 2
-    assert outputs == 1
+    filter = boxFromDSP('process = fi.lowpass(5);')
+    assert filter.inputs == 2
+    assert filter.outputs == 1
     cutoff = boxHSlider("cutoff", boxReal(300), boxReal(100), boxReal(2000), boxReal(0.01))
     cutoffAndInput = boxPar(cutoff, boxWire())
     filteredInput = boxSeq(cutoffAndInput, filter)
@@ -677,10 +677,10 @@ def test27():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box1, inputs, outputs = boxFromDSP('process = os.osc;')
-    box2, inputs, outputs = boxFromDSP('process = en.adsr;')
-    box3, inputs, outputs = boxFromDSP('process = en.adsre;')
-    box4, inputs, outputs = boxFromDSP('process = fi.lowpass(5);')
+    box1 = boxFromDSP('process = os.osc;')
+    box2 = boxFromDSP('process = en.adsr;')
+    box3 = boxFromDSP('process = en.adsre;')
+    box4 = boxFromDSP('process = fi.lowpass(5);')
 
 
 @with_lib_context
@@ -793,9 +793,9 @@ def test29():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box, inputs, outputs = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
-    assert inputs == 2
-    assert outputs == 1
+    box = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    assert box.inputs == 2
+    assert box.outputs == 1
 
 
 @with_lib_context
@@ -804,9 +804,9 @@ def test30():
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
     f = engine.make_faust_processor("my_faust")
 
-    box, ins, outs = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
-    assert ins == 2
-    assert outs == 1
+    box = boxFromDSP(f"""process = en.ahdsre(.1,.1,.1,.1);""")
+    assert box.inputs == 2
+    assert box.outputs == 1
     cpp_code = boxToSource(box, 'cpp', 'MyDSP')
     assert cpp_code != ''
 
