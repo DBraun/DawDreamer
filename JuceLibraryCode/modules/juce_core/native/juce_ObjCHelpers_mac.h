@@ -20,8 +20,6 @@
   ==============================================================================
 */
 
-#include "juce_CFHelpers_mac.h"
-
 /* This file contains a few helper functions that are used internally but which
    need to be kept away from the public headers because they use obj-C symbols.
 */
@@ -46,17 +44,22 @@ inline String nsStringToJuce (NSString* s)
 
 inline NSString* juceStringToNS (const String& s)
 {
-    return [NSString stringWithUTF8String: s.toUTF8()];
+    // This cast helps linters determine nullability
+    return (NSString* _Nonnull) [NSString stringWithUTF8String: s.toUTF8()];
 }
 
 inline NSString* nsStringLiteral (const char* const s) noexcept
 {
-    return [NSString stringWithUTF8String: s];
+    jassert (s != nullptr);
+
+    // This cast helps linters determine nullability
+    return (NSString* _Nonnull) [NSString stringWithUTF8String: s];
 }
 
 inline NSString* nsEmptyString() noexcept
 {
-    return [NSString string];
+    // This cast helps linters determine nullability
+    return (NSString* _Nonnull) [NSString string];
 }
 
 inline NSURL* createNSURLFromFile (const String& f)
@@ -71,127 +74,62 @@ inline NSURL* createNSURLFromFile (const File& f)
 
 inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
 {
-    auto array = [[NSMutableArray alloc] init];
+    auto array = [[NSMutableArray alloc] initWithCapacity: (NSUInteger) strings.size()];
 
-    for (auto string: strings)
-        [array addObject:juceStringToNS (string)];
+    for (const auto& string: strings)
+        [array addObject: juceStringToNS (string)];
 
     return [array autorelease];
 }
 
-inline NSArray* varArrayToNSArray (const var& varToParse);
+inline NSData* varToJsonData (const var& varToParse)
+{
+    return [juceStringToNS (JSON::toString (varToParse)) dataUsingEncoding: NSUTF8StringEncoding];
+}
+
+inline var jsonDataToVar (NSData* jsonData)
+{
+    auto* jsonString = [[NSString alloc] initWithData: jsonData
+                                             encoding: NSUTF8StringEncoding];
+
+    jassert (jsonString != nullptr);
+    return JSON::parse (nsStringToJuce ([jsonString autorelease]));
+}
 
 inline NSDictionary* varObjectToNSDictionary (const var& varToParse)
 {
-    auto dictionary = [NSMutableDictionary dictionary];
+    jassert (varToParse.isObject());
 
-    if (varToParse.isObject())
-    {
-        auto* dynamicObject = varToParse.getDynamicObject();
+    if (! varToParse.isObject())
+        return nullptr;
 
-        auto& properties = dynamicObject->getProperties();
+    NSError* error { nullptr };
+    NSDictionary* dictionary = [NSJSONSerialization JSONObjectWithData: varToJsonData (varToParse)
+                                                               options: NSJSONReadingMutableContainers
+                                                                 error: &error];
 
-        for (int i = 0; i < properties.size(); ++i)
-        {
-            auto* keyString = juceStringToNS (properties.getName (i).toString());
-
-            const var& valueVar = properties.getValueAt (i);
-
-            if (valueVar.isObject())
-            {
-                auto* valueDictionary = varObjectToNSDictionary (valueVar);
-
-                [dictionary setObject: valueDictionary forKey: keyString];
-            }
-            else if (valueVar.isArray())
-            {
-                auto* valueArray = varArrayToNSArray (valueVar);
-
-                [dictionary setObject: valueArray forKey: keyString];
-            }
-            else
-            {
-                auto* valueString = juceStringToNS (valueVar.toString());
-
-                [dictionary setObject: valueString forKey: keyString];
-            }
-        }
-    }
+    jassert (error == nullptr);
+    jassert (dictionary != nullptr);
 
     return dictionary;
 }
 
-inline NSArray* varArrayToNSArray (const var& varToParse)
+inline NSData* jsonObjectToData (const NSObject* jsonObject)
 {
-    jassert (varToParse.isArray());
+    NSError* error { nullptr };
+    auto* jsonData = [NSJSONSerialization dataWithJSONObject: jsonObject
+                                                     options: 0
+                                                       error: &error];
 
-    if (! varToParse.isArray())
-        return nil;
+    jassert (error == nullptr);
+    jassert (jsonData != nullptr);
 
-    const auto* varArray = varToParse.getArray();
-
-    auto array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
-
-    for (const auto& aVar : *varArray)
-    {
-        if (aVar.isObject())
-        {
-            auto* valueDictionary = varObjectToNSDictionary (aVar);
-
-            [array addObject: valueDictionary];
-        }
-        else if (aVar.isArray())
-        {
-            auto* valueArray = varArrayToNSArray (aVar);
-
-            [array addObject: valueArray];
-        }
-        else
-        {
-            auto* valueString = juceStringToNS (aVar.toString());
-
-            [array addObject: valueString];
-        }
-    }
-
-    return array;
+    return jsonData;
 }
-
-var nsObjectToVar (NSObject* array);
 
 inline var nsDictionaryToVar (NSDictionary* dictionary)
 {
-    DynamicObject::Ptr dynamicObject (new DynamicObject());
-
-    for (NSString* key in dictionary)
-        dynamicObject->setProperty (nsStringToJuce (key), nsObjectToVar ([dictionary objectForKey: key]));
-
-    return var (dynamicObject.get());
-}
-
-inline var nsArrayToVar (NSArray* array)
-{
-    Array<var> resultArray;
-
-    for (id value in array)
-        resultArray.add (nsObjectToVar (value));
-
-    return var (resultArray);
-}
-
-inline var nsObjectToVar (NSObject* obj)
-{
-    if ([obj isKindOfClass: [NSString class]])          return nsStringToJuce ((NSString*) obj);
-    else if ([obj isKindOfClass: [NSNumber class]])     return nsStringToJuce ([(NSNumber*) obj stringValue]);
-    else if ([obj isKindOfClass: [NSDictionary class]]) return nsDictionaryToVar ((NSDictionary*) obj);
-    else if ([obj isKindOfClass: [NSArray class]])      return nsArrayToVar ((NSArray*) obj);
-    else
-    {
-        // Unsupported yet, add here!
-        jassertfalse;
-    }
-
-    return {};
+    return jsonDataToVar (jsonObjectToData (dictionary));
 }
 
 #if JUCE_MAC
@@ -359,9 +297,11 @@ struct ObjCClass
     ObjCClass (const char* nameRoot)
         : cls (objc_allocateClassPair ([SuperclassType class], getRandomisedName (nameRoot).toUTF8(), 0))
     {
+        // The class could not be created. Is the name already in use?
+        jassert (cls != nil);
     }
 
-    ~ObjCClass()
+    virtual ~ObjCClass()
     {
         auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
 
@@ -371,7 +311,8 @@ struct ObjCClass
 
     void registerClass()
     {
-        objc_registerClassPair (cls);
+        if (cls != nil)
+            objc_registerClassPair (cls);
     }
 
     SuperclassType* createInstance() const
@@ -393,8 +334,8 @@ struct ObjCClass
     void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
         const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
-        const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
-        jassertquiet (b);
+        [[maybe_unused]] const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
+        jassert (b);
     }
 
     void addProtocol (Protocol* protocol)

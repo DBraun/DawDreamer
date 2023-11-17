@@ -138,7 +138,7 @@ bool HighResolutionTimer::isTimerRunning() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class HighResolutionTimerTests : public UnitTest
+class HighResolutionTimerTests final : public UnitTest
 {
 public:
     HighResolutionTimerTests()
@@ -153,7 +153,7 @@ public:
             WaitableEvent timerFiredOnce;
             WaitableEvent timerFiredTwice;
 
-            Timer timer {[&, callbackCount = 0] () mutable
+            Timer timer {[&, callbackCount = 0]() mutable
             {
                 switch (++callbackCount)
                 {
@@ -181,7 +181,7 @@ public:
         {
             WaitableEvent stoppedTimer;
 
-            auto timerCallback = [&](Timer& timer)
+            auto timerCallback = [&] (Timer& timer)
             {
                 expect (timer.isTimerRunning());
                 timer.stopTimer();
@@ -200,7 +200,7 @@ public:
             WaitableEvent timerRestarted;
             WaitableEvent timerFiredAfterRestart;
 
-            Timer timer {[&, callbackCount = 0] () mutable
+            Timer timer {[&, callbackCount = 0]() mutable
             {
                 switch (++callbackCount)
                 {
@@ -240,7 +240,7 @@ public:
             WaitableEvent stoppingTimer;
             std::atomic<bool> timerCallbackFinished { false };
 
-            Timer timer {[&, callbackCount = 0] () mutable
+            Timer timer {[&, callbackCount = 0]() mutable
             {
                 switch (++callbackCount)
                 {
@@ -295,7 +295,7 @@ public:
             WaitableEvent timerFiredAfterRestart;
             std::atomic<int> lastCallbackCount {0};
 
-            Timer timer {[&, callbackCount = 0] () mutable
+            Timer timer {[&, callbackCount = 0]() mutable
             {
                 switch (++callbackCount)
                 {
@@ -336,7 +336,7 @@ public:
             WaitableEvent timerStopped;
             WaitableEvent timerFiredAfterRestart;
 
-            Timer timer {[&, callbackCount = 0] () mutable
+            Timer timer {[&, callbackCount = 0]() mutable
             {
                 switch (++callbackCount)
                 {
@@ -411,7 +411,7 @@ public:
         }
     }
 
-    class Timer : public HighResolutionTimer
+    class Timer final : public HighResolutionTimer
     {
     public:
         explicit Timer (std::function<void()> fn)

@@ -119,7 +119,7 @@ struct PushNotificationsDelegateDetails
         notification.applicationIconBadgeNumber = n.badgeNumber;
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
-        notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: triggerTime.toMilliseconds() / 1000.];
+        notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
         notification.userInfo   = varObjectToNSDictionary (n.properties);
 
         auto soundToPlayString = n.soundToPlay.toString (true);
@@ -825,7 +825,7 @@ private:
     }
 
     //==============================================================================
-    struct Class    : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
+    struct Class final : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
     {
         Class()
             : ObjCClass ("JucePushNotificationsDelegate_")

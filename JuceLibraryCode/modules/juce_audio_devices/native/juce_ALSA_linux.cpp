@@ -169,7 +169,7 @@ public:
                 error << "The device \"" << deviceID << "\" is not available.";
             else
                 error << "Could not open " << (forInput ? "input" : "output") << " device \"" << deviceID
-                      << "\": " << snd_strerror(err) << " (" << err << ")";
+                      << "\": " << snd_strerror (err) << " (" << err << ")";
 
             JUCE_ALSA_LOG ("snd_pcm_open failed; " << error);
         }
@@ -481,7 +481,7 @@ private:
 };
 
 //==============================================================================
-class ALSAThread  : public Thread
+class ALSAThread final : public Thread
 {
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
@@ -838,7 +838,7 @@ private:
 
 
 //==============================================================================
-class ALSAAudioIODevice   : public AudioIODevice
+class ALSAAudioIODevice final : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
@@ -967,7 +967,7 @@ private:
 
 
 //==============================================================================
-class ALSAAudioIODeviceType  : public AudioIODeviceType
+class ALSAAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     ALSAAudioIODeviceType (bool onlySoundcards, const String& deviceTypeName)

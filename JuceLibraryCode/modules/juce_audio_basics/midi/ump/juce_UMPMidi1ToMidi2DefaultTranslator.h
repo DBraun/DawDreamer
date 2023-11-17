@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -134,15 +132,15 @@ private:
         std::byte byte2;
     };
 
-    static PacketX2 processNoteOnOrOff (const HelperValues helpers);
-    static PacketX2 processPolyPressure (const HelperValues helpers);
+    static PacketX2 processNoteOnOrOff (HelperValues helpers);
+    static PacketX2 processPolyPressure (HelperValues helpers);
 
-    bool processControlChange (const HelperValues helpers, PacketX2& packet);
+    bool processControlChange (HelperValues helpers, PacketX2& packet);
 
-    PacketX2 processProgramChange (const HelperValues helpers) const;
+    PacketX2 processProgramChange (HelperValues helpers) const;
 
-    static PacketX2 processChannelPressure (const HelperValues helpers);
-    static PacketX2 processPitchBend (const HelperValues helpers);
+    static PacketX2 processChannelPressure (HelperValues helpers);
+    static PacketX2 processPitchBend (HelperValues helpers);
 
     class PnAccumulator
     {
@@ -185,7 +183,6 @@ private:
     std::array<ChannelBanks, 16> groupBanks;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

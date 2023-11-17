@@ -29,7 +29,7 @@ namespace juce
 #if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {
-    class CustomDirectWriteTextRenderer   : public ComBaseClassHelper<IDWriteTextRenderer>
+    class CustomDirectWriteTextRenderer final : public ComBaseClassHelper<IDWriteTextRenderer>
     {
     public:
         CustomDirectWriteTextRenderer (IDWriteFontCollection& fonts, const AttributedString& as)
@@ -191,7 +191,7 @@ namespace DirectWriteTypeLayout
         {
             for (int i = 0; i < attributedString.getNumAttributes(); ++i)
             {
-                auto& font = attributedString.getAttribute(i).font;
+                auto& font = attributedString.getAttribute (i).font;
                 auto typeface = font.getTypefacePtr();
 
                 if (auto* wt = dynamic_cast<WindowsDirectWriteTypeface*> (typeface.get()))

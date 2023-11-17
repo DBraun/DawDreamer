@@ -35,7 +35,7 @@ enum class TestEnum
 JUCE_DECLARE_SCOPED_ENUM_BITWISE_OPERATORS (TestEnum)
 }
 
-class EnumHelperTest : public UnitTest
+class EnumHelperTest final : public UnitTest
 {
 public:
     EnumHelperTest() : UnitTest ("EnumHelpers", UnitTestCategories::containers) {}
@@ -75,8 +75,6 @@ public:
 
         beginTest ("operators work as expected");
         {
-            e = {};
-
             e = TestEnum::one;
             expect ((e & TestEnum::one) != TestEnum{});
             e |= TestEnum::other;

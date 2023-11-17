@@ -104,7 +104,7 @@ struct PermissionsRequest
 };
 
 //==============================================================================
-struct PermissionsOverlay   : FragmentOverlay
+struct PermissionsOverlay final : public FragmentOverlay
 {
     PermissionsOverlay (CriticalSection& cs) : overlayGuard (cs) {}
     ~PermissionsOverlay() override = default;
@@ -182,13 +182,13 @@ struct PermissionsOverlay   : FragmentOverlay
 
 
                 auto requestPermissionsMethodID
-                    = env->GetMethodID(AndroidFragment, "requestPermissions", "([Ljava/lang/String;I)V");
+                    = env->GetMethodID (AndroidFragment, "requestPermissions", "([Ljava/lang/String;I)V");
 
                 // this code should only be reached for SDKs >= 23, so this method should be
                 // be available
-                jassert(requestPermissionsMethodID != nullptr);
+                jassert (requestPermissionsMethodID != nullptr);
 
-                env->CallVoidMethod (getNativeHandle(), requestPermissionsMethodID, jPermissionsArray.get (), 0);
+                env->CallVoidMethod (getNativeHandle(), requestPermissionsMethodID, jPermissionsArray.get(), 0);
             }
             else
             {

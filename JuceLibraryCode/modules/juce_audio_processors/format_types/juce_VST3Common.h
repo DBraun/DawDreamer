@@ -100,8 +100,8 @@ public:
     {
         const auto toReturn = result.extract (obj);
 
-        if (result.isOk() && addRefFn != nullptr && *obj != nullptr)
-            addRefFn (*obj);
+        if (result.isOk() && *obj != nullptr)
+            NullCheckedInvocation::invoke (addRefFn, *obj);
 
         return toReturn;
     }
@@ -1166,31 +1166,35 @@ private:
 };
 
 //==============================================================================
+// We have to trust that Steinberg won't double-delete
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDelete)
 template <class ObjectType>
 class VSTComSmartPtr
 {
 public:
-    VSTComSmartPtr() noexcept : source (nullptr) {}
-    VSTComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    VSTComSmartPtr() = default;
     VSTComSmartPtr (const VSTComSmartPtr& other) noexcept : source (other.source)            { if (source != nullptr) source->addRef(); }
     ~VSTComSmartPtr()                                                                        { if (source != nullptr) source->release(); }
 
-    operator ObjectType*() const noexcept    { return source; }
-    ObjectType* get() const noexcept         { return source; }
-    ObjectType& operator*() const noexcept   { return *source; }
-    ObjectType* operator->() const noexcept  { return source; }
+    explicit operator bool() const noexcept           { return operator!= (nullptr); }
+    ObjectType* get() const noexcept                  { return source; }
+    ObjectType& operator*() const noexcept            { return *source; }
+    ObjectType* operator->() const noexcept           { return source; }
 
-    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)       { return operator= (other.source); }
-
-    VSTComSmartPtr& operator= (ObjectType* const newObjectToTakePossessionOf)
+    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)
     {
-        VSTComSmartPtr p (newObjectToTakePossessionOf);
+        auto p = other;
         std::swap (p.source, source);
         return *this;
     }
 
-    bool operator== (ObjectType* const other) noexcept { return source == other; }
-    bool operator!= (ObjectType* const other) noexcept { return source != other; }
+    VSTComSmartPtr& operator= (std::nullptr_t)
+    {
+        return operator= (VSTComSmartPtr{});
+    }
+
+    bool operator== (std::nullptr_t) const noexcept { return source == nullptr; }
+    bool operator!= (std::nullptr_t) const noexcept { return source != nullptr; }
 
     bool loadFrom (Steinberg::FUnknown* o)
     {
@@ -1205,9 +1209,38 @@ public:
         return factory->createInstance (uuid, ObjectType::iid, (void**) &source) == Steinberg::kResultOk;
     }
 
+    /** Increments refcount. */
+    static auto addOwner (ObjectType* t)
+    {
+        return VSTComSmartPtr (t, true);
+    }
+
+    /** Does not initially increment refcount; assumes t has a positive refcount. */
+    static auto becomeOwner (ObjectType* t)
+    {
+        return VSTComSmartPtr (t, false);
+    }
+
 private:
-    ObjectType* source;
+    explicit VSTComSmartPtr (ObjectType* object, bool autoAddRef) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    ObjectType* source = nullptr;
 };
+
+/** Increments refcount. */
+template <class ObjectType>
+auto addVSTComSmartPtrOwner (ObjectType* t)
+{
+    return VSTComSmartPtr<ObjectType>::addOwner (t);
+}
+
+/** Does not initially increment refcount; assumes t has a positive refcount. */
+template <class ObjectType>
+auto becomeVSTComSmartPtrOwner (ObjectType* t)
+{
+    return VSTComSmartPtr<ObjectType>::becomeOwner (t);
+}
+
+// NOLINTEND(clang-analyzer-cplusplus.NewDelete)
 
 //==============================================================================
 /*  This class stores a plugin's preferred MIDI mappings.

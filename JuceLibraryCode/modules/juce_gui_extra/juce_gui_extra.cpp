@@ -49,7 +49,9 @@
 
 //==============================================================================
 #if JUCE_MAC
- #import <WebKit/WebKit.h>
+ #if JUCE_WEB_BROWSER
+  #import <WebKit/WebKit.h>
+ #endif
  #import <IOKit/IOKitLib.h>
  #import <IOKit/IOCFPlugIn.h>
  #import <IOKit/hid/IOHIDLib.h>
@@ -64,7 +66,9 @@
 
 //==============================================================================
 #elif JUCE_IOS
- #import <WebKit/WebKit.h>
+ #if JUCE_WEB_BROWSER
+  #import <WebKit/WebKit.h>
+ #endif
 
  #if JUCE_PUSH_NOTIFICATIONS
   #import <UserNotifications/UserNotifications.h>
@@ -90,6 +94,7 @@
   #if JUCE_USE_WIN_WEBVIEW2
    #include <windows.foundation.h>
    #include <windows.foundation.collections.h>
+   #include <winuser.h>
 
    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
    #include <wrl.h>
@@ -172,6 +177,10 @@
  #include "native/juce_XEmbedComponent_linux.cpp"
 
  #if JUCE_WEB_BROWSER
+  #if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
+   #include "juce_LinuxSubprocessHelperBinaryData.h"
+  #endif
+
   #include "native/juce_WebBrowserComponent_linux.cpp"
  #endif
 

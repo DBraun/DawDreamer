@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 #ifndef DOXYGEN
@@ -34,17 +32,17 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wignored-attributes")
 
 #ifdef _MSC_VER
  #define DECLARE_NEON_SIMD_CONST(type, name) \
-    static __declspec(align(16)) const type name [16 / sizeof (type)]
+    static __declspec (align (16)) const type name [16 / sizeof (type)]
 
  #define DEFINE_NEON_SIMD_CONST(type, class_type, name) \
-    __declspec(align(16)) const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)]
+    __declspec (align (16)) const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)]
 
 #else
  #define DECLARE_NEON_SIMD_CONST(type, name) \
-    static const type name [16 / sizeof (type)] __attribute__((aligned(16)))
+    static const type name [16 / sizeof (type)] __attribute__ ((aligned (16)))
 
  #define DEFINE_NEON_SIMD_CONST(type, class_type, name) \
-    const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)] __attribute__((aligned(16)))
+    const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)] __attribute__ ((aligned (16)))
 
 #endif
 
@@ -538,5 +536,4 @@ struct SIMDNativeOps<double>
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

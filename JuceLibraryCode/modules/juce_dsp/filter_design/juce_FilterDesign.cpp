@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename FloatType>
@@ -469,7 +467,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
         auto v0 = std::asinh (epss) / (N * halfPi);
 
         if (r == 1)
-            pa.add(-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
+            pa.add (-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
 
         for (int i = 1; i <= L; ++i)
         {
@@ -697,5 +695,4 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
 template struct FilterDesign<float>;
 template struct FilterDesign<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp
