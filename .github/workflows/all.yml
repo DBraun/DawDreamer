@@ -11,19 +11,21 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-20.04
     strategy:
+      # fail-fast: false
       matrix:
         include:
         - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
         - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
         - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
         - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
+        - { python-version: "3.12", pythonLibPath: "/opt/python/cp312-cp312/lib", pythonInclude: "/opt/python/cp312-cp312/include/python3.12", cibwbuild: "cp312-manylinux_x86_64"}
         # - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_aarch64"}
         # - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_aarch64"}
         # - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_aarch64"}
         # - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_aarch64"}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -60,7 +62,7 @@ jobs:
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: auto64 aarch64  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
-        CIBW_TEST_SKIP: "*38* *39* *311*"  # Only care about 310 (current Google Colab version)
+        CIBW_TEST_SKIP: "*38* *39* *311* *312*"  # Only care about 310 (current Google Colab version)
 
     - uses: actions/upload-artifact@v3
       with:
@@ -70,7 +72,7 @@ jobs:
   build-ubuntu-docker:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -80,15 +82,17 @@ jobs:
   build-windows:
     runs-on: ${{ matrix.os }}
     strategy:
+      # fail-fast: false
       matrix:
         include:
         - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
         - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
         - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
         - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
+        - { os: windows-2022, python-version: "3.12", CIBW-BUILD: "cp312*"}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -160,17 +164,20 @@ jobs:
   build-macos:
     runs-on: ${{ matrix.os }}
     strategy:
+      # fail-fast: false
       matrix:
         include:
         - { os: macos-11, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
         - { os: macos-11, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
         - { os: macos-11, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
+        - { os: macos-11, build: cp312-macosx_x86_64, python-version: "3.12", ARCHS: "x86_64" }
         - { os: macos-11, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
         - { os: macos-11, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
         - { os: macos-11, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
+        - { os: macos-11, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
