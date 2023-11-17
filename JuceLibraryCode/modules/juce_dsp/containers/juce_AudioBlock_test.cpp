@@ -23,16 +23,16 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
+#if JUCE_USE_SIMD
 template <typename SampleType>
 String& operator<< (String& str, SIMDRegister<SampleType>) { return str; }
+#endif
 
 template <typename SampleType>
-class AudioBlockUnitTests   : public UnitTest
+class AudioBlockUnitTests final : public UnitTest
 {
 public:
     //==============================================================================
@@ -494,5 +494,4 @@ static AudioBlockUnitTests<SIMDRegister<float>> audioBlockSIMDFloatUnitTests;
 static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
 #endif
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

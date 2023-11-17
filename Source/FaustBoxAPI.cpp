@@ -146,7 +146,8 @@ void add_unary_operation(py::class_<BoxWrapper> &cls, const char *name,
   });
 }
 
-py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module &box_module) {
+py::module_ &create_bindings_for_faust_box(py::module &faust_module,
+                                           py::module &box_module) {
   using arg = py::arg;
   using kw_only = py::kw_only;
 
@@ -163,6 +164,13 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
     )pbdoc";
 
   py::class_<BoxWrapper> cls(box_module, "Box");
+
+  cls.def_property_readonly("inputs", &BoxWrapper::getInputs,
+                            "Get the box's number of inputs.");
+  cls.def_property_readonly("outputs", &BoxWrapper::getOutputs,
+                            "Get the box's number of outputs.");
+  cls.def_property_readonly("valid", &BoxWrapper::getValid,
+                            "Get a bool for whether the box is valid.");
 
   add_operation(cls, "__add__", static_cast<Box (*)(Box, Box)>(boxAdd));
   add_operation(cls, "__radd__", static_cast<Box (*)(Box, Box)>(boxAdd));
@@ -212,7 +220,14 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
   cls.def(py::init<float>(), arg("val"), "Init with a float")
       .def(py::init<int>(), arg("val"), "Init with an int")
       .def("__repr__",
-           [](const BoxWrapper &b) { return tree2str((BoxWrapper &)b); })
+           [](const BoxWrapper &b) {
+             try {
+               return tree2str((BoxWrapper &)b);
+             } catch (faustexception &e) {
+               return "UNKNOWN";
+             }
+             return "UNKNOWN";
+           })
       .def(
           "extract_name",
           [](const BoxWrapper &b) { return extractName((BoxWrapper &)b); },
@@ -814,6 +829,27 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           "Create a numerical entry.")
 
       .def(
+          "boxHGroup",
+          [](std::string &label, BoxWrapper &box1) {
+            return BoxWrapper(boxHGroup(label, box1));
+          },
+          arg("label"), arg("box"), "Create an hgroup.")
+
+      .def(
+          "boxVGroup",
+          [](std::string &label, BoxWrapper &box1) {
+            return BoxWrapper(boxHGroup(label, box1));
+          },
+          arg("label"), arg("box"), "Create a vgroup.")
+
+      .def(
+          "boxTGroup",
+          [](std::string &label, BoxWrapper &box1) {
+            return BoxWrapper(boxTGroup(label, box1));
+          },
+          arg("label"), arg("box"), "Create a tgroup.")
+
+      .def(
           "boxVBargraph",
           [](std::string &label, BoxWrapper &boxMin, BoxWrapper &boxMax,
              BoxWrapper &box) {
@@ -868,28 +904,27 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
             const char *argv[512];
 
             auto pathToFaustLibraries = getPathToFaustLibraries();
-            if (pathToFaustLibraries == "") {
+            if (pathToFaustLibraries.empty()) {
               throw std::runtime_error("Unable to load Faust Libraries.");
             }
 
             argv[argc++] = "-I";
-            argv[argc++] = pathToFaustLibraries.c_str();
+            argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
             if (in_argv.has_value()) {
               for (auto v : *in_argv) {
-                argv[argc++] = v.c_str();
+                argv[argc++] = strdup(v.c_str());
               }
             }
 
             Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv,
                                  &inputs, &outputs, error_msg);
 
-            if (error_msg != "") {
+            if (!error_msg.empty()) {
               throw std::runtime_error(error_msg);
             }
 
-            return py::make_tuple<py::return_value_policy::take_ownership>(
-                BoxWrapper(box), inputs, outputs);
+            return BoxWrapper(box, inputs, outputs);
           },
           arg("dsp_code"), arg("argv") = py::none(),
           "Convert Faust DSP code to a Box. This returns a tuple of the box, "
@@ -1389,32 +1424,17 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           arg("box"))
 
       .def(
-          "getBoxType",
-          [](BoxWrapper s1) {
-            int inputs, outputs;
-            try {
-              bool result = getBoxType(s1, &inputs, &outputs);
-              return py::make_tuple(result, inputs, outputs);
-            } catch (std::exception &e) {
-              throw std::runtime_error(e.what());
-            }
-          },
-          arg("box"),
-          "Return a size-3 tuple of (whether the type is valid, number of "
-          "inputs, number of outputs) of a box.")
-
-      .def(
           "boxToSource",
           [](BoxWrapper &box, std::string &lang, std::string &class_name,
              std::optional<std::vector<std::string>> in_argv) {
             auto pathToFaustLibraries = getPathToFaustLibraries();
 
-            if (pathToFaustLibraries == "") {
+            if (pathToFaustLibraries.empty()) {
               throw std::runtime_error("Unable to load Faust Libraries.");
             }
 
             auto pathToArchitecture = getPathToArchitectureFiles();
-            if (pathToArchitecture == "") {
+            if (pathToArchitecture.empty()) {
               throw std::runtime_error(
                   "Unable to find Faust architecture files.");
             }
@@ -1423,17 +1443,17 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
             const char *argv[512];
 
             argv[argc++] = "-I";
-            argv[argc++] = pathToFaustLibraries.c_str();
+            argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
             argv[argc++] = "-cn";
-            argv[argc++] = class_name.c_str();
+            argv[argc++] = strdup(class_name.c_str());
 
             argv[argc++] = "-A";
-            argv[argc++] = pathToArchitecture.c_str();
+            argv[argc++] = strdup(pathToArchitecture.c_str());
 
             if (in_argv.has_value()) {
               for (auto &v : *in_argv) {
-                argv[argc++] = v.c_str();
+                argv[argc++] = strdup(v.c_str());
               }
             }
 
@@ -1460,8 +1480,14 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module, py::module 
           "The second argument `argv` is a list of strings to send to a Faust "
           "command line.");
 
+  py::enum_<SType>(box_module, "SType")
+      .value("kSInt", SType::kSInt)
+      .value("kSReal", SType::kSReal)
+      .export_values();
+
   py::implicitly_convertible<float, BoxWrapper>();
   py::implicitly_convertible<int, BoxWrapper>();
+  py::implicitly_convertible<int, SType>();
 
   return box_module;
 }

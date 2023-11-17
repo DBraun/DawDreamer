@@ -41,7 +41,7 @@ extern Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 // On iOS, all GL calls will crash when the app is running in the background, so
 // this prevents them from happening (which some messy locking behaviour)
-struct iOSBackgroundProcessCheck  : public AppInactivityCallback
+struct iOSBackgroundProcessCheck final : public AppInactivityCallback
 {
     iOSBackgroundProcessCheck()              { isBackgroundProcess(); appBecomingInactiveCallbacks.add (this); }
     ~iOSBackgroundProcessCheck() override    { appBecomingInactiveCallbacks.removeAllInstancesOf (this); }
@@ -92,7 +92,7 @@ static bool contextHasTextureNpotFeature()
 }
 
 //==============================================================================
-class OpenGLContext::CachedImage  : public CachedComponentImage
+class OpenGLContext::CachedImage final : public CachedComponentImage
 {
     template <typename T, typename U>
     static constexpr bool isFlagSet (const T& t, const U& u) { return (t & u) != 0; }
@@ -634,7 +634,7 @@ public:
                 // The advantage of this callback is that it will catch *all* errors, even if we
                 // forget to check manually.
                 DBG ("OpenGL DBG message: " << message);
-                jassertquiet (type != GL_DEBUG_TYPE_ERROR && severity != GL_DEBUG_SEVERITY_HIGH);
+                jassert (type != GL_DEBUG_TYPE_ERROR && severity != GL_DEBUG_SEVERITY_HIGH);
             }, nullptr);
         }
        #endif
@@ -659,7 +659,7 @@ public:
     }
 
     //==============================================================================
-    struct BlockingWorker  : public OpenGLContext::AsyncWorker
+    struct BlockingWorker final : public OpenGLContext::AsyncWorker
     {
         BlockingWorker (OpenGLContext::AsyncWorker::Ptr && workerToUse)
             : originalWorker (std::move (workerToUse))
@@ -899,7 +899,7 @@ public:
     }
 
     //==============================================================================
-    class BufferSwapper : private AsyncUpdater
+    class BufferSwapper final : private AsyncUpdater
     {
     public:
         explicit BufferSwapper (CachedImage& img)
@@ -1061,8 +1061,8 @@ public:
 };
 
 //==============================================================================
-class OpenGLContext::Attachment  : public ComponentMovementWatcher,
-                                   private Timer
+class OpenGLContext::Attachment final : public ComponentMovementWatcher,
+                                        private Timer
 {
 public:
     Attachment (OpenGLContext& c, Component& comp)
@@ -1520,9 +1520,9 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     {
         OpenGLRendering::SavedBinding<OpenGLRendering::TraitsVAO> vaoBinding;
 
-        struct OverlayShaderProgram  : public ReferenceCountedObject
+        struct OverlayShaderProgram final : public ReferenceCountedObject
         {
-            OverlayShaderProgram (OpenGLContext& context)
+            explicit OverlayShaderProgram (OpenGLContext& context)
                 : program (context), params (program)
             {}
 
@@ -1541,7 +1541,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                 return *program;
             }
 
-            struct BuiltProgram : public OpenGLShaderProgram
+            struct BuiltProgram final : public OpenGLShaderProgram
             {
                 explicit BuiltProgram (OpenGLContext& ctx)
                     : OpenGLShaderProgram (ctx)
@@ -1574,7 +1574,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
             struct Params
             {
-                Params (OpenGLShaderProgram& prog)
+                explicit Params (OpenGLShaderProgram& prog)
                     : positionAttribute (prog, "position"),
                       screenSize (prog, "screenSize"),
                       imageTexture (prog, "imageTexture"),
@@ -1606,6 +1606,11 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         auto right  = (GLshort) targetClipArea.getRight();
         auto bottom = (GLshort) targetClipArea.getBottom();
         const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
+
+        GLint oldProgram{};
+        glGetIntegerv (GL_CURRENT_PROGRAM, &oldProgram);
+
+        const ScopeGuard bindPreviousProgram { [&] { extensions.glUseProgram ((GLuint) oldProgram); } };
 
         auto& program = OverlayShaderProgram::select (*this);
         program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);

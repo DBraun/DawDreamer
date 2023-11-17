@@ -37,7 +37,7 @@ enum class ResultCodeMappingMode
 static std::unique_ptr<detail::ScopedMessageBoxInterface> makeNativeMessageBoxWithMappedResult (const MessageBoxOptions& opts,
                                                                                                 ResultCodeMappingMode mode)
 {
-    class Adapter : public detail::ScopedMessageBoxInterface
+    class Adapter final : public detail::ScopedMessageBoxInterface
     {
     public:
         explicit Adapter (const MessageBoxOptions& options)
@@ -89,7 +89,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType iconType
     showNativeBoxUnmanaged (MessageBoxOptions().withIconType (iconType)
                                                .withTitle (title)
                                                .withMessage (message)
-                                               .withButton (TRANS("OK"))
+                                               .withButton (TRANS ("OK"))
                                                .withAssociatedComponent (associatedComponent),
                             nullptr,
                             ResultCodeMappingMode::plainIndex);

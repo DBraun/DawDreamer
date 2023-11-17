@@ -30,7 +30,7 @@ namespace juce
 // This class has been renamed from CoreGraphicsImage to avoid a symbol
 // collision in Pro Tools 2019.12 and possibly 2020 depending on the Pro Tools
 // release schedule.
-class CoreGraphicsPixelData   : public ImagePixelData
+class CoreGraphicsPixelData final : public ImagePixelData
 {
 public:
     CoreGraphicsPixelData (const Image::PixelFormat format, int w, int h, bool clearImage)
@@ -140,7 +140,7 @@ public:
     detail::ContextPtr context;
     detail::ImagePtr cachedImageRef;
 
-    struct ImageDataContainer   : public ReferenceCountedObject
+    struct ImageDataContainer final : public ReferenceCountedObject
     {
         ImageDataContainer() = default;
 
@@ -323,7 +323,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         auto image = detail::ImagePtr { CoreGraphicsPixelData::createImage (singleChannelImage, greyColourSpace.get()) };
 
         flip();
-        auto t = AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform);
+        auto t = AffineTransform::verticalFlip ((float) sourceImage.getHeight()).followedBy (transform);
         applyTransform (t);
 
         auto r = convertToCGRect (sourceImage.getBounds());
@@ -531,7 +531,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
     CGContextSetAlpha (context.get(), state->fillType.getOpacity());
 
     flip();
-    applyTransform (AffineTransform::verticalFlip (ih).followedBy (transform));
+    applyTransform (AffineTransform::verticalFlip ((float) ih).followedBy (transform));
     auto imageRect = CGRectMake (0, 0, iw, ih);
 
     if (fillEntireClipAsTiles)
@@ -813,7 +813,7 @@ void CoreGraphicsContext::applyTransform (const AffineTransform& transform) cons
 #if USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
 Image juce_loadWithCoreImage (InputStream& input)
 {
-    struct MemoryBlockHolder   : public ReferenceCountedObject
+    struct MemoryBlockHolder final : public ReferenceCountedObject
     {
         using Ptr = ReferenceCountedObjectPtr<MemoryBlockHolder>;
         MemoryBlock block;
@@ -912,7 +912,7 @@ CGContextRef juce_getImageContext (const Image& image)
      Image retval (Image::ARGB, (int) CGImageGetWidth (image), (int) CGImageGetHeight (image), true);
      CGContextRef ctx = juce_getImageContext (retval);
 
-     CGContextDrawImage (ctx, CGRectMake (0.0f, 0.0f, CGImageGetWidth (image), CGImageGetHeight (image)), image);
+     CGContextDrawImage (ctx, CGRectMake (0.0f, 0.0f, (CGFloat) CGImageGetWidth (image), (CGFloat) CGImageGetHeight (image)), image);
 
      return retval;
  }

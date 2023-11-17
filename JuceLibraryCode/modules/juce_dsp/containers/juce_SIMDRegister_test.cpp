@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 namespace SIMDRegister_test_internal
@@ -103,7 +101,7 @@ namespace SIMDRegister_test_internal
 // These tests need to be strictly run on all platforms supported by JUCE as the
 // SIMD code is highly platform dependent.
 
-class SIMDRegisterUnitTests   : public UnitTest
+class SIMDRegisterUnitTests final : public UnitTest
 {
 public:
     template <typename> struct Tag {};
@@ -262,9 +260,9 @@ public:
 
             {
                #ifdef _MSC_VER
-                __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+                __declspec (align (sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
                #else
-                type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+                type elements[SIMDRegister<type>::SIMDNumElements] __attribute__ ((aligned (sizeof (SIMDRegister<type>))));
                #endif
                 SIMDRegister_test_internal::fillVec (elements, random);
                 SIMDRegister<type> a (SIMDRegister<type>::fromRawArray (elements));
@@ -412,9 +410,9 @@ public:
                     Operation::template inplace<vMaskType, vMaskType> (b.intVersion, bitmask);
 
                    #ifdef _MSC_VER
-                    __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+                    __declspec (align (sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
                    #else
-                    type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+                    type elements[SIMDRegister<type>::SIMDNumElements] __attribute__ ((aligned (sizeof (SIMDRegister<type>))));
                    #endif
                     b.floatVersion.copyToRawArray (elements);
 
@@ -876,5 +874,4 @@ public:
 
 static SIMDRegisterUnitTests SIMDRegisterUnitTests;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

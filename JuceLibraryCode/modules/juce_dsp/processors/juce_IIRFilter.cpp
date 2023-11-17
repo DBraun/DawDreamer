@@ -23,11 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-namespace IIR
+namespace juce::dsp::IIR
 {
 
 constexpr auto minimumDecibels = -300.0;
@@ -498,7 +494,7 @@ void Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double* fre
             factor *= jw;
         }
 
-        magnitudes[i] = std::abs(numerator / denominator);
+        magnitudes[i] = std::abs (numerator / denominator);
     }
 }
 
@@ -574,6 +570,4 @@ void Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequencies, 
 template struct Coefficients<float>;
 template struct Coefficients<double>;
 
-} // namespace IIR
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::IIR

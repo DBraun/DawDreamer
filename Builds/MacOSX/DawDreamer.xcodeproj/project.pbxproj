@@ -28,10 +28,12 @@
 		7F31E8E6BCA6C4D063D57689 /* include_juce_gui_basics.mm */ = {isa = PBXBuildFile; fileRef = 9FDB1268E8AD800788F80B72; };
 		8CB86F722980F4262C64B7D7 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = D2350C56CE13419F5D6CF40E; };
 		911FCAF5D38B28CA617932B9 /* DataModel.cpp */ = {isa = PBXBuildFile; fileRef = 5691FDBCADAAE7C01869F756; };
+		9220E9F1E4B8AE7DA6C45322 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = 862E281E065C481F1DD68ABE; settings = { ATTRIBUTES = (Weak, ); }; };
 		92F6A21BA484A258A4EF5F23 /* PluginProcessor.cpp */ = {isa = PBXBuildFile; fileRef = 2F962B6F6EA479E59F083A16; };
 		969FB6089449B8EF662494AE /* CoreAudio.framework */ = {isa = PBXBuildFile; fileRef = 2AFB20E3BF20B006326ADE78; };
 		972909F8E3C96F724A1E69AE /* SamplerAudioProcessor.cpp */ = {isa = PBXBuildFile; fileRef = 9A5A5CF18A53538DC4C811D1; };
 		9D34C1F40CAD6A7617F1B60B /* custom_pybind_wrappers.cpp */ = {isa = PBXBuildFile; fileRef = A2CE988FDEA16DA46477FB4B; };
+		A216E35DCCBFEEC04D4A7E45 /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = 023080B0911E6794DD8D4D14; settings = { ATTRIBUTES = (Weak, ); }; };
 		A36633FC72AA916869FA8B33 /* source.cpp */ = {isa = PBXBuildFile; fileRef = 4B4337E31892157AAFCBD879; };
 		A376ADE2384A37361A90737F /* AVFoundation.framework */ = {isa = PBXBuildFile; fileRef = 4C016F8E9E5EB85EF51350D2; };
 		A57AA5B8EA2A23EF5E99E0D2 /* include_juce_opengl.mm */ = {isa = PBXBuildFile; fileRef = 066AA4F18B1578FAE9DEF375; };
@@ -61,6 +63,7 @@
 
 /* Begin PBXFileReference section */
 		0144F71788C0BA26D2427CEA /* ProcessorState.h */ /* ProcessorState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ProcessorState.h; path = ../../Source/Sampler/Source/ProcessorState.h; sourceTree = SOURCE_ROOT; };
+		023080B0911E6794DD8D4D14 /* MetalKit.framework */ /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		03A685E6693EE1741A43DE6D /* AppConfig.h */ /* AppConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = SOURCE_ROOT; };
 		03BD258F06159505E43073E1 /* include_juce_audio_formats.mm */ /* include_juce_audio_formats.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_formats.mm; path = ../../JuceLibraryCode/include_juce_audio_formats.mm; sourceTree = SOURCE_ROOT; };
 		0437FDFA6CF09192A01A9F89 /* SamplerAudioProcessorEditor.cpp */ /* SamplerAudioProcessorEditor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerAudioProcessorEditor.cpp; path = ../../Source/Sampler/Source/SamplerAudioProcessorEditor.cpp; sourceTree = SOURCE_ROOT; };
@@ -125,6 +128,7 @@
 		813727514E7E0F4593240E30 /* WaveformView.h */ /* WaveformView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WaveformView.h; path = ../../Source/Sampler/Source/Components/WaveformView.h; sourceTree = SOURCE_ROOT; };
 		81E1E946E734ED2D5F139566 /* AudioToolbox.framework */ /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		845C73442A853AAC5FB09A34 /* SamplerAudioProcessor.h */ /* SamplerAudioProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SamplerAudioProcessor.h; path = ../../Source/Sampler/Source/SamplerAudioProcessor.h; sourceTree = SOURCE_ROOT; };
+		862E281E065C481F1DD68ABE /* Metal.framework */ /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		8F78B14DAA164DE1331AD3FD /* Main.cpp */ /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Sampler/Source/Main.cpp; sourceTree = SOURCE_ROOT; };
 		950B050EA948807CC56423AA /* Sample.h */ /* Sample.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Sample.h; path = ../../Source/Sampler/Source/Sample.h; sourceTree = SOURCE_ROOT; };
 		9A5A5CF18A53538DC4C811D1 /* SamplerAudioProcessor.cpp */ /* SamplerAudioProcessor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SamplerAudioProcessor.cpp; path = ../../Source/Sampler/Source/SamplerAudioProcessor.cpp; sourceTree = SOURCE_ROOT; };
@@ -196,6 +200,8 @@
 				8CB86F722980F4262C64B7D7,
 				DF5374E67F8812D79694279E,
 				31D395DB17463EFA64FFF6EE,
+				9220E9F1E4B8AE7DA6C45322,
+				A216E35DCCBFEEC04D4A7E45,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +323,8 @@
 				D2350C56CE13419F5D6CF40E,
 				B243F8F5ADFF280683E55EE1,
 				7FC28740B3DC997941439C94,
+				862E281E065C481F1DD68ABE,
+				023080B0911E6794DD8D4D14,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -436,6 +444,7 @@
 		4A73310BAAAEBD94149F5709 = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = "";
 			};
@@ -627,8 +636,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.7.4",
-					"JUCE_APP_VERSION_HEX=0x704",
+					"JUCE_APP_VERSION=0.8.0",
+					"JUCE_APP_VERSION_HEX=0x800",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -690,7 +699,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup -weak_framework Metal -weak_framework MetalKit";
+				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
 				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
@@ -723,8 +732,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.7.4",
-					"JUCE_APP_VERSION_HEX=0x704",
+					"JUCE_APP_VERSION=0.8.0",
+					"JUCE_APP_VERSION_HEX=0x800",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -787,7 +796,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup -weak_framework Metal -weak_framework MetalKit";
+				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
 				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;
@@ -820,8 +829,8 @@
 					"BUILD_DAWDREAMER_FAUST",
 					"BUILD_DAWDREAMER_RUBBERBAND",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=0.7.4",
-					"JUCE_APP_VERSION_HEX=0x704",
+					"JUCE_APP_VERSION=0.8.0",
+					"JUCE_APP_VERSION_HEX=0x800",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -884,7 +893,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
-				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup -weak_framework Metal -weak_framework MetalKit";
+				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
 				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
 				PRODUCT_NAME = "dawdreamer.so";
 				USE_HEADERMAP = NO;

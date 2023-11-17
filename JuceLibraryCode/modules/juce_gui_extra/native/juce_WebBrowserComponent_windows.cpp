@@ -48,8 +48,8 @@ struct InternalWebViewType
 };
 
 //==============================================================================
-class Win32WebView   : public InternalWebViewType,
-                       public ActiveXControlComponent
+class Win32WebView final : public InternalWebViewType,
+                           public ActiveXControlComponent
 {
 public:
     Win32WebView (WebBrowserComponent& parent, const String& userAgentToUse)
@@ -126,7 +126,7 @@ public:
             StringArray headers;
 
             if (userAgent.isNotEmpty())
-                headers.add("User-Agent: " + userAgent);
+                headers.add ("User-Agent: " + userAgent);
 
             if (requestedHeaders != nullptr)
                 headers.addArray (*requestedHeaders);
@@ -247,8 +247,8 @@ private:
     String userAgent;
 
     //==============================================================================
-    struct EventHandler  : public ComBaseClassHelper<IDispatch>,
-                           public ComponentMovementWatcher
+    struct EventHandler final : public ComBaseClassHelper<IDispatch>,
+                                public ComponentMovementWatcher
     {
         EventHandler (Win32WebView& w)  : ComponentMovementWatcher (&w.owner), owner (w) {}
 
@@ -262,8 +262,8 @@ private:
 
             if (dispIdMember == /*DISPID_AMBIENT_USERAGENT*/-5513)
             {
-                V_VT( pVarResult ) = VT_BSTR;
-                V_BSTR( pVarResult ) = SysAllocString ((const OLECHAR*) String(owner.userAgent).toWideCharPointer());;
+                V_VT ( pVarResult ) = VT_BSTR;
+                V_BSTR ( pVarResult ) = SysAllocString ((const OLECHAR*) String (owner.userAgent).toWideCharPointer());;
                 return S_OK;
             }
 
@@ -351,8 +351,6 @@ private:
 
 #if JUCE_USE_WIN_WEBVIEW2
 
-#include <winuser.h>
-
 using namespace Microsoft::WRL;
 
 static std::vector<HWND> getDirectChildWindows (HWND hwnd)
@@ -397,10 +395,10 @@ static bool anyChildWindow (HWND hwnd, std::function<bool (HWND)> predicate)
     return result;
 }
 
-class WebView2  : public InternalWebViewType,
-                  public Component,
-                  public ComponentMovementWatcher,
-                  private AsyncUpdater
+class WebView2 final : public InternalWebViewType,
+                       public Component,
+                       public ComponentMovementWatcher,
+                       private AsyncUpdater
 {
 public:
     WebView2 (WebBrowserComponent& o, const WebBrowserComponent::Options& prefs)
@@ -537,7 +535,7 @@ public:
     //==============================================================================
     struct WebViewHandle
     {
-        using LibraryRef = std::unique_ptr<typename std::pointer_traits<HMODULE>::element_type, decltype(&::FreeLibrary)>;
+        using LibraryRef = std::unique_ptr<typename std::pointer_traits<HMODULE>::element_type, decltype (&::FreeLibrary)>;
         LibraryRef loaderHandle {nullptr, &::FreeLibrary};
         ComSmartPtr<ICoreWebView2Environment> environment;
     };
@@ -942,8 +940,8 @@ private:
                 newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
            #endif
 
-            webViewController->put_Bounds({ newBounds.getX(), newBounds.getY(),
-                                            newBounds.getRight(), newBounds.getBottom() });
+            webViewController->put_Bounds ({ newBounds.getX(), newBounds.getY(),
+                                             newBounds.getRight(), newBounds.getBottom() });
         }
     }
 

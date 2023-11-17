@@ -200,7 +200,7 @@ namespace AudioUnitFormatHelpers
         {
             if (auto bundleRef = CFUniquePtr<CFBundleRef> (CFBundleCreate (kCFAllocatorDefault, url.get())))
             {
-                CFTypeRef bundleName = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleName"));
+                CFTypeRef bundleName = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleName"));
 
                 if (bundleName != nullptr && CFGetTypeID (bundleName) == CFStringGetTypeID())
                     name = String::fromCFString ((CFStringRef) bundleName);
@@ -208,12 +208,12 @@ namespace AudioUnitFormatHelpers
                 if (name.isEmpty())
                     name = file.getFileNameWithoutExtension();
 
-                CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleVersion"));
+                CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleVersion"));
 
                 if (versionString != nullptr && CFGetTypeID (versionString) == CFStringGetTypeID())
                     version = String::fromCFString ((CFStringRef) versionString);
 
-                CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleGetInfoString"));
+                CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleGetInfoString"));
 
                 if (manuString != nullptr && CFGetTypeID (manuString) == CFStringGetTypeID())
                     manufacturer = String::fromCFString ((CFStringRef) manuString);
@@ -332,8 +332,8 @@ namespace AudioUnitFormatHelpers
     using ViewComponentBaseClass = NSViewComponent;
    #endif
 
-    struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
-                                          private AsyncUpdater
+    struct AutoResizingNSViewComponent final : public ViewComponentBaseClass,
+                                               private AsyncUpdater
     {
         void childBoundsChanged (Component*) override  { triggerAsyncUpdate(); }
         void handleAsyncUpdate() override              { resizeToFitView(); }
@@ -675,7 +675,7 @@ public:
         {
             if (! auValueStrings.isEmpty())
             {
-                auto index = roundToInt (jlimit (0.0f, 1.0f, value) * (auValueStrings.size() - 1));
+                auto index = roundToInt (jlimit (0.0f, 1.0f, value) * (float) (auValueStrings.size() - 1));
                 return auValueStrings[index];
             }
 
@@ -714,7 +714,7 @@ public:
                 auto index = auValueStrings.indexOf (text);
 
                 if (index != -1)
-                    return ((float) index) / (auValueStrings.size() - 1);
+                    return ((float) index) / (float) (auValueStrings.size() - 1);
             }
 
             if (valuesHaveStrings)
@@ -838,7 +838,7 @@ public:
 
         if (audioUnit != nullptr)
         {
-            struct AUDeleter : public CallbackMessage
+            struct AUDeleter final : public CallbackMessage
             {
                 AUDeleter (AudioUnitPluginInstance& inInstance, WaitableEvent& inEvent)
                     : auInstance (inInstance), completionSignal (inEvent)
@@ -1001,12 +1001,11 @@ public:
 
             if (getElementCount (scope) != n && isBusCountWritable (isInput))
             {
-                OSStatus err;
                 auto newCount = static_cast<UInt32> (n);
                 layoutHasChanged = true;
 
-                err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
-                jassertquiet (err == noErr);
+                [[maybe_unused]] auto err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
+                jassert (err == noErr);
             }
 
             for (int i = 0; i < n; ++i)
@@ -1166,7 +1165,7 @@ public:
 
     void getExtensions (ExtensionsVisitor& visitor) const override
     {
-        struct Extensions : public ExtensionsVisitor::AudioUnitClient
+        struct Extensions final : public ExtensionsVisitor::AudioUnitClient
         {
             explicit Extensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -1178,7 +1177,7 @@ public:
         visitor.visitAudioUnitClient (Extensions { this });
 
        #ifdef JUCE_PLUGINHOST_ARA
-        struct ARAExtensions  : public ExtensionsVisitor::ARAClient
+        struct ARAExtensions final : public ExtensionsVisitor::ARAClient
         {
             explicit ARAExtensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -1604,7 +1603,7 @@ public:
         {
             AUPreset current;
             current.presetNumber = -1;
-            current.presetName = CFSTR("");
+            current.presetName = CFSTR ("");
 
             UInt32 prstsz = sizeof (AUPreset);
 
@@ -1938,7 +1937,7 @@ private:
 
         float getDefaultValue() const override                              { return 0.0f; }
         String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
-        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS ("On") : TRANS ("Off")); }
         bool isAutomatable() const override                                 { return true; }
         bool isDiscrete() const override                                    { return true; }
         bool isBoolean() const override                                     { return true; }
@@ -1949,9 +1948,9 @@ private:
         String getParameterID() const override                              { return {}; }
 
         AudioUnitPluginInstance& parent;
-        const StringArray auOnStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
-        const StringArray auOffStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
-        const StringArray values { TRANS("Off"), TRANS("On") };
+        const StringArray auOnStrings  { TRANS ("on"),  TRANS ("yes"), TRANS ("true") };
+        const StringArray auOffStrings { TRANS ("off"), TRANS ("no"),  TRANS ("false") };
+        const StringArray values { TRANS ("Off"), TRANS ("On") };
 
         bool currentValue = false;
     };
@@ -2299,8 +2298,8 @@ private:
         setIfNotNull (outCurrentMeasureDownBeat, getFromPlayHead (&AudioPlayHead::PositionInfo::getPpqPositionOfLastBarStart).orFallback (0.0));
 
         const auto signature = getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeSignature).orFallback (AudioPlayHead::TimeSignature{});
-        setIfNotNull (outTimeSig_Numerator,   (UInt32) signature.numerator);
-        setIfNotNull (outTimeSig_Denominator, (UInt32) signature.denominator);
+        setIfNotNull (outTimeSig_Numerator,   (Float32) signature.numerator);
+        setIfNotNull (outTimeSig_Denominator, (UInt32)  signature.denominator);
 
         return noErr;
     }
@@ -2312,7 +2311,7 @@ private:
         const auto nowPlaying = getFromPlayHead (&AudioPlayHead::PositionInfo::getIsPlaying);
         setIfNotNull (outIsPlaying, nowPlaying);
         setIfNotNull (outTransportStateChanged, std::exchange (wasPlaying, nowPlaying) != nowPlaying);
-        setIfNotNull (outCurrentSampleInTimeLine, getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeInSamples).orFallback (0));
+        setIfNotNull (outCurrentSampleInTimeLine, (double) getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeInSamples).orFallback (0));
         setIfNotNull (outIsCycling, getFromPlayHead (&AudioPlayHead::PositionInfo::getIsLooping));
 
         const auto loopPoints = getFromPlayHead (&AudioPlayHead::PositionInfo::getLoopPoints).orFallback (AudioPlayHead::LoopPoints{});
@@ -2582,7 +2581,7 @@ private:
 };
 
 //==============================================================================
-class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
+class AudioUnitPluginWindowCocoa final : public AudioProcessorEditor
 {
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& p, bool createGenericViewIfNeeded)
@@ -2748,7 +2747,7 @@ private:
 
         if (! MessageManager::getInstance()->isThisTheMessageThread())
         {
-            struct AsyncViewControllerCallback : public CallbackMessage
+            struct AsyncViewControllerCallback final : public CallbackMessage
             {
                 AudioUnitPluginWindowCocoa* owner;
                 JUCE_IOS_MAC_VIEW* controllerView;

@@ -527,6 +527,16 @@ public:
         isActive = true;
     }
 
+    std::optional<BigInteger> getDefaultLayout() const
+    {
+        if (countNumberOfBits ((uint64) defaultFormatChannelMask) == defaultNumChannels)
+            return BigInteger ((int64) defaultFormatChannelMask);
+
+        BigInteger integer;
+        integer.setRange (0, defaultNumChannels, true);
+        return integer;
+    }
+
     //==============================================================================
     ComSmartPtr<IMMDevice> device;
     ComSmartPtr<IAudioClient> client;
@@ -550,7 +560,7 @@ public:
 
 private:
     //==============================================================================
-    struct SessionEventCallback  : public ComBaseClassHelper<IAudioSessionEvents>
+    struct SessionEventCallback final : public ComBaseClassHelper<IAudioSessionEvents>
     {
         SessionEventCallback (WASAPIDeviceBase& d) : owner (d) {}
 
@@ -635,7 +645,7 @@ private:
         if (! check (client->GetMixFormat (&mixFormat)))
             return {};
 
-        WAVEFORMATEXTENSIBLE format;
+        WAVEFORMATEXTENSIBLE format{};
 
         copyWavFormat (format, mixFormat);
         CoTaskMemFree (mixFormat);
@@ -756,7 +766,7 @@ private:
                                                                             : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
                                                      isExclusiveMode (mode) ? nullptr
-                                                                                  : &nearestFormat);
+                                                                            : &nearestFormat);
         logFailure (hr);
 
         auto supportsSRC = supportsSampleRateConversion (mode);
@@ -888,7 +898,6 @@ private:
 
     bool tryInitialisingWithBufferSize (int bufferSizeSamples)
     {
-
         if (auto format = findSupportedFormat (client, numChannels, sampleRate))
         {
             auto isInitialised = isLowLatencyMode (deviceMode) ? initialiseLowLatencyClient (bufferSizeSamples, *format)
@@ -914,7 +923,7 @@ private:
 };
 
 //==============================================================================
-class WASAPIInputDevice  : public WASAPIDeviceBase
+class WASAPIInputDevice final : public WASAPIDeviceBase
 {
 public:
     WASAPIInputDevice (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
@@ -1062,7 +1071,7 @@ private:
 };
 
 //==============================================================================
-class WASAPIOutputDevice  : public WASAPIDeviceBase
+class WASAPIOutputDevice final : public WASAPIDeviceBase
 {
 public:
     WASAPIOutputDevice (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
@@ -1164,11 +1173,14 @@ public:
             if (isExclusiveMode (deviceMode) && WaitForSingleObject (clientEvent, 1000) == WAIT_TIMEOUT)
                 break;
 
+            const auto numChannelsToCopy = jmin (actualNumChannels, numSrcBuffers);
+            jassert (numChannelsToCopy <= channelMaps.size());
+
             uint8* outputData = nullptr;
             if (check (renderClient->GetBuffer ((UINT32) samplesToDo, &outputData)))
             {
-                for (int i = 0; i < numSrcBuffers; ++i)
-                    converter->convertSamples (outputData, channelMaps.getUnchecked(i), srcBuffers[i] + offset, 0, samplesToDo);
+                for (int i = 0; i < numChannelsToCopy; ++i)
+                    converter->convertSamples (outputData, channelMaps.getUnchecked (i), srcBuffers[i] + offset, 0, samplesToDo);
 
                 renderClient->ReleaseBuffer ((UINT32) samplesToDo, 0);
             }
@@ -1186,7 +1198,7 @@ private:
 };
 
 //==============================================================================
-class WASAPIAudioIODevice  : public AudioIODevice,
+class WASAPIAudioIODevice final : public AudioIODevice,
                              public Thread,
                              private AsyncUpdater
 {
@@ -1336,6 +1348,16 @@ public:
     String getLastError() override                          { return lastError; }
     int getXRunCount() const noexcept override              { return inputDevice != nullptr ? inputDevice->xruns : -1; }
 
+    std::optional<BigInteger> getDefaultOutputChannels() const override
+    {
+        return outputDevice != nullptr ? outputDevice->getDefaultLayout() : std::nullopt;
+    }
+
+    std::optional<BigInteger> getDefaultInputChannels() const override
+    {
+        return inputDevice != nullptr ? inputDevice->getDefaultLayout() : std::nullopt;
+    }
+
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                  double sampleRate, int bufferSizeSamples) override
     {
@@ -1344,7 +1366,7 @@ public:
 
         if (sampleRates.size() == 0 && inputDevice != nullptr && outputDevice != nullptr)
         {
-            lastError = TRANS("The input and output devices don't share a common sample rate!");
+            lastError = TRANS ("The input and output devices don't share a common sample rate!");
             return lastError;
         }
 
@@ -1355,14 +1377,14 @@ public:
 
         if (inputDevice != nullptr && ! inputDevice->open (currentSampleRate, inputChannels, bufferSizeSamples))
         {
-            lastError = TRANS("Couldn't open the input device!");
+            lastError = TRANS ("Couldn't open the input device!");
             return lastError;
         }
 
         if (outputDevice != nullptr && ! outputDevice->open (currentSampleRate, outputChannels, bufferSizeSamples))
         {
             close();
-            lastError = TRANS("Couldn't open the output device!");
+            lastError = TRANS ("Couldn't open the output device!");
             return lastError;
         }
 
@@ -1372,7 +1394,7 @@ public:
             if (inputDevice != nullptr && outputDevice != nullptr && inputDevice->actualBufferSize != outputDevice->actualBufferSize)
             {
                 close();
-                lastError = TRANS("Couldn't open the output device (buffer size mismatch)");
+                lastError = TRANS ("Couldn't open the output device (buffer size mismatch)");
                 return lastError;
             }
 
@@ -1396,7 +1418,7 @@ public:
             if (! inputDevice->start (currentBufferSizeSamples))
             {
                 close();
-                lastError = TRANS("Couldn't start the input device!");
+                lastError = TRANS ("Couldn't start the input device!");
                 return lastError;
             }
         }
@@ -1408,7 +1430,7 @@ public:
             if (! outputDevice->start())
             {
                 close();
-                lastError = TRANS("Couldn't start the output device!");
+                lastError = TRANS ("Couldn't start the output device!");
                 return lastError;
             }
         }
@@ -1694,7 +1716,7 @@ private:
 
 
 //==============================================================================
-class WASAPIAudioIODeviceType  : public AudioIODeviceType
+class WASAPIAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     explicit WASAPIAudioIODeviceType (WASAPIDeviceMode mode)
@@ -1793,7 +1815,7 @@ private:
     ComSmartPtr<IMMDeviceEnumerator> enumerator;
 
     //==============================================================================
-    class ChangeNotificationClient : public ComBaseClassHelper<IMMNotificationClient>
+    class ChangeNotificationClient final : public ComBaseClassHelper<IMMNotificationClient>
     {
     public:
         explicit ChangeNotificationClient (WASAPIAudioIODeviceType* d)
@@ -1801,7 +1823,7 @@ private:
 
         JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
         JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           { return notify(); }
-        JUCE_COMRESULT OnDeviceStateChanged(LPCWSTR, DWORD)                { return notify(); }
+        JUCE_COMRESULT OnDeviceStateChanged (LPCWSTR, DWORD)               { return notify(); }
         JUCE_COMRESULT OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  { return notify(); }
         JUCE_COMRESULT OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
 
@@ -2002,7 +2024,7 @@ struct MMDeviceMasterVolume
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MMDeviceMasterVolume)
 };
 
-}
+} // namespace WasapiClasses
 
 //==============================================================================
 #define JUCE_SYSTEMAUDIOVOL_IMPLEMENTED 1

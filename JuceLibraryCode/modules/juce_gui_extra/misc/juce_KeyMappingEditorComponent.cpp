@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class KeyMappingEditorComponent::ChangeKeyButton  : public Button
+class KeyMappingEditorComponent::ChangeKeyButton final : public Button
 {
 public:
     ChangeKeyButton (KeyMappingEditorComponent& kec, CommandID command,
@@ -39,8 +39,8 @@ public:
         setWantsKeyboardFocus (false);
         setTriggeredOnMouseDown (keyNum >= 0);
 
-        setTooltip (keyIndex < 0 ? TRANS("Adds a new key-mapping")
-                                 : TRANS("Click to change this key-mapping"));
+        setTooltip (keyIndex < 0 ? TRANS ("Adds a new key-mapping")
+                                 : TRANS ("Click to change this key-mapping"));
     }
 
     void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/) override
@@ -56,7 +56,7 @@ public:
             Component::SafePointer<ChangeKeyButton> button (this);
             PopupMenu m;
 
-            m.addItem (TRANS("Change this key-mapping"),
+            m.addItem (TRANS ("Change this key-mapping"),
                        [button]
                        {
                            if (button != nullptr)
@@ -65,7 +65,7 @@ public:
 
             m.addSeparator();
 
-            m.addItem (TRANS("Remove this key-mapping"),
+            m.addItem (TRANS ("Remove this key-mapping"),
                        [button]
                        {
                            if (button != nullptr)
@@ -92,17 +92,17 @@ public:
     }
 
     //==============================================================================
-    class KeyEntryWindow  : public AlertWindow
+    class KeyEntryWindow final : public AlertWindow
     {
     public:
         KeyEntryWindow (KeyMappingEditorComponent& kec)
-            : AlertWindow (TRANS("New key-mapping"),
-                           TRANS("Please press a key combination now..."),
+            : AlertWindow (TRANS ("New key-mapping"),
+                           TRANS ("Please press a key combination now..."),
                            MessageBoxIconType::NoIcon),
               owner (kec)
         {
-            addButton (TRANS("OK"), 1);
-            addButton (TRANS("Cancel"), 0);
+            addButton (TRANS ("OK"), 1);
+            addButton (TRANS ("Cancel"), 0);
 
             // (avoid return + escape keys getting processed by the buttons..)
             for (auto* child : getChildren())
@@ -115,13 +115,13 @@ public:
         bool keyPressed (const KeyPress& key) override
         {
             lastPress = key;
-            String message (TRANS("Key") + ": " + owner.getDescriptionForKeyPress (key));
+            String message (TRANS ("Key") + ": " + owner.getDescriptionForKeyPress (key));
 
             auto previousCommand = owner.getMappings().findCommandForKeyPress (key);
 
             if (previousCommand != 0)
                 message << "\n\n("
-                        << TRANS("Currently assigned to \"CMDN\"")
+                        << TRANS ("Currently assigned to \"CMDN\"")
                             .replace ("CMDN", TRANS (owner.getCommandManager().getNameOfCommand (previousCommand)))
                         << ')';
 
@@ -160,13 +160,13 @@ public:
             else
             {
                 auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                       TRANS("Change key-mapping"),
-                                                                       TRANS("This key is already assigned to the command \"CMDN\"")
+                                                                       TRANS ("Change key-mapping"),
+                                                                       TRANS ("This key is already assigned to the command \"CMDN\"")
                                                                            .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
                                                                          + "\n\n"
-                                                                         + TRANS("Do you want to re-assign it to this new command instead?"),
-                                                                       TRANS("Re-assign"),
-                                                                       TRANS("Cancel"),
+                                                                         + TRANS ("Do you want to re-assign it to this new command instead?"),
+                                                                       TRANS ("Re-assign"),
+                                                                       TRANS ("Cancel"),
                                                                        this);
                 messageBox = AlertWindow::showScopedAsync (options, [this, newKey] (int result)
                 {
@@ -208,7 +208,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::ItemComponent  : public Component
+class KeyMappingEditorComponent::ItemComponent final : public Component
 {
 public:
     ItemComponent (KeyMappingEditorComponent& kec, CommandID command)
@@ -252,7 +252,7 @@ public:
 
         for (int i = keyChangeButtons.size(); --i >= 0;)
         {
-            auto* b = keyChangeButtons.getUnchecked(i);
+            auto* b = keyChangeButtons.getUnchecked (i);
 
             b->fitToContent (getHeight() - 2);
             b->setTopRightPosition (x, 1);
@@ -276,7 +276,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::MappingItem  : public TreeViewItem
+class KeyMappingEditorComponent::MappingItem final : public TreeViewItem
 {
 public:
     MappingItem (KeyMappingEditorComponent& kec, CommandID command)
@@ -298,7 +298,7 @@ private:
 
 
 //==============================================================================
-class KeyMappingEditorComponent::CategoryItem  : public TreeViewItem
+class KeyMappingEditorComponent::CategoryItem final : public TreeViewItem
 {
 public:
     CategoryItem (KeyMappingEditorComponent& kec, const String& name)
@@ -341,8 +341,8 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  private ChangeListener
+class KeyMappingEditorComponent::TopLevelItem final : public TreeViewItem,
+                                                      private ChangeListener
 {
 public:
     TopLevelItem (KeyMappingEditorComponent& kec)   : owner (kec)
@@ -396,9 +396,9 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
         resetButton.onClick = [this]
         {
             auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::QuestionIcon,
-                                                                   TRANS("Reset to defaults"),
-                                                                   TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
-                                                                   TRANS("Reset"),
+                                                                   TRANS ("Reset to defaults"),
+                                                                   TRANS ("Are you sure you want to reset all the key-mappings to their default state?"),
+                                                                   TRANS ("Reset"),
                                                                    {},
                                                                    this);
             messageBox = AlertWindow::showScopedAsync (options, [this] (int result)

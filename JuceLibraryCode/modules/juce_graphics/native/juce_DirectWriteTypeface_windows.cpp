@@ -53,8 +53,8 @@ namespace
     {
         jassert (family != nullptr);
         ComSmartPtr<IDWriteLocalizedStrings> familyNames;
-        auto hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
-        jassertquiet (SUCCEEDED (hr));
+        [[maybe_unused]] auto hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
+        jassert (SUCCEEDED (hr));
         return getLocalisedName (familyNames);
     }
 
@@ -62,8 +62,8 @@ namespace
     {
         jassert (font != nullptr);
         ComSmartPtr<IDWriteLocalizedStrings> faceNames;
-        auto hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
-        jassertquiet (SUCCEEDED (hr));
+        [[maybe_unused]] auto hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
+        jassert (SUCCEEDED (hr));
         return getLocalisedName (faceNames);
     }
 
@@ -142,7 +142,7 @@ private:
 };
 
 //==============================================================================
-class WindowsDirectWriteTypeface  : public Typeface
+class WindowsDirectWriteTypeface final : public Typeface
 {
 public:
     WindowsDirectWriteTypeface (const Font& font, IDWriteFontCollection* fontCollection)
@@ -285,7 +285,7 @@ private:
     AffineTransform pathTransform;
     BOOL fontFound = false;
 
-    struct PathGeometrySink  : public ComBaseClassHelper<IDWriteGeometrySink>
+    struct PathGeometrySink final : public ComBaseClassHelper<IDWriteGeometrySink>
     {
         PathGeometrySink() : ComBaseClassHelper (0) {}
 

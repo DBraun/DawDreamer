@@ -189,7 +189,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     isIOSAppActive = false;
 
     for (int i = appBecomingInactiveCallbacks.size(); --i >= 0;)
-        appBecomingInactiveCallbacks.getReference(i)->appBecomingInactive();
+        appBecomingInactiveCallbacks.getReference (i)->appBecomingInactive();
 }
 
 - (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier
@@ -556,7 +556,7 @@ public:
     }
 
 private:
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
         {
@@ -674,7 +674,7 @@ void Displays::findDisplays (float masterScale)
         auto getInsets() const { return insets; }
 
     private:
-        struct DelegateClass : public ObjCClass<NSObject>
+        struct DelegateClass final : public ObjCClass<NSObject>
         {
             DelegateClass() : ObjCClass<NSObject> ("JUCEOnScreenKeyboardObserver_")
             {

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename ElementType>
@@ -34,7 +32,7 @@ Matrix<ElementType> Matrix<ElementType>::identity (size_t size)
     Matrix result (size, size);
 
     for (size_t i = 0; i < size; ++i)
-        result(i, i) = 1;
+        result (i, i) = 1;
 
     return result;
 }
@@ -60,8 +58,8 @@ Matrix<ElementType> Matrix<ElementType>::toeplitz (const Matrix& vector, size_t 
 template <typename ElementType>
 Matrix<ElementType> Matrix<ElementType>::hankel (const Matrix& vector, size_t size, size_t offset)
 {
-    jassert(vector.isOneColumnVector());
-    jassert(vector.rows >= (2 * (size - 1) + 1));
+    jassert (vector.isOneColumnVector());
+    jassert (vector.rows >= (2 * (size - 1) + 1));
 
     Matrix result (size, size);
 
@@ -313,5 +311,4 @@ String Matrix<ElementType>::toString() const
 template class Matrix<float>;
 template class Matrix<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -48,6 +48,9 @@ def load_audio_file(file_path: str, duration=None, offset=0):
 		sig, rate = soundfile.read(file_path, always_2d=True)
 		sig = sig.T
 
+		if duration is not None:
+			sig = sig[:,:int(duration*rate)]
+
 	return sig
 
 

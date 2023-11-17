@@ -23,15 +23,11 @@
   ==============================================================================
 */
 
-#if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
- #include "juce_LinuxSubprocessHelperBinaryData.h"
-#endif
-
 namespace juce
 {
 
 //==============================================================================
-class WebKitSymbols  : public DeletedAtShutdown
+class WebKitSymbols final : public DeletedAtShutdown
 {
 public:
     //==============================================================================
@@ -348,7 +344,7 @@ private:
     WebKitSymbols::getInstance()->juce_g_signal_connect_data (instance, detailed_signal, c_handler, data, nullptr, (GConnectFlags) 0)
 
 //==============================================================================
-class GtkChildProcess : private CommandReceiver::Responder
+class GtkChildProcess final : private CommandReceiver::Responder
 {
 public:
     //==============================================================================
@@ -746,7 +742,7 @@ private:
             int status = 0, result = 0;
 
             result = waitpid (childProcess, &status, WNOHANG);
-            for (int i = 0; i < 15 && (! WIFEXITED(status) || result != childProcess); ++i)
+            for (int i = 0; i < 15 && (! WIFEXITED (status) || result != childProcess); ++i)
             {
                 Thread::sleep (100);
                 result = waitpid (childProcess, &status, WNOHANG);
@@ -754,7 +750,7 @@ private:
 
             // clean-up any zombies
             status = 0;
-            if (! WIFEXITED(status) || result != childProcess)
+            if (! WIFEXITED (status) || result != childProcess)
             {
                 for (;;)
                 {

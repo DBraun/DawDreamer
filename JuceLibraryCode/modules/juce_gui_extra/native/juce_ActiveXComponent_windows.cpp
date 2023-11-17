@@ -35,7 +35,7 @@ JUCE_DECLARE_UUID_GETTER (IOleInPlaceSite,  "00000119-0000-0000-C000-00000000004
 namespace ActiveXHelpers
 {
     //==============================================================================
-    struct JuceIStorage   : public ComBaseClassHelper<IStorage>
+    struct JuceIStorage final : public ComBaseClassHelper<IStorage>
     {
         JuceIStorage() {}
 
@@ -57,7 +57,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    struct JuceOleInPlaceFrame   : public ComBaseClassHelper<IOleInPlaceFrame>
+    struct JuceOleInPlaceFrame final : public ComBaseClassHelper<IOleInPlaceFrame>
     {
         JuceOleInPlaceFrame (HWND hwnd)   : window (hwnd) {}
 
@@ -87,7 +87,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    struct JuceIOleInPlaceSite   : public ComBaseClassHelper<IOleInPlaceSite>
+    struct JuceIOleInPlaceSite final : public ComBaseClassHelper<IOleInPlaceSite>
     {
         JuceIOleInPlaceSite (HWND hwnd)
             : window (hwnd),
@@ -139,7 +139,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    struct JuceIOleClientSite  : public ComBaseClassHelper<IOleClientSite>
+    struct JuceIOleClientSite final : public ComBaseClassHelper<IOleClientSite>
     {
         JuceIOleClientSite (HWND window)  : inplaceSite (new JuceIOleInPlaceSite (window))
         {}
@@ -165,7 +165,7 @@ namespace ActiveXHelpers
                 *result = static_cast<IOleInPlaceSite*> (inplaceSite);
                 return S_OK;
             }
-            else if (type == __uuidof(IDispatch) && dispatchEventHandler != nullptr)
+            else if (type == __uuidof (IDispatch) && dispatchEventHandler != nullptr)
             {
                 dispatchEventHandler->AddRef();
                 *result = dispatchEventHandler;
@@ -202,7 +202,7 @@ namespace ActiveXHelpers
 
                 auto iidIDispatch = __uuidof (IDispatch);
 
-                if (static_cast<IUnknown*>(eventHandler)->QueryInterface (iidIDispatch, (void**) &newEventHandler) != S_OK
+                if (static_cast<IUnknown*> (eventHandler)->QueryInterface (iidIDispatch, (void**) &newEventHandler) != S_OK
                     || newEventHandler == nullptr)
                     return;
 

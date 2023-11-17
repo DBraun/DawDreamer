@@ -39,7 +39,7 @@ DECLARE_JNI_CLASS (ClipData, "android/content/ClipData")
 DECLARE_JNI_CLASS (ClipDataItem, "android/content/ClipData$Item")
 #undef JNI_CLASS_MEMBERS
 
-class FileChooser::Native     : public FileChooser::Pimpl
+class FileChooser::Native final : public FileChooser::Pimpl
 {
 public:
     //==============================================================================
@@ -128,7 +128,7 @@ public:
                         auto allMimeTypesHaveSameGroup = true;
 
                         LocalRef<jobjectArray> jMimeTypes (env->NewObjectArray (mimeTypes.size(), JavaString,
-                                                                                javaString("").get()));
+                                                                                javaString ("").get()));
 
                         for (int i = 0; i < mimeTypes.size(); ++i)
                         {
