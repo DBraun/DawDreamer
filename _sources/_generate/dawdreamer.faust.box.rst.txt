@@ -43,6 +43,7 @@
       boxGE
       boxGT
       boxHBargraph
+      boxHGroup
       boxHSlider
       boxInt
       boxIntCast
@@ -81,16 +82,17 @@
       boxSplit
       boxSqrt
       boxSub
+      boxTGroup
       boxTan
       boxToSignals
       boxToSource
       boxVBargraph
+      boxVGroup
       boxVSlider
       boxWaveform
       boxWire
       boxWriteReadTable
       boxXOR
-      getBoxType
       getDefNameProperty
       getUserData
       isBoxAbstr
@@ -154,6 +156,7 @@
    .. autosummary::
    
       Box
+      SType
    
    
 
