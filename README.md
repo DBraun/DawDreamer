@@ -108,7 +108,7 @@ EFFECT_PATH = "path/to/effect.dll"
 engine = daw.RenderEngine(SAMPLE_RATE, 512)
 engine.set_bpm(120.)
 
-synth = engine.make_plugin_processor("synth", PLUGIN_PATH)
+synth = engine.make_plugin_processor("synth", INSTRUMENT_PATH)
 print('inputs:', synth.get_num_input_channels())
 print('inputs:', synth.get_num_output_channels())
 print(synth.get_parameters_description())
