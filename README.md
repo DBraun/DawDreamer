@@ -110,7 +110,7 @@ engine.set_bpm(120.)
 
 synth = engine.make_plugin_processor("synth", INSTRUMENT_PATH)
 print('inputs:', synth.get_num_input_channels())
-print('inputs:', synth.get_num_output_channels())
+print('outputs:', synth.get_num_output_channels())
 print(synth.get_parameters_description())
 
 synth.set_parameter(7, .1234)
