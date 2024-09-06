@@ -9,7 +9,7 @@ RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python3.10 ge
 COPY . /DawDreamer
 
 WORKDIR /DawDreamer/thirdparty/libfaust
-RUN sh download_libfaust.sh
+RUN python download_libfaust.py
 
 WORKDIR /DawDreamer
 ENV PYTHONLIBPATH=/opt/python/cp310-cp310/lib

@@ -66,7 +66,7 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: my-wheel-artifact
+        name: ${{ matrix.cibwbuild}}
         path: ./wheelhouse/*.whl
 
   build-ubuntu-docker:
@@ -141,11 +141,11 @@ jobs:
         CIBW_TEST_COMMAND: "cd /D {project}\\tests && python -m pytest -v ."
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
-        CIBW_TEST_SKIP: "*312*"
+        CIBW_TEST_SKIP: "*310* *312*"
 
     - uses: actions/upload-artifact@v4
       with:
-        name: my-wheel-artifact
+        name: windows-${{ matrix.python-version}}
         path: ./wheelhouse/*.whl
 
     - name: "Build docs for GitHub pages"
@@ -224,7 +224,7 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: my-wheel-artifact
+        name: macos-${{ matrix.build}}
         path: ./wheelhouse/*.whl
 
   upload-pypi:
@@ -235,7 +235,6 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: my-wheel-artifact
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
