@@ -46,6 +46,14 @@ jobs:
         cd thirdparty/libfaust
         python download_libfaust.py
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y zstd libncurses-dev libxml2-dev
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y libllvm15 llvm-15 llvm-15-dev
+
     - name: Build wheels
       uses: pypa/cibuildwheel@v2.20.0
       env:
