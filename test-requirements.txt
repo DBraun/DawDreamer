@@ -1,5 +1,4 @@
-librosa>=0.8.1
-numpy>=1.21.2
+librosa==0.8.*
 pytest>=6.2.4
-scipy>=1.7.0
+scipy==1.7.*
 requests>=2.26.0
