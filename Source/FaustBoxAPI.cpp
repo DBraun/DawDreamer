@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
-#include <limits>
 
 // Find path to .dll */
 // https://stackoverflow.com/a/57738892/12327461
