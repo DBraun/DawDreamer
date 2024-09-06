@@ -226,7 +226,6 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
              } catch (faustexception &e) {
                return "UNKNOWN";
              }
-             return "UNKNOWN";
            })
       .def(
           "extract_name",

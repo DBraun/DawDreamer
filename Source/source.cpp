@@ -50,9 +50,6 @@ PYBIND11_MODULE(dawdreamer, m) {
     Returns
     -------
     None
-
-    """
-    ----------
 )pbdoc")
       .def("get_automation", &ProcessorBase::getAutomationNumpy,
            arg("parameter_name"), R"pbdoc(
@@ -67,10 +64,6 @@ PYBIND11_MODULE(dawdreamer, m) {
     -------
     np.array
         The parameter's automation.
-
-    """
-    ----------
-
 )pbdoc")
       .def("get_automation", &ProcessorBase::getAutomationAll,
            "After rendering, get all of a parameter's automation as a dict of "
@@ -382,6 +375,29 @@ but the filter mode cannot under automation.";
       .def("get_parameters_description",
            &PluginProcessorWrapper::getPluginParametersDescription,
            "Get a list of dictionaries describing the plugin's parameters.")
+      .def("get_parameter_range",
+           &PluginProcessorWrapper::getParameterValueRange, arg("index"),
+           arg("search_steps") = 1000, arg("convert") = true,
+           R"pbdoc(
+    Return a dictionary with information about the parameter's range. The dictionary's keys are tuples of the form `(domain1, domain2)`
+	where `0<=domain1<domain2<=1`. The dictionary's values can be str if `convert` is False. Otherwise, they may be floats if the automatic conversion succeeds.
+
+    Parameters
+    ----------
+    index : int
+        The index of the parameter.
+    search_steps : int
+        The number of search steps to use when finding unique text labels the parameter can display.
+    convert : bool
+		Whether to try to automatically convert the text to floats.
+    Returns
+    -------
+    dict
+        A dictionary holding information about the parameter range.
+)pbdoc")
+      //"Return a list of tuples of the form ((domain1, domain2), text) "
+      //"where 0 <= domain1 < domain2 <= 1. and text is a Python str for "
+      //"the value in that range.")
       .def("get_latency_samples", &PluginProcessorWrapper::getLatencySamples,
            "Get the latency measured in samples of the plugin. DawDreamer "
            "doesn't compensate this, so you are encouraged to delay other "
@@ -474,7 +490,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
       .def(py::init<>())
       .def("__enter__", &DawDreamerFaustLibContext::enter)
       .def("__exit__", &DawDreamerFaustLibContext::exit);
-                             
+
   auto box_module = faust.def_submodule("box");
   create_bindings_for_faust_box(faust, box_module);
   create_bindings_for_faust_signal(faust, box_module);

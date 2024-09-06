@@ -3,6 +3,7 @@
 
 #include <faust/compiler/generator/libfaust.h>
 #include <faust/dsp/libfaust-box.h>
+#include <faust/dsp/libfaust-signal.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>  // this lets std::vector<float> be a default arg

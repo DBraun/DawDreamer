@@ -5,6 +5,9 @@
 
 typedef std::vector<std::pair<int, float>> PluginPatch;
 
+// Alias for variant that can hold either float or string
+using ValueType = std::variant<float, std::string>;
+
 class PluginProcessor : public ProcessorBase {
  public:
   PluginProcessor(std::string newUniqueName, double sampleRate,
@@ -47,6 +50,8 @@ class PluginProcessor : public ProcessorBase {
   std::string getParameterAsText(const int parameter);
   const PluginPatch getPatch();
   const size_t getPluginParameterSize();
+  std::map<std::pair<float, float>, ValueType> getParameterValueRange(
+      const int parameterIndex, int search_steps, bool convert);
 
   const juce::String getName() const override { return "PluginProcessor"; }
 
