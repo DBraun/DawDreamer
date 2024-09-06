@@ -168,14 +168,14 @@ jobs:
       # fail-fast: false
       matrix:
         include:
-        - { os: macos-11, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp312-macosx_x86_64, python-version: "3.12", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
-        - { os: macos-11, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
-        - { os: macos-11, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
-        - { os: macos-11, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
+        - { os: macos-12, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp312-macosx_x86_64, python-version: "3.12", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
+        - { os: macos-12, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
+        - { os: macos-12, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
+        - { os: macos-12, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
 
     steps:
     - uses: actions/checkout@v4
@@ -206,7 +206,7 @@ jobs:
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-version }}
-        MACOSX_DEPLOYMENT_TARGET: 11.0
+        MACOSX_DEPLOYMENT_TARGET: 12.0
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
           export pythonLocation=$(python${{matrix.python-version}}-config --prefix)

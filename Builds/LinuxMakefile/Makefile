@@ -68,9 +68,9 @@ ifeq ($(CONFIG),Release)
   JUCE_LDFLAGS_DYNAMIC_LIBRARY := -shared
   JUCE_TARGET_DYNAMIC_LIBRARY := libdawdreamer.so
 
-  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
+  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -flto -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Release/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2 gl) -fvisibility=hidden -lrt -ldl -lpthread -lsamplerate -lfaustwithllvm $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Release/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2 gl) -fvisibility=hidden -flto -lrt -ldl -lpthread -lsamplerate -lfaustwithllvm $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
