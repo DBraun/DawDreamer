@@ -30,7 +30,7 @@ ldconfig
 
 # faust/architecture/faust/midi/RtMidi.cpp has #include <alsa/asoundlib.h>
 make VERBOSE=1 CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L/__w/DawDreamer/DawDreamer/alsa-lib/src -L$PYTHONLIBPATH" CXXFLAGS="-I../../alsa-lib/include -I$PYTHONINCLUDEPATH"
-# strip --strip-unneeded build/libdawdreamer.so
+strip --strip-unneeded build/libdawdreamer.so
 mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so
 cd ../..
 
