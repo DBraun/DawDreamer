@@ -9,7 +9,7 @@ on:
 jobs:
 
   build-ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       # fail-fast: false
       matrix:
@@ -30,7 +30,7 @@ jobs:
         submodules: true
 
     - name: Set up QEMU for aarch64 on Linux
-      if: runner.os == 'Linux' && endsWith(${{matrix.cibwbuild}}, "aarch64")
+      if: endsWith(${{matrix.cibwbuild}}, "aarch64")
       uses: docker/setup-qemu-action@v3
       with:
         platforms: all
