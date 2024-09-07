@@ -11,7 +11,7 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-22.04
     strategy:
-      # fail-fast: false
+      fail-fast: false
       matrix:
         include:
         # - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
@@ -29,19 +29,12 @@ jobs:
       with:
         submodules: true
 
-    # - name: Set up QEMU for aarch64 on Linux
-    #   if: endsWith(${{matrix.cibwbuild}}, "aarch64")
-    #   uses: docker/setup-qemu-action@v3
-    #   with:
-    #     platforms: all
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get install -y zstd libncurses-dev libxml2-dev
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get install -y libllvm15 llvm-15 llvm-15-dev
+    - name: Set up QEMU for aarch64 on Linux
+      # if: endsWith(${{matrix.cibwbuild}}, "aarch64")
+      if: runner.os == 'Linux'
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: all
 
     - name: clean faust libraries
       run: |

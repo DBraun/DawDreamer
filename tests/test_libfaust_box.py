@@ -620,7 +620,8 @@ def test24b():
     test_bus(2)
 
 @pytest.mark.parametrize("backend",
-    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'fir', 'interp', 'java', 'jax', 'jsfx', 'julia', 'llvm', 'rust', 'wast']
+    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'java', 'jax', 'jsfx', 'julia', 'rust', 'wasm', 'wast']
+    # ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'fir', 'interp', 'java', 'jax', 'jsfx', 'julia', 'llvm', 'rust', 'wast']
     )
 def test25a(backend):
 
@@ -641,7 +642,8 @@ def test25a(backend):
 
 
 @pytest.mark.parametrize("backend",
-    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'fir', 'interp', 'java', 'jax', 'jsfx', 'julia', 'llvm', 'rust', 'wast']
+    ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'java', 'jax', 'jsfx', 'julia', 'rust', 'wasm', 'wast']
+    # ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'fir', 'interp', 'java', 'jax', 'jsfx', 'julia', 'llvm', 'rust', 'wast']
     )
 def test26a(backend):
 

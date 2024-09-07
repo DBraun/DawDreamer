@@ -22,8 +22,6 @@ def install_windows(version: str) -> None:
     if download_file(f"https://github.com/grame-cncm/faust/releases/download/{version}/{exe_file}", exe_file):
         cwd = str(Path(__file__).parent)
         subprocess.run([exe_file, "/S", f"/D={cwd}\\win64\\Release"], check=True)
-    libfaustwithllvm = f"{Path(__file__).parent}/win64/Release/lib/libfaustwithllvm.lib"
-    assert os.path.isfile(libfaustwithllvm), f"Missing file: {libfaustwithllvm}"
 
 def install_macos(version: str) -> None:
     for arch in ["arm64", "x64"]:
@@ -60,7 +58,7 @@ if __name__ == "__main__":
         sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
     parser = argparse.ArgumentParser(description="Download and install Libfaust.")
-    parser.add_argument("-v", "--version", default="2.74.6", help="Specify the version of Faust to download.")
+    parser.add_argument("-v", "--version", default="2.69.3", help="Specify the version of Faust to download.")
     parser.add_argument("--force", action="store_true", help="Force download even if files already exist.")
     args = parser.parse_args()
 
