@@ -35,6 +35,14 @@ jobs:
     #   with:
     #     platforms: all
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y zstd libncurses-dev libxml2-dev
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y libllvm15 llvm-15 llvm-15-dev
+
     - name: clean faust libraries
       run: |
         rm -rf dawdreamer/faustlibraries/.git
