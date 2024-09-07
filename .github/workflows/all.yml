@@ -29,11 +29,11 @@ jobs:
       with:
         submodules: true
 
-    - name: Set up QEMU for aarch64 on Linux
-      if: endsWith(${{matrix.cibwbuild}}, "aarch64")
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: all
+    # - name: Set up QEMU for aarch64 on Linux
+    #   if: endsWith(${{matrix.cibwbuild}}, "aarch64")
+    #   uses: docker/setup-qemu-action@v3
+    #   with:
+    #     platforms: all
 
     - name: clean faust libraries
       run: |
