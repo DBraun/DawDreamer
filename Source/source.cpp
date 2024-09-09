@@ -226,10 +226,9 @@ play the audio in double the amount of time, so it will sound slowed down.")
       .value("OptionChannelsApart", RubberBandStretcher::OptionChannelsApart)
       .value("OptionChannelsTogether",
              RubberBandStretcher::OptionChannelsTogether)
-      .def("__xor__", [](RubberBandStretcher::Option e1,
-                         RubberBandStretcher::Option other) {
-        return int(e1) | int(other);
-      });
+      .def("__xor__",
+           [](RubberBandStretcher::Option e1,
+              RubberBandStretcher::Option other) { return e1 | other; });
 
 #endif
 

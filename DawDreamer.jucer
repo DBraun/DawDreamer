@@ -143,11 +143,11 @@
         <CONFIGURATION name="Release-x86_64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
                        libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
-                       enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
+                       enablePluginBinaryCopyStep="1" osxCompatibility="12.0 SDK" macOSDeploymentTarget="12.0"/>
         <CONFIGURATION name="Release-arm64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
                        libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-arm64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
-                       enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
+                       enablePluginBinaryCopyStep="1" osxCompatibility="12.0 SDK" macOSDeploymentTarget="12.0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
