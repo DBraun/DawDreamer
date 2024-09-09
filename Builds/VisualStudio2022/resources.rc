@@ -9,16 +9,16 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  0,8,2,0
+FILEVERSION  0,8,3,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription",  "DawDreamer\0"
-      VALUE "FileVersion",  "0.8.2\0"
+      VALUE "FileVersion",  "0.8.3\0"
       VALUE "ProductName",  "DawDreamer\0"
-      VALUE "ProductVersion",  "0.8.2\0"
+      VALUE "ProductVersion",  "0.8.3\0"
     END
   END
 
