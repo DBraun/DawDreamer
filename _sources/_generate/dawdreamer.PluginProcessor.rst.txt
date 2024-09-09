@@ -27,6 +27,7 @@
       ~PluginProcessor.get_num_output_channels
       ~PluginProcessor.get_parameter
       ~PluginProcessor.get_parameter_name
+      ~PluginProcessor.get_parameter_range
       ~PluginProcessor.get_parameter_text
       ~PluginProcessor.get_parameters_description
       ~PluginProcessor.get_patch

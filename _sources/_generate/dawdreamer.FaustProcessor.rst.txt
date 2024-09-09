@@ -44,13 +44,17 @@
    
       ~FaustProcessor.auto_import
       ~FaustProcessor.code
+      ~FaustProcessor.compile_flags
       ~FaustProcessor.compiled
       ~FaustProcessor.dynamic_voices
       ~FaustProcessor.faust_assets_path
+      ~FaustProcessor.faust_assets_paths
       ~FaustProcessor.faust_libraries_path
+      ~FaustProcessor.faust_libraries_paths
       ~FaustProcessor.group_voices
       ~FaustProcessor.n_midi_events
       ~FaustProcessor.num_voices
+      ~FaustProcessor.opt_level
       ~FaustProcessor.record
       ~FaustProcessor.record_automation
       ~FaustProcessor.release_length

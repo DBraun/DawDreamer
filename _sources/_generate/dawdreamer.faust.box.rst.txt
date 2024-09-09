@@ -4,11 +4,6 @@
 .. automodule:: dawdreamer.faust.box
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -35,6 +30,7 @@
       boxExp
       boxExp10
       boxFConst
+      boxFFun
       boxFVar
       boxFloatCast
       boxFloor
@@ -147,10 +143,6 @@
       isBoxWire
       isBoxWithLocalDef
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
@@ -158,11 +150,3 @@
       Box
       SType
    
-   
-
-   
-   
-   
-
-
-

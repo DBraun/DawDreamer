@@ -4,11 +4,6 @@
 .. automodule:: dawdreamer.faust
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -16,21 +11,9 @@
       createLibContext
       destroyLibContext
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       FaustContext
    
-   
-
-   
-   
-   
-
-
-

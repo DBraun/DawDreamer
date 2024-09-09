@@ -4,11 +4,6 @@
 .. automodule:: dawdreamer.faust.signal
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -76,6 +71,7 @@
       sigExp
       sigExp10
       sigFConst
+      sigFFun
       sigFVar
       sigFloatCast
       sigFloor
@@ -126,21 +122,9 @@
       simplifyToNormalForm
       simplifyToNormalForm2
    
-   
-
-   
-   
    .. rubric:: Classes
 
    .. autosummary::
    
       Signal
    
-   
-
-   
-   
-   
-
-
-
