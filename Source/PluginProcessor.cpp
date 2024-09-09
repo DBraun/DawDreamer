@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 
 #include <filesystem>
+#include <regex>
 
 #include "StandalonePluginWindow.h"
 
@@ -178,9 +179,9 @@ void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer,
   auto posInfo = getPlayHead()->getPosition();
 
   myRenderMidiBuffer.clear();
-    
+
   const bool isPlaying = posInfo->getIsPlaying();
-    
+
   if (!isPlaying) {
     // send All Notes Off MIDI message to all channels and then process it.
     // todo: is it possible to send all notes midi off without doing a
@@ -668,6 +669,186 @@ int PluginProcessorWrapper::wrapperGetPluginParameterSize() {
   return int(PluginProcessor::getPluginParameterSize());
 }
 
+// Function to convert various strings to floats
+/*
+"42.3" -> 42.3f
+"75%" -> 0.75f
+"75" -> 75f
+"-4" -> -4f
+"78% (-20.1 dB)" -> -20.1f
+"-20.1 dB" -> -20.1f
+"35% (30.1 kHz)" -> 30100f
+"30.1 kHz" -> 30100f
+"35% (30.1 khz)" -> 30100f
+"1% (500 Hz)" -> 500f
+"500 Hz" -> 500f
+"0% (-oo dB)" -> -std::numeric_limits<float>::infinity()
+"100% (oo)" -> std::numeric_limits<float>::infinity()
+"35% (30.1 khz)" -> 30100f
+"10% (-18 db)" -> -18f
+"-4 Oct" -> -4f
+"500 ms" -> 0.5f
+"500 MS" -> 0.5f
+"500 millisec" -> 0.5f
+"500 milliseconds" -> 0.5f
+"5 sec" -> 5
+*/
+float stringToFloat(const std::string& input) {
+  // Regex to match numbers in parentheses or the whole string
+  std::regex parenthesesRegex(R"(\(([^)]+)\))");
+  std::smatch match;
+
+  // Check for a number inside parentheses first
+  std::string extractedInput = input;
+  if (std::regex_search(input, match, parenthesesRegex)) {
+    extractedInput = match[1];  // Use the value inside parentheses
+  }
+
+  // Handle percentage (before checking for other numbers)
+  std::regex percentRegex(R"((\d+)%$)");
+  if (std::regex_search(input, match, percentRegex)) {
+    return std::stof(match[1]) / 100.0f;
+  }
+
+  // Regex for different number formats, including infinity (oo)
+  std::regex numberRegex(R"(-?\d+(\.\d+)?(e[+-]?\d+)?|([+-]?\b(?:oo)\b))");
+  if (std::regex_search(extractedInput, match, numberRegex)) {
+    std::string numberStr = match[0];
+
+    // Handle special cases of infinity
+    if (numberStr == "oo") {
+      return std::numeric_limits<float>::infinity();
+    } else if (numberStr == "-oo") {
+      return -std::numeric_limits<float>::infinity();
+    }
+
+    // Convert the extracted number to float
+    try {
+      float result = std::stof(numberStr);
+
+      // Check for frequency unit kHz or Hz, case insensitive
+      std::regex khzRegex(
+          R"((\d+(\.\d+)?)\s*[kK][hH][zZ])");             // Matches kHz or khz
+      std::regex hzRegex(R"((\d+(\.\d+)?)\s*[hH][zZ])");  // Matches Hz or hz
+
+      if (std::regex_search(extractedInput, match, khzRegex)) {
+        return result * 1000.0f;  // Convert kHz to Hz
+      } else if (std::regex_search(extractedInput, match, hzRegex)) {
+        return result;  // Return Hz as is
+      }
+
+      std::regex msRegex(R"((\d+(\.\d+)?)\s*(?:[mM][sS]|millisec.*))");  // Matches ms or MS
+
+	  // Check for unit ms or MS
+      if (std::regex_search(extractedInput, match, msRegex)) {
+        return result / 1000.0f;  // Convert ms to seconds
+      } else {
+        return result;  // Return the extracted number directly
+      }
+    } catch (...) {
+      // If something goes wrong in conversion, return 0 as a fallback
+      return 0.0f;
+    }
+  }
+
+  // As a fallback, treat the input as a plain number
+  try {
+    return std::stof(extractedInput);
+  } catch (...) {
+    return 0.0f;  // If no valid conversion was found, return 0
+  }
+}
+
+std::string getTextForRawValue(AudioProcessorParameter* parameter,
+                               float rawValue) {
+  /*
+  Some plugins don't respond properly to parameter->getText but do respond when
+  a parameter's raw value is changed. This helper method works around this
+  issue.
+  */
+  float originalValue = parameter->getValue();
+  parameter->setValue(rawValue);
+  std::string text = parameter->getCurrentValueAsText().toStdString();
+  parameter->setValue(originalValue);
+
+  return text;
+}
+
+// Function to attempt float extraction, fall back to string if exception occurs
+ValueType extract_value(const std::string& s) {
+  try {
+    // Attempt to convert the string to a float
+    return std::stof(s);
+  } catch (const std::invalid_argument&) {
+    // If conversion fails, return the original string
+    return s;
+  }
+}
+
+std::map<std::pair<float, float>, ValueType> getParameterRange(
+    AudioProcessorParameter* parameter, int searchSteps, bool convert) {
+  // Adapted from pedalboard (GPL-3.0)
+  // https://github.com/spotify/pedalboard/blob/ee16bb8805859fcd7e2fb7b00c8946666194774b/pedalboard/_pedalboard.py#L290-L318
+  std::map<std::pair<float, float>, ValueType> ranges;
+  std::string text;
+  bool resultsLookIncorrect = false;
+
+  float startOfRange = 0;
+  text.clear();
+  ranges.clear();
+
+  for (int x = 0; x <= searchSteps; ++x) {
+    float rawValue = static_cast<float>(x) / searchSteps;
+    std::string tmpTextValue = getTextForRawValue(parameter, rawValue);
+
+    if (text.empty()) {
+      text = tmpTextValue;
+    } else if (tmpTextValue != text) {
+      // End current range and start a new one
+      ranges[{startOfRange, rawValue}] = text;
+      text = tmpTextValue;
+      startOfRange = rawValue;
+    }
+  }
+
+  if (text.empty()) {
+    const std::string parameterName =
+        parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+    throw std::runtime_error(
+        "Plugin parameter '" + parameterName +
+        "' failed to return a valid string for its value.");
+  }
+
+  ranges[{ranges.rbegin()->first.second, 1.0f}] = text;  // Final range
+
+  if (!convert) {
+    return ranges;
+  }
+
+  std::map<std::pair<float, float>, ValueType> rangeFloat;
+  for (auto& kv : ranges) {
+    try {
+      rangeFloat[kv.first] = stringToFloat(std::get<std::string>(kv.second));
+    } catch (const std::invalid_argument& e) {
+      return ranges;
+    }
+  }
+
+  return rangeFloat;
+}
+
+std::map<std::pair<float, float>, ValueType>
+PluginProcessor::getParameterValueRange(const int parameterIndex,
+                                        int search_steps, bool convert) {
+  if (parameterIndex < 0 || parameterIndex >= getParameters().size()) {
+    throw std::runtime_error("Parameter not found for index: " +
+                             std::to_string(parameterIndex));
+  }
+
+  auto pluginParameter = myPlugin->getParameters().getUnchecked(parameterIndex);
+  return getParameterRange(pluginParameter, search_steps, convert);
+}
+
 py::list PluginProcessorWrapper::getPluginParametersDescription() {
   THROW_ERROR_IF_NO_PLUGIN
 
@@ -732,6 +913,8 @@ py::list PluginProcessorWrapper::getPluginParametersDescription() {
     myDictionary["category"] = category;
 
     myDictionary["text"] = currentText;
+    myDictionary["currentValText"] =
+        processorParams[i]->getCurrentValueAsText().toStdString();
     myDictionary["isMetaParameter"] = processorParams[i]->isMetaParameter();
     myDictionary["isAutomatable"] = processorParams[i]->isAutomatable();
     myDictionary["defaultValue"] = processorParams[i]->getDefaultValue();

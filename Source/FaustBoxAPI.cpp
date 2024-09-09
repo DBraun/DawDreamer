@@ -226,7 +226,6 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
              } catch (faustexception &e) {
                return "UNKNOWN";
              }
-             return "UNKNOWN";
            })
       .def(
           "extract_name",
@@ -480,6 +479,14 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
             return BoxWrapper(boxFVar(type, name, file));
           },
           arg("type"), arg("name"), arg("file"))
+      .def(
+          "boxFFun",
+          [](SType type, nvec names, svec atypes, const std::string &incfile,
+             const std::string &libfile) {
+            return BoxWrapper(boxFFun(type, names, atypes, incfile, libfile));
+          },
+          arg("type"), arg("names"), arg("arg_types"), arg("inc_file"),
+          arg("lib_file"), "Return a foreign function box.")
 
       .def(
           "boxBinOp",
@@ -838,7 +845,7 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
       .def(
           "boxVGroup",
           [](std::string &label, BoxWrapper &box1) {
-            return BoxWrapper(boxHGroup(label, box1));
+            return BoxWrapper(boxVGroup(label, box1));
           },
           arg("label"), arg("box"), "Create a vgroup.")
 
@@ -873,7 +880,6 @@ py::module_ &create_bindings_for_faust_box(py::module &faust_module,
                                   : boxAttach());
           },
           arg("box1") = py::none(), arg("box2") = py::none())
-
       .def(
           "boxSampleRate",
           []() {

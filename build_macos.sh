@@ -23,7 +23,7 @@ CONFIGURATION=Release-$ARCHS
 
 # Build Libsamplerate
 cd thirdparty/libsamplerate
-cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="$ARCHS" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="$ARCHS" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
 make --directory=build_release
 cd ../..
 

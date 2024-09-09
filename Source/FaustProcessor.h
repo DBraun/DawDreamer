@@ -32,9 +32,9 @@ class MySoundUI : public SoundUI {
  public:
   MySoundUI(
       std::map<std::string, std::vector<juce::AudioSampleBuffer>> *soundfileMap,
-      const std::string &sound_directory = "", int sample_rate = -1,
+      const std::vector<std::string> &sound_directories, int sample_rate = -1,
       SoundfileReader *reader = nullptr, bool is_double = false)
-      : SoundUI(sound_directory, sample_rate, reader, is_double) {
+      : SoundUI(sound_directories, sample_rate, reader, is_double) {
     jassert(soundfileMap);
     m_SoundfileMap = soundfileMap;
     m_sampleRate = sample_rate;
@@ -226,16 +226,59 @@ class FaustProcessor : public ProcessorBase {
   void setReleaseLength(double sec);
 
   void setFaustLibrariesPath(std::string faustLibrariesPath) {
-    m_faustLibrariesPath = faustLibrariesPath;
+    m_faustLibrariesPaths.clear();
+    m_faustLibrariesPaths.push_back(faustLibrariesPath);
   }
 
-  std::string getFaustLibrariesPath() { return m_faustLibrariesPath; }
+  void setFaustLibrariesPaths(std::vector<std::string> faustLibrariesPaths) {
+    m_faustLibrariesPaths.clear();
+    m_faustLibrariesPaths = faustLibrariesPaths;
+  }
+
+  std::string getFaustLibrariesPath() {
+    if (!m_faustLibrariesPaths.empty()) {
+      return m_faustLibrariesPaths.at(0);
+    }
+    return "";
+  }
+
+  std::vector<std::string> getFaustLibrariesPaths() {
+    return m_faustLibrariesPaths;
+  }
 
   void setFaustAssetsPath(std::string faustAssetsPath) {
-    m_faustAssetsPath = faustAssetsPath;
+    m_faustAssetsPaths.clear();
+    m_faustAssetsPaths.push_back(faustAssetsPath);
   }
 
-  std::string getFaustAssetsPath() { return m_faustAssetsPath; }
+  void setFaustAssetsPaths(std::vector<std::string> faustAssetsPath) {
+    m_faustAssetsPaths.clear();
+    m_faustAssetsPaths = faustAssetsPath;
+  }
+
+  std::string getFaustAssetsPath() {
+    if (!m_faustAssetsPaths.empty()) {
+      return m_faustAssetsPaths.at(0);
+    }
+    return "";
+  }
+
+  std::vector<std::string> getFaustAssetsPaths() { return m_faustAssetsPaths; }
+
+  void setCompileFlags(std::vector<std::string> compileFlags) {
+    m_compileFlags = compileFlags;
+  }
+
+  std::vector<std::string> getCompileFlags() { return m_compileFlags; }
+
+  void setLLVMOpt(int optLevel) {
+    if (m_llvmOptLevel != optLevel) {
+      m_compileState = kNotCompiled;
+    }
+    m_llvmOptLevel = optLevel;
+  }
+
+  int getLLVMOpt() { return m_llvmOptLevel; }
 
   std::map<std::string, std::vector<juce::AudioSampleBuffer>> m_SoundfileMap;
 
@@ -267,12 +310,14 @@ class FaustProcessor : public ProcessorBase {
 
   std::string m_autoImport;
   std::string m_code;
-  std::string m_faustLibrariesPath = "";
-  std::string m_faustAssetsPath = "";
+  std::vector<std::string> m_faustLibrariesPaths;
+  std::vector<std::string> m_faustAssetsPaths;
+  std::vector<std::string> m_compileFlags;
 
   int m_nvoices = 0;
   bool m_dynamicVoices = true;
   bool m_groupVoices = true;
+  int m_llvmOptLevel = -1;
 
   MidiBuffer myMidiBufferQN;
   MidiBuffer myMidiBufferSec;
@@ -387,10 +432,28 @@ inline void create_bindings_for_faust_processor(py::module &m) {
                     &FaustProcessor::setFaustLibrariesPath,
                     "Absolute path to directory containing your custom "
                     "\".lib\" files containing Faust code.")
+      .def_property(
+          "faust_libraries_paths", &FaustProcessor::getFaustLibrariesPaths,
+          &FaustProcessor::setFaustLibrariesPaths,
+          "List of absolute paths to directories containing your custom "
+          "\".lib\" files containing Faust code.")
       .def_property("faust_assets_path", &FaustProcessor::getFaustAssetsPath,
                     &FaustProcessor::setFaustAssetsPath,
                     "Absolute path to directory containing audio files to be "
                     "used by Faust.")
+      .def_property(
+          "faust_assets_paths", &FaustProcessor::getFaustAssetsPaths,
+          &FaustProcessor::setFaustAssetsPaths,
+          "List of absolute paths to directories containing audio files to be "
+          "used by Faust.")
+      .def_property("compile_flags", &FaustProcessor::getCompileFlags,
+                    &FaustProcessor::setCompileFlags,
+                    "List of compilation flags.")
+      .def_property(
+          "opt_level", &FaustProcessor::getLLVMOpt, &FaustProcessor::setLLVMOpt,
+          "LLVM IR to IR optimization level (from -1 to 4, -1 means 'maximum "
+          "possible value' * since the maximum value may change with new LLVM "
+          "versions)")
       .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents,
                              "The number of MIDI events stored in the buffer. \
 		Note that note-ons and note-offs are counted separately.")

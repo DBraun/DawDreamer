@@ -9,13 +9,13 @@ on:
 jobs:
 
   build-ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
-      # fail-fast: false
+      fail-fast: false
       matrix:
         include:
-        - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
-        - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
+        # - { python-version: "3.8", pythonLibPath: "/opt/python/cp39-cp38/lib", pythonInclude: "/opt/python/cp38-cp38/include/python3.8", cibwbuild: "cp38-manylinux_x86_64"}
+        # - { python-version: "3.9", pythonLibPath: "/opt/python/cp39-cp39/lib", pythonInclude: "/opt/python/cp39-cp39/include/python3.9", cibwbuild: "cp39-manylinux_x86_64"}
         - { python-version: "3.10", pythonLibPath: "/opt/python/cp310-cp310/lib", pythonInclude: "/opt/python/cp310-cp310/include/python3.10", cibwbuild: "cp310-manylinux_x86_64"}
         - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
         - { python-version: "3.12", pythonLibPath: "/opt/python/cp312-cp312/lib", pythonInclude: "/opt/python/cp312-cp312/include/python3.12", cibwbuild: "cp312-manylinux_x86_64"}
@@ -30,8 +30,9 @@ jobs:
         submodules: true
 
     - name: Set up QEMU for aarch64 on Linux
+      # if: endsWith(${{matrix.cibwbuild}}, "aarch64")
       if: runner.os == 'Linux'
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
       with:
         platforms: all
 
@@ -44,10 +45,10 @@ jobs:
     - name: Download libfaust
       run: |
         cd thirdparty/libfaust
-        sh download_libfaust.sh
+        python download_libfaust.py
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.20.0
       env:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
@@ -64,9 +65,9 @@ jobs:
         CIBW_ARCHS_LINUX: auto64 aarch64  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
         CIBW_TEST_SKIP: "*38* *39* *311* *312*"  # Only care about 310 (current Google Colab version)
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: my-wheel-artifact
+        name: ${{ matrix.cibwbuild}}
         path: ./wheelhouse/*.whl
 
   build-ubuntu-docker:
@@ -85,8 +86,8 @@ jobs:
       # fail-fast: false
       matrix:
         include:
-        - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
-        - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
+        # - { os: windows-2022, python-version: "3.8", CIBW-BUILD: "cp38*"}
+        # - { os: windows-2022, python-version: "3.9", CIBW-BUILD: "cp39*"}
         - { os: windows-2022, python-version: "3.10", CIBW-BUILD: "cp310*"}
         - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
         - { os: windows-2022, python-version: "3.12", CIBW-BUILD: "cp312*"}
@@ -97,12 +98,12 @@ jobs:
         submodules: true
 
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
 
     - name: Get CMake
       uses: lukka/get-cmake@latest
@@ -115,7 +116,7 @@ jobs:
       shell: cmd
       run: |
         cd thirdparty/libfaust
-        call download_libfaust.bat
+        python download_libfaust.py
 
     - name: Build libsamplerate
       run: |
@@ -143,21 +144,21 @@ jobs:
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
         CIBW_TEST_SKIP: "*312*"
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: my-wheel-artifact
+        name: windows-${{ matrix.python-version}}
         path: ./wheelhouse/*.whl
 
     - name: "Build docs for GitHub pages"
-      if: ${{ matrix.python-version == '3.9' && github.event_name == 'release' && github.event.action == 'published' }}
+      if: ${{ matrix.python-version == '3.10' && github.event_name == 'release' && github.event.action == 'published' }}
       shell: cmd
       run: |
         pip install -U sphinx
         cd docs && make.bat html
     - name: Deploy docs
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       # todo: make condition for being on main branch
-      if: ${{ matrix.python-version == '3.9' && github.event_name == 'release' && github.event.action == 'published' }}
+      if: ${{ matrix.python-version == '3.10' && github.event_name == 'release' && github.event.action == 'published' }}
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/_build/html
@@ -168,14 +169,14 @@ jobs:
       # fail-fast: false
       matrix:
         include:
-        - { os: macos-11, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp312-macosx_x86_64, python-version: "3.12", ARCHS: "x86_64" }
-        - { os: macos-11, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
-        - { os: macos-11, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
-        - { os: macos-11, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
-        - { os: macos-11, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
+        # - { os: macos-12, build: cp39-macosx_x86_64, python-version: "3.9", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp310-macosx_x86_64, python-version: "3.10", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp311-macosx_x86_64, python-version: "3.11", ARCHS: "x86_64" }
+        - { os: macos-12, build: cp312-macosx_x86_64, python-version: "3.12", ARCHS: "x86_64" }
+        # - { os: macos-12, build: cp39-macosx_arm64, python-version: "3.9", ARCHS: "arm64" }
+        - { os: macos-12, build: cp310-macosx_arm64, python-version: "3.10", ARCHS: "arm64" }
+        - { os: macos-12, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
+        - { os: macos-12, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
 
     steps:
     - uses: actions/checkout@v4
@@ -199,14 +200,14 @@ jobs:
     - name: Download libfaust
       run: |
         cd thirdparty/libfaust
-        sh download_libfaust.sh
+        python download_libfaust.py
 
     - name: Build wheels ${{ matrix.python-version }}
-      uses: pypa/cibuildwheel@v2.16.2
+      uses: pypa/cibuildwheel@v2.20.0
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-version }}
-        MACOSX_DEPLOYMENT_TARGET: 11.0
+        MACOSX_DEPLOYMENT_TARGET: 12.0
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
           export pythonLocation=$(python${{matrix.python-version}}-config --prefix)
@@ -222,9 +223,9 @@ jobs:
         CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
         CIBW_TEST_SKIP: "*arm64* *312*"
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: my-wheel-artifact
+        name: macos-${{ matrix.build}}
         path: ./wheelhouse/*.whl
 
   upload-pypi:
@@ -233,9 +234,8 @@ jobs:
     name: "Upload wheels to PyPI"
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
-          name: my-wheel-artifact
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1

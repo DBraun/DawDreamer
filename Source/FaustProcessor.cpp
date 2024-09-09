@@ -105,7 +105,7 @@ void FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer,
                                   juce::MidiBuffer& midiBuffer) {
   // todo: Faust should be able to use the incoming midiBuffer too.
   auto posInfo = getPlayHead()->getPosition();
-    
+
   const bool isPlaying = posInfo->getIsPlaying();
   if (!isPlaying) {
     ProcessorBase::processBlock(buffer, midiBuffer);
@@ -419,8 +419,6 @@ bool FaustProcessor::compile() {
   // clean up
   clear();
 
-  // optimization level
-  const int optimize = -1;
   // arguments
 
   auto pathToFaustLibraries = getPathToFaustLibraries();
@@ -437,9 +435,13 @@ bool FaustProcessor::compile() {
   argv[argc++] = "-I";
   argv[argc++] = pathToFaustLibraries.c_str();
 
-  if (!m_faustLibrariesPath.empty()) {
+  for (const auto& p : m_faustLibrariesPaths) {
     argv[argc++] = "-I";
-    argv[argc++] = m_faustLibrariesPath.c_str();
+    argv[argc++] = p.c_str();
+  }
+
+  for (const auto& flag : m_compileFlags) {
+    argv[argc++] = flag.c_str();
   }
 
   auto theCode = m_autoImport + "\n" + m_code;
@@ -451,11 +453,13 @@ bool FaustProcessor::compile() {
   // create new factory
   bool is_polyphonic = m_nvoices > 0;
   if (is_polyphonic) {
-    m_poly_factory = createPolyDSPFactoryFromString(
-        "dawdreamer", theCode, argc, argv, target, m_errorString, optimize);
+    m_poly_factory =
+        createPolyDSPFactoryFromString("dawdreamer", theCode, argc, argv,
+                                       target, m_errorString, m_llvmOptLevel);
   } else {
-    m_factory = createDSPFactoryFromString("dawdreamer", theCode, argc, argv,
-                                           target, m_errorString, optimize);
+    m_factory =
+        createDSPFactoryFromString("dawdreamer", theCode, argc, argv, target,
+                                   m_errorString, m_llvmOptLevel);
   }
 
   for (int i = 0; i < argc; i++) {
@@ -530,7 +534,7 @@ bool FaustProcessor::compile() {
 
   const int sr = (int)(mySampleRate + .5);
 
-  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
   theDsp->buildUserInterface(m_soundUI);
 
   // init
@@ -547,18 +551,22 @@ bool FaustProcessor::compileSignals(
     std::vector<SigWrapper>& wrappers,
     std::optional<std::vector<std::string>> in_argv) {
   clear();
-    
+
   auto pathToFaustLibraries = getPathToFaustLibraries();
 
   int argc = 0;
-  const char* argv[64];
-    
+  const char* argv[512];
+
   argv[argc++] = "-I";
   argv[argc++] = pathToFaustLibraries.c_str();
 
-  if (!m_faustLibrariesPath.empty()) {
+  for (const auto& p : m_faustLibrariesPaths) {
     argv[argc++] = "-I";
-    argv[argc++] = m_faustLibrariesPath.c_str();
+    argv[argc++] = p.c_str();
+  }
+
+  for (const auto& flag : m_compileFlags) {
+    argv[argc++] = flag.c_str();
   }
 
   if (in_argv.has_value()) {
@@ -576,7 +584,7 @@ bool FaustProcessor::compileSignals(
   std::string error_msg;
 
   m_factory = createDSPFactoryFromSignals("dawdreamer", signals, argc, argv,
-                                          target, error_msg);
+                                          target, error_msg, m_llvmOptLevel);
 
   if (!m_factory) {
     clear();
@@ -622,7 +630,7 @@ bool FaustProcessor::compileSignals(
 
   const int sr = (int)(mySampleRate + .5);
 
-  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
   theDsp->buildUserInterface(m_soundUI);
 
   // init
@@ -640,16 +648,20 @@ bool FaustProcessor::compileBox(
   clear();
 
   auto pathToFaustLibraries = getPathToFaustLibraries();
-    
+
   int argc = 0;
   const char* argv[512];
-        
+
   argv[argc++] = "-I";
   argv[argc++] = pathToFaustLibraries.c_str();
 
-  if (!m_faustLibrariesPath.empty()) {
+  for (const auto& p : m_faustLibrariesPaths) {
     argv[argc++] = "-I";
-    argv[argc++] = m_faustLibrariesPath.c_str();
+    argv[argc++] = p.c_str();
+  }
+
+  for (const auto& flag : m_compileFlags) {
+    argv[argc++] = flag.c_str();
   }
 
   if (in_argv.has_value()) {
@@ -662,7 +674,7 @@ bool FaustProcessor::compileBox(
   std::string error_msg;
 
   m_factory = createDSPFactoryFromBoxes("dawdreamer", box, argc, argv, target,
-                                        error_msg);
+                                        error_msg, m_llvmOptLevel);
 
   if (!m_factory) {
     clear();
@@ -691,7 +703,7 @@ bool FaustProcessor::compileBox(
   m_numOutputChannels = outputs;
 
   setMainBusInputsAndOutputs(inputs, outputs);
-    
+
   // make new UI
   if (is_polyphonic) {
     m_midi_handler = rt_midi("my_midi");
@@ -706,7 +718,7 @@ bool FaustProcessor::compileBox(
 
   const int sr = (int)(mySampleRate + .5);
 
-  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPath, sr);
+  m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
   theDsp->buildUserInterface(m_soundUI);
 
   // init

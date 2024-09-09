@@ -18,7 +18,8 @@ def test_stereo_plugin_effect(plugin_path):
 
     effect = engine.make_plugin_processor("effect", plugin_path)
 
-    # print(effect.get_parameters_description())
+    desc = effect.get_parameters_description()
+    # print(desc)
     assert(effect.get_num_input_channels() == PLUGIN_INPUT_CHANNELS[plugin_basename])
     assert(effect.get_num_output_channels() == PLUGIN_OUTPUT_CHANNELS[plugin_basename])
 
@@ -51,6 +52,9 @@ def test_plugin_instrument1(plugin_path):
     synth = engine.make_plugin_processor("synth", plugin_path)
 
     desc = synth.get_parameters_description()
+    for item in desc:
+        index = item['index']
+        range = synth.get_parameter_range(index, 10)
 
     val = synth.get_parameter(0)
     synth.set_parameter(0, val)
@@ -107,7 +111,8 @@ def test_plugin_instrument_add_midi_note_beats(plugin_path):
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_parameters_description())
+    desc = synth.get_parameters_description()
+    # print(desc)
 
     for i in range(16):
         synth.add_midi_note(60, 60, i*4, 2, beats=True)
@@ -133,7 +138,8 @@ def test_plugin_instrument_midi(plugin_path):
 
     synth = engine.make_plugin_processor("synth", plugin_path)
 
-    # print(synth.get_parameters_description())
+    desc = synth.get_parameters_description()
+    # print(desc)
 
     synth.load_midi(abspath(ASSETS / 'MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi'))
     synth.clear_midi()

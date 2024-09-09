@@ -189,9 +189,7 @@ void create_bindings_for_faust_signal(py::module &faust_module,
           arg("sig1"), arg("sig2"))
       .def(
           "sigDelay1",
-          [](SigWrapper &sig1) {
-            return SigWrapper(sigDelay1(sig1));
-          },
+          [](SigWrapper &sig1) { return SigWrapper(sigDelay1(sig1)); },
           arg("sig1"))
 
       .def(
@@ -273,11 +271,21 @@ void create_bindings_for_faust_signal(py::module &faust_module,
           arg("selector"), arg("sig1"), arg("sig2"), arg("sig3"))
 
       .def(
+          "sigFFun",
+          [](SType rtype, nvec names, svec atypes, const std::string &incfile,
+             const std::string &libfile, tvec largs) {
+            return SigWrapper(
+                sigFFun(rtype, names, atypes, incfile, libfile, largs));
+          },
+          arg("type"), arg("names"), arg("arg_types"), arg("inc_file"),
+          arg("lib_file"), arg("largs"), "Create a foreign function signal.")
+      .def(
           "sigFConst",
           [](SType type, const std::string &name, const std::string &file) {
             return SigWrapper(sigFConst(type, name, file));
           },
-          arg("type"), arg("name"), arg("file"))
+          arg("type"), arg("name"), arg("file"),
+          "Create a foreign constant signal.")
       .def(
           "sigFVar",
           [](SType type, const std::string &name, const std::string &file) {
