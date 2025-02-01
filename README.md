@@ -43,14 +43,17 @@ DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a 
 ## Installation
 
 macOS requirements:
-* 64-bit Python 3.9 or higher
+* 64-bit Python 3.10-3.12
+* Apple Silicon or Intel CPU
 * macOS 11.0 or higher
 
 Windows requirements:
-* 64-bit Python 3.8 or higher
+* x86_64 CPU
+* 64-bit Python 3.10-3.12
 
 Linux requirements:
-* 64-bit Python 3.8 or higher
+* x86_64 CPU
+* 64-bit Python 3.10-3.12
 
 Install with [PyPI](https://pypi.org/project/dawdreamer/):
 
