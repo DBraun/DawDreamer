@@ -1,9 +1,7 @@
 name: Compile, Test, and Deploy
 on:
   pull_request: {}
-  # push:
-  #   branches:
-  #     - main
+  workflow_dispatch: {}  # Allow manual trigger
   release:
     types: [published]
 jobs:
