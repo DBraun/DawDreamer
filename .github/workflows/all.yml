@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
         - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
-        - { python-version: "3.12", pythonLibPath: "/opt/python/cp312-cp312/lib", pythonInclude: "/opt/python/cp312-cp312/include/python3.12", cibwbuild: "cp312-manylinux_x86_64"}
-        - { python-version: "3.13", pythonLibPath: "/opt/python/cp313-cp313/lib", pythonInclude: "/opt/python/cp313-cp313/include/python3.13", cibwbuild: "cp313-manylinux_x86_64"}
-        - { python-version: "3.14", pythonLibPath: "/opt/python/cp314-cp314/lib", pythonInclude: "/opt/python/cp314-cp314/include/python3.14", cibwbuild: "cp314-manylinux_x86_64"}
+        # - { python-version: "3.12", pythonLibPath: "/opt/python/cp312-cp312/lib", pythonInclude: "/opt/python/cp312-cp312/include/python3.12", cibwbuild: "cp312-manylinux_x86_64"}
+        # - { python-version: "3.13", pythonLibPath: "/opt/python/cp313-cp313/lib", pythonInclude: "/opt/python/cp313-cp313/include/python3.13", cibwbuild: "cp313-manylinux_x86_64"}
+        # - { python-version: "3.14", pythonLibPath: "/opt/python/cp314-cp314/lib", pythonInclude: "/opt/python/cp314-cp314/include/python3.14", cibwbuild: "cp314-manylinux_x86_64"}
 
     steps:
     - uses: actions/checkout@v5
@@ -80,9 +80,9 @@ jobs:
       matrix:
         include:
         - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
-        - { os: windows-2022, python-version: "3.12", CIBW-BUILD: "cp312*"}
-        - { os: windows-2022, python-version: "3.13", CIBW-BUILD: "cp313*"}
-        - { os: windows-2022, python-version: "3.14", CIBW-BUILD: "cp314*"}
+        # - { os: windows-2022, python-version: "3.12", CIBW-BUILD: "cp312*"}
+        # - { os: windows-2022, python-version: "3.13", CIBW-BUILD: "cp313*"}
+        # - { os: windows-2022, python-version: "3.14", CIBW-BUILD: "cp314*"}
 
     steps:
     - uses: actions/checkout@v5
@@ -162,9 +162,9 @@ jobs:
         include:
         # Apple Silicon only (macos-14 = M1/M2/M3 runners)
         - { os: macos-14, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
-        - { os: macos-14, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
-        - { os: macos-14, build: cp313-macosx_arm64, python-version: "3.13", ARCHS: "arm64" }
-        - { os: macos-14, build: cp314-macosx_arm64, python-version: "3.14", ARCHS: "arm64" }
+        # - { os: macos-14, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
+        # - { os: macos-14, build: cp313-macosx_arm64, python-version: "3.13", ARCHS: "arm64" }
+        # - { os: macos-14, build: cp314-macosx_arm64, python-version: "3.14", ARCHS: "arm64" }
 
     steps:
     - uses: actions/checkout@v5
