@@ -7,7 +7,7 @@ import("stdfaust.lib");
 my_phasor(inc,c) = inc*on_memory : + ~ (_*(1-start_pulse))
 with {
     is_on = c>0;
-    
+
     start_pulse = is_on & (1-is_on');
     on_memory = is_on : max ~ (_*(1-start_pulse));
 };

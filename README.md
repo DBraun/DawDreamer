@@ -1,11 +1,11 @@
 ```
-  _____                       _____                                                  
- |  __ \                     |  __ \                                                 
- | |  | |   __ _  __      __ | |  | |  _ __    ___    __ _   _ __ ___     ___   _ __ 
+  _____                       _____
+ |  __ \                     |  __ \
+ | |  | |   __ _  __      __ | |  | |  _ __    ___    __ _   _ __ ___     ___   _ __
  | |  | |  / _` | \ \ /\ / / | |  | | | '__|  / _ \  / _` | | '_ ` _ \   / _ \ | '__|
- | |__| | | (_| |  \ V  V /  | |__| | | |    |  __/ | (_| | | | | | | | |  __/ | |   
- |_____/   \__,_|   \_/\_/   |_____/  |_|     \___|  \__,_| |_| |_| |_|  \___| |_|   
-                                                                                     
+ | |__| | | (_| |  \ V  V /  | |__| | | |    |  __/ | (_| | | | | | | | |  __/ | |
+ |_____/   \__,_|   \_/\_/   |_____/  |_|     \___|  \__,_| |_| |_| |_|  \___| |_|
+
 * * Digital Audio Workstation with Python * *
 ```
 
@@ -135,7 +135,7 @@ synth.clear_midi()
 # add midi again, render again, and so on...
 ```
 
-Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki), [examples](https://github.com/DBraun/DawDreamer/tree/main/examples/), [API documentation](https://dirt.design/DawDreamer), and [tests](https://github.com/DBraun/DawDreamer/tree/main/tests). 
+Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki), [examples](https://github.com/DBraun/DawDreamer/tree/main/examples/), [API documentation](https://dirt.design/DawDreamer), and [tests](https://github.com/DBraun/DawDreamer/tree/main/tests).
 
 ## License
 

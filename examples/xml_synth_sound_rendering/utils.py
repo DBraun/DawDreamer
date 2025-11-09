@@ -1,14 +1,13 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import librosa as lb
-import librosa.display as lbd
+import json
 import os
 import random
-import json
-import xmltodict
-import difflib
 import re
-import math
+
+import librosa as lb
+import librosa.display as lbd
+import matplotlib.pyplot as plt
+import numpy as np
+import xmltodict
 
 tal_uno_to_dawdreamer_mapping = {
     "@path": None,  # No suitable match
@@ -96,18 +95,19 @@ tal_uno_to_dawdreamer_mapping = {
     "voicetunings": None,  # No suitable match
 }
 
+
 def piano_note_to_midi_note(piano_note):
     """
     Convert a string representation of a piano note to its corresponding MIDI note number.
-    
+
     Args:
         piano_note (str): A string representation of a piano note (e.g. 'C4').
-    
+
     Returns:
         int: The MIDI note number corresponding to the input piano note.
     """
     # Define lists of piano note names and their corresponding MIDI note numbers
-    piano_notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+    piano_notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
     midi_notes = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
 
     # Extract the octave and note name from the piano note input
@@ -120,27 +120,29 @@ def piano_note_to_midi_note(piano_note):
 
     return midi_note
 
+
 def read_txt(path: str) -> str:
     """
     Read the contents of a text file and return as a string.
-    
+
     Args:
         path (str): The path to the text file to be read.
-    
+
     Returns:
         str: The contents of the text file as a string.
     """
-    with open(path, 'r') as file:
+    with open(path) as file:
         txt = file.read()
     return txt
+
 
 def get_xml_preset_settings(preset_path: str):
     """
     Read a preset file in XML format and convert it to a dictionary.
-    
+
     Args:
         preset_path (str): The path to the preset file.
-    
+
     Returns:
         str: The preset settings in JSON format as a string.
     """
@@ -164,16 +166,19 @@ def get_xml_preset_settings(preset_path: str):
 
     return preset_settings
 
-def make_json_parameter_mapping(plugin, preset_path:str, json_preset_folder=f'TAL-UNO_json_presets', verbose=True):
+
+def make_json_parameter_mapping(
+    plugin, preset_path: str, json_preset_folder="TAL-UNO_json_presets", verbose=True
+):
     """
     Read a preset file in XML format, apply the settings to the plugin, and create a JSON file
     that maps the preset parameters to the plugin parameters.
-    
+
     Args:
         plugin (dawdreamer.PluginProcessor): The plugin to which the preset settings will be applied.
         preset_path (str): The path to the preset file in XML format.
         verbose (bool): if True, it will print parameter mapping. Default is True.
-    
+
     Returns:
         str: The name of the JSON file containing the parameter mapping.
     """
@@ -182,8 +187,8 @@ def make_json_parameter_mapping(plugin, preset_path:str, json_preset_folder=f'TA
         os.mkdir(json_preset_folder)
 
     # specify the output json filename
-    preset_name = preset_path.split(os.sep)[-1].split('.pjunoxl')[0]
-    output_name = f'{json_preset_folder}{os.sep}TAL-UNO-{preset_name}-parameter-mapping.json'
+    preset_name = preset_path.split(os.sep)[-1].split(".pjunoxl")[0]
+    output_name = f"{json_preset_folder}{os.sep}TAL-UNO-{preset_name}-parameter-mapping.json"
 
     if not os.path.exists(output_name):
         # read the XML preset path
@@ -213,23 +218,28 @@ def make_json_parameter_mapping(plugin, preset_path:str, json_preset_folder=f'TA
 
                 if closest_match is not None:
                     # Extract the value of the JSON key from the JSON string using regex
-                    match_value = re.search(r'"{}":\s*"([\d.]+)"'.format(key), preset_settings)
+                    match_value = re.search(rf'"{key}":\s*"([\d.]+)"', preset_settings)
                     if match_value:
                         param_value = float(match_value.group(1))
                         index = param_name_to_index[closest_match]
-                        parameter_mapping[key] = {'match': closest_match, 'value': param_value, 'index': index}
+                        parameter_mapping[key] = {
+                            "match": closest_match,
+                            "value": param_value,
+                            "index": index,
+                        }
             except KeyError:
-                print(f'Key {key} was not found in mapping dictionary. Continuing...')
-        
-        with open(output_name, 'w') as outfile:
-            json.dump(parameter_mapping, outfile)  
+                print(f"Key {key} was not found in mapping dictionary. Continuing...")
 
-    return output_name      
+        with open(output_name, "w") as outfile:
+            json.dump(parameter_mapping, outfile)
 
-def load_xml_preset(dawdreamer_plugin,parameter_mapping_json):
+    return output_name
+
+
+def load_xml_preset(dawdreamer_plugin, parameter_mapping_json):
     """
     Load a preset into a plugin using a JSON file that maps preset parameters to plugin parameters.
-    
+
     Args:
         dawdreamer_plugin (dawdreamer.PluginProcessor): The plugin to which the preset settings will be applied.
         parameter_mapping_json (str): The path to the JSON file that maps preset parameters to plugin parameters.
@@ -237,44 +247,57 @@ def load_xml_preset(dawdreamer_plugin,parameter_mapping_json):
         dawdreamer.PluginProcessor: The plugin with the preset settings applied.
     """
     # Load JSON file into a dictionary
-    with open(parameter_mapping_json, 'r') as infile:
+    with open(parameter_mapping_json) as infile:
         parameter_map = json.load(infile)
 
     # Get the parameters description from the plugin
     parameters = dawdreamer_plugin.get_parameters_description()
 
     # Create a dictionary with parameter names as keys and their indices as values
-    param_name_to_index = {param["name"]: param["index"] for param in parameters}
+    {param["name"]: param["index"] for param in parameters}
 
     # Iterate over each JSON key
-    for key in parameter_map.keys():
-        dawdreamer_plugin.set_parameter(parameter_map[key]['index'], parameter_map[key]['value'])
-    
+    for key in parameter_map:
+        dawdreamer_plugin.set_parameter(parameter_map[key]["index"], parameter_map[key]["value"])
+
     return dawdreamer_plugin
+
 
 def select_preset_path(folder_path, preset_ext):
     """
     Select a random preset file path from a preset folder path and its subdirectories.
-    
+
     Args:
         folder_path (str): The path to the folder to search for preset files.
         preset_ext (str): The file extension of the preset files to search for (e.g. ".pjunoxl").
-    
+
     Returns:
         str or None: The path to a randomly selected preset file, or None if no preset files are found.
     """
     preset_files = []
-    for root, dirs, files in os.walk(folder_path):
+    for root, _dirs, files in os.walk(folder_path):
         for file in files:
             if file.endswith(preset_ext):
                 preset_files.append(os.path.join(root, file))
     return random.choice(preset_files) if preset_files else None
 
-def audio2mel_spectrogram(audio_folder_path, plot_flag=False, window_size=2048, zero_padding_factor=1,
-                           window_type='hann', gain_db=0.0, range_db=80.0, high_boost_db=0.0, f_min=0, f_max=20000, n_mels=256):
+
+def audio2mel_spectrogram(
+    audio_folder_path,
+    plot_flag=False,
+    window_size=2048,
+    zero_padding_factor=1,
+    window_type="hann",
+    gain_db=0.0,
+    range_db=80.0,
+    high_boost_db=0.0,
+    f_min=0,
+    f_max=20000,
+    n_mels=256,
+):
     """
     Convert a collection of audio files to mel-scaled spectrograms.
-    
+
     Args:
         audio_folder_path (str): The path to the folder containing the audio files.
         plot_flag (bool, optional): Whether to plot the mel-scaled spectrograms. Defaults to False.
@@ -287,7 +310,7 @@ def audio2mel_spectrogram(audio_folder_path, plot_flag=False, window_size=2048, 
         f_min (int, optional): The minimum frequency to include in the spectrogram (Hz). Defaults to 0.
         f_max (int, optional): The maximum frequency to include in the spectrogram (Hz). Defaults to 20000.
         n_mels (int, optional): The number of mel frequency bins to include in the spectrogram. Defaults to 256.
-    
+
     Returns:
         list: A list of mel-scaled spectrograms, where each element is a NumPy array.
     """
@@ -308,11 +331,14 @@ def audio2mel_spectrogram(audio_folder_path, plot_flag=False, window_size=2048, 
         # Compute the mel-scaled spectrogram
         fft_size = window_size * zero_padding_factor
         hop_length = window_size // 2
-        mel_filterbank = lb.filters.mel(sr=sample_rate, n_fft=fft_size, n_mels=n_mels)
+        lb.filters.mel(sr=sample_rate, n_fft=fft_size, n_mels=n_mels)
         window = lb.filters.get_window(window_type, window_size, fftbins=True)
-        spectrogram = np.abs(lb.stft(signal, n_fft=fft_size, hop_length=hop_length, window=window))**2
-        mel_spectrogram = lb.feature.melspectrogram(S=spectrogram, sr=sample_rate, n_mels=n_mels,
-                                                     fmax=f_max, htk=True, norm=None)
+        spectrogram = (
+            np.abs(lb.stft(signal, n_fft=fft_size, hop_length=hop_length, window=window)) ** 2
+        )
+        mel_spectrogram = lb.feature.melspectrogram(
+            S=spectrogram, sr=sample_rate, n_mels=n_mels, fmax=f_max, htk=True, norm=None
+        )
         mel_spectrogram = lb.power_to_db(mel_spectrogram, ref=np.max)
 
         # Apply range and high boost to the mel-scaled spectrogram
@@ -323,12 +349,23 @@ def audio2mel_spectrogram(audio_folder_path, plot_flag=False, window_size=2048, 
         if plot_flag:
             plt.figure(figsize=(10, 4))
             # TODO: Need to fix spectrogram visualization frequency axis!
-            lbd.specshow(mel_spectrogram, x_axis='time', y_axis='mel',sr=sample_rate, fmin=f_min, fmax=f_max, hop_length=hop_length, cmap='jet', vmin=-range_db, vmax=mel_spectrogram.max() + high_boost_db)
-            plt.colorbar(format='%+2.0f dB')
-            plt.title('Mel spectrogram for {}'.format(file_name))
+            lbd.specshow(
+                mel_spectrogram,
+                x_axis="time",
+                y_axis="mel",
+                sr=sample_rate,
+                fmin=f_min,
+                fmax=f_max,
+                hop_length=hop_length,
+                cmap="jet",
+                vmin=-range_db,
+                vmax=mel_spectrogram.max() + high_boost_db,
+            )
+            plt.colorbar(format="%+2.0f dB")
+            plt.title(f"Mel spectrogram for {file_name}")
             plt.tight_layout()
             plt.show()
-        
+
         mel_spectrograms.append(mel_spectrogram)
 
         if len(mel_spectrograms) > 4:

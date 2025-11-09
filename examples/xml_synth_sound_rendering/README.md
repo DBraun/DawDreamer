@@ -4,7 +4,7 @@ This script demonstrates how to use [multiprocessing](https://docs.python.org/3/
 
 The number of workers is by default `multiprocessing.cpu_count()`. Each worker has a persistent RenderEngine which loads a plugin instrument of our choice. Each worker consumes paths of presets from a multiprocessing [Queue](https://docs.python.org/3/library/multiprocessing.html#pipes-and-queues). For each preset, the worker renders out audio for a configurable MIDI pitch range. The output audio path includes the pitch and preset name.
 
-To run a CLI example that produces many sounds in parallel with the TAL-U-NO-LX VST plugin using multiprocessing, you may adjust and run the following: 
+To run a CLI example that produces many sounds in parallel with the TAL-U-NO-LX VST plugin using multiprocessing, you may adjust and run the following:
 
 ```bash
 python main.py --plugin "path/to/TAL-U-NO-LX-V2.vst3" --preset-dir "path/to/TAL-U-NO-LX_presets"

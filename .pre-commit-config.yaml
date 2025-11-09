@@ -1,0 +1,71 @@
+# Pre-commit hooks for DawDreamer
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+        exclude: '\\.jucer$'  # Don't modify JUCE project files
+      - id: trailing-whitespace
+        exclude: '\\.jucer$'
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: check-docstring-first
+
+  # Python formatting and linting (ruff replaces black, flake8, isort)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        exclude: '\.ipynb$'
+      - id: ruff-format
+        exclude: '\.ipynb$'
+
+  # C++ formatting
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v19.1.4
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
+        exclude: '^(JuceLibraryCode|thirdparty)/'
+
+  # Shell script checking
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
+  # Spell checking
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        args: ['--skip=*.so,*.dll,*.dylib,*.pyd,*.a,*.lib,*.jucer', '--ignore-words=.codespellignore']
+        exclude: '^(thirdparty|JuceLibraryCode|Builds)/'
+
+# Exclude patterns for all hooks
+exclude: |
+  (?x)(
+    ^thirdparty/|
+    ^JuceLibraryCode/|
+    ^Builds/|
+    ^dawdreamer\.egg-info/|
+    ^dist/|
+    ^wheelhouse/|
+    ^docs/_build/|
+    \.so$|
+    \.pyd$|
+    \.dll$|
+    \.dylib$|
+    \.a$|
+    \.lib$
+  )

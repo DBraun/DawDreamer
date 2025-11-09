@@ -1,1 +1,4 @@
-vst param #	name	min	max	display	unit	default0	on/off	0	100	=	%	11	Size	0	100	=	%	502	Dry/Wet	0	100	=	%	50
+vst param #	name	min	max	display	unit	default
+0	on/off	0	100	=	%	1
+1	Size	0	100	=	%	50
+2	Dry/Wet	0	100	=	%	50

@@ -1,0 +1,53 @@
+# ClangFormat configuration for DawDreamer
+# Based on LLVM style with modifications for the project
+
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+
+# Line length
+ColumnLimit: 100
+
+# Braces
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+
+# Pointers and references
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+# Spacing
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInContainerLiterals: false
+
+# Include sorting
+SortIncludes: CaseInsensitive
+IncludeBlocks: Preserve
+
+# Alignment
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+
+# Comments
+ReflowComments: true
+SpacesBeforeTrailingComments: 1
+
+# Namespaces
+CompactNamespaces: false
+FixNamespaceComments: true
+
+# Other
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: true
+BinPackParameters: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
