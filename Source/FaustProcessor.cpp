@@ -1216,21 +1216,23 @@ void FaustProcessor::setSoundfiles(nb::dict d)
             // todo: safer casting?
             auto audioData = nb::cast<myaudiotype>(potentialAudio);
 
-            float* input_ptr = (float*)audioData.data();
-
             AudioSampleBuffer buffer;
 
             buffer.setSize((int)audioData.shape(0), (int)audioData.shape(1));
 
-            // Use element-based strides for proper array access
-            int64_t chan_stride = audioData.stride(0);
-            int64_t sample_stride = audioData.stride(1);
+            // Use byte-based addressing to handle different dtypes
+            uint8_t* input_ptr = (uint8_t*)audioData.data();
+            int64_t chan_stride_bytes = audioData.stride(0) * audioData.itemsize();
+            int64_t sample_stride_bytes = audioData.stride(1) * audioData.itemsize();
+            bool is_float64 = (audioData.dtype() == nb::dtype<double>());
 
             for (int chan = 0; chan < audioData.shape(0); chan++)
             {
                 for (int samp = 0; samp < audioData.shape(1); samp++)
                 {
-                    float val = input_ptr[chan * chan_stride + samp * sample_stride];
+                    uint8_t* ptr =
+                        input_ptr + chan * chan_stride_bytes + samp * sample_stride_bytes;
+                    float val = is_float64 ? (float)(*(double*)ptr) : *(float*)ptr;
                     buffer.setSample(chan, samp, val);
                 }
             }

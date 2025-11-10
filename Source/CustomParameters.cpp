@@ -20,7 +20,20 @@ bool AutomateParameter::setAutomation(nb::ndarray<> input, std::uint32_t newPPQN
 
         myAutomation = std::vector<float>(numSamples, 0.f);
 
-        memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
+        // Handle different dtypes
+        bool is_float64 = (input.dtype() == nb::dtype<double>());
+        if (is_float64)
+        {
+            double* data_ptr = (double*)input.data();
+            for (size_t i = 0; i < numSamples; i++)
+            {
+                myAutomation[i] = (float)data_ptr[i];
+            }
+        }
+        else
+        {
+            memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
+        }
         m_hasAutomation = numSamples > 1;
     }
     catch (const std::exception& e)

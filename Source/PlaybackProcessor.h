@@ -56,16 +56,18 @@ class PlaybackProcessor : public ProcessorBase
 
         myPlaybackData.setSize(m_numChannels, numSamples);
 
-        float* input_ptr = (float*)input.data();
-        int64_t chan_stride_elements = input.stride(0);   // Stride in elements
-        int64_t sample_stride_elements = input.stride(1); // Stride in elements
+        // Use byte-based addressing to handle different dtypes
+        uint8_t* input_ptr = (uint8_t*)input.data();
+        int64_t chan_stride_bytes = input.stride(0) * input.itemsize();
+        int64_t sample_stride_bytes = input.stride(1) * input.itemsize();
+        bool is_float64 = (input.dtype() == nb::dtype<double>());
 
         for (int chan = 0; chan < m_numChannels; chan++)
         {
             for (int samp = 0; samp < numSamples; samp++)
             {
-                // Use element-based stride indexing
-                float val = input_ptr[chan * chan_stride_elements + samp * sample_stride_elements];
+                uint8_t* ptr = input_ptr + chan * chan_stride_bytes + samp * sample_stride_bytes;
+                float val = is_float64 ? (float)(*(double*)ptr) : *(float*)ptr;
                 myPlaybackData.setSample(chan, samp, val);
             }
         }

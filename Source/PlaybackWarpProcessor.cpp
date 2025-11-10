@@ -157,14 +157,18 @@ void PlaybackWarpProcessor::setWarpMarkers(nb::ndarray<> input)
     double pos, new_pos;
     beat = new_beat = pos = new_pos = std::numeric_limits<float>::lowest();
 
-    float* input_ptr = (float*)input.data();
-    int64_t pair_stride_elements = input.stride(0); // Stride in elements
-    int64_t val_stride_elements = input.stride(1);  // Stride in elements
+    // Use byte-based addressing to handle different dtypes
+    uint8_t* input_ptr = (uint8_t*)input.data();
+    int64_t pair_stride_bytes = input.stride(0) * input.itemsize();
+    int64_t val_stride_bytes = input.stride(1) * input.itemsize();
+    bool is_float64 = (input.dtype() == nb::dtype<double>());
 
     for (int pair_i = 0; pair_i < numPairs; pair_i++)
     {
-        new_pos = input_ptr[pair_i * pair_stride_elements + 0 * val_stride_elements];
-        new_beat = input_ptr[pair_i * pair_stride_elements + 1 * val_stride_elements];
+        uint8_t* pos_ptr = input_ptr + pair_i * pair_stride_bytes + 0 * val_stride_bytes;
+        uint8_t* beat_ptr = input_ptr + pair_i * pair_stride_bytes + 1 * val_stride_bytes;
+        new_pos = is_float64 ? (double)(*(double*)pos_ptr) : (double)(*(float*)pos_ptr);
+        new_beat = is_float64 ? (double)(*(double*)beat_ptr) : (double)(*(float*)beat_ptr);
 
         if (new_beat <= beat || new_pos <= pos)
         {
@@ -434,16 +438,18 @@ void PlaybackWarpProcessor::setData(nb::ndarray<> input, double data_sr)
 
     myPlaybackData.setSize(m_numChannels, numSamples);
 
-    float* input_ptr = (float*)input.data();
-    int64_t chan_stride_elements = input.stride(0);   // Stride in elements
-    int64_t sample_stride_elements = input.stride(1); // Stride in elements
+    // Use byte-based addressing to handle different dtypes
+    uint8_t* input_ptr = (uint8_t*)input.data();
+    int64_t chan_stride_bytes = input.stride(0) * input.itemsize();
+    int64_t sample_stride_bytes = input.stride(1) * input.itemsize();
+    bool is_float64 = (input.dtype() == nb::dtype<double>());
 
     for (int chan = 0; chan < m_numChannels; chan++)
     {
         for (int samp = 0; samp < numSamples; samp++)
         {
-            // Use element-based stride indexing
-            float val = input_ptr[chan * chan_stride_elements + samp * sample_stride_elements];
+            uint8_t* ptr = input_ptr + chan * chan_stride_bytes + samp * sample_stride_bytes;
+            float val = is_float64 ? (float)(*(double*)ptr) : *(float*)ptr;
             myPlaybackData.setSample(chan, samp, val);
         }
     }
