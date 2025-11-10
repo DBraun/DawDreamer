@@ -74,8 +74,9 @@ class DawDreamerFaustLibContext
         createLibContext();
         return 1;
     };
-    void exit(const nb::object& type, const nb::object& value, const nb::object& traceback)
+    void exit(nb::object type, nb::object value, nb::object traceback)
     {
+        // Parameters are ignored, just destroy the context
         destroyLibContext();
     };
 };

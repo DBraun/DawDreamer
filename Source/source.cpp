@@ -432,7 +432,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         faust, "FaustContext", "A libfaust context to be used with Python's \"with\" syntax.")
         .def(nb::init<>())
         .def("__enter__", &DawDreamerFaustLibContext::enter)
-        .def("__exit__", &DawDreamerFaustLibContext::exit);
+        .def("__exit__", &DawDreamerFaustLibContext::exit, arg("type").none(), arg("value").none(),
+             arg("traceback").none());
 
     auto box_module = faust.def_submodule("box");
     create_bindings_for_faust_box(faust, box_module);
