@@ -48,7 +48,7 @@ ignore = [
 "dawdreamer/__init__.py" = ["F403", "F405"]  # Main module imports from C++ extension
 "tests/*.py" = ["F403", "F405", "E402", "F401", "E722", "B007", "B028", "SIM115", "B018", "F811"]  # Allow star imports and test-specific patterns
 "tests/box_instruments.py" = ["F403", "F405"]
-"tests/dawdreamer_utils.py" = ["E731"]  # Lambda assignments OK in utility module
+"tests/dawdreamer_utils.py" = ["E731", "F401"]  # Re-exports imports for other test files via star imports
 "dawdreamer/faust/**/*.py" = ["F403", "F405"]  # Faust API uses star imports intentionally
 "examples/**/*.py" = ["F403", "F405", "B007", "B904"]  # Examples often use star imports for brevity
 

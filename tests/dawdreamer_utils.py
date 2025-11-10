@@ -1,7 +1,14 @@
+# This module re-exports common imports for test files via star imports.
+# DO NOT remove imports even if they appear unused locally - they're used downstream.
+# The imports below are accessed by test files using: from dawdreamer_utils import *
+
 import platform
+import random
+import warnings
 from collections import defaultdict
+from itertools import product
 from os import getenv
-from os.path import abspath, isdir, isfile, splitext
+from os.path import abspath, basename, isdir, isfile, splitext
 from pathlib import Path
 
 import numpy as np
