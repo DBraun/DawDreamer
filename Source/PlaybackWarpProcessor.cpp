@@ -51,9 +51,8 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName,
     resetWarpMarkers(120.);
 }
 
-PlaybackWarpProcessor::PlaybackWarpProcessor(
-    std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input,
-    double sr, double data_sr)
+PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, nb::ndarray<> input,
+                                             double sr, double data_sr)
     : ProcessorBase{newUniqueName}
 {
     createParameterLayout();
@@ -89,19 +88,23 @@ void PlaybackWarpProcessor::automateParameters(AudioPlayHead::PositionInfo& posI
     m_rbstretcher->setPitchScale(scale * myPlaybackDataSR / m_sample_rate);
 }
 
-py::array_t<float> PlaybackWarpProcessor::getWarpMarkers()
+nb::ndarray<nb::numpy, float> PlaybackWarpProcessor::getWarpMarkers()
 {
-    py::array_t<float, py::array::c_style> arr({(int)m_clipInfo.warp_markers.size(), 2});
-
-    auto ra = arr.mutable_unchecked();
+    size_t num_markers = m_clipInfo.warp_markers.size();
+    float* data = new float[num_markers * 2];
 
     int i = 0;
     for (auto& warp_marker : m_clipInfo.warp_markers)
     {
-        ra(i, 0) = warp_marker.first;  // time in seconds in the audio
-        ra(i, 1) = warp_marker.second; // time in beats in the audio, relative to 1.1.1
+        data[i * 2 + 0] = warp_marker.first;  // time in seconds in the audio
+        data[i * 2 + 1] = warp_marker.second; // time in beats in the audio, relative to 1.1.1
         i++;
     }
+
+    size_t shape[2] = {num_markers, 2};
+    int64_t strides[2] = {2, 1}; // Strides in elements for row-major layout
+    nb::capsule owner(data, [](void* p) noexcept { delete[] (float*)p; });
+    nb::ndarray<nb::numpy, float> arr(data, 2, shape, owner, strides);
 
     return arr;
 }
@@ -124,8 +127,7 @@ void PlaybackWarpProcessor::resetWarpMarkers(double bpm)
         (bpm / 60.) * (myPlaybackData.getNumSamples() / myPlaybackDataSR);
 }
 
-void PlaybackWarpProcessor::setWarpMarkers(
-    py::array_t<float, py::array::c_style | py::array::forcecast> input)
+void PlaybackWarpProcessor::setWarpMarkers(nb::ndarray<> input)
 {
     if (input.ndim() != 2)
     {
@@ -156,11 +158,13 @@ void PlaybackWarpProcessor::setWarpMarkers(
     beat = new_beat = pos = new_pos = std::numeric_limits<float>::lowest();
 
     float* input_ptr = (float*)input.data();
+    int64_t pair_stride_elements = input.stride(0); // Stride in elements
+    int64_t val_stride_elements = input.stride(1);  // Stride in elements
 
     for (int pair_i = 0; pair_i < numPairs; pair_i++)
     {
-        new_pos = *input_ptr++;
-        new_beat = *input_ptr++;
+        new_pos = input_ptr[pair_i * pair_stride_elements + 0 * val_stride_elements];
+        new_beat = input_ptr[pair_i * pair_stride_elements + 1 * val_stride_elements];
 
         if (new_beat <= beat || new_pos <= pos)
         {
@@ -422,20 +426,26 @@ void PlaybackWarpProcessor::reset()
     ProcessorBase::reset();
 }
 
-void PlaybackWarpProcessor::setData(
-    py::array_t<float, py::array::c_style | py::array::forcecast> input, double data_sr)
+void PlaybackWarpProcessor::setData(nb::ndarray<> input, double data_sr)
 {
-    float* input_ptr = (float*)input.data();
-
     m_numChannels = (int)input.shape(0);
     setMainBusInputsAndOutputs(0, m_numChannels);
     const int numSamples = (int)input.shape(1);
 
     myPlaybackData.setSize(m_numChannels, numSamples);
+
+    float* input_ptr = (float*)input.data();
+    int64_t chan_stride_elements = input.stride(0);   // Stride in elements
+    int64_t sample_stride_elements = input.stride(1); // Stride in elements
+
     for (int chan = 0; chan < m_numChannels; chan++)
     {
-        myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
-        input_ptr += numSamples;
+        for (int samp = 0; samp < numSamples; samp++)
+        {
+            // Use element-based stride indexing
+            float val = input_ptr[chan * chan_stride_elements + samp * sample_stride_elements];
+            myPlaybackData.setSample(chan, samp, val);
+        }
     }
 
     if (data_sr)

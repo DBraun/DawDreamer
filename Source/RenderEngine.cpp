@@ -365,7 +365,7 @@ void RenderEngine::setBPM(double bpm)
     m_bpmAutomation.setSample(0, 0, bpm);
 }
 
-bool RenderEngine::setBPMwithPPQN(py::array_t<float> input, std::uint32_t ppqn)
+bool RenderEngine::setBPMwithPPQN(nb::ndarray<nb::numpy, float> input, std::uint32_t ppqn)
 {
     if (ppqn <= 0)
     {
@@ -388,21 +388,23 @@ bool RenderEngine::setBPMwithPPQN(py::array_t<float> input, std::uint32_t ppqn)
     return true;
 }
 
-py::array_t<float> RenderEngine::getAudioFrames()
+nb::ndarray<nb::numpy, float> RenderEngine::getAudioFrames()
 {
     if (m_mainProcessorGraph->getNumNodes() == 0 || m_stringDag.size() == 0)
     {
-        // NB: For some reason we can't initialize the array as shape (2, 0)
-        py::array_t<float, py::array::c_style> arr({2, 1});
-        arr.resize({2, 0});
-
+        // Return empty array with shape (2, 0)
+        float* empty_data = new float[0];
+        size_t shape[2] = {2, 0};
+        int64_t strides[2] = {0, 1}; // Strides in elements
+        nb::capsule owner(empty_data, [](void* p) noexcept { delete[] (float*)p; });
+        nb::ndarray<nb::numpy, float> arr(empty_data, 2, shape, owner, strides);
         return arr;
     }
 
     return getAudioFramesForName(m_stringDag.at(m_stringDag.size() - 1).first);
 }
 
-py::array_t<float> RenderEngine::getAudioFramesForName(std::string& name)
+nb::ndarray<nb::numpy, float> RenderEngine::getAudioFramesForName(std::string& name)
 {
     if (m_UniqueNameToNodeID.find(name) != m_UniqueNameToNodeID.end())
     {
@@ -418,10 +420,12 @@ py::array_t<float> RenderEngine::getAudioFramesForName(std::string& name)
         }
     }
 
-    // NB: For some reason we can't initialize the array as shape (2, 0)
-    py::array_t<float, py::array::c_style> arr({2, 1});
-    arr.resize({2, 0});
-
+    // Return empty array with shape (2, 0)
+    float* empty_data = new float[0];
+    size_t shape[2] = {2, 0};
+    int64_t strides[2] = {0, 1}; // Strides in elements
+    nb::capsule owner(empty_data, [](void* p) noexcept { delete[] (float*)p; });
+    nb::ndarray<nb::numpy, float> arr(empty_data, 2, shape, owner, strides);
     return arr;
 }
 
@@ -476,7 +480,7 @@ PluginProcessorWrapper* RenderEngine::makePluginProcessor(const std::string& nam
     return processor;
 }
 
-PlaybackProcessor* RenderEngine::makePlaybackProcessor(const std::string& name, py::array data)
+PlaybackProcessor* RenderEngine::makePlaybackProcessor(const std::string& name, nb::ndarray<> data)
 {
     auto processor = new PlaybackProcessor{name, data};
     this->prepareProcessor(processor, name);
@@ -485,7 +489,7 @@ PlaybackProcessor* RenderEngine::makePlaybackProcessor(const std::string& name, 
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 PlaybackWarpProcessor* RenderEngine::makePlaybackWarpProcessor(const std::string& name,
-                                                               py::array data, double data_sr)
+                                                               nb::ndarray<> data, double data_sr)
 {
     auto processor = new PlaybackWarpProcessor{name, data, mySampleRate, data_sr};
     this->prepareProcessor(processor, name);
@@ -561,7 +565,7 @@ DelayProcessor* RenderEngine::makeDelayProcessor(const std::string& name, std::s
     return processor;
 }
 
-SamplerProcessor* RenderEngine::makeSamplerProcessor(const std::string& name, py::array data)
+SamplerProcessor* RenderEngine::makeSamplerProcessor(const std::string& name, nb::ndarray<> data)
 {
     auto processor = new SamplerProcessor{name, data, mySampleRate, myBufferSize};
     this->prepareProcessor(processor, name);
@@ -577,66 +581,90 @@ FaustProcessor* RenderEngine::makeFaustProcessor(const std::string& name)
 }
 #endif
 
-bool RenderEngine::loadGraphWrapper(py::object dagObj)
+bool RenderEngine::loadGraphWrapper(nb::object dagObj)
 {
-    if (!py::isinstance<py::list>(dagObj))
+    if (!nb::isinstance<nb::list>(dagObj))
     {
         throw std::runtime_error("Error: load_graph. No processors were passed.");
     }
 
     std::unique_ptr<DAG> buildingDag(new DAG());
 
-    for (py::handle theTuple : dagObj)
+    for (nb::handle theTuple : dagObj)
     { // iterators!
 
-        if (!py::isinstance<py::tuple>(theTuple) && !py::isinstance<py::list>(theTuple))
+        if (!nb::isinstance<nb::tuple>(theTuple) && !nb::isinstance<nb::list>(theTuple))
         {
             throw std::runtime_error("Error: load_graph. Received graph that is not a list.");
         }
-        py::list castedTuple = theTuple.cast<py::list>();
 
-        if (castedTuple.size() != 2)
+        // Both tuple and list support indexing, so just treat as a sequence
+        nb::object castedTuple = nb::cast<nb::object>(theTuple);
+
+        if (nb::len(castedTuple) != 2)
         {
             throw std::runtime_error("Error: load_graph. Each tuple in the graph must be size 2.");
         }
 
         // todo: enable this:
-        // if (!py::isinstance<ProcessorBase*>(castedTuple[0])) {
+        // if (!nb::isinstance<ProcessorBase*>(castedTuple[0])) {
         // std::cout << "Error: load_graph. First argument in tuple wasn't a
         // Processor object." << std::endl;
         //    return false;
         //}
-        if (!py::isinstance<py::list>(castedTuple[1]))
+        if (!nb::isinstance<nb::list>(castedTuple[1]))
         {
             throw std::runtime_error(
                 "Error: load_graph. Something was wrong with the list of inputs.");
         }
 
-        py::list listOfStrings = castedTuple[1].cast<py::list>();
+        nb::list listOfStrings = nb::cast<nb::list>(castedTuple[1]);
 
         std::vector<std::string> inputs;
 
-        for (py::handle potentialString : listOfStrings)
+        for (nb::handle potentialString : listOfStrings)
         {
-            if (!py::isinstance<py::str>(potentialString))
+            if (!nb::isinstance<nb::str>(potentialString))
             {
                 throw std::runtime_error(
                     "Error: load_graph. Something was wrong with the list of inputs.");
             }
 
-            inputs.push_back(potentialString.cast<std::string>());
+            inputs.push_back(nb::cast<std::string>(potentialString));
         }
 
         DAGNode dagNode;
         try
         {
-            dagNode.processorBase = castedTuple[0].cast<ProcessorBase*>();
+            // Try direct cast to derived type first
+            nb::handle h = castedTuple[0];
+            OscillatorProcessor* osc_ptr = nb::inst_ptr<OscillatorProcessor>(h.ptr());
+
+            if (osc_ptr)
+            {
+                dagNode.processorBase =
+                    osc_ptr; // Should work since OscillatorProcessor inherits from ProcessorBase
+            }
+            else
+            {
+                // Try other processor types...
+                ProcessorBase* base_ptr = nb::inst_ptr<ProcessorBase>(h.ptr());
+                if (base_ptr)
+                {
+                    dagNode.processorBase = base_ptr;
+                }
+                else
+                {
+                    throw std::runtime_error("Failed to extract ProcessorBase pointer");
+                }
+            }
         }
-        catch (std::exception&)
+        catch (std::exception& e)
         {
             throw std::runtime_error(
-                "Error: Load_graph. First argument in tuple wasn't a Processor "
-                "object.");
+                std::string(
+                    "Error: Load_graph. First argument in tuple wasn't a Processor object: ") +
+                e.what());
         }
 
         dagNode.inputs = inputs;

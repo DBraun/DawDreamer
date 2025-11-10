@@ -95,7 +95,8 @@ FaustProcessor::~FaustProcessor()
     delete myMidiIteratorSec;
 }
 
-bool FaustProcessor::setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn)
+bool FaustProcessor::setAutomation(std::string& parameterName, nb::ndarray<> input,
+                                   std::uint32_t ppqn)
 {
     COMPILE_FAUST
     return ProcessorBase::setAutomation(parameterName, input, ppqn);
@@ -973,11 +974,11 @@ void FaustProcessor::createParameterLayout()
     }
 }
 
-py::list FaustProcessor::getPluginParametersDescription()
+nb::list FaustProcessor::getPluginParametersDescription()
 {
     COMPILE_FAUST
 
-    py::list myList;
+    nb::list myList;
 
     if (m_compileState)
     {
@@ -1017,7 +1018,7 @@ py::list FaustProcessor::getPluginParametersDescription()
             // bool isDiscrete = parameter->isDiscrete();
             // int numSteps = processorParams->getNumSteps();
 
-            py::dict myDictionary;
+            nb::dict myDictionary;
             myDictionary["index"] = i;
             myDictionary["name"] = theName;
             myDictionary["numSteps"] = numSteps;
@@ -1178,9 +1179,9 @@ void FaustProcessor::saveMIDI(std::string& savePath)
     file.writeTo(stream);
 }
 
-using myaudiotype = py::array_t<float, py::array::c_style | py::array::forcecast>;
+using myaudiotype = nb::ndarray<float>;
 
-void FaustProcessor::setSoundfiles(py::dict d)
+void FaustProcessor::setSoundfiles(nb::dict d)
 {
     m_compileState = kNotCompiled;
 
@@ -1188,7 +1189,7 @@ void FaustProcessor::setSoundfiles(py::dict d)
 
     for (auto&& [potentialString, potentialListOfAudio] : d)
     {
-        if (!py::isinstance<py::str>(potentialString))
+        if (!nb::isinstance<nb::str>(potentialString))
         {
             throw std::runtime_error(
                 "Error with FaustProcessor::setSoundfiles. Something was wrong with "
@@ -1196,9 +1197,9 @@ void FaustProcessor::setSoundfiles(py::dict d)
             return;
         }
 
-        auto soundfileName = potentialString.cast<std::string>();
+        auto soundfileName = nb::cast<std::string>(potentialString);
 
-        if (!py::isinstance<py::list>(potentialListOfAudio))
+        if (!nb::isinstance<nb::list>(potentialListOfAudio))
         {
             // todo: if it's audio, it's ok. Just use it.
             throw std::runtime_error("Error with FaustProcessor::setSoundfiles. The values of the "
@@ -1206,14 +1207,14 @@ void FaustProcessor::setSoundfiles(py::dict d)
             return;
         }
 
-        py::list listOfAudio = potentialListOfAudio.cast<py::list>();
+        nb::list listOfAudio = nb::cast<nb::list>(potentialListOfAudio);
 
-        for (py::handle potentialAudio : listOfAudio)
+        for (nb::handle potentialAudio : listOfAudio)
         {
-            // if (py::isinstance<myaudiotype>(potentialAudio)) {
+            // if (nb::isinstance<myaudiotype>(potentialAudio)) {
 
             // todo: safer casting?
-            auto audioData = potentialAudio.cast<myaudiotype>();
+            auto audioData = nb::cast<myaudiotype>(potentialAudio);
 
             float* input_ptr = (float*)audioData.data();
 
@@ -1221,11 +1222,16 @@ void FaustProcessor::setSoundfiles(py::dict d)
 
             buffer.setSize((int)audioData.shape(0), (int)audioData.shape(1));
 
-            for (int y = 0; y < audioData.shape(1); y++)
+            // Use element-based strides for proper array access
+            int64_t chan_stride = audioData.stride(0);
+            int64_t sample_stride = audioData.stride(1);
+
+            for (int chan = 0; chan < audioData.shape(0); chan++)
             {
-                for (int x = 0; x < audioData.shape(0); x++)
+                for (int samp = 0; samp < audioData.shape(1); samp++)
                 {
-                    buffer.setSample(x, y, input_ptr[x * audioData.shape(1) + y]);
+                    float val = input_ptr[chan * chan_stride + samp * sample_stride];
+                    buffer.setSample(chan, samp, val);
                 }
             }
 

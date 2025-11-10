@@ -51,11 +51,11 @@ class RenderEngine : public AudioPlayHead
 
     void setBPM(double bpm);
 
-    bool setBPMwithPPQN(py::array_t<float> input, std::uint32_t ppqn);
+    bool setBPMwithPPQN(nb::ndarray<nb::numpy, float> input, std::uint32_t ppqn);
 
-    py::array_t<float> getAudioFrames();
+    nb::ndarray<nb::numpy, float> getAudioFrames();
 
-    py::array_t<float> getAudioFramesForName(std::string& name);
+    nb::ndarray<nb::numpy, float> getAudioFramesForName(std::string& name);
 
     juce::Optional<PositionInfo> getPosition() const override;
     bool canControlTransport() override;
@@ -68,10 +68,10 @@ class RenderEngine : public AudioPlayHead
 
     PluginProcessorWrapper* makePluginProcessor(const std::string& name, const std::string& path);
 
-    PlaybackProcessor* makePlaybackProcessor(const std::string& name, py::array input);
+    PlaybackProcessor* makePlaybackProcessor(const std::string& name, nb::ndarray<> input);
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
-    PlaybackWarpProcessor* makePlaybackWarpProcessor(const std::string& name, py::array input,
+    PlaybackWarpProcessor* makePlaybackWarpProcessor(const std::string& name, nb::ndarray<> input,
                                                      double sr);
 #endif
 
@@ -91,13 +91,13 @@ class RenderEngine : public AudioPlayHead
     DelayProcessor* makeDelayProcessor(const std::string& name, std::string& rule, float delay,
                                        float wet);
 
-    SamplerProcessor* makeSamplerProcessor(const std::string& name, py::array input);
+    SamplerProcessor* makeSamplerProcessor(const std::string& name, nb::ndarray<> input);
 
 #ifdef BUILD_DAWDREAMER_FAUST
     FaustProcessor* makeFaustProcessor(const std::string& name);
 #endif
 
-    bool loadGraphWrapper(py::object dagObj);
+    bool loadGraphWrapper(nb::object dagObj);
 
   protected:
     double mySampleRate;

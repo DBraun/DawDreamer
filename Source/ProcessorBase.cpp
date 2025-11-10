@@ -9,7 +9,8 @@ void ProcessorBase::getStateInformation(juce::MemoryBlock& destData) {}
 
 void ProcessorBase::setStateInformation(const void* data, int sizeInBytes) {}
 
-bool ProcessorBase::setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn)
+bool ProcessorBase::setAutomation(std::string& parameterName, nb::ndarray<> input,
+                                  std::uint32_t ppqn)
 {
     for (auto& uncastedParameter : this->getParameters())
     {
@@ -26,7 +27,7 @@ bool ProcessorBase::setAutomation(std::string& parameterName, py::array input, s
     return false;
 }
 
-bool ProcessorBase::setAutomationByIndex(int& index, py::array input, std::uint32_t ppqn)
+bool ProcessorBase::setAutomationByIndex(int& index, nb::ndarray<> input, std::uint32_t ppqn)
 {
     auto parameters = this->getParameters();
     if (index < 0 || index >= parameters.size())
@@ -166,25 +167,19 @@ float ProcessorBase::getAutomationAtZero(const std::string& parameterName)
     throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
 }
 
-py::array_t<float> ProcessorBase::getAutomationNumpy(const std::string& parameterName)
+nb::ndarray<nb::numpy, float> ProcessorBase::getAutomationNumpy(const std::string& parameterName)
 {
     std::vector<float> data = getAutomation(parameterName);
 
-    py::array_t<float, py::array::c_style> arr({(int)data.size()});
-
-    auto ra = arr.mutable_unchecked();
-
-    for (size_t i = 0; i < data.size(); i++)
-    {
-        ra(i) = data[i];
-    }
+    size_t shape[1] = {data.size()};
+    nb::ndarray<nb::numpy, float> arr(data.data(), 1, shape);
 
     return arr;
 }
 
-py::dict ProcessorBase::getAutomationAll()
+nb::dict ProcessorBase::getAutomationAll()
 {
-    py::dict outDict;
+    nb::dict outDict;
 
     for (auto it = m_recordedAutomationDict.begin(); it != m_recordedAutomationDict.end(); it++)
     {
@@ -279,30 +274,35 @@ void ProcessorBase::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuff
     }
 }
 
-py::array_t<float> ProcessorBase::bufferToPyArray(juce::AudioSampleBuffer& buffer)
+nb::ndarray<nb::numpy, float> ProcessorBase::bufferToPyArray(juce::AudioSampleBuffer& buffer)
 {
     size_t num_channels = buffer.getNumChannels();
     size_t num_samples = buffer.getNumSamples();
 
-    py::array_t<float, py::array::c_style> arr({(int)num_channels, (int)num_samples});
+    // Allocate data buffer
+    float* data = new float[num_channels * num_samples];
 
-    auto ra = arr.mutable_unchecked();
-
+    // Copy channel data to contiguous buffer (row-major)
     auto chans = buffer.getArrayOfReadPointers();
     for (size_t i = 0; i < num_channels; i++)
     {
-        auto chanPtr = chans[i];
-
-        for (size_t j = 0; j < num_samples; j++)
-        {
-            ra(i, j) = *(chanPtr++);
-        }
+        memcpy(data + (i * num_samples), chans[i], num_samples * sizeof(float));
     }
+
+    // Create ndarray with ownership (nanobind will manage deallocation)
+    // Specify explicit strides for row-major (C-contiguous) layout IN ELEMENTS
+    size_t shape[2] = {num_channels, num_samples};
+    int64_t strides[2] = {
+        static_cast<int64_t>(num_samples), // stride in elements for channels dimension
+        1                                  // stride in elements for samples dimension
+    };
+    nb::capsule owner(data, [](void* p) noexcept { delete[] (float*)p; });
+    nb::ndarray<nb::numpy, float> arr(data, 2, shape, owner, strides);
 
     return arr;
 }
 
-py::array_t<float> ProcessorBase::getAudioFrames()
+nb::ndarray<nb::numpy, float> ProcessorBase::getAudioFrames()
 {
     return bufferToPyArray(myRecordBuffer);
 }

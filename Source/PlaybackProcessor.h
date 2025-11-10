@@ -20,9 +20,7 @@ class PlaybackProcessor : public ProcessorBase
         setMainBusInputsAndOutputs(0, m_numChannels);
     }
 
-    PlaybackProcessor(std::string newUniqueName,
-                      py::array_t<float, py::array::c_style | py::array::forcecast> input)
-        : ProcessorBase{newUniqueName}
+    PlaybackProcessor(std::string newUniqueName, nb::ndarray<> input) : ProcessorBase{newUniqueName}
     {
         setData(input);
     }
@@ -51,19 +49,25 @@ class PlaybackProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "PlaybackProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input)
+    void setData(nb::ndarray<> input)
     {
-        float* input_ptr = (float*)input.data();
-
         m_numChannels = (int)input.shape(0);
         auto numSamples = (int)input.shape(1);
 
         myPlaybackData.setSize(m_numChannels, numSamples);
 
+        float* input_ptr = (float*)input.data();
+        int64_t chan_stride_elements = input.stride(0);   // Stride in elements
+        int64_t sample_stride_elements = input.stride(1); // Stride in elements
+
         for (int chan = 0; chan < m_numChannels; chan++)
         {
-            myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
-            input_ptr += numSamples;
+            for (int samp = 0; samp < numSamples; samp++)
+            {
+                // Use element-based stride indexing
+                float val = input_ptr[chan * chan_stride_elements + samp * sample_stride_elements];
+                myPlaybackData.setSample(chan, samp, val);
+            }
         }
 
         setMainBusInputsAndOutputs(0, m_numChannels);

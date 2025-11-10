@@ -4,14 +4,15 @@
 #include <faust/compiler/generator/libfaust.h>
 #include <faust/dsp/libfaust-box.h>
 // #include <faust/dsp/libfaust-signal.h>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // this lets std::vector<float> be a default arg
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 
 // todo: don't include a .hh file
 #include <faust/compiler/tlib/tree.hh>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 struct BoxWrapper
 {
@@ -73,7 +74,7 @@ class DawDreamerFaustLibContext
         createLibContext();
         return 1;
     };
-    void exit(const py::object& type, const py::object& value, const py::object& traceback)
+    void exit(const nb::object& type, const nb::object& value, const nb::object& traceback)
     {
         destroyLibContext();
     };
@@ -83,6 +84,6 @@ std::string getPathToFaustLibraries();
 
 std::string getPathToArchitectureFiles();
 
-py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module& box_module);
+nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module_& box_module);
 
 #endif

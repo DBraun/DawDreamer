@@ -18,9 +18,7 @@ class SamplerProcessor : public ProcessorBase
         setMainBusInputsAndOutputs(0, inputData.size());
     }
 
-    SamplerProcessor(std::string newUniqueName,
-                     py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr,
-                     int blocksize)
+    SamplerProcessor(std::string newUniqueName, nb::ndarray<> input, double sr, int blocksize)
         : ProcessorBase{newUniqueName}, mySampleRate{sr}
     {
         createParameterLayout();
@@ -151,18 +149,22 @@ class SamplerProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "SamplerProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input)
+    void setData(nb::ndarray<> input)
     {
-        float* input_ptr = (float*)input.data();
-
         std::vector<std::vector<float>> data =
             std::vector<std::vector<float>>(input.shape(0), std::vector<float>(input.shape(1)));
 
-        for (int y = 0; y < input.shape(1); y++)
+        float* input_ptr = (float*)input.data();
+        int64_t chan_stride_elements = input.stride(0);   // Stride in elements
+        int64_t sample_stride_elements = input.stride(1); // Stride in elements
+
+        for (int chan = 0; chan < input.shape(0); chan++)
         {
-            for (int x = 0; x < input.shape(0); x++)
+            for (int samp = 0; samp < input.shape(1); samp++)
             {
-                data[x][y] = input_ptr[x * input.shape(1) + y];
+                // Use element-based stride indexing
+                data[chan][samp] =
+                    input_ptr[chan * chan_stride_elements + samp * sample_stride_elements];
             }
         }
 
@@ -316,9 +318,9 @@ class SamplerProcessor : public ProcessorBase
 
     int wrapperGetPluginParameterSize() { return sampler.getNumParameters(); }
 
-    py::list getParametersDescription()
+    nb::list getParametersDescription()
     {
-        py::list myList;
+        nb::list myList;
 
         // get the parameters as an AudioProcessorParameter array
         const Array<AudioProcessorParameter*>& processorParams = sampler.getParameters();
@@ -333,7 +335,7 @@ class SamplerProcessor : public ProcessorBase
                     .toStdString();
             std::string label = processorParams[i]->getLabel().toStdString();
 
-            py::dict myDictionary;
+            nb::dict myDictionary;
             myDictionary["index"] = i;
             myDictionary["name"] = theName;
             myDictionary["numSteps"] = processorParams[i]->getNumSteps();

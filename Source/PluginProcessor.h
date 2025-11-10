@@ -107,9 +107,9 @@ class PluginProcessorWrapper : public PluginProcessor
     PluginProcessorWrapper(std::string newUniqueName, double sampleRate, int samplesPerBlock,
                            std::string path);
 
-    void wrapperSetPatch(py::list listOfTuples);
+    void wrapperSetPatch(nb::list listOfTuples);
 
-    py::list wrapperGetPatch();
+    nb::list wrapperGetPatch();
 
     std::string wrapperGetParameterName(const int& parameter);
 
@@ -117,5 +117,5 @@ class PluginProcessorWrapper : public PluginProcessor
 
     int wrapperGetPluginParameterSize();
 
-    py::list getPluginParametersDescription();
+    nb::list getPluginParametersDescription();
 };

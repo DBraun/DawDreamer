@@ -67,8 +67,8 @@ class ProcessorBase : public juce::AudioProcessor
     void getStateInformation(juce::MemoryBlock&) override;
     void setStateInformation(const void*, int) override;
 
-    virtual bool setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn);
-    virtual bool setAutomationByIndex(int& index, py::array input, std::uint32_t ppqn);
+    virtual bool setAutomation(std::string& parameterName, nb::ndarray<> input, std::uint32_t ppqn);
+    virtual bool setAutomationByIndex(int& index, nb::ndarray<> input, std::uint32_t ppqn);
 
     bool setAutomationVal(const char* parameterName, float val);
     virtual bool setAutomationValByStr(std::string& parameterName, float val);
@@ -82,8 +82,8 @@ class ProcessorBase : public juce::AudioProcessor
 
     std::vector<float> getAutomation(const std::string& parameterName);
     std::vector<float> getAutomationByIndex(const int& index);
-    py::array_t<float> getAutomationNumpy(const std::string& parameterName);
-    py::dict getAutomationAll();
+    nb::ndarray<nb::numpy, float> getAutomationNumpy(const std::string& parameterName);
+    nb::dict getAutomationAll();
 
     //==============================================================================
     std::string getUniqueName() { return myUniqueName; }
@@ -97,9 +97,9 @@ class ProcessorBase : public juce::AudioProcessor
     void setRecordAutomationEnable(bool recordAutomation) { m_recordAutomation = recordAutomation; }
     bool getRecordAutomationEnable() { return m_recordAutomation; }
 
-    py::array_t<float> bufferToPyArray(juce::AudioSampleBuffer& buffer);
+    nb::ndarray<nb::numpy, float> bufferToPyArray(juce::AudioSampleBuffer& buffer);
 
-    py::array_t<float> getAudioFrames();
+    nb::ndarray<nb::numpy, float> getAudioFrames();
 
     void setRecorderLength(int numSamples);
 

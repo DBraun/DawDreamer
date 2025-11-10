@@ -83,7 +83,7 @@ class StandalonePluginWindow : public juce::DocumentWindow
                 {
                     // Release the GIL to allow other Python threads to run in the
                     // background while we the UI is running:
-                    py::gil_scoped_release release;
+                    nb::gil_scoped_release release;
                     juce::MessageManager::getInstance()->runDispatchLoopUntil(10);
                 }
             }
@@ -95,7 +95,7 @@ class StandalonePluginWindow : public juce::DocumentWindow
 
         if (shouldThrowErrorAlreadySet)
         {
-            throw py::error_already_set();
+            throw nb::python_error();
         }
     }
 

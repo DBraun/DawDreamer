@@ -5,7 +5,7 @@
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
               defines="PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw=="
-              addUsingNamespaceToJuceHeader="0" headerPath="../../thirdparty;&#10;../../thirdparty/pybind11/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/boxes;&#10;../../thirdparty/faust/compiler/documentator;&#10;../../thirdparty/faust/compiler/draw;&#10;../../thirdparty/faust/compiler/draw/device;&#10;../../thirdparty/faust/compiler/draw/schema;&#10;../../thirdparty/faust/compiler/errors;&#10;../../thirdparty/faust/compiler/evaluate;&#10;../../thirdparty/faust/compiler/extended;&#10;../../thirdparty/faust/compiler/generator;&#10;../../thirdparty/faust/compiler/generator/interpreter;&#10;../../thirdparty/faust/compiler/normalize;&#10;../../thirdparty/faust/compiler/parallelize;&#10;../../thirdparty/faust/compiler/parser;&#10;../../thirdparty/faust/compiler/patternmatcher;&#10;../../thirdparty/faust/compiler/propagate;&#10;../../thirdparty/faust/compiler/signals;&#10;../../thirdparty/faust/compiler/tlib;&#10;../../thirdparty/faust/compiler/transform;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;">
+              addUsingNamespaceToJuceHeader="0" headerPath="../../thirdparty;&#10;../../thirdparty/nanobind/include;&#10;../../thirdparty/nanobind/ext/robin_map/include;&#10;../../thirdparty/faust/architecture;&#10;../../thirdparty/faust/compiler;&#10;../../thirdparty/faust/compiler/boxes;&#10;../../thirdparty/faust/compiler/documentator;&#10;../../thirdparty/faust/compiler/draw;&#10;../../thirdparty/faust/compiler/draw/device;&#10;../../thirdparty/faust/compiler/draw/schema;&#10;../../thirdparty/faust/compiler/errors;&#10;../../thirdparty/faust/compiler/evaluate;&#10;../../thirdparty/faust/compiler/extended;&#10;../../thirdparty/faust/compiler/generator;&#10;../../thirdparty/faust/compiler/generator/interpreter;&#10;../../thirdparty/faust/compiler/normalize;&#10;../../thirdparty/faust/compiler/parallelize;&#10;../../thirdparty/faust/compiler/parser;&#10;../../thirdparty/faust/compiler/patternmatcher;&#10;../../thirdparty/faust/compiler/propagate;&#10;../../thirdparty/faust/compiler/signals;&#10;../../thirdparty/faust/compiler/tlib;&#10;../../thirdparty/faust/compiler/transform;&#10;../../thirdparty/faust/compiler/utils;&#10;../../thirdparty/libsamplerate/src;&#10;../../thirdparty/libsamplerate/include;">
   <MAINGROUP id="tONOKg" name="DawDreamer">
     <GROUP id="{0E83F486-B7F5-9380-D835-6FDD219C6256}" name="Libsamplerate">
       <FILE id="rIpQBw" name="samplerate.h" compile="0" resource="0" file="thirdparty/libsamplerate/include/samplerate.h"/>
@@ -127,6 +127,7 @@
           file="Source/RenderEngine.cpp"/>
     <FILE id="LnjjS9" name="portable_endian.h" compile="0" resource="0"
           file="thirdparty/portable_endian/include/portable_endian.h"/>
+    <FILE id="NBsrc1" name="nb_combined.cpp" compile="1" resource="0" file="thirdparty/nanobind/src/nb_combined.cpp"/>
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
   </MAINGROUP>
   <EXPORTFORMATS>

@@ -51,6 +51,7 @@
 		D915E61C72D98F0B97F31690 /* StandalonePluginWindow.h */ = {isa = PBXBuildFile; fileRef = 44A26898F037A3E6B43EB911; };
 		DF5374E67F8812D79694279E /* Security.framework */ = {isa = PBXBuildFile; fileRef = B243F8F5ADFF280683E55EE1; };
 		DFE780784ED99EACC1B654A6 /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 06AE4EC72C9D2D0775EF879E; };
+		E2953514E7A721EFB0252A7A /* nb_combined.cpp */ = {isa = PBXBuildFile; fileRef = 5BA523F3989B445516A7168D; };
 		E358C00D8D92D35AFBC9944C /* FaustProcessor.cpp */ = {isa = PBXBuildFile; fileRef = BFD142EBB8AFBADC8AB04A8A; };
 		E3F94999130BC1FFAB7F9829 /* FaustSignalAPI.cpp */ = {isa = PBXBuildFile; fileRef = DA5D0A9D3542DCB5ACFC8FB8; };
 		E6C27C09FEC5B3BBEC75F414 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = E4E23DF360EE14C337676E2D; };
@@ -107,6 +108,7 @@
 		55A7EED856ACF66C119C1D8F /* portable_endian.h */ /* portable_endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = portable_endian.h; path = ../../thirdparty/portable_endian/include/portable_endian.h; sourceTree = SOURCE_ROOT; };
 		5691FDBCADAAE7C01869F756 /* DataModel.cpp */ /* DataModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DataModel.cpp; path = ../../Source/Sampler/Source/DataModels/DataModel.cpp; sourceTree = SOURCE_ROOT; };
 		58E5949DCB62BE84406F882C /* RenderEngine.cpp */ /* RenderEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderEngine.cpp; path = ../../Source/RenderEngine.cpp; sourceTree = SOURCE_ROOT; };
+		5BA523F3989B445516A7168D /* nb_combined.cpp */ /* nb_combined.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = nb_combined.cpp; path = ../../thirdparty/nanobind/src/nb_combined.cpp; sourceTree = SOURCE_ROOT; };
 		5E78CB5125AD5B7A9848A603 /* LoopPointsOverlay.h */ /* LoopPointsOverlay.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LoopPointsOverlay.h; path = ../../Source/Sampler/Source/Components/LoopPointsOverlay.h; sourceTree = SOURCE_ROOT; };
 		5F6BCB65212E4D3138FCEBCB /* VisibleRangeDataModel.h */ /* VisibleRangeDataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VisibleRangeDataModel.h; path = ../../Source/Sampler/Source/DataModels/VisibleRangeDataModel.h; sourceTree = SOURCE_ROOT; };
 		5F7714E09DFF1DD96B6A9E1A /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -262,6 +264,7 @@
 				094BECA334087BBDDA1CA022,
 				58E5949DCB62BE84406F882C,
 				55A7EED856ACF66C119C1D8F,
+				5BA523F3989B445516A7168D,
 				4B4337E31892157AAFCBD879,
 			);
 			name = DawDreamer;
@@ -495,6 +498,7 @@
 				1B14253412716097BBB38A9B,
 				9D34C1F40CAD6A7617F1B60B,
 				48CA111A7776D753A8BFF02E,
+				E2953514E7A721EFB0252A7A,
 				A36633FC72AA916869FA8B33,
 				3331B6C0CCADE7C79E00AA8D,
 				F2B685C5405CA2318DDF0273,
@@ -558,6 +562,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CODE_SIGN_FLAGS = --timestamp;
 				PRODUCT_NAME = "dawdreamer.so";
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
@@ -605,6 +610,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CODE_SIGN_FLAGS = --timestamp;
 				PRODUCT_NAME = "dawdreamer.so";
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
@@ -663,7 +669,8 @@
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
 					"$(pythonLocation)/include/python$(PYTHONMAJOR)",
 					"$(SRCROOT)/../../thirdparty",
-					"$(SRCROOT)/../../thirdparty/pybind11/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
 					"$(SRCROOT)/../../thirdparty/faust/compiler",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/boxes",
@@ -696,7 +703,7 @@
 					"\"../../thirdparty/libsamplerate/build_debug/src\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/nanobind/include $(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
@@ -759,7 +766,8 @@
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
 					"$(pythonLocation)/include/python$(PYTHONMAJOR)",
 					"$(SRCROOT)/../../thirdparty",
-					"$(SRCROOT)/../../thirdparty/pybind11/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
 					"$(SRCROOT)/../../thirdparty/faust/compiler",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/boxes",
@@ -793,7 +801,7 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/nanobind/include $(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
@@ -856,7 +864,8 @@
 					"$(SRCROOT)/../../JuceLibraryCode/modules",
 					"$(pythonLocation)/include/python$(PYTHONMAJOR)",
 					"$(SRCROOT)/../../thirdparty",
-					"$(SRCROOT)/../../thirdparty/pybind11/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include",
 					"$(SRCROOT)/../../thirdparty/faust/architecture",
 					"$(SRCROOT)/../../thirdparty/faust/compiler",
 					"$(SRCROOT)/../../thirdparty/faust/compiler/boxes",
@@ -890,7 +899,7 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/pybind11/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/nanobind/include $(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
 				OTHER_CFLAGS = "-fPIC";
 				OTHER_CPLUSPLUSFLAGS = "-fPIC";
 				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
@@ -943,6 +952,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CODE_SIGN_FLAGS = --timestamp;
 				PRODUCT_NAME = "dawdreamer.so";
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";

@@ -1,10 +1,10 @@
 #include "FaustSignalAPI.h"
 #include "RenderEngine.h"
 
-PYBIND11_MODULE(dawdreamer, m)
+NB_MODULE(dawdreamer, m)
 {
-    using arg = py::arg;
-    using kw_only = py::kw_only;
+    using arg = nb::arg;
+    using kw_only = nb::kw_only;
 
     m.doc() = R"pbdoc(
         DawDreamer
@@ -33,7 +33,7 @@ PYBIND11_MODULE(dawdreamer, m)
            SamplerProcessor
     )pbdoc";
 
-    py::class_<ProcessorBase>(m, "ProcessorBase")
+    nb::class_<ProcessorBase>(m, "ProcessorBase")
         .def("set_automation", &ProcessorBase::setAutomation, arg("parameter_name"), arg("data"),
              kw_only(), arg("ppqn") = 0,
              R"pbdoc(
@@ -76,11 +76,11 @@ PYBIND11_MODULE(dawdreamer, m)
              "output).")
         .def("get_num_input_channels", &ProcessorBase::getTotalNumInputChannels,
              "Get the total number of input channels (2 indicates stereo input).")
-        .def_property("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable,
-                      "Whether recording of this processor is enabled.")
-        .def_property("record_automation", &ProcessorBase::getRecordAutomationEnable,
-                      &ProcessorBase::setRecordAutomationEnable,
-                      "Whether recording of this processor's automation is enabled.")
+        .def_prop_rw("record", &ProcessorBase::getRecordEnable, &ProcessorBase::setRecordEnable,
+                     "Whether recording of this processor is enabled.")
+        .def_prop_rw("record_automation", &ProcessorBase::getRecordAutomationEnable,
+                     &ProcessorBase::setRecordAutomationEnable,
+                     "Whether recording of this processor's automation is enabled.")
         .def("get_audio", &ProcessorBase::getAudioFrames,
              "Get the audio data of the processor after a render, assuming "
              "recording was enabled.")
@@ -90,52 +90,52 @@ PYBIND11_MODULE(dawdreamer, m)
     The abstract Processor Base class, which all processors subclass.
 )pbdoc";
 
-    py::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor").doc() = R"pbdoc(
+    nb::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor").doc() = R"pbdoc(
 A simple sine oscillator, mainly for testing.
 )pbdoc";
 
-    py::class_<PlaybackProcessor, ProcessorBase>(m, "PlaybackProcessor")
+    nb::class_<PlaybackProcessor, ProcessorBase>(m, "PlaybackProcessor")
         .def("set_data", &PlaybackProcessor::setData, arg("data"),
              "Set the audio as a numpy array shaped (Channels, Samples).")
         .doc() = "The Playback Processor can play audio data provided as an argument.";
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 
-    py::class_<PlaybackWarpProcessor, ProcessorBase> playbackWarpProcessor(m,
+    nb::class_<PlaybackWarpProcessor, ProcessorBase> playbackWarpProcessor(m,
                                                                            "PlaybackWarpProcessor");
 
     playbackWarpProcessor
-        .def_property(
+        .def_prop_rw(
             "time_ratio", &PlaybackWarpProcessor::getTimeRatio,
             &PlaybackWarpProcessor::setTimeRatio,
             "The time ratio has an effect if an Ableton ASD file hasn't been loaded or if `warp_on` is false. A value of 2.0 for the time ratio will \
 play the audio in double the amount of time, so it will sound slowed down.")
-        .def_property("transpose", &PlaybackWarpProcessor::getTranspose,
-                      &PlaybackWarpProcessor::setTranspose, "The pitch transposition in semitones")
-        .def_property("warp_on", &PlaybackWarpProcessor::getWarpOn,
-                      &PlaybackWarpProcessor::setWarpOn, "Whether warping is enabled.")
-        .def_property("loop_on", &PlaybackWarpProcessor::getLoopOn,
-                      &PlaybackWarpProcessor::setLoopOn, "Whether looping is enabled")
-        .def_property("loop_start", &PlaybackWarpProcessor::getLoopStart,
-                      &PlaybackWarpProcessor::setLoopStart,
-                      "The loop start position in beats (typically quarter "
-                      "notes) relative to 1.1.1")
-        .def_property("loop_end", &PlaybackWarpProcessor::getLoopEnd,
-                      &PlaybackWarpProcessor::setLoopEnd,
-                      "The loop end position in beats (typically quarter notes) "
-                      "relative to 1.1.1")
-        .def_property("start_marker", &PlaybackWarpProcessor::getStartMarker,
-                      &PlaybackWarpProcessor::setStartMarker,
-                      "The start position in beats (typically quarter notes) "
-                      "relative to 1.1.1")
-        .def_property("end_marker", &PlaybackWarpProcessor::getEndMarker,
-                      &PlaybackWarpProcessor::setEndMarker,
-                      "The end position in beats (typically quarter notes) "
-                      "relative to 1.1.1")
-        .def_property("warp_markers", &PlaybackWarpProcessor::getWarpMarkers,
-                      &PlaybackWarpProcessor::setWarpMarkers,
-                      "Get/set the warp markers as an (N, 2) numpy array of time "
-                      "positions in samples and positions in beats.")
+        .def_prop_rw("transpose", &PlaybackWarpProcessor::getTranspose,
+                     &PlaybackWarpProcessor::setTranspose, "The pitch transposition in semitones")
+        .def_prop_rw("warp_on", &PlaybackWarpProcessor::getWarpOn,
+                     &PlaybackWarpProcessor::setWarpOn, "Whether warping is enabled.")
+        .def_prop_rw("loop_on", &PlaybackWarpProcessor::getLoopOn,
+                     &PlaybackWarpProcessor::setLoopOn, "Whether looping is enabled")
+        .def_prop_rw("loop_start", &PlaybackWarpProcessor::getLoopStart,
+                     &PlaybackWarpProcessor::setLoopStart,
+                     "The loop start position in beats (typically quarter "
+                     "notes) relative to 1.1.1")
+        .def_prop_rw("loop_end", &PlaybackWarpProcessor::getLoopEnd,
+                     &PlaybackWarpProcessor::setLoopEnd,
+                     "The loop end position in beats (typically quarter notes) "
+                     "relative to 1.1.1")
+        .def_prop_rw("start_marker", &PlaybackWarpProcessor::getStartMarker,
+                     &PlaybackWarpProcessor::setStartMarker,
+                     "The start position in beats (typically quarter notes) "
+                     "relative to 1.1.1")
+        .def_prop_rw("end_marker", &PlaybackWarpProcessor::getEndMarker,
+                     &PlaybackWarpProcessor::setEndMarker,
+                     "The end position in beats (typically quarter notes) "
+                     "relative to 1.1.1")
+        .def_prop_rw("warp_markers", &PlaybackWarpProcessor::getWarpMarkers,
+                     &PlaybackWarpProcessor::setWarpMarkers,
+                     "Get/set the warp markers as an (N, 2) numpy array of time "
+                     "positions in samples and positions in beats.")
         .def("reset_warp_markers", &PlaybackWarpProcessor::resetWarpMarkers, arg("bpm"),
              "Reset the warp markers with a BPM.")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"),
@@ -168,7 +168,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
 #include "rubberband/rubberband/RubberBandStretcher.h"
     using namespace RubberBand;
 
-    py::enum_<RubberBandStretcher::Option>(playbackWarpProcessor, "option", py::arithmetic{})
+    nb::enum_<RubberBandStretcher::Option>(playbackWarpProcessor, "option", nb::is_arithmetic())
         // these four below are intentionally excluded because we always use
         // real-time mode (unintuitively)
         //.value("OptionProcessOffline",
@@ -211,64 +211,64 @@ play the audio in double the amount of time, so it will sound slowed down.")
 
 #endif
 
-    py::class_<PannerProcessor, ProcessorBase>(m, "PannerProcessor")
-        .def_property("rule", &PannerProcessor::getRule, &PannerProcessor::setRule,
-                      "The rule must be among \"linear\", \"balanced\", \"sin3dB\", "
-                      "\"sin4p5dB\", \"sin6dB\", \"squareRoot3dB\", \"squareRoot4p5dB.\"")
-        .def_property("pan", &PannerProcessor::getPan, &PannerProcessor::setPan,
-                      "The pan value between -1.0 and 1.0.")
+    nb::class_<PannerProcessor, ProcessorBase>(m, "PannerProcessor")
+        .def_prop_rw("rule", &PannerProcessor::getRule, &PannerProcessor::setRule,
+                     "The rule must be among \"linear\", \"balanced\", \"sin3dB\", "
+                     "\"sin4p5dB\", \"sin6dB\", \"squareRoot3dB\", \"squareRoot4p5dB.\"")
+        .def_prop_rw("pan", &PannerProcessor::getPan, &PannerProcessor::setPan,
+                     "The pan value between -1.0 and 1.0.")
         .doc() = "The Panner Processor class";
 
-    py::class_<CompressorProcessor, ProcessorBase>(m, "CompressorProcessor")
-        .def_property("threshold", &CompressorProcessor::getThreshold,
-                      &CompressorProcessor::setThreshold, "The compressor's threshold in decibels.")
-        .def_property("ratio", &CompressorProcessor::getRatio, &CompressorProcessor::setRatio,
-                      "The ratio of the compressor. It must be greater than or "
-                      "equal to 1.0.")
-        .def_property("attack", &CompressorProcessor::getAttack, &CompressorProcessor::setAttack,
-                      "The compressor's attack in millisecods.")
-        .def_property("release", &CompressorProcessor::getRelease, &CompressorProcessor::setRelease,
-                      "The compressor's release in millisecods.")
+    nb::class_<CompressorProcessor, ProcessorBase>(m, "CompressorProcessor")
+        .def_prop_rw("threshold", &CompressorProcessor::getThreshold,
+                     &CompressorProcessor::setThreshold, "The compressor's threshold in decibels.")
+        .def_prop_rw("ratio", &CompressorProcessor::getRatio, &CompressorProcessor::setRatio,
+                     "The ratio of the compressor. It must be greater than or "
+                     "equal to 1.0.")
+        .def_prop_rw("attack", &CompressorProcessor::getAttack, &CompressorProcessor::setAttack,
+                     "The compressor's attack in millisecods.")
+        .def_prop_rw("release", &CompressorProcessor::getRelease, &CompressorProcessor::setRelease,
+                     "The compressor's release in millisecods.")
         .doc() = "A compressor from JUCE.";
 
-    py::class_<DelayProcessor, ProcessorBase>(m, "DelayProcessor")
-        .def_property("delay", &DelayProcessor::getDelay, &DelayProcessor::setDelay,
-                      "The delay in milliseconds.")
-        .def_property("wet", &DelayProcessor::getWet, &DelayProcessor::setWet,
-                      "A wet level between 0.0 and 1.0.")
+    nb::class_<DelayProcessor, ProcessorBase>(m, "DelayProcessor")
+        .def_prop_rw("delay", &DelayProcessor::getDelay, &DelayProcessor::setDelay,
+                     "The delay in milliseconds.")
+        .def_prop_rw("wet", &DelayProcessor::getWet, &DelayProcessor::setWet,
+                     "A wet level between 0.0 and 1.0.")
         .doc() = "A delay from JUCE.";
 
-    py::class_<FilterProcessor, ProcessorBase>(m, "FilterProcessor")
-        .def_property("mode", &FilterProcessor::getMode, &FilterProcessor::setMode,
-                      "Choose from \"low\", \"high\", \"band\", \"low_shelf\", "
-                      "\"high_shelf\", \"notch\".")
-        .def_property("frequency", &FilterProcessor::getFrequency, &FilterProcessor::setFrequency,
-                      "The frequency cutoff in Hz.")
-        .def_property("q", &FilterProcessor::getQ, &FilterProcessor::setQ,
-                      "The Q-value. A safe choice is 1./rad(2)=0.707107.")
-        .def_property("gain", &FilterProcessor::getGain, &FilterProcessor::setGain,
-                      "The gain parameter only matters when the mode is "
-                      "low_shelf or high_shelf. A value of 1.0 has no effect.")
+    nb::class_<FilterProcessor, ProcessorBase>(m, "FilterProcessor")
+        .def_prop_rw("mode", &FilterProcessor::getMode, &FilterProcessor::setMode,
+                     "Choose from \"low\", \"high\", \"band\", \"low_shelf\", "
+                     "\"high_shelf\", \"notch\".")
+        .def_prop_rw("frequency", &FilterProcessor::getFrequency, &FilterProcessor::setFrequency,
+                     "The frequency cutoff in Hz.")
+        .def_prop_rw("q", &FilterProcessor::getQ, &FilterProcessor::setQ,
+                     "The Q-value. A safe choice is 1./rad(2)=0.707107.")
+        .def_prop_rw("gain", &FilterProcessor::getGain, &FilterProcessor::setGain,
+                     "The gain parameter only matters when the mode is "
+                     "low_shelf or high_shelf. A value of 1.0 has no effect.")
         .doc() =
         "A Filter Processor applies one of several kinds of filters. The filter cutoff, Q-value and gain can be adjusted, \
 but the filter mode cannot under automation.";
 
-    py::class_<ReverbProcessor, ProcessorBase>(m, "ReverbProcessor")
-        .def_property("room_size", &ReverbProcessor::getRoomSize, &ReverbProcessor::setRoomSize,
-                      "The room size between 0.0 and 1.0.")
-        .def_property("damping", &ReverbProcessor::getDamping, &ReverbProcessor::setDamping,
-                      "The damping amount between 0.0 and 1.0.")
-        .def_property("wet_level", &ReverbProcessor::getWetLevel, &ReverbProcessor::setWetLevel,
-                      "A wet level between 0.0 and 1.0.")
-        .def_property("dry_level", &ReverbProcessor::getDryLevel, &ReverbProcessor::setDryLevel,
-                      "A dry level between 0.0 and 1.0.")
-        .def_property("width", &ReverbProcessor::getWidth, &ReverbProcessor::setWidth,
-                      "The stereo width from 0.0 to 1.0.")
+    nb::class_<ReverbProcessor, ProcessorBase>(m, "ReverbProcessor")
+        .def_prop_rw("room_size", &ReverbProcessor::getRoomSize, &ReverbProcessor::setRoomSize,
+                     "The room size between 0.0 and 1.0.")
+        .def_prop_rw("damping", &ReverbProcessor::getDamping, &ReverbProcessor::setDamping,
+                     "The damping amount between 0.0 and 1.0.")
+        .def_prop_rw("wet_level", &ReverbProcessor::getWetLevel, &ReverbProcessor::setWetLevel,
+                     "A wet level between 0.0 and 1.0.")
+        .def_prop_rw("dry_level", &ReverbProcessor::getDryLevel, &ReverbProcessor::setDryLevel,
+                     "A dry level between 0.0 and 1.0.")
+        .def_prop_rw("width", &ReverbProcessor::getWidth, &ReverbProcessor::setWidth,
+                     "The stereo width from 0.0 to 1.0.")
         .doc() = "A Reverb Processor applies reverb with the FreeVerb algorithm.";
 
-    py::class_<AddProcessor, ProcessorBase>(m, "AddProcessor")
-        .def_property("gain_levels", &AddProcessor::getGainLevels, &AddProcessor::setGainLevels,
-                      "A list of gain levels to apply to the corresponding inputs.")
+    nb::class_<AddProcessor, ProcessorBase>(m, "AddProcessor")
+        .def_prop_rw("gain_levels", &AddProcessor::getGainLevels, &AddProcessor::setGainLevels,
+                     "A list of gain levels to apply to the corresponding inputs.")
         .doc() = "An Add Processor adds one or more stereo inputs with corresponding gain "
                  "parameters.";
 
@@ -285,7 +285,7 @@ but the filter mode cannot under automation.";
         "After rendering, you can save the MIDI to a file using absolute times "
         "(SMPTE format).";
 
-    py::class_<PluginProcessorWrapper, ProcessorBase>(m, "PluginProcessor")
+    nb::class_<PluginProcessorWrapper, ProcessorBase>(m, "PluginProcessor")
         .def("can_set_bus", &PluginProcessorWrapper::canApplyBusInputsAndOutputs, arg("inputs"),
              arg("outputs"),
              "Return bool for whether this combination of input and output "
@@ -360,8 +360,8 @@ but the filter mode cannot under automation.";
              "processors by this amount to compensate. Also, this value depends "
              "on the plugin's parameters, so it can change over time, and the "
              "output of this function doesn't represent that.")
-        .def_property_readonly("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents,
-                               "The number of MIDI events stored in the buffer. \
+        .def_prop_ro("n_midi_events", &PluginProcessorWrapper::getNumMidiEvents,
+                     "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &PluginProcessorWrapper::loadMidi, arg("filepath"), kw_only(),
              arg("clear_previous") = true, arg("beats") = false, arg("all_events") = true,
@@ -375,7 +375,7 @@ Note that note-ons and note-offs are counted separately.")
         "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
 
-    py::class_<SamplerProcessor, ProcessorBase>(m, "SamplerProcessor")
+    nb::class_<SamplerProcessor, ProcessorBase>(m, "SamplerProcessor")
         .def("set_data", &SamplerProcessor::setData, arg("data"), "Set an audio sample.")
         .def("get_parameter", &SamplerProcessor::getAutomationAtZeroByIndex, arg("index"),
              "Get a parameter's value.")
@@ -389,8 +389,8 @@ or effects. Some plugins such as ones that do sidechain compression can accept t
              "Get the number of parameters.")
         .def("get_parameters_description", &SamplerProcessor::getParametersDescription,
              "Get a list of dictionaries describing the plugin's parameters.")
-        .def_property_readonly("n_midi_events", &SamplerProcessor::getNumMidiEvents,
-                               "The number of MIDI events stored in the buffer. \
+        .def_prop_ro("n_midi_events", &SamplerProcessor::getNumMidiEvents,
+                     "The number of MIDI events stored in the buffer. \
 Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &SamplerProcessor::loadMidi, arg("filepath"), kw_only(),
              arg("clear_previous") = true, arg("beats") = false, arg("all_events") = true,
@@ -428,9 +428,9 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
              "createLibContext", []() { createLibContext(); }, "Create a libfaust context.")
         .def("destroyLibContext", []() { destroyLibContext(); }, "Destroy a libfaust context.");
 
-    py::class_<DawDreamerFaustLibContext>(
+    nb::class_<DawDreamerFaustLibContext>(
         faust, "FaustContext", "A libfaust context to be used with Python's \"with\" syntax.")
-        .def(py::init<>())
+        .def(nb::init<>())
         .def("__enter__", &DawDreamerFaustLibContext::enter)
         .def("__exit__", &DawDreamerFaustLibContext::exit);
 
@@ -442,11 +442,11 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
 
     std::vector<float> defaultGain;
 
-    py::return_value_policy returnPolicy = py::return_value_policy::reference;
+    nb::rv_policy returnPolicy = nb::rv_policy::reference;
 
-    py::class_<RenderEngine>(m, "RenderEngine",
+    nb::class_<RenderEngine>(m, "RenderEngine",
                              "A Render Engine loads and runs a graph of audio processors.")
-        .def(py::init<double, int>(), arg("sample_rate"), arg("block_size"))
+        .def(nb::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngine::render, arg("duration"), kw_only(), arg("beats") = false,
              "Render the most recently loaded graph. By default, when "
              "`beats` is "

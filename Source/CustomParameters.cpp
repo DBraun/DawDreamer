@@ -4,7 +4,7 @@
 
 #include "ProcessorBase.h"
 
-bool AutomateParameter::setAutomation(py::array_t<float> input, std::uint32_t newPPQN)
+bool AutomateParameter::setAutomation(nb::ndarray<> input, std::uint32_t newPPQN)
 {
     if (newPPQN < 0)
     {

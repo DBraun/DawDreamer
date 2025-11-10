@@ -116,7 +116,7 @@ class AutomateParameter
   public:
     AutomateParameter() {}
 
-    bool setAutomation(py::array_t<float> input, std::uint32_t newPPQN);
+    bool setAutomation(nb::ndarray<> input, std::uint32_t newPPQN);
 
     void setAutomation(const float val);
 
