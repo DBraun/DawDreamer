@@ -5,7 +5,10 @@ from os.path import abspath, isdir, isfile, splitext
 from pathlib import Path
 
 import numpy as np
+import pytest
 from scipy.io import wavfile
+
+import dawdreamer as daw
 
 USE_LIBROSA = True
 try:
