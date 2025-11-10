@@ -499,7 +499,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
 
         .def(
             "boxAdd",
-            [](std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2)
+            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
             {
                 return box1.has_value() && box2.has_value() ? BoxWrapper(boxAdd(*box1, *box2))
                                                             : BoxWrapper(boxAdd());
