@@ -132,10 +132,12 @@ play the audio in double the amount of time, so it will sound slowed down.")
                      &PlaybackWarpProcessor::setEndMarker,
                      "The end position in beats (typically quarter notes) "
                      "relative to 1.1.1")
-        .def_prop_rw("warp_markers", &PlaybackWarpProcessor::getWarpMarkers,
-                     &PlaybackWarpProcessor::setWarpMarkers,
-                     "Get/set the warp markers as an (N, 2) numpy array of time "
+        .def_prop_ro("warp_markers", &PlaybackWarpProcessor::getWarpMarkers, nb::rv_policy::move,
+                     "Get the warp markers as an (N, 2) numpy array of time "
                      "positions in samples and positions in beats.")
+        .def("set_warp_markers", &PlaybackWarpProcessor::setWarpMarkers, arg("markers"),
+             "Set the warp markers as an (N, 2) numpy array of time "
+             "positions in samples and positions in beats.")
         .def("reset_warp_markers", &PlaybackWarpProcessor::resetWarpMarkers, arg("bpm"),
              "Reset the warp markers with a BPM.")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"),

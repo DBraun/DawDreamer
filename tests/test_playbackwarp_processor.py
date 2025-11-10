@@ -37,7 +37,7 @@ def test_playbackwarp_processor1(buffer_size: int):
     print("drums.warp_markers: ", drums.warp_markers)
 
     # re-assign and test that it stayed the same
-    drums.warp_markers = warp_markers
+    drums.set_warp_markers(warp_markers)
     assert (drums.warp_markers == warp_markers).all()
 
     # add one interpolated warp marker in the middle
@@ -50,7 +50,7 @@ def test_playbackwarp_processor1(buffer_size: int):
     assert warp_markers.shape[0] == 3
     assert warp_markers.shape[1] == 2
 
-    drums.warp_markers = warp_markers
+    drums.set_warp_markers(warp_markers)
 
     assert (drums.warp_markers == warp_markers).all()
 
