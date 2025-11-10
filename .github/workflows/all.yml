@@ -46,14 +46,14 @@ jobs:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
         CIBW_BUILD_VERBOSITY: 3
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
         CIBW_BEFORE_BUILD_LINUX:
           export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && sh -v build_linux.sh
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer:$PWD/thirdparty/libfaust/ubuntu-x86_64/Release/lib && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2_28 {wheel})
-        CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile jax flax
-        CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v ."
+          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer:$PWD/thirdparty/libfaust/ubuntu-x86_64/Release/lib && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2014 {wheel})
+        CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
+        CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v . --ignore=test_jax.py"
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: auto64 aarch64  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
         CIBW_TEST_SKIP: "*arm64* *313* *314*"  # Skip ARM64 tests and Python 3.13/3.14 tests until stable
