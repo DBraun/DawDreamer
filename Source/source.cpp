@@ -6,7 +6,7 @@ NB_MODULE(dawdreamer, m)
     using arg = nb::arg;
     using kw_only = nb::kw_only;
 
-    // Disable nanobind leak warnings to prevent cleanup crashes
+    // Disable nanobind leak warnings
     nb::set_leak_warnings(false);
 
     m.doc() = R"pbdoc(
@@ -448,6 +448,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
 
     std::vector<float> defaultGain;
 
+    // Use reference policy since RenderEngine owns the processors through AudioProcessorGraph
     nb::rv_policy returnPolicy = nb::rv_policy::reference;
 
     nb::class_<RenderEngine>(m, "RenderEngine",
