@@ -3,6 +3,7 @@
 
 #include <faust/compiler/generator/libfaust.h>
 #include <faust/dsp/libfaust-box.h>
+#include <optional>
 // #include <faust/dsp/libfaust-signal.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
