@@ -9,6 +9,9 @@ NB_MODULE(dawdreamer, m)
     // Disable nanobind leak warnings
     nb::set_leak_warnings(false);
 
+    // Disable implicit conversions to be more strict
+    nb::set_implicit_cast(false);
+
     m.doc() = R"pbdoc(
         DawDreamer
         -----------------------
