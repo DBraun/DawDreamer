@@ -1,5 +1,11 @@
 #include "ProcessorBase.h"
 
+// Static capsule deleter function to avoid lambda capture issues
+static void delete_float_array(void* p) noexcept
+{
+    delete[] static_cast<float*>(p);
+}
+
 void ProcessorBase::numChannelsChanged()
 {
     m_isConnectedInGraph = false;
@@ -296,7 +302,7 @@ nb::ndarray<nb::numpy, float> ProcessorBase::bufferToPyArray(juce::AudioSampleBu
         static_cast<int64_t>(num_samples), // stride in elements for channels dimension
         1                                  // stride in elements for samples dimension
     };
-    nb::capsule owner(data, [](void* p) noexcept { delete[] (float*)p; });
+    nb::capsule owner(data, delete_float_array);
     nb::ndarray<nb::numpy, float> arr(data, 2, shape, owner, strides);
 
     return arr;

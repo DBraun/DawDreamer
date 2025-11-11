@@ -1,6 +1,12 @@
 #include "PlaybackWarpProcessor.h"
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 
+// Static capsule deleter function to avoid lambda capture issues
+static void delete_float_array(void* p) noexcept
+{
+    delete[] static_cast<float*>(p);
+}
+
 #include <rubberband/src/common/FFT.cpp>
 #include <rubberband/src/common/Log.cpp>
 #include <rubberband/src/common/mathmisc.cpp>
@@ -103,7 +109,7 @@ nb::ndarray<nb::numpy, float> PlaybackWarpProcessor::getWarpMarkers()
 
     size_t shape[2] = {num_markers, 2};
     int64_t strides[2] = {2, 1}; // Strides in elements for row-major layout
-    nb::capsule owner(data, [](void* p) noexcept { delete[] (float*)p; });
+    nb::capsule owner(data, delete_float_array);
     nb::ndarray<nb::numpy, float> arr(data, 2, shape, owner, strides);
 
     return arr;

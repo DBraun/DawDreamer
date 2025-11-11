@@ -6,6 +6,9 @@ NB_MODULE(dawdreamer, m)
     using arg = nb::arg;
     using kw_only = nb::kw_only;
 
+    // Disable nanobind leak warnings to prevent cleanup crashes
+    nb::set_leak_warnings(false);
+
     m.doc() = R"pbdoc(
         DawDreamer
         -----------------------

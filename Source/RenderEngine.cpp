@@ -2,6 +2,12 @@
 
 #include <unordered_map>
 
+// Static capsule deleter function to avoid lambda capture issues
+static void delete_float_array(void* p) noexcept
+{
+    delete[] static_cast<float*>(p);
+}
+
 RenderEngine::RenderEngine(double sr, int bs)
     : AudioPlayHead{}, mySampleRate{sr}, myBufferSize{bs},
       m_mainProcessorGraph(std::make_unique<juce::AudioProcessorGraph>())
@@ -396,7 +402,7 @@ nb::ndarray<nb::numpy, float> RenderEngine::getAudioFrames()
         float* empty_data = new float[0];
         size_t shape[2] = {2, 0};
         int64_t strides[2] = {0, 1}; // Strides in elements
-        nb::capsule owner(empty_data, [](void* p) noexcept { delete[] (float*)p; });
+        nb::capsule owner(empty_data, delete_float_array);
         nb::ndarray<nb::numpy, float> arr(empty_data, 2, shape, owner, strides);
         return arr;
     }
@@ -424,7 +430,7 @@ nb::ndarray<nb::numpy, float> RenderEngine::getAudioFramesForName(std::string& n
     float* empty_data = new float[0];
     size_t shape[2] = {2, 0};
     int64_t strides[2] = {0, 1}; // Strides in elements
-    nb::capsule owner(empty_data, [](void* p) noexcept { delete[] (float*)p; });
+    nb::capsule owner(empty_data, delete_float_array);
     nb::ndarray<nb::numpy, float> arr(empty_data, 2, shape, owner, strides);
     return arr;
 }
