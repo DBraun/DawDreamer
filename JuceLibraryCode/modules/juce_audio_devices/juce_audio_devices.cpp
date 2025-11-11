@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -46,7 +58,7 @@
 #include "juce_audio_devices.h"
 
 #include "audio_io/juce_SampleRateHelpers.cpp"
-#include "midi_io/juce_MidiDevices.cpp"
+#include "midi_io/juce_MidiDeviceListConnectionBroadcaster.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -164,19 +176,6 @@
   #include "native/juce_ALSA_linux.cpp"
  #endif
 
- #if JUCE_JACK
-  /* Got an include error here? If so, you've either not got jack-audio-connection-kit
-     installed, or you've not got your paths set up correctly to find its header files.
-
-     The package you need to install to get JACK support is "libjack-dev".
-
-     If you don't have the jack-audio-connection-kit library and don't want to build
-     JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
-  */
-  #include <jack/jack.h>
-  #include "native/juce_JackAudio_linux.cpp"
- #endif
-
  #if (JUCE_LINUX && JUCE_BELA)
   /* Got an include error here? If so, you've either not got the bela headers
      installed, or you've not got your paths set up correctly to find its header
@@ -228,7 +227,9 @@ namespace juce
                                         "-Wzero-as-null-pointer-constant",
                                         "-Winconsistent-missing-destructor-override",
                                         "-Wshadow-field-in-constructor",
-                                        "-Wshadow-field")
+                                        "-Wshadow-field",
+                                        "-Wsign-conversion",
+                                        "-Wswitch-enum")
    #include <oboe/Oboe.h>
    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
@@ -243,6 +244,27 @@ namespace juce
  #endif
 
 #endif
+
+#if (JUCE_LINUX || JUCE_BSD || JUCE_MAC || JUCE_WINDOWS) && JUCE_JACK
+ /* Got an include error here? If so, you've either not got jack-audio-connection-kit
+    installed, or you've not got your paths set up correctly to find its header files.
+
+    Linux: The package you need to install to get JACK support is libjack-dev.
+
+    macOS: The package you need to install to get JACK support is jack, which you can
+    install using Homebrew.
+
+    Windows: The package you need to install to get JACK support is available from the
+    JACK Audio website. Download and run the installer for Windows.
+
+    If you don't have the jack-audio-connection-kit library and don't want to build
+    JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
+ */
+ #include <jack/jack.h>
+ #include "native/juce_JackAudio.cpp"
+#endif
+
+#include "midi_io/juce_MidiDevices.cpp"
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED
 namespace juce

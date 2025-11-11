@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -23,7 +35,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4309 4305 4365 6385 6326 6340)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4244 4309 4305 4365 6385 6326 6340)
 
 namespace zlibNamespace
 {
@@ -37,18 +49,32 @@ namespace zlibNamespace
                                        "-Wredundant-decls",
                                        "-Wimplicit-fallthrough",
                                        "-Wzero-as-null-pointer-constant",
-                                       "-Wcomma")
+                                       "-Wcomma",
+                                       "-Wcast-align",
+                                       "-Wkeyword-macro",
+                                       "-Wmissing-prototypes")
+
+  #pragma push_macro ("register")
+  #define register
+
+  #pragma push_macro ("MIN")
+  #undef MIN
+
+  #pragma push_macro ("read")
+  #pragma push_macro ("write")
+  #pragma push_macro ("open")
+  #pragma push_macro ("close")
 
   #undef OS_CODE
   #undef fdopen
   #define ZLIB_INTERNAL
   #define NO_DUMMY_DECL
-  #include "zlib/zlib.h"
   #include "zlib/adler32.c"
   #include "zlib/compress.c"
   #undef DO1
   #undef DO8
   #include "zlib/crc32.c"
+  #undef N
   #include "zlib/deflate.c"
   #include "zlib/inffast.c"
   #undef PULLBYTE
@@ -58,6 +84,7 @@ namespace zlibNamespace
   #undef NEEDBITS
   #undef DROPBITS
   #undef BYTEBITS
+  #undef GZIP
   #include "zlib/inflate.c"
   #include "zlib/inftrees.c"
   #include "zlib/trees.c"
@@ -70,19 +97,26 @@ namespace zlibNamespace
   #undef Dad
   #undef Len
 
+  #pragma pop_macro ("close")
+  #pragma pop_macro ("open")
+  #pragma pop_macro ("write")
+  #pragma pop_macro ("read")
+  #pragma pop_macro ("MIN")
+  #pragma pop_macro ("register")
+
   JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #else
   #include JUCE_ZLIB_INCLUDE_PATH
-
-  #ifndef z_uInt
-   #ifdef uInt
-    #define z_uInt uInt
-   #else
-    #define z_uInt unsigned int
-   #endif
-  #endif
-
  #endif
+
+#ifndef z_uInt
+ #ifdef uInt
+  #define z_uInt uInt
+ #else
+  #define z_uInt unsigned int
+ #endif
+#endif
+
 }
 
 JUCE_END_IGNORE_WARNINGS_MSVC

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -118,6 +127,26 @@ public:
 
     /** Tries to create an object that can write to a stream with this audio format.
 
+        If the writer can't be created for some reason (e.g. the parameters passed in
+        here aren't suitable), this will return nullptr.
+
+        @param streamToWriteTo  a reference to a unique_ptr that owns the output stream. If creating
+                                the writer succeeds, then ownership of the stream will be
+                                transferred to the writer, and this argument will be set to nullptr.
+                                If creating the writer fails, then streamToWriteTo will remain
+                                unchanged, allowing it to be reused to create a writer of a
+                                different format.
+        @param options          options that specify details of the output file. If the audio format
+                                does not support these settings, then this function may return
+                                nullptr.
+
+        @see AudioFormatWriterOptions
+    */
+    virtual std::unique_ptr<AudioFormatWriter> createWriterFor (std::unique_ptr<OutputStream>& streamToWriteTo,
+                                                                const AudioFormatWriterOptions& options) = 0;
+
+    /** Tries to create an object that can write to a stream with this audio format.
+
         The writer object that is returned can be used to write to the stream, and
         should then be deleted by the caller.
 
@@ -146,12 +175,13 @@ public:
                                     ignored
         @see AudioFormatWriter
     */
-    virtual AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                                double sampleRateToUse,
-                                                unsigned int numberOfChannels,
-                                                int bitsPerSample,
-                                                const StringPairArray& metadataValues,
-                                                int qualityOptionIndex) = 0;
+    [[deprecated ("Use the function taking an AudioFormatWriterOptions instead.")]]
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
 
     /** Tries to create an object that can write to a stream with this audio format.
 
@@ -184,12 +214,13 @@ public:
                                     ignored
         @see AudioFormatWriter
     */
-    virtual AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                                double sampleRateToUse,
-                                                const AudioChannelSet& channelLayout,
-                                                int bitsPerSample,
-                                                const StringPairArray& metadataValues,
-                                                int qualityOptionIndex);
+    [[deprecated ("Use the function taking an AudioFormatWriterOptions instead.")]]
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        const AudioChannelSet& channelLayout,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
 
 protected:
     /** Creates an AudioFormat object.
@@ -208,6 +239,8 @@ protected:
     AudioFormat (StringRef formatName, StringRef fileExtensions);
 
 private:
+    AudioFormatWriter* createWriterForRawPtr (OutputStream*, const AudioFormatWriterOptions&);
+
     //==============================================================================
     String formatName;
     StringArray fileExtensions;

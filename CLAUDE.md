@@ -581,13 +581,54 @@ audio = engine.get_audio()
 
 | Dependency      | Purpose                           | Version/Notes                 |
 |-----------------|-----------------------------------|-------------------------------|
-| JUCE            | Audio framework                   | Latest main branch            |
+| JUCE            | Audio framework                   | See JUCE version management below |
 | pybind11        | C++/Python bindings               | Submodule, header-only        |
 | Faust           | DSP language compiler             | Submodule, embedded compiler  |
 | libfaust        | Pre-compiled Faust runtime        | Downloaded via script          |
 | libsamplerate   | Sample rate conversion            | Built from source (CMake)     |
 | RubberBand      | Time/pitch modification           | Submodule, optional build flag|
 | Python headers  | C API and development files       | 3.10-3.12 required            |
+
+### JUCE Version Management
+
+**IMPORTANT**: DawDreamer uses a two-JUCE-version system:
+
+1. **thirdparty/JUCE submodule**: Pinned at JUCE 5.3.2 (commit cf4f12a452)
+   - **DO NOT update this submodule**
+   - It remains at JUCE 5 for stability and compatibility
+   - Used as a fallback reference
+
+2. **JuceLibraryCode/modules**: Active JUCE version used for builds
+   - Currently using **JUCE 8.0.10+**
+   - Updated manually by contributors using Projucer
+   - This is the version that actually compiles into DawDreamer
+
+**How to update JUCE for development:**
+
+```bash
+# 1. Install JUCE 8.x separately (not in the repo)
+# Download from https://juce.com/get-juce/ or:
+git clone --branch 8.0.10 https://github.com/juce-framework/JUCE.git ~/JUCE
+
+# 2. Open DawDreamer.jucer with the NEW version of Projucer
+# The Projucer app is inside the JUCE folder you just downloaded:
+~/JUCE/extras/Projucer/Builds/MacOSX/build/Debug/Projucer.app
+
+# 3. In Projucer:
+#    - File > Open > DawDreamer.jucer
+#    - Projucer will detect the JUCE version and update JuceLibraryCode/modules
+#    - File > Save Project (or Ctrl+S)
+#    - This regenerates JuceLibraryCode/ with the new JUCE version
+
+# 4. Build as normal
+xcodebuild -project Builds/MacOSX/DawDreamer.xcodeproj ...
+```
+
+**Key Points:**
+- DawDreamer.jucer is configured to use `path="JuceLibraryCode/modules"` for all modules
+- JuceLibraryCode/ is the "working copy" of JUCE that gets compiled
+- thirdparty/JUCE stays pinned at JUCE 5 and should not be modified
+- When you open the .jucer file with a newer Projucer, it automatically updates JuceLibraryCode/
 
 ---
 

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -146,9 +158,30 @@ public:
 
     void runTest() override
     {
-        constexpr int maximumTimeoutMs {30'000};
+        runBehaviourTestsWithBackgroundThreads<0>();
+        runBehaviourTestsWithBackgroundThreads<16>();
+        runStressTests();
+    }
 
-        beginTest ("Start/stop a timer");
+    template <size_t NumBackgroundThreads>
+    void runBehaviourTestsWithBackgroundThreads()
+    {
+        constexpr int maximumTimeoutMs { 30'000 };
+
+        const auto beginBehaviourTest = [&] (const auto& testName)
+        {
+            beginTest (String (testName) + " (" + String (NumBackgroundThreads) + " background timers)");
+        };
+
+        [[maybe_unused]] std::array<BackgroundTimer, NumBackgroundThreads> backgroundTimers;
+
+        beginBehaviourTest ("Background timer preconditions");
+        {
+            for (auto& t : backgroundTimers)
+                expect (t.isTimerRunning());
+        }
+
+        beginBehaviourTest ("Start/stop a timer");
         {
             WaitableEvent timerFiredOnce;
             WaitableEvent timerFiredTwice;
@@ -177,7 +210,7 @@ public:
             expect (timer.getTimerInterval() == 0);
         }
 
-        beginTest ("Stop a timer from the timer callback");
+        beginBehaviourTest ("Stop a timer from the timer callback");
         {
             WaitableEvent stoppedTimer;
 
@@ -194,7 +227,7 @@ public:
             expect (stoppedTimer.wait (maximumTimeoutMs));
         }
 
-        beginTest ("Restart a timer from the timer callback");
+        beginBehaviourTest ("Restart a timer from the timer callback");
         {
             WaitableEvent restartTimer;
             WaitableEvent timerRestarted;
@@ -234,7 +267,7 @@ public:
             timer.stopTimer();
         }
 
-        beginTest ("Calling stopTimer on a timer, waits for any timer callbacks to finish");
+        beginBehaviourTest ("Calling stopTimer on a timer, waits for any timer callbacks to finish");
         {
             WaitableEvent timerCallbackStarted;
             WaitableEvent stoppingTimer;
@@ -264,13 +297,13 @@ public:
             expect (timerCallbackFinished);
         }
 
-        beginTest ("Calling stopTimer on a timer, waits for any timer callbacks to finish, even if the timer callback calls stopTimer first");
+        beginBehaviourTest ("Calling stopTimer on a timer, waits for any timer callbacks to finish, even if the timer callback calls stopTimer first");
         {
             WaitableEvent stoppedFromInsideTimerCallback;
             WaitableEvent stoppingFromOutsideTimerCallback;
             std::atomic<bool> timerCallbackFinished { false };
 
-            Timer timer {[&]()
+            Timer timer {[&]
             {
                 timer.stopTimer();
                 stoppedFromInsideTimerCallback.signal();
@@ -288,7 +321,7 @@ public:
             expect (timerCallbackFinished);
         }
 
-        beginTest ("Adjusting a timer period from outside the timer callback doesn't cause data races");
+        beginBehaviourTest ("Adjusting a timer period from outside the timer callback doesn't cause data races");
         {
             WaitableEvent timerCallbackStarted;
             WaitableEvent timerRestarted;
@@ -331,8 +364,9 @@ public:
             expect (lastCallbackCount == 2);
         }
 
-        beginTest ("A timer can be restarted externally, after being stopped internally");
+        beginBehaviourTest ("A timer can be restarted externally, after being stopped internally");
         {
+            WaitableEvent stopTimer;
             WaitableEvent timerStopped;
             WaitableEvent timerFiredAfterRestart;
 
@@ -341,6 +375,7 @@ public:
                 switch (++callbackCount)
                 {
                     case 1:
+                        stopTimer.wait (maximumTimeoutMs);
                         timer.stopTimer();
                         timerStopped.signal();
                         return;
@@ -358,6 +393,7 @@ public:
             timer.startTimer (1);
             expect (timer.isTimerRunning());
 
+            stopTimer.signal();
             expect (timerStopped.wait (maximumTimeoutMs));
             expect (! timer.isTimerRunning());
 
@@ -366,7 +402,7 @@ public:
             expect (timerFiredAfterRestart.wait (maximumTimeoutMs));
         }
 
-        beginTest ("Calls to `startTimer` and `getTimerInterval` succeed while a callback is blocked");
+        beginBehaviourTest ("Calls to `startTimer` and `getTimerInterval` succeed while a callback is blocked");
         {
             WaitableEvent timerBlocked;
             WaitableEvent unblockTimer;
@@ -388,32 +424,33 @@ public:
             unblockTimer.signal();
             timer.stopTimer();
         }
+    }
 
+    void runStressTests()
+    {
         beginTest ("Stress test");
         {
-            constexpr auto maxNumTimers { 100 };
+            std::vector<Timer> timers (100);
 
-            std::vector<std::unique_ptr<Timer>> timers;
-            timers.reserve (maxNumTimers);
-
-            for (int i = 0; i < maxNumTimers; ++i)
+            for (auto& timer : timers)
             {
-                auto timer = std::make_unique<Timer> ([]{});
-                timer->startTimer (1);
-
-                if (! timer->isTimerRunning())
-                    break;
-
-                timers.push_back (std::move (timer));
+                timer.startTimer (1);
+                expect (timer.isTimerRunning());
             }
 
-            expect (timers.size() >= 16);
+            for (auto& timer : timers)
+            {
+                timer.stopTimer();
+                expect (! timer.isTimerRunning());
+            }
         }
     }
 
     class Timer final : public HighResolutionTimer
     {
     public:
+        Timer() = default;
+
         explicit Timer (std::function<void()> fn)
             : callback (std::move (fn)) {}
 
@@ -422,7 +459,17 @@ public:
         void hiResTimerCallback() override { callback(); }
 
     private:
-        std::function<void()> callback;
+        std::function<void()> callback = []{};
+    };
+
+    class BackgroundTimer
+    {
+    public:
+        BackgroundTimer() { timer.startTimer (1); }
+        bool isTimerRunning() const { return timer.isTimerRunning(); }
+
+    private:
+        Timer timer { []{} };
     };
 };
 

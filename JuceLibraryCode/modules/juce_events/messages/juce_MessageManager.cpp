@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -29,7 +41,7 @@ MessageManager::MessageManager() noexcept
     JUCE_VERSION_ID
 
     if (JUCEApplicationBase::isStandaloneApp())
-        Thread::setCurrentThreadName ("JUCE Message Thread");
+        Thread::setCurrentThreadName (SystemStats::getJUCEVersion() + ": Message Thread");
 }
 
 MessageManager::~MessageManager() noexcept
@@ -149,59 +161,9 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
-class AsyncFunctionCallback final : public MessageManager::MessageBase
-{
-public:
-    AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
-        : func (f), parameter (param)
-    {}
-
-    void messageCallback() override
-    {
-        result = (*func) (parameter);
-        finished.signal();
-    }
-
-    WaitableEvent finished;
-    std::atomic<void*> result { nullptr };
-
-private:
-    MessageCallbackFunction* const func;
-    void* const parameter;
-
-    JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCallback)
-};
-
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func, void* parameter)
 {
-    if (isThisTheMessageThread())
-        return func (parameter);
-
-    // If this thread has the message manager locked, then this will deadlock!
-    jassert (! currentThreadHasLockedMessageManager());
-
-    const ReferenceCountedObjectPtr<AsyncFunctionCallback> message (new AsyncFunctionCallback (func, parameter));
-
-    if (message->post())
-    {
-        message->finished.wait();
-        return message->result.load();
-    }
-
-    jassertfalse; // the OS message queue failed to send the message!
-    return nullptr;
-}
-
-bool MessageManager::callAsync (std::function<void()> fn)
-{
-    struct AsyncCallInvoker final : public MessageBase
-    {
-        AsyncCallInvoker (std::function<void()> f) : callback (std::move (f)) {}
-        void messageCallback() override  { callback(); }
-        std::function<void()> callback;
-    };
-
-    return (new AsyncCallInvoker (std::move (fn)))->post();
+    return callSync ([func, parameter] { return func (parameter); }).value_or (nullptr);
 }
 
 //==============================================================================

@@ -1,159 +1,44 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 #pragma once
 
-#ifndef DOXYGEN
-
+/** @cond */
 namespace juce
 {
 
 JUCE_BEGIN_NO_SANITIZE ("vptr")
-
-//==============================================================================
-#define JUCE_DECLARE_VST3_COM_REF_METHODS \
-    Steinberg::uint32 PLUGIN_API addRef() override   { return (Steinberg::uint32) ++refCount; } \
-    Steinberg::uint32 PLUGIN_API release() override  { const int r = --refCount; if (r == 0) delete this; return (Steinberg::uint32) r; }
-
-#define JUCE_DECLARE_VST3_COM_QUERY_METHODS \
-    Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID, void** obj) override \
-    { \
-        jassertfalse; \
-        *obj = nullptr; \
-        return Steinberg::kNotImplemented; \
-    }
-
-inline bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexcept
-{
-    return std::memcmp (a, b, sizeof (Steinberg::TUID)) == 0;
-}
-
-/*  Holds a tresult and a pointer to an object.
-
-    Useful for holding intermediate results of calls to queryInterface.
-*/
-class QueryInterfaceResult
-{
-public:
-    QueryInterfaceResult() = default;
-
-    QueryInterfaceResult (Steinberg::tresult resultIn, void* ptrIn)
-        : result (resultIn), ptr (ptrIn) {}
-
-    bool isOk() const noexcept   { return result == Steinberg::kResultOk; }
-
-    Steinberg::tresult extract (void** obj) const
-    {
-        *obj = result == Steinberg::kResultOk ? ptr : nullptr;
-        return result;
-    }
-
-private:
-    Steinberg::tresult result = Steinberg::kResultFalse;
-    void* ptr = nullptr;
-};
-
-/*  Holds a tresult and a pointer to an object.
-
-    Calling InterfaceResultWithDeferredAddRef::extract() will also call addRef
-    on the pointed-to object. It is expected that users will use
-    InterfaceResultWithDeferredAddRef to hold intermediate results of a queryInterface
-    call. When a suitable interface is found, the function can be exited with
-    `return suitableInterface.extract (obj)`, which will set the obj pointer,
-    add a reference to the interface, and return the appropriate result code.
-*/
-class InterfaceResultWithDeferredAddRef
-{
-public:
-    InterfaceResultWithDeferredAddRef() = default;
-
-    template <typename Ptr>
-    InterfaceResultWithDeferredAddRef (Steinberg::tresult resultIn, Ptr* ptrIn)
-        : result (resultIn, ptrIn),
-          addRefFn (doAddRef<Ptr>) {}
-
-    bool isOk() const noexcept   { return result.isOk(); }
-
-    Steinberg::tresult extract (void** obj) const
-    {
-        const auto toReturn = result.extract (obj);
-
-        if (result.isOk() && *obj != nullptr)
-            NullCheckedInvocation::invoke (addRefFn, *obj);
-
-        return toReturn;
-    }
-
-private:
-    template <typename Ptr>
-    static void doAddRef (void* obj)   { static_cast<Ptr*> (obj)->addRef(); }
-
-    QueryInterfaceResult result;
-    void (*addRefFn) (void*) = nullptr;
-};
-
-template <typename ClassType>                                   struct UniqueBase {};
-template <typename CommonClassType, typename SourceClassType>   struct SharedBase {};
-
-template <typename ToTest, typename CommonClassType, typename SourceClassType>
-InterfaceResultWithDeferredAddRef testFor (ToTest& toTest,
-                                           const Steinberg::TUID targetIID,
-                                           SharedBase<CommonClassType, SourceClassType>)
-{
-    if (! doUIDsMatch (targetIID, CommonClassType::iid))
-        return {};
-
-    return { Steinberg::kResultOk, static_cast<CommonClassType*> (static_cast<SourceClassType*> (std::addressof (toTest))) };
-}
-
-template <typename ToTest, typename ClassType>
-InterfaceResultWithDeferredAddRef testFor (ToTest& toTest,
-                                           const Steinberg::TUID targetIID,
-                                           UniqueBase<ClassType>)
-{
-    return testFor (toTest, targetIID, SharedBase<ClassType, ClassType>{});
-}
-
-template <typename ToTest>
-InterfaceResultWithDeferredAddRef testForMultiple (ToTest&, const Steinberg::TUID) { return {}; }
-
-template <typename ToTest, typename Head, typename... Tail>
-InterfaceResultWithDeferredAddRef testForMultiple (ToTest& toTest, const Steinberg::TUID targetIID, Head head, Tail... tail)
-{
-    const auto result = testFor (toTest, targetIID, head);
-
-    if (result.isOk())
-        return result;
-
-    return testForMultiple (toTest, targetIID, tail...);
-}
-
-//==============================================================================
-#if VST_VERSION < 0x030608
- #define kAmbi1stOrderACN kBFormat
-#endif
 
 //==============================================================================
 inline juce::String toString (const Steinberg::char8* string) noexcept       { return juce::String (juce::CharPointer_UTF8  ((juce::CharPointer_UTF8::CharType*)  string)); }
@@ -175,6 +60,11 @@ inline void toString128 (Steinberg::Vst::String128 result, const juce::String& s
     Steinberg::UString (result, 128).assign (toString (source));
 }
 
+//==============================================================================
+#if VST_VERSION < 0x030608
+ #define kAmbi1stOrderACN kBFormat
+#endif
+
 #if JUCE_WINDOWS
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
 #elif JUCE_MAC
@@ -182,7 +72,6 @@ inline void toString128 (Steinberg::Vst::String128 result, const juce::String& s
 #elif JUCE_LINUX || JUCE_BSD
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeX11EmbedWindowID;
 #endif
-
 
 //==============================================================================
 static inline Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg::Vst::IAudioProcessor* processor,
@@ -260,6 +149,8 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
         case AudioChannelSet::bottomRearLeft:    return Steinberg::Vst::kSpeakerBrl;
         case AudioChannelSet::bottomRearCentre:  return Steinberg::Vst::kSpeakerBrc;
         case AudioChannelSet::bottomRearRight:   return Steinberg::Vst::kSpeakerBrr;
+        case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerLw;
+        case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerRw;
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
 
@@ -302,8 +193,6 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
         case AudioChannelSet::ambisonicACN61:
         case AudioChannelSet::ambisonicACN62:
         case AudioChannelSet::ambisonicACN63:
-        case AudioChannelSet::wideLeft:
-        case AudioChannelSet::wideRight:
         case AudioChannelSet::unknown:
             break;
     }
@@ -374,6 +263,8 @@ static std::optional<AudioChannelSet::ChannelType> getChannelType (Steinberg::Vs
         case Steinberg::Vst::kSpeakerBrl:   return AudioChannelSet::bottomRearLeft;
         case Steinberg::Vst::kSpeakerBrc:   return AudioChannelSet::bottomRearCentre;
         case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
+        case Steinberg::Vst::kSpeakerLw:    return AudioChannelSet::wideLeft;
+        case Steinberg::Vst::kSpeakerRw:    return AudioChannelSet::wideRight;
     }
 
     return {};
@@ -424,11 +315,15 @@ namespace detail
         { k71_6,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
         { k70_6,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
 
-        // The VST3 layout uses 'left/right' and 'left-of-center/right-of-center', but the JUCE layout uses 'left/right' and 'wide-left/wide-right'.
-        { k91_4,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
-        { k90_4,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
-        { k91_6,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
-        { k90_6,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k90_4_W,                      { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::wideLeft, X::wideRight } },
+        { k91_4_W,                      { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::wideLeft, X::wideRight } },
+        { k90_6_W,                      { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight, X::wideLeft, X::wideRight } },
+        { k91_6_W,                      { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight, X::wideLeft, X::wideRight } },
+
+        { k90_4,                        { X::left, X::right, X::centre,         X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k91_4,                        { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k90_6,                        { X::left, X::right, X::centre,         X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k91_6,                        { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
     };
 
    #if JUCE_DEBUG
@@ -1104,9 +999,17 @@ public:
     {
         mappings = std::move (arrangements);
 
-        floatBusMap .resize (mappings.size());
-        doubleBusMap.resize (mappings.size());
-        busBuffers  .resize (mappings.size());
+        const auto numBuses = mappings.size();
+        floatBusMap .resize (numBuses);
+        doubleBusMap.resize (numBuses);
+        busBuffers  .resize (numBuses);
+
+        for (auto [index, busMap] : enumerate (mappings, size_t{}))
+        {
+            const auto numChannels = busMap.size();
+            floatBusMap [index].reserve (numChannels);
+            doubleBusMap[index].reserve (numChannels);
+        }
     }
 
     /*  Applies the mapping to an AudioBuffer using JUCE channel layout. */
@@ -1142,6 +1045,10 @@ private:
                             const ChannelMapping& busMap,
                             int channelStartOffset) const
     {
+        // If this is hit, we may be about to allocate memory. Ideally, this should have been
+        // allocated in prepare().
+        jassert (busMap.size() <= bus.capacity());
+
         bus.clear();
 
         for (size_t i = 0; i < busMap.size(); ++i)
@@ -1164,83 +1071,6 @@ private:
     std::vector<Steinberg::Vst::AudioBusBuffers> busBuffers;
     std::vector<ChannelMapping> mappings;
 };
-
-//==============================================================================
-// We have to trust that Steinberg won't double-delete
-// NOLINTBEGIN(clang-analyzer-cplusplus.NewDelete)
-template <class ObjectType>
-class VSTComSmartPtr
-{
-public:
-    VSTComSmartPtr() = default;
-    VSTComSmartPtr (const VSTComSmartPtr& other) noexcept : source (other.source)            { if (source != nullptr) source->addRef(); }
-    ~VSTComSmartPtr()                                                                        { if (source != nullptr) source->release(); }
-
-    explicit operator bool() const noexcept           { return operator!= (nullptr); }
-    ObjectType* get() const noexcept                  { return source; }
-    ObjectType& operator*() const noexcept            { return *source; }
-    ObjectType* operator->() const noexcept           { return source; }
-
-    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)
-    {
-        auto p = other;
-        std::swap (p.source, source);
-        return *this;
-    }
-
-    VSTComSmartPtr& operator= (std::nullptr_t)
-    {
-        return operator= (VSTComSmartPtr{});
-    }
-
-    bool operator== (std::nullptr_t) const noexcept { return source == nullptr; }
-    bool operator!= (std::nullptr_t) const noexcept { return source != nullptr; }
-
-    bool loadFrom (Steinberg::FUnknown* o)
-    {
-        *this = nullptr;
-        return o != nullptr && o->queryInterface (ObjectType::iid, (void**) &source) == Steinberg::kResultOk;
-    }
-
-    bool loadFrom (Steinberg::IPluginFactory* factory, const Steinberg::TUID& uuid)
-    {
-        jassert (factory != nullptr);
-        *this = nullptr;
-        return factory->createInstance (uuid, ObjectType::iid, (void**) &source) == Steinberg::kResultOk;
-    }
-
-    /** Increments refcount. */
-    static auto addOwner (ObjectType* t)
-    {
-        return VSTComSmartPtr (t, true);
-    }
-
-    /** Does not initially increment refcount; assumes t has a positive refcount. */
-    static auto becomeOwner (ObjectType* t)
-    {
-        return VSTComSmartPtr (t, false);
-    }
-
-private:
-    explicit VSTComSmartPtr (ObjectType* object, bool autoAddRef) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
-    ObjectType* source = nullptr;
-};
-
-/** Increments refcount. */
-template <class ObjectType>
-auto addVSTComSmartPtrOwner (ObjectType* t)
-{
-    return VSTComSmartPtr<ObjectType>::addOwner (t);
-}
-
-/** Does not initially increment refcount; assumes t has a positive refcount. */
-template <class ObjectType>
-auto becomeVSTComSmartPtrOwner (ObjectType* t)
-{
-    return VSTComSmartPtr<ObjectType>::becomeOwner (t);
-}
-
-// NOLINTEND(clang-analyzer-cplusplus.NewDelete)
 
 //==============================================================================
 /*  This class stores a plugin's preferred MIDI mappings.
@@ -1403,7 +1233,7 @@ private:
                                                              controlEvent->controllerNumber);
 
         if (controlParamID != Steinberg::Vst::kNoParamId)
-            callback (controlParamID, controlEvent->paramValue);
+            callback (controlParamID, (float) controlEvent->paramValue, msg.getTimeStamp());
 
         return true;
     }
@@ -1490,12 +1320,14 @@ private:
         return e;
     }
 
-    static Steinberg::Vst::Event createSysExEvent (const MidiMessage& msg, const uint8* midiEventData) noexcept
+    static Steinberg::Vst::Event createSysExEvent (const MidiMessage& msg, const uint8* data) noexcept
     {
+        jassert (msg.isSysEx());
+
         Steinberg::Vst::Event e{};
         e.type          = Steinberg::Vst::Event::kDataEvent;
-        e.data.bytes    = midiEventData + 1;
-        e.data.size     = (uint32) msg.getSysExDataSize();
+        e.data.bytes    = data;
+        e.data.size     = (uint32) msg.getRawDataSize();
         e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
         return e;
     }
@@ -1649,6 +1481,28 @@ private:
         }
     }
 
+    static Optional<MidiMessage> toMidiMessage (const Steinberg::Vst::DataEvent& e)
+    {
+        if (e.type != Steinberg::Vst::DataEvent::kMidiSysEx || e.size < 2)
+        {
+            // Only sysex data messages can be converted to MIDI
+            jassertfalse;
+            return {};
+        }
+
+        const auto header = e.bytes[0];
+        const auto footer = e.bytes[e.size - 1];
+
+        if (header != 0xf0 || footer != 0xf7)
+        {
+            // The sysex header/footer bytes are missing
+            jassertfalse;
+            return {};
+        }
+
+        return MidiMessage::createSysExMessage (e.bytes + 1, (int) e.size - 2);
+    }
+
     static Optional<MidiMessage> toMidiMessage (const Steinberg::Vst::Event& e)
     {
         switch (e.type)
@@ -1669,7 +1523,7 @@ private:
                                                       (Steinberg::uint8) denormaliseToMidiValue (e.polyPressure.pressure));
 
             case Steinberg::Vst::Event::kDataEvent:
-                return MidiMessage::createSysExMessage (e.data.bytes, (int) e.data.size);
+                return toMidiMessage (e.data);
 
             case Steinberg::Vst::Event::kLegacyMIDICCOutEvent:
                 return toMidiMessage (e.midiCCOut);
@@ -1737,8 +1591,15 @@ public:
 
     Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set                 (Steinberg::int32 index, float value)   { floatCache.setValueAndBits ((size_t) index, value, 1); }
-    void setWithoutNotifying (Steinberg::int32 index, float value)   { floatCache.setValue        ((size_t) index, value); }
+    void set (Steinberg::int32 index, float value)
+    {
+        floatCache.setValueAndBits ((size_t) index, value, 1);
+    }
+
+    float exchangeWithoutNotifying (Steinberg::int32 index, float value)
+    {
+        return floatCache.exchangeValue ((size_t) index, value);
+    }
 
     float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 
@@ -1801,5 +1662,4 @@ private:
 JUCE_END_NO_SANITIZE
 
 } // namespace juce
-
-#endif
+/** @endcond */

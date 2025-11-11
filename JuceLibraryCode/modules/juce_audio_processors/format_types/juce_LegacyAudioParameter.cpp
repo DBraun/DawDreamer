@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,35 +35,36 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 class LegacyAudioParameter final : public HostedAudioProcessorParameter
 {
 public:
-    LegacyAudioParameter (AudioProcessor& audioProcessorToUse, int audioParameterIndex)
+    LegacyAudioParameter (AudioProcessorParameter::Listener& listener,
+                          AudioProcessor& audioProcessorToUse,
+                          int audioParameterIndex)
+        : processor (&audioProcessorToUse)
     {
-        processor = &audioProcessorToUse;
-
-        parameterIndex = audioParameterIndex;
-        jassert (parameterIndex < processor->getNumParameters());
+        setOwner (&listener);
+        setParameterIndex (audioParameterIndex);
+        jassert (getParameterIndex() < processor->getNumParameters());
     }
 
     //==============================================================================
-    float getValue() const override                    { return processor->getParameter (parameterIndex); }
-    void setValue (float newValue) override            { processor->setParameter (parameterIndex, newValue); }
-    float getDefaultValue() const override             { return processor->getParameterDefaultValue (parameterIndex); }
-    String getName (int maxLen) const override         { return processor->getParameterName (parameterIndex, maxLen); }
-    String getLabel() const override                   { return processor->getParameterLabel (parameterIndex); }
-    int getNumSteps() const override                   { return processor->getParameterNumSteps (parameterIndex); }
-    bool isDiscrete() const override                   { return processor->isParameterDiscrete (parameterIndex); }
+    float getValue() const override                    { return processor->getParameter (getParameterIndex()); }
+    void setValue (float newValue) override            { processor->setParameter (getParameterIndex(), newValue); }
+    float getDefaultValue() const override             { return processor->getParameterDefaultValue (getParameterIndex()); }
+    String getName (int maxLen) const override         { return processor->getParameterName (getParameterIndex(), maxLen); }
+    String getLabel() const override                   { return processor->getParameterLabel (getParameterIndex()); }
+    int getNumSteps() const override                   { return processor->getParameterNumSteps (getParameterIndex()); }
+    bool isDiscrete() const override                   { return processor->isParameterDiscrete (getParameterIndex()); }
     bool isBoolean() const override                    { return false; }
-    bool isOrientationInverted() const override        { return processor->isParameterOrientationInverted (parameterIndex); }
-    bool isAutomatable() const override                { return processor->isParameterAutomatable (parameterIndex); }
-    bool isMetaParameter() const override              { return processor->isMetaParameter (parameterIndex); }
-    Category getCategory() const override              { return processor->getParameterCategory (parameterIndex); }
-    String getCurrentValueAsText() const override      { return processor->getParameterText (parameterIndex); }
-    String getParameterID() const override             { return processor->getParameterID (parameterIndex); }
+    bool isOrientationInverted() const override        { return processor->isParameterOrientationInverted (getParameterIndex()); }
+    bool isAutomatable() const override                { return processor->isParameterAutomatable (getParameterIndex()); }
+    bool isMetaParameter() const override              { return processor->isMetaParameter (getParameterIndex()); }
+    Category getCategory() const override              { return processor->getParameterCategory (getParameterIndex()); }
+    String getCurrentValueAsText() const override      { return processor->getParameterText (getParameterIndex()); }
+    String getParameterID() const override             { return processor->getParameterID (getParameterIndex()); }
 
     //==============================================================================
     float getValueForText (const String&) const override
@@ -77,22 +87,18 @@ public:
         return (dynamic_cast<LegacyAudioParameter*> (param) != nullptr);
     }
 
-    static int getParamIndex (AudioProcessor& processor, AudioProcessorParameter* param) noexcept
+    static int getParamIndex (AudioProcessor& proc, AudioProcessorParameter* param) noexcept
     {
         if (auto* legacy = dynamic_cast<LegacyAudioParameter*> (param))
-        {
-            return legacy->parameterIndex;
-        }
-        else
-        {
-            auto n = processor.getNumParameters();
-            jassert (n == processor.getParameters().size());
+            return legacy->getParameterIndex();
 
-            for (int i = 0; i < n; ++i)
-            {
-                if (processor.getParameters()[i] == param)
-                    return i;
-            }
+        auto n = proc.getNumParameters();
+        jassert (n == proc.getParameters().size());
+
+        for (int i = 0; i < n; ++i)
+        {
+            if (proc.getParameters()[i] == param)
+                return i;
         }
 
         return -1;
@@ -101,7 +107,7 @@ public:
     static String getParamID (const AudioProcessorParameter* param, bool forceLegacyParamIDs) noexcept
     {
         if (auto* legacy = dynamic_cast<const LegacyAudioParameter*> (param))
-            return forceLegacyParamIDs ? String (legacy->parameterIndex) : legacy->getParameterID();
+            return forceLegacyParamIDs ? String (legacy->getParameterIndex()) : legacy->getParameterID();
 
         if (auto* paramWithID = dynamic_cast<const HostedAudioProcessorParameter*> (param))
         {
@@ -114,6 +120,9 @@ public:
 
         return {};
     }
+
+private:
+    AudioProcessor* processor = nullptr;
 };
 
 //==============================================================================
@@ -131,6 +140,7 @@ public:
     {
         clear();
 
+        forwarder = AudioProcessor::ParameterChangeForwarder { &audioProcessor };
         legacyParamIDs = forceLegacyParamIDs;
 
         auto numParameters = audioProcessor.getNumParameters();
@@ -143,7 +153,7 @@ public:
                 if (usingManagedParameters)
                     return audioProcessor.getParameters()[i];
 
-                auto newParam = std::make_unique<LegacyAudioParameter> (audioProcessor, i);
+                auto newParam = std::make_unique<LegacyAudioParameter> (forwarder, audioProcessor, i);
                 auto* result = newParam.get();
                 ownedGroup.addChild (std::move (newParam));
 
@@ -159,6 +169,7 @@ public:
 
     void clear()
     {
+        forwarder = AudioProcessor::ParameterChangeForwarder { nullptr };
         ownedGroup = AudioProcessorParameterGroup();
         params.clear();
     }
@@ -207,10 +218,10 @@ private:
     const AudioProcessorParameterGroup* processorGroup = nullptr;
     AudioProcessorParameterGroup ownedGroup;
     Array<AudioProcessorParameter*> params;
+    AudioProcessor::ParameterChangeForwarder forwarder { nullptr };
     bool legacyParamIDs = false, usingManagedParameters = false;
 };
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 } // namespace juce

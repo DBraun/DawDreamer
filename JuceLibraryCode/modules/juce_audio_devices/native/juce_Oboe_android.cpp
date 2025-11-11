@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -386,12 +398,12 @@ private:
                                                   oboe::Direction::Output,
                                                   oboe::SharingMode::Exclusive,
                                                   2,
-                                                  getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
+                                                  oboe::AudioFormat::Float,
                                                   (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
                                                   bufferSizeHint,
                                                   &callback);
 
-        if (auto* nativeStream = tempStream.getNativeStream())
+        if (auto nativeStream = tempStream.getNativeStream())
             return nativeStream->getFramesPerBurst();
 
         return bufferSizeHint;
@@ -460,7 +472,6 @@ private:
         ~OboeStream()
         {
             close();
-            delete stream;
         }
 
         bool openedOk() const noexcept
@@ -483,7 +494,7 @@ private:
 
                 startResult = stream->waitForStateChange (expectedState, &nextState, timeoutNanos);
 
-                JUCE_OBOE_LOG ("Starting Oboe stream with result: " + getOboeString (startResult);
+                JUCE_OBOE_LOG ("Starting Oboe stream with result: " + getOboeString (startResult)
                                  + "\nUses AAudio = " + String ((int) stream->usesAAudio())
                                  + "\nDirection = " + getOboeString (stream->getDirection())
                                  + "\nSharingMode = " + getOboeString (stream->getSharingMode())
@@ -501,7 +512,7 @@ private:
             }
         }
 
-        oboe::AudioStream* getNativeStream() const
+        std::shared_ptr<oboe::AudioStream> getNativeStream() const
         {
             jassert (openedOk());
             return stream;
@@ -565,7 +576,7 @@ private:
                  + "\nSampleRate = " + String (newSampleRate)
                  + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
 
-            openResult = builder.openStream (&stream);
+            openResult = builder.openStream (stream);
             JUCE_OBOE_LOG ("Building Oboe stream with result: " + getOboeString (openResult)
                  + "\nStream state = " + (stream != nullptr ? getOboeString (stream->getState()) : String ("?")));
 
@@ -601,7 +612,7 @@ private:
             }
         }
 
-        oboe::AudioStream* stream = nullptr;
+        std::shared_ptr<oboe::AudioStream> stream;
        #if JUCE_USE_ANDROID_OBOE_STABILIZED_CALLBACK
         std::unique_ptr<oboe::StabilizedCallback> stabilizedCallback;
        #endif
@@ -655,40 +666,9 @@ private:
               sampleRate (sampleRateToUse),
               bufferSize (bufferSizeToUse),
               streamFormat (streamFormatToUse),
-              bitDepth (bitDepthToUse),
-              outputStream (new OboeStream (outputDeviceId,
-                                            oboe::Direction::Output,
-                                            oboe::SharingMode::Exclusive,
-                                            numOutputChannels,
-                                            streamFormatToUse,
-                                            sampleRateToUse,
-                                            bufferSizeToUse,
-                                            this))
+              bitDepth (bitDepthToUse)
         {
-            if (numInputChannels > 0)
-            {
-                inputStream.reset (new OboeStream (inputDeviceId,
-                                                   oboe::Direction::Input,
-                                                   oboe::SharingMode::Exclusive,
-                                                   numInputChannels,
-                                                   streamFormatToUse,
-                                                   sampleRateToUse,
-                                                   bufferSizeToUse,
-                                                   nullptr));
-
-                if (inputStream->openedOk() && outputStream->openedOk())
-                {
-                    // Input & output sample rates should match!
-                    jassert (inputStream->getNativeStream()->getSampleRate()
-                               == outputStream->getNativeStream()->getSampleRate());
-                }
-
-                checkStreamSetup (inputStream.get(), inputDeviceId, numInputChannels,
-                                  sampleRate, bufferSize, streamFormat);
-            }
-
-            checkStreamSetup (outputStream.get(), outputDeviceId, numOutputChannels,
-                              sampleRate, bufferSize, streamFormat);
+            openStreams();
         }
 
         // Not strictly required as these should not change, but recommended by Google anyway
@@ -699,7 +679,7 @@ private:
                                [[maybe_unused]] int expectedBufferSize,
                                oboe::AudioFormat format)
         {
-            if ([[maybe_unused]] auto* nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
+            if ([[maybe_unused]] auto nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
             {
                 jassert (numChannels == 0 || numChannels == nativeStream->getChannelCount());
                 jassert (expectedSampleRate == 0 || expectedSampleRate == nativeStream->getSampleRate());
@@ -714,7 +694,51 @@ private:
             if (ptr == nullptr || ! ptr->openedOk())
                 return 0;
 
-            return ptr->getNativeStream()->getBufferCapacityInFrames();
+            if (auto nativeStream = ptr->getNativeStream())
+                return nativeStream->getBufferCapacityInFrames();
+
+            return 0;
+        }
+
+        void openStreams()
+        {
+            outputStream = std::make_unique<OboeStream> (outputDeviceId,
+                                                         oboe::Direction::Output,
+                                                         oboe::SharingMode::Exclusive,
+                                                         numOutputChannels,
+                                                         streamFormat,
+                                                         sampleRate,
+                                                         bufferSize,
+                                                         static_cast<AudioStreamCallback*> (this));
+
+            checkStreamSetup (outputStream.get(), outputDeviceId, numOutputChannels,
+                              sampleRate, bufferSize, streamFormat);
+
+            if (numInputChannels <= 0)
+                return;
+
+            inputStream = std::make_unique<OboeStream> (inputDeviceId,
+                                                        oboe::Direction::Input,
+                                                        oboe::SharingMode::Exclusive,
+                                                        numInputChannels,
+                                                        streamFormat,
+                                                        sampleRate,
+                                                        bufferSize,
+                                                        nullptr);
+
+            checkStreamSetup (inputStream.get(), inputDeviceId, numInputChannels,
+                              sampleRate, bufferSize, streamFormat);
+
+            if (! inputStream->openedOk() || ! outputStream->openedOk())
+                return;
+
+            const auto getSampleRate = [] (auto nativeStream)
+            {
+                return nativeStream != nullptr ? nativeStream->getSampleRate() : 0;
+            };
+            // Input & output sample rates should match!
+            jassert (getSampleRate (inputStream->getNativeStream())
+                     == getSampleRate (outputStream->getNativeStream()));
         }
 
         OboeAudioIODevice& owner;
@@ -764,8 +788,7 @@ private:
         {
             const SpinLock::ScopedLockType lock { audioCallbackMutex };
 
-            inputStream  = nullptr;
-            outputStream = nullptr;
+            destroyStreams();
         }
 
         int getOutputLatencyInSamples() override    { return outputLatency; }
@@ -777,8 +800,10 @@ private:
             if (stream == nullptr || ! openedOk())
                 return false;
 
-            auto result = stream->getNativeStream()->getTimestamp (CLOCK_MONOTONIC, nullptr, nullptr);
-            return result != oboe::Result::ErrorUnimplemented;
+            if (auto ptr = stream->getNativeStream())
+                return ptr->getTimestamp (CLOCK_MONOTONIC, nullptr, nullptr) != oboe::Result::ErrorUnimplemented;
+
+            return false;
         }
 
         oboe::DataCallbackResult onAudioReady (oboe::AudioStream* stream, void* audioData, int32_t numFrames) override
@@ -791,7 +816,7 @@ private:
                     return oboe::DataCallbackResult::Stop;
 
                 // only output stream should be the master stream receiving callbacks
-                jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream());
+                jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream().get());
 
                 // Read input from Oboe
                 const auto expandedBufferSize = jmax (inputStreamNativeBuffer.size(),
@@ -800,7 +825,7 @@ private:
 
                 if (inputStream != nullptr)
                 {
-                    auto* nativeInputStream = inputStream->getNativeStream();
+                    auto nativeInputStream = inputStream->getNativeStream();
 
                     if (nativeInputStream->getFormat() != oboe::AudioFormat::I16 && nativeInputStream->getFormat() != oboe::AudioFormat::Float)
                     {
@@ -809,7 +834,7 @@ private:
                         return oboe::DataCallbackResult::Continue;
                     }
 
-                    auto result = inputStream->getNativeStream()->read (inputStreamNativeBuffer.data(), numFrames, 0);
+                    auto result = nativeInputStream->read (inputStreamNativeBuffer.data(), numFrames, 0);
 
                     if (result)
                     {
@@ -876,25 +901,25 @@ private:
 
         int getLatencyFor (OboeStream& stream)
         {
-            auto& nativeStream = *stream.getNativeStream();
+            auto nativeStream = stream.getNativeStream();
 
-            if (auto latency = nativeStream.calculateLatencyMillis())
+            if (auto latency = nativeStream->calculateLatencyMillis())
                 return static_cast<int> ((latency.value() * sampleRate) / 1000);
 
             // Get the time that a known audio frame was presented.
             int64_t hardwareFrameIndex = 0;
             int64_t hardwareFrameHardwareTime = 0;
 
-            auto result = nativeStream.getTimestamp (CLOCK_MONOTONIC,
-                                                     &hardwareFrameIndex,
-                                                     &hardwareFrameHardwareTime);
+            auto result = nativeStream->getTimestamp (CLOCK_MONOTONIC,
+                                                      &hardwareFrameIndex,
+                                                      &hardwareFrameHardwareTime);
 
             if (result != oboe::Result::OK)
                 return 0;
 
             // Get counter closest to the app.
-            const bool isOutput = nativeStream.getDirection() == oboe::Direction::Output;
-            const int64_t appFrameIndex = isOutput ? nativeStream.getFramesWritten() : nativeStream.getFramesRead();
+            const bool isOutput = nativeStream->getDirection() == oboe::Direction::Output;
+            const int64_t appFrameIndex = isOutput ? nativeStream->getFramesWritten() : nativeStream->getFramesRead();
 
             // Assume that the next frame will be processed at the current time
             int64_t appFrameAppTime = getCurrentTimeNanos();
@@ -938,30 +963,26 @@ private:
 
             JUCE_OBOE_LOG ("Oboe stream onErrorAfterClose(): " + getOboeString (error));
 
-            if (error == oboe::Result::ErrorDisconnected)
-            {
-                const SpinLock::ScopedTryLockType streamRestartLock { streamRestartMutex };
+            const SpinLock::ScopedTryLockType streamRestartLock { streamRestartMutex };
 
-                if (streamRestartLock.isLocked())
-                {
-                    // Close, recreate, and start the stream, not much use in current one.
-                    // Use default device id, to let the OS pick the best ID (since our was disconnected).
+            if (! streamRestartLock.isLocked())
+                return;
 
-                    const SpinLock::ScopedLockType audioCallbackLock { audioCallbackMutex };
+            const SpinLock::ScopedLockType audioCallbackLock { audioCallbackMutex };
 
-                    outputStream = nullptr;
-                    outputStream.reset (new OboeStream (oboe::kUnspecified,
-                                                        oboe::Direction::Output,
-                                                        oboe::SharingMode::Exclusive,
-                                                        numOutputChannels,
-                                                        streamFormat,
-                                                        sampleRate,
-                                                        bufferSize,
-                                                        this));
+            destroyStreams();
 
-                    outputStream->start();
-                }
-            }
+            if (error != oboe::Result::ErrorDisconnected)
+                return;
+
+            openStreams();
+            start();
+        }
+
+        void destroyStreams()
+        {
+            inputStream = nullptr;
+            outputStream = nullptr;
         }
 
         std::vector<SampleType> inputStreamNativeBuffer;
@@ -1011,19 +1032,18 @@ OboeAudioIODevice::OboeSessionBase* OboeAudioIODevice::OboeSessionBase::create (
                                                                                 int bufferSize)
 {
 
-    std::unique_ptr<OboeSessionBase> session;
-    auto sdkVersion = getAndroidSDKVersion();
-
     // SDK versions 21 and higher should natively support floating point...
-    if (sdkVersion >= 21)
-    {
-        session.reset (new OboeSessionImpl<float> (owner, inputDeviceId, outputDeviceId,
-                                                   numInputChannels, numOutputChannels, sampleRate, bufferSize));
+    std::unique_ptr<OboeSessionBase> session = std::make_unique<OboeSessionImpl<float>> (owner,
+                                                                                         inputDeviceId,
+                                                                                         outputDeviceId,
+                                                                                         numInputChannels,
+                                                                                         numOutputChannels,
+                                                                                         sampleRate,
+                                                                                         bufferSize);
 
-        // ...however, some devices lie so re-try without floating point
-        if (session != nullptr && (! session->openedOk()))
-            session.reset();
-    }
+    // ...however, some devices lie so re-try without floating point
+    if (session != nullptr && (! session->openedOk()))
+        session.reset();
 
     if (session == nullptr)
     {
@@ -1177,8 +1197,7 @@ public:
 
     bool supportsDevicesInfo() const
     {
-        static auto result = getAndroidSDKVersion() >= 23;
-        return result;
+        return true;
     }
 
     void addDevice (const LocalRef<jobject>& device, JNIEnv* env)

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -29,7 +38,7 @@
 #undef PRAGMA_ALIGN_SUPPORTED
 
 
-#if ! JUCE_MINGW && ! JUCE_MSVC
+#if ! JUCE_MSVC
  #define __cdecl
 #endif
 
@@ -54,19 +63,15 @@ struct AEffect;
 
 #include "juce_VSTCommon.h"
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 #include "juce_VSTMidiEventList.h"
 
-#if JUCE_MINGW
- #ifndef WM_APPCOMMAND
-  #define WM_APPCOMMAND 0x0319
- #endif
-#elif ! JUCE_WINDOWS
+#if ! JUCE_WINDOWS
  static void _fpreset() {}
  static void _clearfp() {}
 #endif
@@ -76,7 +81,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 #endif
 
 #ifndef JUCE_VST_WRAPPER_INVOKE_MAIN
-#define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain ((Vst2::audioMasterCallback) &audioMaster);
+#define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain (audioMaster);
 #endif
 
 #ifndef JUCE_VST_FALLBACK_HOST_NAME
@@ -217,8 +222,7 @@ namespace
 }
 
 //==============================================================================
-typedef Vst2::AEffect* (VSTCALLBACK *MainCall) (Vst2::audioMasterCallback);
-static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect*, int32, int32, pointer_sized_int, void*, float);
+using MainCall = Vst2::AEffect* (VSTCALLBACK*) (Vst2::audioMasterCallback);
 
 //==============================================================================
 // Change this to disable logging of various VST activities
@@ -824,8 +828,6 @@ private:
 static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
-
 class TempChannelPointers
 {
 public:
@@ -1115,7 +1117,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
     ~VSTPluginInstance() override
     {
         if (vstEffect != nullptr && vstEffect->magic == 0x56737450 /* 'VstP' */)
-            callOnMessageThread ([this] { cleanup(); });
+            MessageManager::callSync ([this] { cleanup(); });
     }
 
     void cleanup()
@@ -1332,6 +1334,18 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
     bool isSynthPlugin() const  { return (vstEffect != nullptr && (vstEffect->flags & Vst2::effFlagsIsSynth) != 0); }
 
     int pluginCanDo (const char* text) const  { return (int) dispatch (Vst2::effCanDo, 0, 0, (void*) text,  0); }
+
+    std::optional<String> getNameForMidiNoteNumber (int note, int midiChannel) override
+    {
+        Vst2::MidiKeyName keyName{};
+
+        keyName.thisProgramIndex = getCurrentProgram();
+        keyName.thisKeyNumber = note;
+
+        return dispatch (Vst2::effGetMidiKeyName, midiChannel, 0, &keyName, 0.0f) != 0
+             ? std::make_optional (String::createStringFromData (keyName.keyName, Vst2::kVstMaxNameLen))
+             : std::nullopt;
+    }
 
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
@@ -2150,6 +2164,20 @@ private:
             if (module->resFileId != 0)
                 UseResFile (module->resFileId);
            #endif
+
+            constexpr Vst2::audioMasterCallback audioMaster = [] (Vst2::AEffect* eff,
+                                                                  Vst2::VstInt32 opcode,
+                                                                  Vst2::VstInt32 index,
+                                                                  Vst2::VstIntPtr value,
+                                                                  void* ptr,
+                                                                  float opt) -> Vst2::VstIntPtr
+            {
+                if (eff != nullptr)
+                    if (auto* instance = (VSTPluginInstance*) (eff->resvd2))
+                        return instance->handleCallback (opcode, index, value, ptr, opt);
+
+                return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
+            };
 
             {
                 JUCE_VST_WRAPPER_INVOKE_MAIN
@@ -3428,8 +3456,6 @@ private:
 };
 #endif
 
-JUCE_END_IGNORE_WARNINGS_MSVC
-
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
 {
@@ -3453,15 +3479,6 @@ bool VSTPluginInstance::updateSizeFromEditor ([[maybe_unused]] int w, [[maybe_un
 
 //==============================================================================
 // entry point for all callbacks from the plugin
-static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect* effect, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
-{
-    if (effect != nullptr)
-        if (auto* instance = (VSTPluginInstance*) (effect->resvd2))
-            return instance->handleCallback (opcode, index, value, ptr, opt);
-
-    return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
-}
-
 //==============================================================================
 VSTPluginFormat::VSTPluginFormat() {}
 VSTPluginFormat::~VSTPluginFormat() {}
@@ -3753,7 +3770,7 @@ void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

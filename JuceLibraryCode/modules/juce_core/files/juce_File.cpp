@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -358,6 +370,14 @@ String File::getPathUpToLastSlash() const
 File File::getParentDirectory() const
 {
     return createFileWithoutCheckingPath (getPathUpToLastSlash());
+}
+
+bool File::isNonEmptyDirectory() const
+{
+    if (! isDirectory())
+        return false;
+
+    return RangedDirectoryIterator (*this, false, "*", findFilesAndDirectories) != RangedDirectoryIterator();
 }
 
 //==============================================================================
@@ -1009,13 +1029,11 @@ File File::getLinkedTarget() const
 //==============================================================================
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 const File File::nonexistent{};
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 #endif
 
@@ -1060,7 +1078,6 @@ public:
         expect (home.isDirectory());
         expect (home.exists());
         expect (! home.existsAsFile());
-        expect (File::getSpecialLocation (File::userApplicationDataDirectory).isDirectory());
         expect (File::getSpecialLocation (File::currentExecutableFile).exists());
         expect (File::getSpecialLocation (File::currentApplicationFile).exists());
         expect (File::getSpecialLocation (File::invokedExecutableFile).exists());
@@ -1139,10 +1156,10 @@ public:
         expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
         expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
         expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
-        expect (home.getChildFile ("../xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile (".././xyz") == home.getParentDirectory().getChildFile ("xyz"));
-        expect (home.getChildFile (".././xyz/./abc") == home.getParentDirectory().getChildFile ("xyz/abc"));
-        expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile ("../xyz") == home.getSiblingFile ("xyz"));
+        expect (home.getChildFile (".././xyz") == home.getSiblingFile ("xyz"));
+        expect (home.getChildFile (".././xyz/./abc") == home.getSiblingFile ("xyz/abc"));
+        expect (home.getChildFile ("./../xyz") == home.getSiblingFile ("xyz"));
         expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
 
         expect (! File().hasReadAccess());

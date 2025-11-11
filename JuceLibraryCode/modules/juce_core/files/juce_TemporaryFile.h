@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -76,14 +88,40 @@ public:
 
     //==============================================================================
     /** Creates a randomly-named temporary file in the default temp directory.
+    */
+    TemporaryFile();
+
+    /** Creates a randomly-named temporary file in the default temp directory.
+
+        @param suffix       a file suffix to use for the file
+    */
+    explicit TemporaryFile (const String& suffix);
+
+    /** Creates a randomly-named temporary file in the default temp directory.
 
         @param suffix       a file suffix to use for the file
         @param optionFlags  a combination of the values listed in the OptionFlags enum
         The file will not be created until you write to it. And remember that when
         this object is deleted, the file will also be deleted!
     */
-    TemporaryFile (const String& suffix = String(),
-                   int optionFlags = 0);
+    TemporaryFile (const String& suffix,
+                   int optionFlags);
+
+    /** Creates a temporary file in the same directory as a specified file.
+
+        This is useful if you have a file that you want to overwrite, but don't
+        want to harm the original file if the write operation fails. You can
+        use this to create a temporary file next to the target file, then
+        write to the temporary file, and finally use overwriteTargetFileWithTemporary()
+        to replace the target file with the one you've just written.
+
+        This class won't create any files until you actually write to them. And remember
+        that when this object is deleted, the temporary file will also be deleted!
+
+        @param targetFile   the file that you intend to overwrite - the temporary
+                            file will be created in the same directory as this
+    */
+    explicit TemporaryFile (const File& targetFile);
 
     /** Creates a temporary file in the same directory as a specified file.
 
@@ -101,7 +139,7 @@ public:
         @param optionFlags  a combination of the values listed in the OptionFlags enum
     */
     TemporaryFile (const File& targetFile,
-                   int optionFlags = 0);
+                   int optionFlags);
 
     /** Creates a temporary file using an explicit filename.
         The other constructors are a better choice than this one, unless for some reason

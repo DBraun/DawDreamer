@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -271,9 +280,12 @@ public:
     void executeOnGLThread (T&& functor, bool blockUntilFinished);
 
     //==============================================================================
-    /** Returns the scale factor used by the display that is being rendered.
+    /** Returns a scale factor that relates the context component's size to the number
+        of physical pixels it covers on the screen.
 
-        The scale is that of the display - see Displays::Display::scale
+        In special cases it will be the same as Displays::Display::scale, but it also
+        includes AffineTransforms that affect the rendered area, and will be correctly
+        reported not just in standalone applications but plugins as well.
 
         Note that this should only be called during an OpenGLRenderer::renderOpenGL()
         callback - at other times the value it returns is undefined.
@@ -306,7 +318,7 @@ public:
     //==============================================================================
     /** Draws the currently selected texture into this context at its original size.
 
-        @param targetClipArea  the target area to draw into (in top-left origin coords)
+        @param targetClipArea   the target area to draw into (in top-left origin coords)
         @param anchorPosAndTextureSize  the position of this rectangle is the texture's top-left
                                         anchor position in the target space, and the size must be
                                         the total size of the texture.
@@ -316,12 +328,16 @@ public:
                                 used for vertical flipping of the y coordinates.
         @param textureOriginIsBottomLeft    if true, the texture's origin is treated as being at
                                 (0, 0). If false, it is assumed to be (0, 1)
+        @param blend            if true, the texture's alpha is used to blend the texture with
+                                transparency on top the context's existing content. If false, the
+                                texture is drawn with no alpha, overwriting the content of the
+                                context.
     */
     void copyTexture (const Rectangle<int>& targetClipArea,
                       const Rectangle<int>& anchorPosAndTextureSize,
                       int contextWidth, int contextHeight,
-                      bool textureOriginIsBottomLeft);
-
+                      bool textureOriginIsBottomLeft,
+                      bool blend = true);
 
     /** Changes the amount of GPU memory that the internal cache for Images is allowed to use. */
     void setImageCacheSize (size_t cacheSizeBytes) noexcept;
@@ -330,9 +346,10 @@ public:
     size_t getImageCacheSize() const noexcept;
 
     //==============================================================================
-   #ifndef DOXYGEN
+    /** @cond */
     class NativeContext;
-   #endif
+    class NativeContextListener;
+    /** @endcond */
 
 private:
     enum class InitResult
@@ -384,9 +401,9 @@ private:
 };
 
 //==============================================================================
-#ifndef DOXYGEN
+/** @cond */
 template <typename FunctionType>
 void OpenGLContext::executeOnGLThread (FunctionType&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<FunctionType> (f), shouldBlock); }
-#endif
+/** @endcond */
 
 } // namespace juce

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -281,9 +290,9 @@ struct Grid::Helpers
             const auto lines = getArrayOfLinesFromTracks (tracks);
             int count = 0;
 
-            for (int i = 0; i < lines.size(); i++)
+            for (const auto [index, line] : enumerate (lines))
             {
-                for (const auto& name : lines.getReference (i).lineNames)
+                for (const auto& name : line.lineNames)
                 {
                     if (prop.getName() == name)
                     {
@@ -293,7 +302,7 @@ struct Grid::Helpers
                 }
 
                 if (count == prop.getNumber())
-                    return i + 1;
+                    return (int) index + 1;
             }
 
             jassertfalse;
@@ -328,9 +337,11 @@ struct Grid::Helpers
             const auto lines = getArrayOfLinesFromTracks (tracks);
             int count = 0;
 
-            for (int i = startLineNumber; i < lines.size(); i++)
+            const auto enumerated = enumerate (lines);
+
+            for (const auto [index, line] : makeRange (enumerated.begin() + startLineNumber, enumerated.end()))
             {
-                for (const auto& name : lines.getReference (i).lineNames)
+                for (const auto& name : line.lineNames)
                 {
                     if (propertyWithSpan.getName() == name)
                     {
@@ -340,7 +351,7 @@ struct Grid::Helpers
                 }
 
                 if (count == propertyWithSpan.getNumber())
-                    return i + 1;
+                    return (int) index + 1;
             }
 
             jassertfalse;
@@ -622,6 +633,8 @@ struct Grid::Helpers
     //==============================================================================
     struct AutoPlacement
     {
+        AutoPlacement() = delete;
+
         using ItemPlacementArray = Array<std::pair<GridItem*, PlacementHelpers::LineArea>>;
 
         //==============================================================================
@@ -638,7 +651,7 @@ struct Grid::Helpers
             {
                 for (int i = 0; i < columnSpan; i++)
                     for (int j = 0; j < rowSpan; j++)
-                        setCell (cell.column + i, cell.row + j);
+                        occupiedCells.insert ({ cell.column + i, cell.row + j });
 
                 return { { cell.column, cell.column + columnSpan }, { cell.row, cell.row + rowSpan } };
             }
@@ -687,36 +700,26 @@ struct Grid::Helpers
             }
 
         private:
-            struct SortableCell
+            struct Comparator
             {
-                int column, row;
-                bool columnFirst;
+                using Tie = std::tuple<int, int> (*) (const Cell&);
 
-                bool operator< (const SortableCell& other) const
+                explicit Comparator (bool columnFirstIn)
+                    : tie (columnFirstIn ? Tie { [] (const Cell& x) { return std::tuple (x.row, x.column); } }
+                                         : Tie { [] (const Cell& x) { return std::tuple (x.column, x.row); } })
+                {}
+
+                bool operator() (const Cell& a, const Cell& b) const
                 {
-                    if (columnFirst)
-                    {
-                        if (row == other.row)
-                            return column < other.column;
-
-                        return row < other.row;
-                    }
-
-                    if (row == other.row)
-                        return column < other.column;
-
-                    return row < other.row;
+                    return tie (a) < tie (b);
                 }
-            };
 
-            void setCell (int column, int row)
-            {
-                occupiedCells.insert ({ column, row, columnFirst });
-            }
+                const Tie tie;
+            };
 
             bool isOccupied (Cell cell) const
             {
-                return occupiedCells.count ({ cell.column, cell.row, columnFirst }) > 0;
+                return occupiedCells.count (cell) > 0;
             }
 
             bool isOccupied (Cell cell, int columnSpan, int rowSpan) const
@@ -739,20 +742,20 @@ struct Grid::Helpers
 
             int getHighestCrossDimension() const
             {
-                Cell cell { 1, 1 };
+                const auto cell = occupiedCells.empty() ? Cell { 1, 1 }
+                                                        : *std::prev (occupiedCells.end());
 
-                if (occupiedCells.size() > 0)
-                    cell = { occupiedCells.crbegin()->column, occupiedCells.crbegin()->row };
-
-                return std::max (getCrossDimension (cell), highestCrossDimension);
+                return std::max (getCrossDimension (cell) + 1, highestCrossDimension);
             }
 
             Cell advance (Cell cell) const
             {
-                if ((getCrossDimension (cell) + 1) >= getHighestCrossDimension())
+                const auto next = getCrossDimension (cell) + 1;
+
+                if (next >= getHighestCrossDimension())
                     return fromDimensions (getMainDimension (cell) + 1, 1);
 
-                return fromDimensions (getMainDimension (cell), getCrossDimension (cell) + 1);
+                return fromDimensions (getMainDimension (cell), next);
             }
 
             int getMainDimension (Cell cell) const   { return columnFirst ? cell.column : cell.row; }
@@ -767,8 +770,11 @@ struct Grid::Helpers
             }
 
             int highestCrossDimension;
-            bool columnFirst;
-            std::set<SortableCell> occupiedCells;
+            const bool columnFirst;
+            std::set<Cell, Comparator> occupiedCells { Comparator { columnFirst } };
+
+            JUCE_DECLARE_NON_COPYABLE (OccupancyPlane)
+            JUCE_DECLARE_NON_MOVEABLE (OccupancyPlane)
         };
 
         //==============================================================================
@@ -830,7 +836,7 @@ struct Grid::Helpers
         }
 
         //==============================================================================
-        ItemPlacementArray deduceAllItems (Grid& grid) const
+        static ItemPlacementArray deduceAllItems (Grid& grid)
         {
             const auto namedAreas = PlacementHelpers::deduceNamedAreas (grid.templateAreas);
 
@@ -1101,7 +1107,7 @@ float Grid::TrackInfo::getAbsoluteSize (float relativeFractionalUnit) const
 //==============================================================================
 void Grid::performLayout (Rectangle<int> targetArea)
 {
-    const auto itemsAndAreas = Helpers::AutoPlacement().deduceAllItems (*this);
+    const auto itemsAndAreas = Helpers::AutoPlacement::deduceAllItems (*this);
 
     auto implicitTracks = Helpers::AutoPlacement::createImplicitTracks (*this, itemsAndAreas);
 
@@ -1629,6 +1635,85 @@ struct GridTests final : public UnitTest
                 const auto randomSolution = createSolution (numColumns, probabilityOfFractionalColumn, bounds);
                 evaluateInvariants (randomSolution);
             }
+        }
+
+        {
+            beginTest ("Cell orderings for row and columns work correctly");
+
+            const Rectangle<int> bounds { 0, 0, 200, 200 };
+
+            Grid grid;
+            grid.autoColumns = Grid::TrackInfo { Grid::Fr { 1 } };
+            grid.autoRows = Grid::TrackInfo { Grid::Fr { 1 } };
+
+            grid.items = { GridItem{}.withArea (1, 20),
+                           GridItem{}.withArea (2, 10),
+                           GridItem{}.withArea (GridItem::Span { 1 }, GridItem::Span { 15 }),
+                           GridItem{} };
+
+            grid.autoFlow = Grid::AutoFlow::row;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 150, 0, 10, 100 });
+
+            grid.autoFlow = Grid::AutoFlow::column;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 0, 100, 10, 100 });
+
+            grid.items = { GridItem{}.withArea (20, 1),
+                           GridItem{}.withArea (10, 2),
+                           GridItem{}.withArea (GridItem::Span { 15 }, GridItem::Span { 1 }),
+                           GridItem{} };
+
+            grid.autoFlow = Grid::AutoFlow::row;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 100, 0, 100, 10 });
+
+            grid.autoFlow = Grid::AutoFlow::column;
+            grid.performLayout (bounds);
+            expect (grid.items.getLast().currentBounds == Rect { 0, 150, 100, 10 });
+        }
+
+        beginTest ("Complex grid layout");
+        {
+            Grid grid;
+
+            using Track = Grid::TrackInfo;
+
+            grid.templateRows    = { Track (1_fr), Track (1_fr), Track (1_fr) };
+            grid.templateColumns = { Track (1_fr), Track (1_fr), Track (1_fr) };
+
+            grid.autoColumns = Track (1_fr);
+            grid.autoRows    = Track (1_fr);
+
+            grid.autoFlow = Grid::AutoFlow::column;
+
+            grid.items.addArray ({ GridItem().withArea (2, 2, 4, 4),
+                                   GridItem(),
+                                   GridItem().withArea ({}, 3),
+                                   GridItem(),
+                                   GridItem().withArea (GridItem::Span (2), {}),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem(),
+                                   GridItem() });
+
+            grid.performLayout ({ 60, 30 });
+
+            expect (grid.items[0] .currentBounds == Rect { 10, 10, 20, 20 });
+            expect (grid.items[1] .currentBounds == Rect {  0,  0, 10, 10 });
+            expect (grid.items[2] .currentBounds == Rect { 20,  0, 10, 10 });
+            expect (grid.items[3] .currentBounds == Rect {  0, 10, 10, 10 });
+            expect (grid.items[4] .currentBounds == Rect { 30,  0, 10, 20 });
+            expect (grid.items[5] .currentBounds == Rect { 30, 20, 10, 10 });
+            expect (grid.items[6] .currentBounds == Rect { 40,  0, 10, 10 });
+            expect (grid.items[7] .currentBounds == Rect { 40, 10, 10, 10 });
+            expect (grid.items[8] .currentBounds == Rect { 40, 20, 10, 10 });
+            expect (grid.items[9] .currentBounds == Rect { 50,  0, 10, 10 });
+            expect (grid.items[10].currentBounds == Rect { 50, 10, 10, 10 });
+            expect (grid.items[11].currentBounds == Rect { 50, 20, 10, 10 });
         }
     }
 };

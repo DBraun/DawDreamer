@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -182,10 +191,10 @@ public:
             // numOpenedHandles may get negative if we don't receive open handle event.
             if (fileWasRead && numOpenedHandles <= 0)
             {
-                MessageManager::callAsync ([fileObserver = fileObserver, onClose = onClose]
+                MessageManager::callAsync ([fo = fileObserver, oc = onClose]
                 {
-                    getEnv()->CallVoidMethod (fileObserver, JuceContentProviderFileObserver.stopWatching);
-                    NullCheckedInvocation::invoke (onClose);
+                    getEnv()->CallVoidMethod (fo, JuceContentProviderFileObserver.stopWatching);
+                    NullCheckedInvocation::invoke (oc);
                 });
             }
         }
@@ -254,33 +263,45 @@ public:
 
         fileForUri.insert (fileForUriIn.begin(), fileForUriIn.end());
 
-        LocalRef<jobject> fileUris (env->NewObject (JavaArrayList, JavaArrayList.constructor, fileForUriIn.size()));
-
-        for (const auto& pair : fileForUriIn)
-        {
-            env->CallBooleanMethod (fileUris,
-                                    JavaArrayList.add,
-                                    env->CallStaticObjectMethod (AndroidUri,
-                                                                 AndroidUri.parse,
-                                                                 javaString (pair.first).get()));
-        }
+        const auto* action = fileForUriIn.size() == 1 ? "android.intent.action.SEND"
+                                                      : "android.intent.action.SEND_MULTIPLE";
 
         LocalRef<jobject> intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
-        env->CallObjectMethod (intent,
-                               AndroidIntent.setAction,
-                               javaString ("android.intent.action.SEND_MULTIPLE").get());
+        env->CallObjectMethod (intent, AndroidIntent.setAction, javaString (action).get());
 
         env->CallObjectMethod (intent,
                                AndroidIntent.setType,
                                javaString (getCommonMimeType (mimeTypes)).get());
 
-        constexpr int grantReadPermission = 1;
-        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadPermission);
+        constexpr jint grantReadUriPermission   = 1;
+        constexpr jint grantPrefixUriPermission = 128;
 
-        env->CallObjectMethod (intent,
-                               AndroidIntent.putParcelableArrayListExtra,
-                               javaString ("android.intent.extra.STREAM").get(),
-                               fileUris.get());
+        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadUriPermission | grantPrefixUriPermission);
+
+        if (fileForUriIn.size() == 1)
+        {
+            const auto uri = fileForUriIn.begin()->first;
+            LocalRef<jobject> androidUri { env->CallStaticObjectMethod (AndroidUri, AndroidUri.parse, javaString (uri).get()) };
+            env->CallObjectMethod (intent, AndroidIntent.putExtraParcelable, javaString ("android.intent.extra.STREAM").get(), androidUri.get());
+        }
+        else
+        {
+            LocalRef<jobject> fileUris (env->NewObject (JavaArrayList, JavaArrayList.constructor, fileForUriIn.size()));
+
+            for (const auto& pair : fileForUriIn)
+            {
+                env->CallBooleanMethod (fileUris,
+                                        JavaArrayList.add,
+                                        env->CallStaticObjectMethod (AndroidUri,
+                                                                     AndroidUri.parse,
+                                                                     javaString (pair.first).get()));
+            }
+
+            env->CallObjectMethod (intent,
+                                   AndroidIntent.putParcelableArrayListExtra,
+                                   javaString ("android.intent.extra.STREAM").get(),
+                                   fileUris.get());
+        }
 
         return doIntent (intent, callback);
     }
@@ -336,8 +357,8 @@ public:
 
     static jobjectArray JNICALL contentSharerGetStreamTypes (JNIEnv*, jobject /*contentProvider*/, jobject uri, jstring mimeTypeFilter)
     {
-        return getInstance().getStreamTypes (LocalRef<jobject> (static_cast<jobject> (uri)),
-                                             LocalRef<jstring> (static_cast<jstring> (mimeTypeFilter)));
+        return getInstance().getStreamTypes (addLocalRefOwner (uri),
+                                             addLocalRefOwner (mimeTypeFilter));
     }
 
 private:
@@ -349,12 +370,6 @@ private:
 
         const auto text = javaString ("Choose share target");
 
-        if (getAndroidSDKVersion() < 22)
-            return LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent,
-                                                                   AndroidIntent.createChooser,
-                                                                   intent.get(),
-                                                                   text.get()));
-
         constexpr jint FLAG_UPDATE_CURRENT = 0x08000000;
         constexpr jint FLAG_IMMUTABLE = 0x04000000;
 
@@ -364,7 +379,7 @@ private:
         const LocalRef<jobject> replyIntent (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), klass));
         getEnv()->CallObjectMethod (replyIntent, AndroidIntent.putExtraInt, javaString ("com.rmsl.juce.JUCE_REQUEST_CODE").get(), request);
 
-        const auto flags = FLAG_UPDATE_CURRENT | (getAndroidSDKVersion() <= 23 ? 0 : FLAG_IMMUTABLE);
+        const auto flags = FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE;
         const LocalRef<jobject> pendingIntent (env->CallStaticObjectMethod (AndroidPendingIntent,
                                                                             AndroidPendingIntent.getBroadcast,
                                                                             context.get(),
@@ -372,8 +387,8 @@ private:
                                                                             replyIntent.get(),
                                                                             flags));
 
-        return LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent22,
-                                                               AndroidIntent22.createChooser,
+        return LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent,
+                                                               AndroidIntent.createChooserWithSender,
                                                                intent.get(),
                                                                text.get(),
                                                                env->CallObjectMethod (pendingIntent,
@@ -482,7 +497,8 @@ private:
         if (extension.isEmpty())
             return nullptr;
 
-        return juceStringArrayToJava (filterMimeTypes (MimeTypeTable::getMimeTypesForFileExtension (extension), juceString (mimeTypeFilter.get())));
+        return juceStringArrayToJava (filterMimeTypes (detail::MimeTypeTable::getMimeTypesForFileExtension (extension),
+                                                       juceString (mimeTypeFilter.get()))).release();
     }
 
     std::unique_ptr<ActivityLauncher> doIntent (const LocalRef<jobject>& intent,
@@ -776,7 +792,7 @@ private:
 
         if (std::none_of (extensions.begin(), extensions.end(), [] (const String& s) { return s.isEmpty(); }))
             for (const auto& extension : extensions)
-                for (const auto& mime : MimeTypeTable::getMimeTypesForFileExtension (extension))
+                for (const auto& mime : detail::MimeTypeTable::getMimeTypesForFileExtension (extension))
                     mimes.insert (mime);
 
         for (const auto& mime : mimes)

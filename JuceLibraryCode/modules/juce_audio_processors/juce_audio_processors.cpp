@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -77,26 +86,6 @@ static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
 
 #endif
 
-template <typename Callback>
-void callOnMessageThread (Callback&& callback)
-{
-    if (MessageManager::getInstance()->existsAndIsLockedByCurrentThread())
-    {
-        callback();
-        return;
-    }
-
-    WaitableEvent completionEvent;
-
-    MessageManager::callAsync ([&callback, &completionEvent]
-                               {
-                                   callback();
-                                   completionEvent.signal();
-                               });
-
-    completionEvent.wait();
-}
-
 #if JUCE_MAC
 
 //==============================================================================
@@ -151,8 +140,8 @@ private:
         {
             auto* view = static_cast<NSView*> (getView());
             const auto newArea = peer->getAreaCoveredBy (*this);
-            [view setFrame: makeNSRect (newArea.withHeight (newArea.getHeight() + 1))];
-            [view setFrame: makeNSRect (newArea)];
+            [view setFrame: makeCGRect (newArea.withHeight (newArea.getHeight() + 1))];
+            [view setFrame: makeCGRect (newArea)];
         }
     }
 
@@ -195,7 +184,9 @@ private:
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "format_types/juce_LegacyAudioParameter.cpp"
+#include "processors/juce_AudioProcessorParameter.cpp"
 #include "processors/juce_AudioProcessor.cpp"
+#include "processors/juce_AudioProcessorListener.cpp"
 #include "processors/juce_AudioPluginInstance.cpp"
 #include "processors/juce_AudioProcessorEditor.cpp"
 #include "processors/juce_AudioProcessorGraph.cpp"
@@ -220,9 +211,9 @@ private:
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
-#include "utilities/juce_NativeScaleFactorNotifier.cpp"
 #include "utilities/juce_AAXClientExtensions.cpp"
 #include "utilities/juce_VST2ClientExtensions.cpp"
+#include "utilities/juce_VST3ClientExtensions.cpp"
 #include "utilities/ARA/juce_ARA_utils.cpp"
 
 #include "format_types/juce_LV2PluginFormat.cpp"
@@ -230,6 +221,10 @@ private:
 #if JUCE_UNIT_TESTS
  #if JUCE_PLUGINHOST_VST3
   #include "format_types/juce_VST3PluginFormat_test.cpp"
+ #endif
+
+ #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+  #include "format_types/juce_AudioUnitPluginFormat_test.cpp"
  #endif
 
  #if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))

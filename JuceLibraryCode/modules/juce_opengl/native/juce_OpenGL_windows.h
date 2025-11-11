@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,10 +35,11 @@
 namespace juce
 {
 
-extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
+extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, Component* parent);
 
 //==============================================================================
-class OpenGLContext::NativeContext  : private ComponentPeer::ScaleFactorListener
+class OpenGLContext::NativeContext  : private ComponentPeer::ScaleFactorListener,
+                                      private AsyncUpdater
 {
 public:
     NativeContext (Component& component,
@@ -37,8 +47,9 @@ public:
                    void* contextToShareWithIn,
                    bool /*useMultisampling*/,
                    OpenGLVersion version)
+        : sharedContext (contextToShareWithIn)
     {
-        dummyComponent.reset (new DummyComponent (*this));
+        placeholderComponent.reset (new PlaceholderComponent (*this));
         createNativeWindow (component);
 
         PIXELFORMATDESCRIPTOR pfd;
@@ -74,9 +85,6 @@ public:
                 }
             }
 
-            if (contextToShareWithIn != nullptr)
-                wglShareLists ((HGLRC) contextToShareWithIn, renderContext.get());
-
             component.getTopLevelComponent()->repaint();
             component.repaint();
         }
@@ -84,6 +92,7 @@ public:
 
     ~NativeContext() override
     {
+        cancelPendingUpdate();
         renderContext.reset();
         dc.reset();
 
@@ -96,6 +105,26 @@ public:
     {
         threadAwarenessSetter = std::make_unique<ScopedThreadDPIAwarenessSetter> (nativeWindow->getNativeHandle());
         context = &c;
+
+        if (sharedContext != nullptr)
+        {
+            if (! wglShareLists ((HGLRC) sharedContext, renderContext.get()))
+            {
+                TCHAR messageBuffer[256] = {};
+
+                FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                               nullptr,
+                               GetLastError(),
+                               MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                               messageBuffer,
+                               (DWORD) numElementsInArray (messageBuffer) - 1,
+                               nullptr);
+
+                DBG (messageBuffer);
+                jassertfalse;
+            }
+        }
+
         return InitResult::success;
     }
 
@@ -109,7 +138,14 @@ public:
     static void deactivateCurrentContext()  { wglMakeCurrent (nullptr, nullptr); }
     bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc.get(), renderContext.get()) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext.get(); }
-    void swapBuffers() const noexcept       { SwapBuffers (dc.get()); }
+
+    void swapBuffers() noexcept
+    {
+        SwapBuffers (dc.get());
+
+        if (! std::exchange (haveBuffersBeenSwapped, true))
+            triggerAsyncUpdate();
+    }
 
     bool setSwapInterval (int numFramesPerSwap)
     {
@@ -160,8 +196,16 @@ public:
         return nullptr;
     }
 
+    void addListener (NativeContextListener&) {}
+    void removeListener (NativeContextListener&) {}
+
 private:
     //==============================================================================
+    void handleAsyncUpdate() override
+    {
+        nativeWindow->setVisible (true);
+    }
+
     static void initialiseWGLExtensions (HDC dcIn)
     {
         static bool initialised = false;
@@ -254,9 +298,13 @@ private:
     }
 
     //==============================================================================
-    struct DummyComponent  : public Component
+    struct PlaceholderComponent  : public Component
     {
-        DummyComponent (NativeContext& c) : context (c) {}
+        explicit PlaceholderComponent (NativeContext& c)
+            : context (c)
+        {
+            setOpaque (true);
+        }
 
         // The windowing code will call this when a paint callback happens
         void handleCommandMessage (int) override   { context.triggerRepaint(); }
@@ -286,7 +334,7 @@ private:
             auto* parentHWND = topComp->getWindowHandle();
 
             ScopedThreadDPIAwarenessSetter setter { parentHWND };
-            nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, parentHWND));
+            nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*placeholderComponent, topComp));
         }
 
         if (auto* peer = topComp->getPeer())
@@ -298,7 +346,6 @@ private:
             peer->addScaleFactorListener (this);
         }
 
-        nativeWindow->setVisible (true);
         dc = std::unique_ptr<std::remove_pointer_t<HDC>, DeviceContextDeleter> { GetDC ((HWND) nativeWindow->getNativeHandle()),
                                                                                  DeviceContextDeleter { (HWND) nativeWindow->getNativeHandle() } };
     }
@@ -374,14 +421,16 @@ private:
     };
 
     CriticalSection mutex;
-    std::unique_ptr<DummyComponent> dummyComponent;
+    std::unique_ptr<PlaceholderComponent> placeholderComponent;
     std::unique_ptr<ComponentPeer> nativeWindow;
     std::unique_ptr<ScopedThreadDPIAwarenessSetter> threadAwarenessSetter;
     Component::SafePointer<Component> safeComponent;
     std::unique_ptr<std::remove_pointer_t<HGLRC>, RenderContextDeleter> renderContext;
     std::unique_ptr<std::remove_pointer_t<HDC>, DeviceContextDeleter> dc;
     OpenGLContext* context = nullptr;
+    void* sharedContext = nullptr;
     double nativeScaleFactor = 1.0;
+    bool haveBuffersBeenSwapped = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)

@@ -20,7 +20,7 @@
 
 // [END_USER_CODE_SECTION]
 
-#define JUCE_PROJUCER_VERSION 0x80004
+#define JUCE_PROJUCER_VERSION 0x8000a
 
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics          1
@@ -225,10 +225,6 @@
  //#define JUCE_USE_COREIMAGE_LOADER 1
 #endif
 
-#ifndef    JUCE_USE_DIRECTWRITE
- //#define JUCE_USE_DIRECTWRITE 1
-#endif
-
 #ifndef    JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
  //#define JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING 0
 #endif
@@ -269,6 +265,10 @@
 
 #ifndef    JUCE_WEB_BROWSER
  #define   JUCE_WEB_BROWSER 0
+#endif
+
+#ifndef    JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING
+ //#define JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING 0
 #endif
 
 #ifndef    JUCE_USE_WIN_WEBVIEW2

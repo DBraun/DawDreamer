@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -58,14 +67,14 @@ public:
     /** Each node in the graph has a UID of this type. */
     struct NodeID
     {
-        NodeID() {}
-        explicit NodeID (uint32 i) : uid (i) {}
+        constexpr NodeID() = default;
+        explicit constexpr NodeID (uint32 i) : uid (i) {}
 
         uint32 uid = 0;
 
-        bool operator== (const NodeID& other) const noexcept    { return uid == other.uid; }
-        bool operator!= (const NodeID& other) const noexcept    { return uid != other.uid; }
-        bool operator<  (const NodeID& other) const noexcept    { return uid <  other.uid; }
+        constexpr bool operator== (const NodeID& other) const noexcept    { return uid == other.uid; }
+        constexpr bool operator!= (const NodeID& other) const noexcept    { return uid != other.uid; }
+        constexpr bool operator<  (const NodeID& other) const noexcept    { return uid <  other.uid; }
     };
 
     //==============================================================================
@@ -82,17 +91,17 @@ public:
     */
     class NodeAndChannel
     {
-        auto tie() const { return std::tie (nodeID, channelIndex); }
+        constexpr auto tie() const { return std::tie (nodeID, channelIndex); }
 
     public:
         NodeID nodeID;
         int channelIndex;
 
-        bool isMIDI() const noexcept                                    { return channelIndex == midiChannelIndex; }
+        constexpr bool isMIDI() const noexcept                                    { return channelIndex == midiChannelIndex; }
 
-        bool operator== (const NodeAndChannel& other) const noexcept    { return tie() == other.tie(); }
-        bool operator!= (const NodeAndChannel& other) const noexcept    { return tie() != other.tie(); }
-        bool operator<  (const NodeAndChannel& other) const noexcept    { return tie() <  other.tie(); }
+        constexpr bool operator== (const NodeAndChannel& other) const noexcept    { return tie() == other.tie(); }
+        constexpr bool operator!= (const NodeAndChannel& other) const noexcept    { return tie() != other.tie(); }
+        constexpr bool operator<  (const NodeAndChannel& other) const noexcept    { return tie() <  other.tie(); }
     };
 
     //==============================================================================
@@ -183,15 +192,34 @@ public:
     struct JUCE_API  Connection
     {
         //==============================================================================
-        Connection() = default;
-        Connection (NodeAndChannel source, NodeAndChannel destination) noexcept;
+        constexpr Connection() = default;
+        constexpr Connection (NodeAndChannel sourceIn, NodeAndChannel destinationIn) noexcept
+            : source (sourceIn), destination (destinationIn) {}
 
-        Connection (const Connection&) = default;
-        Connection& operator= (const Connection&) = default;
+        constexpr Connection (const Connection&) = default;
+        constexpr Connection& operator= (const Connection&) = default;
 
-        bool operator== (const Connection&) const noexcept;
-        bool operator!= (const Connection&) const noexcept;
-        bool operator<  (const Connection&) const noexcept;
+        constexpr bool operator== (const Connection& other) const noexcept
+        {
+            return source == other.source && destination == other.destination;
+        }
+
+        constexpr bool operator!= (const Connection& other) const noexcept
+        {
+            return ! operator== (other);
+        }
+
+        constexpr bool operator<  (const Connection& other) const noexcept
+        {
+            const auto tie = [] (auto& x)
+            {
+                return std::tie (x.source.nodeID,
+                                 x.destination.nodeID,
+                                 x.source.channelIndex,
+                                 x.destination.channelIndex);
+            };
+            return tie (*this) < tie (other);
+        }
 
         //==============================================================================
         /** The channel and node which is the input source for this connection. */
@@ -252,7 +280,7 @@ public:
 
         If this succeeds, it returns a pointer to the newly-created node.
     */
-    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, NodeID nodeId = {}, UpdateKind = UpdateKind::sync);
+    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, std::optional<NodeID> nodeId = std::nullopt, UpdateKind = UpdateKind::sync);
 
     /** Deletes a node within the graph which has the specified ID.
         This will also delete any connections that are attached to this node.

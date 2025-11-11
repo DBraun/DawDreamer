@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -225,13 +234,25 @@ public:
         }
     }
 
-    void focusGained (FocusChangeType changeType)
+    void focusGained (FocusChangeType changeType, FocusChangeDirection direction)
     {
         if (client != 0 && supportsXembed && wantsFocus)
         {
             updateKeyFocus();
+
+            const auto xembedDirection = [&]
+            {
+                if (direction == FocusChangeDirection::forward)
+                    return XEMBED_FOCUS_FIRST;
+
+                if (direction == FocusChangeDirection::backward)
+                    return XEMBED_FOCUS_LAST;
+
+                return XEMBED_FOCUS_CURRENT;
+            }();
+
             sendXEmbedEvent (CurrentTime, XEMBED_FOCUS_IN,
-                             (changeType == focusChangedByTabKey ? XEMBED_FOCUS_FIRST : XEMBED_FOCUS_CURRENT));
+                             (changeType == focusChangedByTabKey ? xembedDirection : XEMBED_FOCUS_CURRENT));
         }
     }
 
@@ -267,15 +288,76 @@ public:
 
 private:
     //==============================================================================
+    class ComponentIsShowingListener : private ComponentMovementWatcher
+    {
+    public:
+        ComponentIsShowingListener (Component& componentIn, std::function<void()> callbackIn)
+            : ComponentMovementWatcher (&componentIn),
+              callback (std::move (callbackIn))
+        {}
+
+    private:
+        void componentMovedOrResized (bool, bool) override {}
+        void componentPeerChanged() override {}
+        void componentVisibilityChanged() override { NullCheckedInvocation::invoke (callback); }
+
+        using ComponentMovementWatcher::componentMovedOrResized;
+        using ComponentMovementWatcher::componentVisibilityChanged;
+
+        std::function<void()> callback;
+    };
+
+    class WindowMapper
+    {
+    public:
+        WindowMapper (Pimpl& pimplIn, Window& windowIn)
+            : pimpl (pimplIn),
+              window (windowIn)
+        {}
+
+        void update()
+        {
+            if (window == 0)
+                return;
+
+            const auto shouldBeMapped =    pimpl.getXEmbedMappedFlag()
+                                        && pimpl.owner.isShowing()
+                                        && pimpl.lastPeer != nullptr;
+
+            if (std::exchange (mapped, shouldBeMapped) != shouldBeMapped)
+            {
+                if (shouldBeMapped)
+                    X11Symbols::getInstance()->xMapWindow (pimpl.getDisplay(), window);
+                else
+                    X11Symbols::getInstance()->xUnmapWindow (pimpl.getDisplay(), window);
+            }
+        }
+
+        void unmap()
+        {
+            if (window == 0)
+                return;
+
+            X11Symbols::getInstance()->xUnmapWindow (pimpl.getDisplay(), window);
+            mapped = false;
+        }
+
+    private:
+        Pimpl& pimpl;
+        Window& window;
+        bool mapped = false;
+    };
+
     XEmbedComponent& owner;
+    ComponentIsShowingListener isShowingListener { owner, [this] { updateMapping(); } };
     Window client = 0, host = 0;
+    WindowMapper clientMapper { *this, client }, hostMapper { *this, host };
     Atom infoAtom, messageTypeAtom;
 
     bool clientInitiated;
     bool wantsFocus        = false;
     bool allowResize       = false;
     bool supportsXembed    = false;
-    bool hasBeenMapped     = false;
     int xembedVersion      = maxXEmbedVersionToSupport;
 
     ComponentPeer* lastPeer = nullptr;
@@ -348,11 +430,8 @@ private:
             int defaultScreen = X11Symbols::getInstance()->xDefaultScreen (dpy);
             Window root = X11Symbols::getInstance()->xRootWindow (dpy, defaultScreen);
 
-            if (hasBeenMapped)
-            {
-                X11Symbols::getInstance()->xUnmapWindow (dpy, client);
-                hasBeenMapped = false;
-            }
+            hostMapper.unmap();
+            clientMapper.unmap();
 
             X11Symbols::getInstance()->xReparentWindow (dpy, client, root, 0, 0);
             client = 0;
@@ -363,20 +442,8 @@ private:
 
     void updateMapping()
     {
-        if (client != 0)
-        {
-            const bool shouldBeMapped = getXEmbedMappedFlag();
-
-            if (shouldBeMapped != hasBeenMapped)
-            {
-                hasBeenMapped = shouldBeMapped;
-
-                if (shouldBeMapped)
-                    X11Symbols::getInstance()->xMapWindow (getDisplay(), client);
-                else
-                    X11Symbols::getInstance()->xUnmapWindow (getDisplay(), client);
-            }
-        }
+        hostMapper.update();
+        clientMapper.update();
     }
 
     Window getParentX11Window()
@@ -392,6 +459,9 @@ private:
     //==============================================================================
     bool getXEmbedMappedFlag()
     {
+        if (client == 0)
+            return false;
+
         XWindowSystemUtilities::GetXProperty embedInfo (getDisplay(), client, infoAtom, 0, 2, false, infoAtom);
 
         if (embedInfo.success && embedInfo.actualFormat == 32
@@ -475,7 +545,7 @@ private:
             Rectangle<int> newBounds = getX11BoundsFromJuce();
 
             if (newPeer == nullptr)
-                X11Symbols::getInstance()->xUnmapWindow (dpy, host);
+                hostMapper.unmap();
 
             Window newParent = (newPeer != nullptr ? getParentX11Window() : rootWindow);
             X11Symbols::getInstance()->xReparentWindow (dpy, host, newParent, newBounds.getX(), newBounds.getY());
@@ -491,7 +561,7 @@ private:
                 }
 
                 componentMovedOrResized (owner, true, true);
-                X11Symbols::getInstance()->xMapWindow (dpy, host);
+                updateMapping();
 
                 broughtToFront();
             }
@@ -507,6 +577,9 @@ private:
     //==============================================================================
     void handleXembedCmd (const ::Time& /*xTime*/, long opcode, long /*detail*/, long /*data1*/, long /*data2*/)
     {
+        if (auto* peer = owner.getPeer())
+            peer->getCurrentModifiersRealtime();
+
         switch (opcode)
         {
             case XEMBED_REQUEST_FOCUS:
@@ -690,7 +763,11 @@ void XEmbedComponent::paint (Graphics& g)
     g.fillAll (Colours::lightgrey);
 }
 
-void XEmbedComponent::focusGained (FocusChangeType changeType)     { pimpl->focusGained (changeType); }
+void XEmbedComponent::focusGainedWithDirection (FocusChangeType changeType, FocusChangeDirection direction)
+{
+    pimpl->focusGained (changeType, direction);
+}
+
 void XEmbedComponent::focusLost   (FocusChangeType changeType)     { pimpl->focusLost   (changeType); }
 void XEmbedComponent::broughtToFront()                             { pimpl->broughtToFront(); }
 unsigned long XEmbedComponent::getHostWindowID()                   { return pimpl->getHostWindowID(); }

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -106,7 +118,7 @@ struct IgnoreUnused
 template <typename T>
 static auto getDataPtrAndSize (T& t)
 {
-    static_assert (std::is_pod_v<T>);
+    static_assert (std::is_standard_layout_v<T>);
     return std::make_tuple (&t, (UInt32) sizeof (T));
 }
 
@@ -341,14 +353,16 @@ public:
 
     void allocateTempBuffers()
     {
-        auto tempBufSize = bufferSize + 4;
+        const auto tempBufSize = (size_t) bufferSize + 4;
 
         auto streams = getStreams();
-        const auto total = std::accumulate (streams.begin(), streams.end(), 0,
-                                            [] (int n, const auto& s) { return n + (s != nullptr ? s->channels : 0); });
-        audioBuffer.calloc (total * tempBufSize);
+        const auto total = std::accumulate (streams.begin(), streams.end(), (size_t) 0,
+                                            [] (auto n, const auto& s) { return n + (s != nullptr ? s->channels : 0); });
+        audioBuffer.clear();
+        audioBuffer.resize (total * tempBufSize);
+        audioBufferLengthInSamples = (size_t) bufferSize;
 
-        auto channels = 0;
+        size_t channels = 0;
         for (auto* stream : streams)
             channels += stream != nullptr ? stream->allocateTempBuffers (tempBufSize, channels, audioBuffer) : 0;
     }
@@ -764,60 +778,52 @@ public:
             return;
         }
 
-        const auto numInputChans  = getChannels (inStream);
-        const auto numOutputChans = getChannels (outStream);
-
-        if (callback != nullptr)
+        const auto actualBufferSizeSamples = std::invoke ([&]
         {
-            for (int i = numInputChans; --i >= 0;)
-            {
-                auto& info = inStream->channelInfo.getReference (i);
-                auto dest = inStream->tempBuffers[i];
-                auto src = ((const float*) inInputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
-                auto stride = info.dataStrideSamples;
+            size_t result = 0;
 
-                if (stride != 0) // if this is zero, info is invalid
+            for (auto [streamPtr, data] : { std::tuple (&inStream,  static_cast<const AudioBufferList*> (inInputData)),
+                                            std::tuple (&outStream, static_cast<const AudioBufferList*> (outOutputData)) })
+            {
+                auto& stream = *streamPtr;
+                const auto numChannels = (int) getChannels (stream);
+
+                for (auto i = 0; i < numChannels; ++i)
                 {
-                    for (int j = bufferSize; --j >= 0;)
-                    {
-                        *dest++ = *src;
-                        src += stride;
-                    }
+                    const auto info = stream->channelInfo.getReference (i);
+                    const auto stride = (size_t) info.dataStrideSamples;
+
+                    if (stride == 0)
+                        continue;
+
+                    const auto bufSizeSamples = data->mBuffers[info.streamNum].mDataByteSize / (sizeof (float) * stride);
+
+                    // Not all stream buffer sizes are equal!
+                    jassert (result == 0 || result == bufSizeSamples);
+
+                    result = bufSizeSamples;
                 }
             }
 
+            return result;
+        });
+
+        if (callback != nullptr)
+        {
             for (auto* stream : getStreams())
-                if (stream != nullptr)
-                    owner.hadDiscontinuity |= stream->checkTimestampsForDiscontinuity (stream == inStream.get() ? inputTimestamp
-                                                                                                                : outputTimestamp);
-
-            const auto* timeStamp = numOutputChans > 0 ? outputTimestamp : inputTimestamp;
-            const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
-            const AudioIODeviceCallbackContext context
             {
-                timeStamp != nullptr ? &nanos : nullptr,
-            };
+                if (stream == nullptr)
+                    continue;
 
-            callback->audioDeviceIOCallbackWithContext (getTempBuffers (inStream),  numInputChans,
-                                                        getTempBuffers (outStream), numOutputChans,
-                                                        bufferSize,
-                                                        context);
+                const auto timeStamp = stream == inStream.get() ? inputTimestamp : outputTimestamp;
+                owner.hadDiscontinuity |= stream->checkTimestampsForDiscontinuity (timeStamp);
+            }
 
-            for (int i = numOutputChans; --i >= 0;)
+            for (size_t offset = 0; offset < actualBufferSizeSamples;)
             {
-                auto& info = outStream->channelInfo.getReference (i);
-                auto src = outStream->tempBuffers[i];
-                auto dest = ((float*) outOutputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
-                auto stride = info.dataStrideSamples;
-
-                if (stride != 0) // if this is zero, info is invalid
-                {
-                    for (int j = bufferSize; --j >= 0;)
-                    {
-                        *dest = *src++;
-                        dest += stride;
-                    }
-                }
+                const auto numSamplesInChunk = jmin (actualBufferSizeSamples - offset, audioBufferLengthInSamples);
+                processBufferChunk (offset, numSamplesInChunk, inputTimestamp, outputTimestamp, inInputData, outOutputData);
+                offset += numSamplesInChunk;
             }
         }
         else
@@ -829,7 +835,7 @@ public:
 
         for (auto* stream : getStreams())
             if (stream != nullptr)
-                stream->previousSampleTime += static_cast<Float64> (bufferSize);
+                stream->previousSampleTime += static_cast<Float64> (actualBufferSizeSamples);
     }
 
     // called by callbacks (possibly off the main thread)
@@ -862,16 +868,20 @@ public:
                                result.setRange (clearFrom, result.getHighestBit() + 1 - clearFrom, false);
                                return result;
                            }()),
-              channelInfo (getChannelInfos (isInput, parent, activeChans)),
-              channels (static_cast<int> (channelInfo.size()))
+              channelInfo (getChannelInfos (isInput, parent, activeChans))
         {}
 
-        int allocateTempBuffers (int tempBufSize, int channelCount, HeapBlock<float>& buffer)
+        size_t allocateTempBuffers (size_t tempBufSize, size_t channelCount, Span<float> buffer)
         {
-            tempBuffers.calloc (channels + 2);
+            tempBuffers.clear();
+            tempBuffers.resize (channels + 2);
 
-            for (int i = 0; i < channels;  ++i)
-                tempBuffers[i] = buffer + channelCount++ * tempBufSize;
+            for (size_t i = 0; i < channels; ++i)
+            {
+                const auto offset = channelCount++ * tempBufSize;
+                jassert (offset + tempBufSize <= buffer.size());
+                tempBuffers[i] = buffer.data() + offset;
+            }
 
             return channels;
         }
@@ -1006,10 +1016,10 @@ public:
         const StringArray chanNames;
         const BigInteger activeChans;
         const Array<CallbackDetailsForChannel> channelInfo;
-        const int channels = 0;
+        const size_t channels = (size_t) channelInfo.size();
         Float64 previousSampleTime;
 
-        HeapBlock<float*> tempBuffers;
+        std::vector<float*> tempBuffers;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Stream)
     };
@@ -1028,18 +1038,18 @@ public:
 
     static int          getLatency          (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::latency); }
     static int          getBitDepth         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::bitDepth); }
-    static int          getChannels         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::channels); }
+    static size_t       getChannels         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::channels); }
     static int          getNumChannelNames  (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::chanNames).size(); }
     static String       getChannelNames     (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::chanNames).joinIntoString (" "); }
     static BigInteger   getActiveChannels   (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::activeChans); }
-    static float**      getTempBuffers      (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, [] (auto& s) { return s.tempBuffers.get(); }); }
+    static float**      getTempBuffers      (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, [] (auto& s) { return s.tempBuffers.data(); }); }
 
     //==============================================================================
     static constexpr Float64 invalidSampleTime = std::numeric_limits<Float64>::max();
 
     CoreAudioIODevice& owner;
     int bitDepth = 32;
-    int xruns = 0;
+    std::atomic<int> xruns = 0;
     Array<double> sampleRates;
     Array<int> bufferSizes;
     AudioDeviceID deviceID;
@@ -1048,6 +1058,111 @@ public:
     AudioWorkgroup audioWorkgroup;
 
 private:
+    template <typename Iterator>
+    struct StrideIterator
+    {
+        StrideIterator (Iterator iteratorIn, ptrdiff_t strideIn)
+            : iterator (std::move (iteratorIn)), stride (strideIn) {}
+
+        StrideIterator& operator++()
+        {
+            iterator += stride;
+            return *this;
+        }
+
+        StrideIterator operator++ (int)
+        {
+            auto copy = *this;
+            operator++();
+            return copy;
+        }
+
+        // decltype (auto) here because the return types may be references
+        decltype (auto) operator* () const { return *iterator; }
+
+        bool operator== (const StrideIterator& other) const { return iterator == other.iterator; }
+        bool operator!= (const StrideIterator& other) const { return iterator != other.iterator; }
+
+        StrideIterator& operator+= (ptrdiff_t x)
+        {
+            iterator += stride * x;
+            return *this;
+        }
+
+        StrideIterator operator+ (ptrdiff_t x) const
+        {
+            return StrideIterator { *this } += x;
+        }
+
+        Iterator iterator;
+        ptrdiff_t stride;
+    };
+
+    void processBufferChunk (size_t sampleOffset,
+                             size_t numSamplesInChunk,
+                             const AudioTimeStamp* inputTimestamp,
+                             const AudioTimeStamp* outputTimestamp,
+                             const AudioBufferList* inInputData,
+                             AudioBufferList* outOutputData)
+    {
+        // precondition
+        jassert (callback != nullptr);
+
+        const auto numInputChans  = (int) getChannels (inStream);
+        const auto numOutputChans = (int) getChannels (outStream);
+
+        // copy from input buffer to temporary buffer
+        for (auto index = 0; index < numInputChans; ++index)
+        {
+            const auto info = inStream->channelInfo.getReference (index);
+            const auto src = StrideIterator { ((const float*) inInputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples,
+                                              info.dataStrideSamples }
+                           + (ptrdiff_t) sampleOffset;
+
+            if (src.stride == 0) // if this is zero, info is invalid
+                continue;
+
+            std::copy (src, src + (ptrdiff_t) numSamplesInChunk, inStream->tempBuffers[(size_t) index]);
+        }
+
+        // only pass a timestamp for the first chunk of each buffer
+        const auto* timeStamp = std::invoke ([&]() -> const AudioTimeStamp*
+        {
+            if (sampleOffset != 0)
+                return nullptr;
+
+            return numOutputChans > 0 ? outputTimestamp : inputTimestamp;
+        });
+
+        const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
+        const AudioIODeviceCallbackContext context
+        {
+            timeStamp != nullptr ? &nanos : nullptr,
+        };
+
+        callback->audioDeviceIOCallbackWithContext (getTempBuffers (inStream),
+                                                    numInputChans,
+                                                    getTempBuffers (outStream),
+                                                    numOutputChans,
+                                                    (int) numSamplesInChunk,
+                                                    context);
+
+        // copy from temporary buffer to output buffer
+        for (auto index = 0; index < numOutputChans; ++index)
+        {
+            const auto info = outStream->channelInfo.getReference (index);
+            const auto dest = StrideIterator { ((float*) outOutputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples,
+                                               info.dataStrideSamples }
+                            + (ptrdiff_t) sampleOffset;
+
+            if (dest.stride == 0) // if this is zero, info is invalid
+                continue;
+
+            const auto* src = outStream->tempBuffers[(size_t) index];
+            std::copy (src, src + numSamplesInChunk, dest);
+        }
+    }
+
     class ScopedAudioDeviceIOProcID
     {
     public:
@@ -1099,7 +1214,8 @@ private:
     std::atomic<bool> playing { false };
     double sampleRate = 0;
     int bufferSize = 0;
-    HeapBlock<float> audioBuffer;
+    std::vector<float> audioBuffer;
+    size_t audioBufferLengthInSamples = 0;
     Atomic<int> callbacksAllowed { 1 };
 
     //==============================================================================
@@ -1112,8 +1228,8 @@ private:
         auto oldBufferSize = bufferSize;
 
         if (! updateDetailsFromDevice())
-            owner.stopInternal();
-        else if ((oldBufferSize != bufferSize || ! approximatelyEqual (oldSampleRate, sampleRate)) && owner.shouldRestartDevice())
+            owner.stopWithPendingCallback();
+        else if (oldBufferSize != bufferSize || ! approximatelyEqual (oldSampleRate, sampleRate))
             owner.restart();
     }
 
@@ -1147,7 +1263,7 @@ private:
             return x.mSelector == kAudioDeviceProcessorOverload;
         });
 
-        intern.xruns += xruns;
+        intern.xruns += (int) xruns;
 
         const auto detailsChanged = std::any_of (pa, pa + numAddresses, [] (const AudioObjectPropertyAddress& x)
         {
@@ -1313,30 +1429,26 @@ public:
 
     void start (AudioIODeviceCallback* callback) override
     {
+        const ScopedLock sl (startStopLock);
+
         if (internal->start (callback))
-            previousCallback = callback;
+            pendingCallback = nullptr;
     }
 
     void stop() override
     {
-        restartDevice = false;
         stopAndGetLastCallback();
+
+        const ScopedLock sl (startStopLock);
+        pendingCallback = nullptr;
     }
 
-    AudioIODeviceCallback* stopAndGetLastCallback() const
+    void stopWithPendingCallback()
     {
-        auto* lastCallback = internal->stop (true);
+        const ScopedLock sl (startStopLock);
 
-        if (lastCallback != nullptr)
-            lastCallback->audioDeviceStopped();
-
-        return lastCallback;
-    }
-
-    AudioIODeviceCallback* stopInternal()
-    {
-        restartDevice = true;
-        return stopAndGetLastCallback();
+        if (pendingCallback == nullptr)
+            pendingCallback = stopAndGetLastCallback();
     }
 
     AudioWorkgroup getWorkgroup() const override
@@ -1369,11 +1481,7 @@ public:
             return;
         }
 
-        {
-            const ScopedLock sl (closeLock);
-            previousCallback = stopInternal();
-        }
-
+        stopWithPendingCallback();
         startTimer (100);
     }
 
@@ -1387,31 +1495,45 @@ public:
         restarter = restarterIn;
     }
 
-    bool shouldRestartDevice() const noexcept    { return restartDevice; }
-
     WeakReference<CoreAudioIODeviceType> deviceType;
     bool hadDiscontinuity;
 
 private:
     std::unique_ptr<CoreAudioInternal> internal;
-    bool isOpen_ = false, restartDevice = true;
+    bool isOpen_ = false;
     String lastError;
-    AudioIODeviceCallback* previousCallback = nullptr;
+    //  When non-null, this indicates that the device has been stopped with the intent to restart
+    //  using the same callback. That is, this should only be non-null when the device is stopped.
+    AudioIODeviceCallback* pendingCallback = nullptr;
     AsyncRestarter* restarter = nullptr;
     BigInteger inputChannelsRequested, outputChannelsRequested;
-    CriticalSection closeLock;
+    CriticalSection startStopLock;
+
+    AudioIODeviceCallback* stopAndGetLastCallback() const
+    {
+        auto* lastCallback = internal->stop (true);
+
+        if (lastCallback != nullptr)
+            lastCallback->audioDeviceStopped();
+
+        return lastCallback;
+    }
 
     void timerCallback() override
     {
         stopTimer();
 
-        stopInternal();
+        stopWithPendingCallback();
 
         internal->updateDetailsFromDevice();
 
-        open (inputChannelsRequested, outputChannelsRequested,
-              getCurrentSampleRate(), getCurrentBufferSizeSamples());
-        start (previousCallback);
+        open (inputChannelsRequested,
+              outputChannelsRequested,
+              getCurrentSampleRate(),
+              getCurrentBufferSizeSamples());
+
+        const ScopedLock sl { startStopLock };
+        start (pendingCallback);
     }
 
     static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/,
@@ -1462,6 +1584,12 @@ public:
     auto getDeviceWrappers()       { return std::array<      DeviceWrapper*, 2> { { &inputWrapper, &outputWrapper } }; }
     auto getDeviceWrappers() const { return std::array<const DeviceWrapper*, 2> { { &inputWrapper, &outputWrapper } }; }
 
+    int getIndexOfDevice (bool asInput) const
+    {
+        return asInput ? inputWrapper.getIndexOfDevice (true)
+                       : outputWrapper.getIndexOfDevice (false);
+    }
+
     StringArray getOutputChannelNames() override        { return outputWrapper.getChannelNames(); }
     StringArray getInputChannelNames()  override        { return inputWrapper .getChannelNames(); }
     BigInteger getActiveOutputChannels() const override { return outputWrapper.getActiveChannels(); }
@@ -1469,46 +1597,16 @@ public:
 
     Array<double> getAvailableSampleRates() override
     {
-        Array<double> commonRates;
-        bool first = true;
-
-        for (auto& d : getDeviceWrappers())
-        {
-            auto rates = d->getAvailableSampleRates();
-
-            if (first)
-            {
-                first = false;
-                commonRates = rates;
-            }
-            else
-            {
-                commonRates.removeValuesNotIn (rates);
-            }
-        }
+        auto commonRates = inputWrapper.getAvailableSampleRates();
+        commonRates.removeValuesNotIn (outputWrapper.getAvailableSampleRates());
 
         return commonRates;
     }
 
     Array<int> getAvailableBufferSizes() override
     {
-        Array<int> commonSizes;
-        bool first = true;
-
-        for (auto& d : getDeviceWrappers())
-        {
-            auto sizes = d->getAvailableBufferSizes();
-
-            if (first)
-            {
-                first = false;
-                commonSizes = sizes;
-            }
-            else
-            {
-                commonSizes.removeValuesNotIn (sizes);
-            }
-        }
+        auto commonSizes = inputWrapper.getAvailableBufferSizes();
+        commonSizes.removeValuesNotIn (outputWrapper.getAvailableBufferSizes());
 
         return commonSizes;
     }
@@ -1520,22 +1618,12 @@ public:
 
     int getCurrentBitDepth() override
     {
-        int depth = 32;
-
-        for (auto& d : getDeviceWrappers())
-            depth = jmin (depth, d->getCurrentBitDepth());
-
-        return depth;
+        return jmin (32, inputWrapper.getCurrentBitDepth(), outputWrapper.getCurrentBitDepth());
     }
 
     int getDefaultBufferSize() override
     {
-        int size = 0;
-
-        for (auto& d : getDeviceWrappers())
-            size = jmax (size, d->getDefaultBufferSize());
-
-        return size;
+        return jmax (0, inputWrapper.getDefaultBufferSize(), outputWrapper.getDefaultBufferSize());
     }
 
     AudioWorkgroup getWorkgroup() const override
@@ -1758,7 +1846,7 @@ private:
         }
 
         for (auto& d : getDeviceWrappers())
-            d->stopInternal();
+            d->stop();
 
         if (lastCallback != nullptr)
         {
@@ -2024,7 +2112,7 @@ private:
         int getCurrentBitDepth()                                  const { return device->getCurrentBitDepth(); }
         int getDefaultBufferSize()                                const { return device->getDefaultBufferSize(); }
         void start (AudioIODeviceCallback* callbackToNotify)      const { return device->start (callbackToNotify); }
-        AudioIODeviceCallback* stopInternal()                     const { return device->stopInternal(); }
+        void stop()                                               const { return device->stop(); }
         void close()                                              const { return device->close(); }
         AudioWorkgroup getWorkgroup()                             const { return device->getWorkgroup(); }
 
@@ -2099,7 +2187,8 @@ private:
             if (target != nullptr)
                 target->audioDeviceStopped();
 
-            error = true;
+            // The audio device may stop because it's about to be restarted with new settings.
+            // Stopping the device doesn't necessarily count as an error.
         }
 
         void audioDeviceError (const String& errorMessage) override
@@ -2238,9 +2327,7 @@ public:
             return d->getIndexOfDevice (asInput);
 
         if (auto* d = dynamic_cast<AudioIODeviceCombiner*> (device))
-            for (auto* dev : d->getDeviceWrappers())
-                if (const auto index = dev->getIndexOfDevice (asInput); index >= 0)
-                    return index;
+            return d->getIndexOfDevice (asInput);
 
         return -1;
     }

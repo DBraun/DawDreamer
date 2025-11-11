@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -103,7 +112,7 @@ static const uint8 MediaSessionByteCode[] =
  METHOD (setVolumeTo,          "setVolumeTo",          "(II)V") \
  METHOD (unregisterCallback,   "unregisterCallback",   "(Landroid/media/session/MediaController$Callback;)V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaController, "android/media/session/MediaController", 21)
+DECLARE_JNI_CLASS (AndroidMediaController, "android/media/session/MediaController")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -111,7 +120,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaController, "android/media/session/M
  METHOD (getCurrentVolume,   "getCurrentVolume",   "()I") \
  METHOD (getMaxVolume,       "getMaxVolume",       "()I")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaControllerPlaybackInfo, "android/media/session/MediaController$PlaybackInfo", 21)
+DECLARE_JNI_CLASS (AndroidMediaControllerPlaybackInfo, "android/media/session/MediaController$PlaybackInfo")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -121,7 +130,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaControllerPlaybackInfo, "android/med
  METHOD (seekTo,          "seekTo",          "(J)V") \
  METHOD (stop,            "stop",            "()V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaControllerTransportControls, "android/media/session/MediaController$TransportControls", 21)
+DECLARE_JNI_CLASS (AndroidMediaControllerTransportControls, "android/media/session/MediaController$TransportControls")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -150,7 +159,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaControllerTransportControls, "androi
  METHOD (start,                        "start",                        "()V") \
  METHOD (stop,                         "stop",                         "()V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaPlayer, "android/media/MediaPlayer", 21)
+DECLARE_JNI_CLASS (AndroidMediaPlayer, "android/media/MediaPlayer")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -165,7 +174,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaPlayer, "android/media/MediaPlayer",
  METHOD (setPlaybackState,       "setPlaybackState",       "(Landroid/media/session/PlaybackState;)V") \
  METHOD (setPlaybackToLocal,     "setPlaybackToLocal",     "(Landroid/media/AudioAttributes;)V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaSession, "android/media/session/MediaSession", 21)
+DECLARE_JNI_CLASS (AndroidMediaSession, "android/media/session/MediaSession")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -173,14 +182,14 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaSession, "android/media/session/Medi
  METHOD (constructor, "<init>",  "()V") \
  METHOD (putLong,     "putLong", "(Ljava/lang/String;J)Landroid/media/MediaMetadata$Builder;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaMetadataBuilder, "android/media/MediaMetadata$Builder", 21)
+DECLARE_JNI_CLASS (AndroidMediaMetadataBuilder, "android/media/MediaMetadata$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (getSpeed, "getSpeed", "()F") \
  METHOD (setSpeed, "setSpeed", "(F)Landroid/media/PlaybackParams;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidPlaybackParams, "android/media/PlaybackParams", 21)
+DECLARE_JNI_CLASS (AndroidPlaybackParams, "android/media/PlaybackParams")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -190,7 +199,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidPlaybackParams, "android/media/PlaybackPa
  METHOD (getPosition,      "getPosition",      "()J") \
  METHOD (getState,         "getState",         "()I")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidPlaybackState, "android/media/session/PlaybackState", 21)
+DECLARE_JNI_CLASS (AndroidPlaybackState, "android/media/session/PlaybackState")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -200,7 +209,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidPlaybackState, "android/media/session/Pla
  METHOD (setErrorMessage, "setErrorMessage", "(Ljava/lang/CharSequence;)Landroid/media/session/PlaybackState$Builder;") \
  METHOD (setState,        "setState",        "(IJF)Landroid/media/session/PlaybackState$Builder;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidPlaybackStateBuilder, "android/media/session/PlaybackState$Builder", 21)
+DECLARE_JNI_CLASS (AndroidPlaybackStateBuilder, "android/media/session/PlaybackState$Builder")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -335,8 +344,9 @@ private:
 };
 
 //==============================================================================
-struct VideoComponent::Pimpl
-    : public AndroidViewComponent, private ActivityLifecycleCallbacks, private SurfaceHolderCallback
+struct VideoComponent::Pimpl : public AndroidViewComponent,
+                               private ActivityLifecycleCallbacks,
+                               private SurfaceHolderCallback
 {
     Pimpl (VideoComponent& ownerToUse, bool)
         : owner (ownerToUse),
@@ -345,22 +355,11 @@ struct VideoComponent::Pimpl
         , systemVolumeListener (*this)
        #endif
     {
-        // Video requires SDK version 21 or higher
-        jassert (getAndroidSDKVersion() >= 21);
-
         setVisible (true);
 
         auto* env = getEnv();
 
         LocalRef<jobject> appContext (getAppContext());
-
-        if (appContext != nullptr)
-        {
-            ActivityLifecycleCallbacks* callbacks = dynamic_cast<ActivityLifecycleCallbacks*> (this);
-
-            activityLifeListener = GlobalRef (CreateJavaInterface (callbacks, "android/app/Application$ActivityLifecycleCallbacks"));
-            env->CallVoidMethod (appContext.get(), AndroidApplication.registerActivityLifecycleCallbacks, activityLifeListener.get());
-        }
 
         {
             LocalRef<jobject> surfaceView (env->NewObject (AndroidSurfaceView, AndroidSurfaceView.constructor, getAppContext().get()));
@@ -390,13 +389,6 @@ struct VideoComponent::Pimpl
                 SurfaceHolderCallback::clear();
                 surfaceHolderCallback.clear();
             }
-        }
-
-        if (activityLifeListener != nullptr)
-        {
-            env->CallVoidMethod (getAppContext().get(), AndroidApplication.unregisterActivityLifecycleCallbacks, activityLifeListener.get());
-            ActivityLifecycleCallbacks::clear();
-            activityLifeListener.clear();
         }
     }
 
@@ -1277,7 +1269,7 @@ private:
             CALLBACK (generatedCallback<&MediaSession::seekToCallback>,          "mediaSessionSeekTo",          "(JJ)V") \
             CALLBACK (generatedCallback<&MediaSession::stopCallback>,            "mediaSessionStop",            "(J)V")
 
-        DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidMediaSessionCallback, "com/rmsl/juce/MediaSessionCallback", 21)
+        DECLARE_JNI_CLASS (AndroidMediaSessionCallback, "com/rmsl/juce/MediaSessionCallback")
         #undef JNI_CLASS_MEMBERS
 
         LocalRef<jobject> createCallbackObject()
@@ -1608,9 +1600,6 @@ private:
         //==============================================================================
         static LocalRef<jobject> getAudioAttributes()
         {
-            // Video requires SDK version 21 or higher
-            jassert (getAndroidSDKVersion() >= 21);
-
             auto* env = getEnv();
 
             auto audioAttribsBuilder = LocalRef<jobject> (env->NewObject (AndroidAudioAttributesBuilder,
@@ -1651,7 +1640,7 @@ private:
             METHOD (setEnabled,  "setEnabled", "(Z)V")                  \
             CALLBACK (generatedCallback<&SystemVolumeListener::systemVolumeChanged>, "mediaSessionSystemVolumeChanged", "(J)V")
 
-        DECLARE_JNI_CLASS_WITH_MIN_SDK (SystemVolumeObserver, "com/rmsl/juce/SystemVolumeObserver", 21)
+        DECLARE_JNI_CLASS (SystemVolumeObserver, "com/rmsl/juce/SystemVolumeObserver")
         #undef JNI_CLASS_MEMBERS
 
 
@@ -1693,7 +1682,7 @@ private:
     VideoComponent& owner;
 
     MediaSession mediaSession;
-    GlobalRef activityLifeListener;
+    ActivityLifecycleCallbackForwarder forwarder { GlobalRef { getAppContext() }, this };
    #if JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
     SystemVolumeListener systemVolumeListener;
    #endif
@@ -1791,6 +1780,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
-
-//==============================================================================
-constexpr VideoComponent::Pimpl::MediaSession::Player::StateInfo VideoComponent::Pimpl::MediaSession::Player::stateInfos[];

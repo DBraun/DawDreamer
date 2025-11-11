@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -30,33 +39,90 @@ namespace juce
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-static bool isStartingUpOrShuttingDown()
+//==============================================================================
+struct WindowsAccessibility
 {
-    if (auto* app = JUCEApplicationBase::getInstance())
-        if (app->isInitialising())
+    WindowsAccessibility() = delete;
+
+    static long getUiaRootObjectId()
+    {
+        return static_cast<long> (UiaRootObjectId);
+    }
+
+    static bool handleWmGetObject (AccessibilityHandler* handler, WPARAM wParam, LPARAM lParam, LRESULT* res)
+    {
+        if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
+            return false;
+
+        if (auto* uiaWrapper = WindowsUIAWrapper::getInstance())
+        {
+            ComSmartPtr<IRawElementProviderSimple> provider;
+            handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+
+            if (! uiaWrapper->isProviderDisconnecting (provider))
+                *res = uiaWrapper->returnRawElementProvider ((HWND) handler->getComponent().getWindowHandle(), wParam, lParam, provider);
+
             return true;
+        }
 
-    if (auto* mm = MessageManager::getInstanceWithoutCreating())
-        if (mm->hasStopMessageBeenSent())
-            return true;
+        return false;
+    }
 
-    return false;
-}
+    static void revokeUIAMapEntriesForWindow (HWND hwnd)
+    {
+        if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+            uiaWrapper->returnRawElementProvider (hwnd, 0, 0, nullptr);
+    }
 
-static bool isHandlerValid (const AccessibilityHandler& handler)
-{
-    if (auto* provider = handler.getNativeImplementation())
-        return provider->isElementValid();
+    static bool isStartingUpOrShuttingDown()
+    {
+        if (auto* app = JUCEApplicationBase::getInstance())
+            if (app->isInitialising())
+                return true;
 
-    return false;
-}
+        if (auto* mm = MessageManager::getInstanceWithoutCreating())
+            if (mm->hasStopMessageBeenSent())
+                return true;
+
+        return false;
+    }
+
+    static bool isHandlerValid (const AccessibilityHandler& handler)
+    {
+        if (auto* provider = handler.getNativeImplementation())
+            return provider->isElementValid();
+
+        return false;
+    }
+
+    static bool areAnyAccessibilityClientsActive()
+    {
+        const auto areClientsListening = []
+        {
+            if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+                return uiaWrapper->clientsAreListening() != 0;
+
+            return false;
+        };
+
+        const auto isScreenReaderRunning = []
+        {
+            BOOL isRunning = FALSE;
+            SystemParametersInfo (SPI_GETSCREENREADER, 0, (PVOID) &isRunning, 0);
+
+            return isRunning != 0;
+        };
+
+        return areClientsListening() || isScreenReaderRunning();
+    }
+};
 
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& owner)
-        : accessibilityElement (new AccessibilityNativeHandle (owner))
+        : accessibilityElement (becomeComSmartPtrOwner (new AccessibilityNativeHandle (owner)))
     {
         ++providerCount;
     }
@@ -94,31 +160,12 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return nativeImpl->accessibilityElement;
 }
 
-static bool areAnyAccessibilityClientsActive()
-{
-    const auto areClientsListening = []
-    {
-        if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
-            return uiaWrapper->clientsAreListening() != 0;
-
-        return false;
-    };
-
-    const auto isScreenReaderRunning = []
-    {
-        BOOL isRunning = FALSE;
-        SystemParametersInfo (SPI_GETSCREENREADER, 0, (PVOID) &isRunning, 0);
-
-        return isRunning != 0;
-    };
-
-    return areClientsListening() || isScreenReaderRunning();
-}
-
 template <typename Callback>
 void getProviderWithCheckedWrapper (const AccessibilityHandler& handler, Callback&& callback)
 {
-    if (! areAnyAccessibilityClientsActive() || isStartingUpOrShuttingDown() || ! isHandlerValid (handler))
+    if (! WindowsAccessibility::areAnyAccessibilityClientsActive()
+        || WindowsAccessibility::isStartingUpOrShuttingDown()
+        || ! WindowsAccessibility::isHandlerValid (handler))
         return;
 
     if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
@@ -155,8 +202,6 @@ void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler& handler,
 
 void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
 {
-    using namespace ComTypes::Constants;
-
     if (eventType == Event::elementCreated
         || eventType == Event::elementDestroyed)
     {
@@ -223,8 +268,6 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
     auto event = [eventType]() -> EVENTID
     {
-        using namespace ComTypes::Constants;
-
         switch (eventType)
         {
             case AccessibilityEvent::textSelectionChanged:  return UIA_Text_TextSelectionChangedEventId;
@@ -246,7 +289,7 @@ struct SpVoiceWrapper final : public DeletedAtShutdown
 {
     SpVoiceWrapper()
     {
-        [[maybe_unused]] auto hr = voice.CoCreateInstance (ComTypes::CLSID_SpVoice);
+        [[maybe_unused]] auto hr = voice.CoCreateInstance (CLSID_SpVoice);
 
         jassert (SUCCEEDED (hr));
     }
@@ -258,10 +301,8 @@ struct SpVoiceWrapper final : public DeletedAtShutdown
 
     ComSmartPtr<ISpVoice> voice;
 
-    JUCE_DECLARE_SINGLETON (SpVoiceWrapper, false)
+    JUCE_DECLARE_SINGLETON_INLINE (SpVoiceWrapper, false)
 };
-
-JUCE_IMPLEMENT_SINGLETON (SpVoiceWrapper)
 
 
 void AccessibilityHandler::postAnnouncement (const String& announcementString, AnnouncementPriority priority)
@@ -289,42 +330,10 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
     }
 }
 
-//==============================================================================
-namespace WindowsAccessibility
+bool AccessibilityHandler::areAnyAccessibilityClientsActive()
 {
-    static long getUiaRootObjectId()
-    {
-        return static_cast<long> (UiaRootObjectId);
-    }
-
-    static bool handleWmGetObject (AccessibilityHandler* handler, WPARAM wParam, LPARAM lParam, LRESULT* res)
-    {
-        if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
-            return false;
-
-        if (auto* uiaWrapper = WindowsUIAWrapper::getInstance())
-        {
-            ComSmartPtr<IRawElementProviderSimple> provider;
-            handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
-
-            if (! uiaWrapper->isProviderDisconnecting (provider))
-                *res = uiaWrapper->returnRawElementProvider ((HWND) handler->getComponent().getWindowHandle(), wParam, lParam, provider);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    static void revokeUIAMapEntriesForWindow (HWND hwnd)
-    {
-        if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
-            uiaWrapper->returnRawElementProvider (hwnd, 0, 0, nullptr);
-    }
+    return WindowsAccessibility::areAnyAccessibilityClientsActive();
 }
-
-
-JUCE_IMPLEMENT_SINGLETON (WindowsUIAWrapper)
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
