@@ -35,6 +35,9 @@ mv Builds/MacOSX/build/$CONFIGURATION/dawdreamer.so.dylib Builds/MacOSX/build/$C
 rm tests/dawdreamer.so
 cp Builds/MacOSX/build/$CONFIGURATION/dawdreamer.so tests/dawdreamer.so
 
+# Install in development mode for testing
+python"$PYTHONMAJOR" setup.py develop
+
 # # To make a wheel locally:
 # pip install setuptools wheel build delocate
 # python3 -m build --wheel
