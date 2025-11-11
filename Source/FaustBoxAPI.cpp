@@ -323,18 +323,10 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
 
         .def(
             "boxDelay",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                if (box1.has_value() && box2.has_value())
-                {
-                    return BoxWrapper(boxDelay(*box1, *box2));
-                }
-                else
-                {
-                    return BoxWrapper(boxDelay());
-                }
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none(), "Create a delayed box.")
+            [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxDelay(box1, box2)); },
+            arg("box1"), arg("box2"), "Create a delayed box.")
+        .def(
+            "boxDelay", []() { return BoxWrapper(boxDelay()); }, "Create a delayed box.")
 
         .def(
             "boxIntCast",
@@ -500,146 +492,76 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             arg("op"), arg("x") = nb::none(), arg("y") = nb::none())
 
         .def(
-            "boxAdd",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxAdd(*box1, *box2))
-                                                            : BoxWrapper(boxAdd());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxAdd", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxAdd(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxAdd", []() { return BoxWrapper(boxAdd()); })
         .def(
-            "boxSub",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxSub(*box1, *box2))
-                                                            : BoxWrapper(boxSub());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxSub", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxSub(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxSub", []() { return BoxWrapper(boxSub()); })
         .def(
-            "boxMul",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxMul(*box1, *box2))
-                                                            : BoxWrapper(boxMul());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxMul", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxMul(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxMul", []() { return BoxWrapper(boxMul()); })
         .def(
-            "boxDiv",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxDiv(*box1, *box2))
-                                                            : BoxWrapper(boxDiv());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxDiv", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxDiv(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxDiv", []() { return BoxWrapper(boxDiv()); })
         .def(
-            "boxRem",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxRem(*box1, *box2))
-                                                            : BoxWrapper(boxRem());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxRem", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxRem(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxRem", []() { return BoxWrapper(boxRem()); })
 
         .def(
-            "boxLeftShift",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxLeftShift(*box1, *box2))
-                                                            : BoxWrapper(boxLeftShift());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxLeftShift", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxLeftShift(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxLeftShift", []() { return BoxWrapper(boxLeftShift()); })
         .def(
-            "boxLRightShift",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value()
-                           ? BoxWrapper(boxLRightShift(*box1, *box2))
-                           : BoxWrapper(boxLRightShift());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxLRightShift", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxLRightShift(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxLRightShift", []() { return BoxWrapper(boxLRightShift()); })
         .def(
-            "boxARightShift",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value()
-                           ? BoxWrapper(boxARightShift(*box1, *box2))
-                           : BoxWrapper(boxARightShift());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxARightShift", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxARightShift(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxARightShift", []() { return BoxWrapper(boxARightShift()); })
 
         .def(
-            "boxGT",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxGT(*box1, *box2))
-                                                            : BoxWrapper(boxGT());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxGT", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxGT(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxGT", []() { return BoxWrapper(boxGT()); })
         .def(
-            "boxLT",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxLT(*box1, *box2))
-                                                            : BoxWrapper(boxLT());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxLT", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxLT(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxLT", []() { return BoxWrapper(boxLT()); })
         .def(
-            "boxGE",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxGE(*box1, *box2))
-                                                            : BoxWrapper(boxGE());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxGE", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxGE(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxGE", []() { return BoxWrapper(boxGE()); })
         .def(
-            "boxLE",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxLE(*box1, *box2))
-                                                            : BoxWrapper(boxLE());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxLE", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxLE(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxLE", []() { return BoxWrapper(boxLE()); })
         .def(
-            "boxEQ",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxEQ(*box1, *box2))
-                                                            : BoxWrapper(boxEQ());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxEQ", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxEQ(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxEQ", []() { return BoxWrapper(boxEQ()); })
         .def(
-            "boxNE",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxNE(*box1, *box2))
-                                                            : BoxWrapper(boxNE());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxNE", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxNE(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxNE", []() { return BoxWrapper(boxNE()); })
 
         .def(
-            "boxAND",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxAND(*box1, *box2))
-                                                            : BoxWrapper(boxAND());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxAND", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxAND(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxAND", []() { return BoxWrapper(boxAND()); })
         .def(
-            "boxOR",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxOR(*box1, *box2))
-                                                            : BoxWrapper(boxOR());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxOR", [](BoxWrapper box1, BoxWrapper box2) { return BoxWrapper(boxOR(box1, box2)); },
+            arg("box1"), arg("box2"))
+        .def("boxOR", []() { return BoxWrapper(boxOR()); })
         .def(
-            "boxXOR",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxXOR(*box1, *box2))
-                                                            : BoxWrapper(boxXOR());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxXOR", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxXOR(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxXOR", []() { return BoxWrapper(boxXOR()); })
 
         .def(
             "boxAbs", [](std::optional<BoxWrapper> box1 = {})
@@ -707,53 +629,29 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             arg("box1") = nb::none())
 
         .def(
-            "boxRemainder",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxRemainder(*box1, *box2))
-                                                            : BoxWrapper(boxRemainder());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxRemainder", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxRemainder(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxRemainder", []() { return BoxWrapper(boxRemainder()); })
         .def(
-            "boxPow",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxPow(*box1, *box2))
-                                                            : BoxWrapper(boxPow());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxPow", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxPow(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxPow", []() { return BoxWrapper(boxPow()); })
         .def(
-            "boxMin",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxMin(*box1, *box2))
-                                                            : BoxWrapper(boxMin());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxMin", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxMin(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxMin", []() { return BoxWrapper(boxMin()); })
         .def(
-            "boxMax",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxMax(*box1, *box2))
-                                                            : BoxWrapper(boxMax());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxMax", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxMax(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxMax", []() { return BoxWrapper(boxMax()); })
         .def(
-            "boxFmod",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxFmod(*box1, *box2))
-                                                            : BoxWrapper(boxFmod());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxFmod", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxFmod(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxFmod", []() { return BoxWrapper(boxFmod()); })
         .def(
-            "boxAtan2",
-            [](std::optional<BoxWrapper> box1 = {}, std::optional<BoxWrapper> box2 = {})
-            {
-                return box1.has_value() && box2.has_value() ? BoxWrapper(boxAtan2(*box1, *box2))
-                                                            : BoxWrapper(boxAtan2());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxAtan2", [](BoxWrapper box1, BoxWrapper box2)
+            { return BoxWrapper(boxAtan2(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxAtan2", []() { return BoxWrapper(boxAtan2()); })
 
         .def(
             "boxRec", [](BoxWrapper& box1, BoxWrapper& box2)
