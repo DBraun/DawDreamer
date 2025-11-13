@@ -299,13 +299,10 @@ void FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, in
     if (anyAutomation && m_nvoices > 0 && m_groupVoices)
     {
         // When you want to access shared memory:
-        if (guiUpdateMutex.Lock())
-        {
-            // Have Faust update all GUIs.
-            GUI::updateAllGuis();
-
-            guiUpdateMutex.Unlock();
-        }
+        guiUpdateMutex.Lock();
+        // Have Faust update all GUIs.
+        GUI::updateAllGuis();
+        guiUpdateMutex.Unlock();
     }
 }
 
@@ -344,13 +341,10 @@ void FaustProcessor::reset()
         if (m_nvoices > 0 && m_groupVoices)
         {
             // When you want to access shared memory:
-            if (guiUpdateMutex.Lock())
-            {
-                // Have Faust update all GUIs.
-                GUI::updateAllGuis();
-
-                guiUpdateMutex.Unlock();
-            }
+            guiUpdateMutex.Lock();
+            // Have Faust update all GUIs.
+            GUI::updateAllGuis();
+            guiUpdateMutex.Unlock();
         }
     }
 
@@ -565,7 +559,7 @@ bool FaustProcessor::compile()
             clear();
             throw std::runtime_error("FaustProcessor::compile(): Cannot create Poly DSP instance.");
         }
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in newer Faust API
     }
     else
     {
@@ -680,7 +674,7 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
     {
         // Allocate polyphonic DSP
         m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in newer Faust API
         theDsp = m_dsp_poly;
     }
 
@@ -774,7 +768,7 @@ bool FaustProcessor::compileBox(BoxWrapper& box, std::optional<std::vector<std::
     {
         // Allocate polyphonic DSP
         m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in newer Faust API
         theDsp = m_dsp_poly;
     }
 
@@ -1258,7 +1252,7 @@ void FaustProcessor::setReleaseLength(double sec)
     m_releaseLengthSec = sec;
     if (m_dsp_poly)
     {
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in newer Faust API
     }
 }
 

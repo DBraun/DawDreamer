@@ -329,70 +329,31 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             "boxDelay", []() { return BoxWrapper(boxDelay()); }, "Create a delayed box.")
 
         .def(
-            "boxIntCast",
-            [](std::optional<BoxWrapper> box1 = {})
-            {
-                if (box1.has_value())
-                {
-                    return BoxWrapper(boxIntCast(*box1));
-                }
-                else
-                {
-                    return BoxWrapper(boxIntCast());
-                }
-            },
-            arg("box1") = nb::none())
+            "boxIntCast", [](BoxWrapper& box1) { return BoxWrapper(boxIntCast(box1)); },
+            arg("box1"))
+        .def("boxIntCast", []() { return BoxWrapper(boxIntCast()); })
 
         .def(
-            "boxFloatCast",
-            [](std::optional<BoxWrapper> box1 = {})
-            {
-                if (box1.has_value())
-                {
-                    return BoxWrapper(boxFloatCast(*box1));
-                }
-                else
-                {
-                    return BoxWrapper(boxFloatCast());
-                }
-            },
-            arg("box1") = nb::none())
+            "boxFloatCast", [](BoxWrapper& box1) { return BoxWrapper(boxFloatCast(box1)); },
+            arg("box1"))
+        .def("boxFloatCast", []() { return BoxWrapper(boxFloatCast()); })
 
         .def(
-            "boxReadOnlyTable",
-            [](std::optional<BoxWrapper> n = {}, std::optional<BoxWrapper> init = {},
-               std::optional<BoxWrapper> ridx = {})
-            {
-                if (n.has_value() && init.has_value() && ridx.has_value())
-                {
-                    return BoxWrapper(boxReadOnlyTable(boxIntCast(*n), *init, boxIntCast(*ridx)));
-                }
-                else
-                {
-                    return BoxWrapper(boxReadOnlyTable());
-                }
-            },
-            arg("n") = nb::none(), arg("init") = nb::none(), arg("ridx") = nb::none())
+            "boxReadOnlyTable", [](BoxWrapper& n, BoxWrapper& init, BoxWrapper& ridx)
+            { return BoxWrapper(boxReadOnlyTable(boxIntCast(n), init, boxIntCast(ridx))); },
+            arg("n"), arg("init"), arg("ridx"))
+        .def("boxReadOnlyTable", []() { return BoxWrapper(boxReadOnlyTable()); })
 
         .def(
             "boxWriteReadTable",
-            [](std::optional<BoxWrapper> n = {}, std::optional<BoxWrapper> init = {},
-               std::optional<BoxWrapper> widx = {}, std::optional<BoxWrapper> wsig = {},
-               std::optional<BoxWrapper> ridx = {})
+            [](BoxWrapper& n, BoxWrapper& init, BoxWrapper& widx, BoxWrapper& wsig,
+               BoxWrapper& ridx)
             {
-                if (n.has_value() && init.has_value() && widx.has_value() && wsig.has_value() &&
-                    ridx.has_value())
-                {
-                    return BoxWrapper(boxWriteReadTable(boxIntCast(*n), *init, boxIntCast(*widx),
-                                                        boxIntCast(*wsig), boxIntCast(*ridx)));
-                }
-                else
-                {
-                    return BoxWrapper(boxWriteReadTable());
-                }
+                return BoxWrapper(boxWriteReadTable(boxIntCast(n), init, boxIntCast(widx),
+                                                    boxIntCast(wsig), boxIntCast(ridx)));
             },
-            arg("n") = nb::none(), arg("init") = nb::none(), arg("widx") = nb::none(),
-            arg("wsig") = nb::none(), arg("ridx") = nb::none())
+            arg("n"), arg("init"), arg("widx"), arg("wsig"), arg("ridx"))
+        .def("boxWriteReadTable", []() { return BoxWrapper(boxWriteReadTable()); })
 
         .def(
             "boxWaveform",
@@ -408,7 +369,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             arg("vals"), "Create a waveform from a list of values.")
         .def(
             "boxSoundfile",
-            [](std::string& label, BoxWrapper& chan, std::optional<BoxWrapper> part,
+            [](const std::string& label, BoxWrapper& chan, std::optional<BoxWrapper> part,
                std::optional<BoxWrapper> rdx)
             {
                 if (part.has_value() && rdx.has_value())
@@ -428,37 +389,17 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             "between 0 and the selected sound length).")
 
         .def(
-            "boxSelect2",
-            [](std::optional<BoxWrapper> selector, std::optional<BoxWrapper> box1,
-               std::optional<BoxWrapper> box2)
-            {
-                if (selector.has_value() && box1.has_value() && box2.has_value())
-                {
-                    return BoxWrapper(boxSelect2(*selector, *box1, *box2));
-                }
-                else
-                {
-                    return BoxWrapper(boxSelect2());
-                }
-            },
-            arg("selector") = nb::none(), arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxSelect2", [](BoxWrapper& selector, BoxWrapper& box1, BoxWrapper& box2)
+            { return BoxWrapper(boxSelect2(selector, box1, box2)); }, arg("selector"), arg("box1"),
+            arg("box2"))
+        .def("boxSelect2", []() { return BoxWrapper(boxSelect2()); })
 
         .def(
             "boxSelect3",
-            [](std::optional<BoxWrapper> selector, std::optional<BoxWrapper> box1,
-               std::optional<BoxWrapper> box2, std::optional<BoxWrapper> box3)
-            {
-                if (selector.has_value() && box1.has_value() && box2.has_value())
-                {
-                    return BoxWrapper(boxSelect3(*selector, *box1, *box2, *box3));
-                }
-                else
-                {
-                    return BoxWrapper(boxSelect3());
-                }
-            },
-            arg("selector") = nb::none(), arg("box1") = nb::none(), arg("box2") = nb::none(),
-            arg("box3") = nb::none())
+            [](BoxWrapper& selector, BoxWrapper& box1, BoxWrapper& box2, BoxWrapper& box3)
+            { return BoxWrapper(boxSelect3(selector, box1, box2, box3)); }, arg("selector"),
+            arg("box1"), arg("box2"), arg("box3"))
+        .def("boxSelect3", []() { return BoxWrapper(boxSelect3()); })
 
         .def(
             "boxFConst", [](SType type, const std::string& name, const std::string& file)
@@ -477,19 +418,10 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             "Return a foreign function box.")
 
         .def(
-            "boxBinOp",
-            [](SOperator op, std::optional<BoxWrapper> box1, std::optional<BoxWrapper> box2)
-            {
-                if (box1.has_value() && box2.has_value())
-                {
-                    return BoxWrapper(boxBinOp(op, *box1, *box2));
-                }
-                else
-                {
-                    return BoxWrapper(boxBinOp(op));
-                }
-            },
-            arg("op"), arg("x") = nb::none(), arg("y") = nb::none())
+            "boxBinOp", [](SOperator op, BoxWrapper& x, BoxWrapper& y)
+            { return BoxWrapper(boxBinOp(op, x, y)); }, arg("op"), arg("x"), arg("y"))
+        .def(
+            "boxBinOp", [](SOperator op) { return BoxWrapper(boxBinOp(op)); }, arg("op"))
 
         .def(
             "boxAdd", [](BoxWrapper box1, BoxWrapper box2)
@@ -564,69 +496,53 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
         .def("boxXOR", []() { return BoxWrapper(boxXOR()); })
 
         .def(
-            "boxAbs", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxAbs(*box1) : boxAbs()); },
-            arg("box1") = nb::none())
+            "boxAbs", [](BoxWrapper& box1) { return BoxWrapper(boxAbs(box1)); }, arg("box1"))
+        .def("boxAbs", []() { return BoxWrapper(boxAbs()); })
         .def(
-            "boxAcos", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxAcos(*box1) : boxAcos()); },
-            arg("box1") = nb::none())
+            "boxAcos", [](BoxWrapper& box1) { return BoxWrapper(boxAcos(box1)); }, arg("box1"))
+        .def("boxAcos", []() { return BoxWrapper(boxAcos()); })
         .def(
-            "boxTan", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxTan(*box1) : boxTan()); },
-            arg("box1") = nb::none())
+            "boxTan", [](BoxWrapper& box1) { return BoxWrapper(boxTan(box1)); }, arg("box1"))
+        .def("boxTan", []() { return BoxWrapper(boxTan()); })
         .def(
-            "boxSqrt", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxSqrt(*box1) : boxSqrt()); },
-            arg("box1") = nb::none())
+            "boxSqrt", [](BoxWrapper& box1) { return BoxWrapper(boxSqrt(box1)); }, arg("box1"))
+        .def("boxSqrt", []() { return BoxWrapper(boxSqrt()); })
         .def(
-            "boxSin", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxSin(*box1) : boxSin()); },
-            arg("box1") = nb::none())
+            "boxSin", [](BoxWrapper& box1) { return BoxWrapper(boxSin(box1)); }, arg("box1"))
+        .def("boxSin", []() { return BoxWrapper(boxSin()); })
         .def(
-            "boxRint", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxRint(*box1) : boxRint()); },
-            arg("box1") = nb::none())
+            "boxRint", [](BoxWrapper& box1) { return BoxWrapper(boxRint(box1)); }, arg("box1"))
+        .def("boxRint", []() { return BoxWrapper(boxRint()); })
         .def(
-            "boxRound", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxRound(*box1) : boxRound()); },
-            arg("box1") = nb::none())
+            "boxRound", [](BoxWrapper& box1) { return BoxWrapper(boxRound(box1)); }, arg("box1"))
+        .def("boxRound", []() { return BoxWrapper(boxRound()); })
         .def(
-            "boxLog", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxLog(*box1) : boxLog()); },
-            arg("box1") = nb::none())
+            "boxLog", [](BoxWrapper& box1) { return BoxWrapper(boxLog(box1)); }, arg("box1"))
+        .def("boxLog", []() { return BoxWrapper(boxLog()); })
         .def(
-            "boxLog10", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxLog10(*box1) : boxLog10()); },
-            arg("box1") = nb::none())
+            "boxLog10", [](BoxWrapper& box1) { return BoxWrapper(boxLog10(box1)); }, arg("box1"))
+        .def("boxLog10", []() { return BoxWrapper(boxLog10()); })
         .def(
-            "boxFloor", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxFloor(*box1) : boxFloor()); },
-            arg("box1") = nb::none())
+            "boxFloor", [](BoxWrapper& box1) { return BoxWrapper(boxFloor(box1)); }, arg("box1"))
+        .def("boxFloor", []() { return BoxWrapper(boxFloor()); })
         .def(
-            "boxExp", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxExp(*box1) : boxExp()); },
-            arg("box1") = nb::none())
+            "boxExp", [](BoxWrapper& box1) { return BoxWrapper(boxExp(box1)); }, arg("box1"))
+        .def("boxExp", []() { return BoxWrapper(boxExp()); })
         .def(
-            "boxExp10", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxExp10(*box1) : boxExp10()); },
-            arg("box1") = nb::none())
+            "boxExp10", [](BoxWrapper& box1) { return BoxWrapper(boxExp10(box1)); }, arg("box1"))
+        .def("boxExp10", []() { return BoxWrapper(boxExp10()); })
         .def(
-            "boxCos", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxCos(*box1) : boxCos()); },
-            arg("box1") = nb::none())
+            "boxCos", [](BoxWrapper& box1) { return BoxWrapper(boxCos(box1)); }, arg("box1"))
+        .def("boxCos", []() { return BoxWrapper(boxCos()); })
         .def(
-            "boxCeil", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxCeil(*box1) : boxCeil()); },
-            arg("box1") = nb::none())
+            "boxCeil", [](BoxWrapper& box1) { return BoxWrapper(boxCeil(box1)); }, arg("box1"))
+        .def("boxCeil", []() { return BoxWrapper(boxCeil()); })
         .def(
-            "boxAtan", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxAtan(*box1) : boxAtan()); },
-            arg("box1") = nb::none())
+            "boxAtan", [](BoxWrapper& box1) { return BoxWrapper(boxAtan(box1)); }, arg("box1"))
+        .def("boxAtan", []() { return BoxWrapper(boxAtan()); })
         .def(
-            "boxAsin", [](std::optional<BoxWrapper> box1 = {})
-            { return BoxWrapper(box1.has_value() ? boxAsin(*box1) : boxAsin()); },
-            arg("box1") = nb::none())
+            "boxAsin", [](BoxWrapper& box1) { return BoxWrapper(boxAsin(box1)); }, arg("box1"))
+        .def("boxAsin", []() { return BoxWrapper(boxAsin()); })
 
         .def(
             "boxRemainder", [](BoxWrapper box1, BoxWrapper box2)
@@ -662,70 +578,66 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             "outputs(A)≥inputs(B) and inputs(A)≥outputs(B)")
 
         .def(
-            "boxButton", [](std::string& label) { return BoxWrapper(boxButton(label)); },
+            "boxButton", [](const std::string& label) { return BoxWrapper(boxButton(label)); },
             arg("label"))
         .def(
-            "boxCheckbox", [](std::string& label) { return BoxWrapper(boxCheckbox(label)); },
+            "boxCheckbox", [](const std::string& label) { return BoxWrapper(boxCheckbox(label)); },
             arg("label"))
 
         .def(
             "boxVSlider",
-            [](std::string& label, BoxWrapper& boxInit, BoxWrapper& boxMin, BoxWrapper& boxMax,
-               BoxWrapper& boxStep)
+            [](const std::string& label, BoxWrapper& boxInit, BoxWrapper& boxMin,
+               BoxWrapper& boxMax, BoxWrapper& boxStep)
             { return BoxWrapper(boxVSlider(label, boxInit, boxMin, boxMax, boxStep)); },
             arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
             "Create a vertical slider.")
         .def(
             "boxHSlider",
-            [](std::string& label, BoxWrapper& boxInit, BoxWrapper& boxMin, BoxWrapper& boxMax,
-               BoxWrapper& boxStep)
+            [](const std::string& label, BoxWrapper& boxInit, BoxWrapper& boxMin,
+               BoxWrapper& boxMax, BoxWrapper& boxStep)
             { return BoxWrapper(boxHSlider(label, boxInit, boxMin, boxMax, boxStep)); },
             arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
             "Create a horizontal slider.")
 
         .def(
             "boxNumEntry",
-            [](std::string& label, BoxWrapper& boxInit, BoxWrapper& boxMin, BoxWrapper& boxMax,
-               BoxWrapper& boxStep)
+            [](const std::string& label, BoxWrapper& boxInit, BoxWrapper& boxMin,
+               BoxWrapper& boxMax, BoxWrapper& boxStep)
             { return BoxWrapper(boxNumEntry(label, boxInit, boxMin, boxMax, boxStep)); },
             arg("label"), arg("init"), arg("min"), arg("max"), arg("step"),
             "Create a numerical entry.")
 
         .def(
-            "boxHGroup",
-            [](std::string& label, BoxWrapper& box1) { return BoxWrapper(boxHGroup(label, box1)); },
-            arg("label"), arg("box"), "Create an hgroup.")
+            "boxHGroup", [](const std::string& label, BoxWrapper& box1)
+            { return BoxWrapper(boxHGroup(label, box1)); }, arg("label"), arg("box"),
+            "Create an hgroup.")
 
         .def(
-            "boxVGroup",
-            [](std::string& label, BoxWrapper& box1) { return BoxWrapper(boxVGroup(label, box1)); },
-            arg("label"), arg("box"), "Create a vgroup.")
+            "boxVGroup", [](const std::string& label, BoxWrapper& box1)
+            { return BoxWrapper(boxVGroup(label, box1)); }, arg("label"), arg("box"),
+            "Create a vgroup.")
 
         .def(
-            "boxTGroup",
-            [](std::string& label, BoxWrapper& box1) { return BoxWrapper(boxTGroup(label, box1)); },
-            arg("label"), arg("box"), "Create a tgroup.")
+            "boxTGroup", [](const std::string& label, BoxWrapper& box1)
+            { return BoxWrapper(boxTGroup(label, box1)); }, arg("label"), arg("box"),
+            "Create a tgroup.")
 
         .def(
             "boxVBargraph",
-            [](std::string& label, BoxWrapper& boxMin, BoxWrapper& boxMax, BoxWrapper& box)
+            [](const std::string& label, BoxWrapper& boxMin, BoxWrapper& boxMax, BoxWrapper& box)
             { return BoxWrapper(boxVBargraph(label, boxMin, boxMax, box)); }, arg("label"),
             arg("min"), arg("max"), arg("step"))
 
         .def(
             "boxHBargraph",
-            [](std::string& label, BoxWrapper& boxMin, BoxWrapper& boxMax, BoxWrapper& box)
+            [](const std::string& label, BoxWrapper& boxMin, BoxWrapper& boxMax, BoxWrapper& box)
             { return BoxWrapper(boxHBargraph(label, boxMin, boxMax, box)); }, arg("label"),
             arg("min"), arg("max"), arg("step"))
 
         .def(
-            "boxAttach",
-            [](std::optional<BoxWrapper> s1, std::optional<BoxWrapper> s2)
-            {
-                return BoxWrapper((s1.has_value() && s2.has_value()) ? boxAttach(*s1, *s2)
-                                                                     : boxAttach());
-            },
-            arg("box1") = nb::none(), arg("box2") = nb::none())
+            "boxAttach", [](BoxWrapper& box1, BoxWrapper& box2)
+            { return BoxWrapper(boxAttach(box1, box2)); }, arg("box1"), arg("box2"))
+        .def("boxAttach", []() { return BoxWrapper(boxAttach()); })
         .def(
             "boxSampleRate",
             []()
@@ -1310,8 +1222,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
 
         .def(
             "boxToSource",
-            [](BoxWrapper& box, std::string& lang, std::string& class_name,
-               std::optional<std::vector<std::string>> in_argv)
+            [](BoxWrapper& box, const std::string& lang, const std::string& class_name)
             {
                 auto pathToFaustLibraries = getPathToFaustLibraries();
 
@@ -1338,12 +1249,59 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 argv[argc++] = "-A";
                 argv[argc++] = strdup(pathToArchitecture.c_str());
 
-                if (in_argv.has_value())
+                std::string error_msg = "";
+
+                std::string source_code =
+                    createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
+
+                if (source_code == "")
                 {
-                    for (auto& v : *in_argv)
-                    {
-                        argv[argc++] = strdup(v.c_str());
-                    }
+                    throw std::runtime_error(error_msg);
+                }
+
+                std::variant<std::string, nb::bytes> result;
+                if (lang == "wasm" || lang == "wast")
+                {
+                    result = nb::bytes(source_code.c_str(), source_code.size());
+                    return result;
+                }
+                result = source_code;
+                return result;
+            },
+            arg("box"), arg("language"), arg("class_name"))
+        .def(
+            "boxToSource",
+            [](BoxWrapper& box, const std::string& lang, const std::string& class_name,
+               std::vector<std::string> in_argv)
+            {
+                auto pathToFaustLibraries = getPathToFaustLibraries();
+
+                if (pathToFaustLibraries.empty())
+                {
+                    throw std::runtime_error("Unable to load Faust Libraries.");
+                }
+
+                auto pathToArchitecture = getPathToArchitectureFiles();
+                if (pathToArchitecture.empty())
+                {
+                    throw std::runtime_error("Unable to find Faust architecture files.");
+                }
+
+                int argc = 0;
+                const char* argv[512];
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-cn";
+                argv[argc++] = strdup(class_name.c_str());
+
+                argv[argc++] = "-A";
+                argv[argc++] = strdup(pathToArchitecture.c_str());
+
+                for (auto& v : in_argv)
+                {
+                    argv[argc++] = strdup(v.c_str());
                 }
 
                 std::string error_msg = "";

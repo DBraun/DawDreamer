@@ -6,11 +6,8 @@ NB_MODULE(dawdreamer, m)
     using arg = nb::arg;
     using kw_only = nb::kw_only;
 
-    // Disable nanobind leak warnings
-    nb::set_leak_warnings(false);
-
-    // Disable implicit conversions to be more strict
-    nb::set_implicit_cast(false);
+    // Enable nanobind leak warnings to help debug memory issues
+    nb::set_leak_warnings(true);
 
     m.doc() = R"pbdoc(
         DawDreamer

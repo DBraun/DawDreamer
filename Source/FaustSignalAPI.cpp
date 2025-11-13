@@ -191,7 +191,7 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
             arg("vals"))
         .def(
             "sigSoundfile",
-            [](std::string& name, SigWrapper& rdx, SigWrapper& chan, SigWrapper& part)
+            [](const std::string& name, SigWrapper& rdx, SigWrapper& chan, SigWrapper& part)
             {
                 // Soundfile definition
                 Signal sf = sigSoundfile(name);
@@ -377,40 +377,40 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
             arg("sig"))
 
         .def(
-            "sigButton", [](std::string& label) { return SigWrapper(sigButton(label)); },
+            "sigButton", [](const std::string& label) { return SigWrapper(sigButton(label)); },
             arg("label"))
         .def(
-            "sigCheckbox", [](std::string& label) { return SigWrapper(sigCheckbox(label)); },
+            "sigCheckbox", [](const std::string& label) { return SigWrapper(sigCheckbox(label)); },
             arg("label"))
 
         .def(
             "sigVSlider",
-            [](std::string& label, SigWrapper& sigInit, SigWrapper& sigMin, SigWrapper& sigMax,
-               SigWrapper& sigStep)
+            [](const std::string& label, SigWrapper& sigInit, SigWrapper& sigMin,
+               SigWrapper& sigMax, SigWrapper& sigStep)
             { return SigWrapper(sigVSlider(label, sigInit, sigMin, sigMax, sigStep)); },
             arg("label"), arg("init"), arg("min"), arg("max"), arg("step"))
         .def(
             "sigHSlider",
-            [](std::string& label, SigWrapper& sigInit, SigWrapper& sigMin, SigWrapper& sigMax,
-               SigWrapper& sigStep)
+            [](const std::string& label, SigWrapper& sigInit, SigWrapper& sigMin,
+               SigWrapper& sigMax, SigWrapper& sigStep)
             { return SigWrapper(sigHSlider(label, sigInit, sigMin, sigMax, sigStep)); },
             arg("label"), arg("init"), arg("min"), arg("max"), arg("step"))
 
         .def(
             "sigNumEntry",
-            [](std::string& label, SigWrapper& sigInit, SigWrapper& sigMin, SigWrapper& sigMax,
-               SigWrapper& sigStep)
+            [](const std::string& label, SigWrapper& sigInit, SigWrapper& sigMin,
+               SigWrapper& sigMax, SigWrapper& sigStep)
             { return SigWrapper(sigNumEntry(label, sigInit, sigMin, sigMax, sigStep)); },
             arg("label"), arg("init"), arg("min"), arg("max"), arg("step"))
 
         .def(
             "sigVBargraph",
-            [](std::string& label, SigWrapper& sigMin, SigWrapper& sigMax, SigWrapper& sig)
+            [](const std::string& label, SigWrapper& sigMin, SigWrapper& sigMax, SigWrapper& sig)
             { return SigWrapper(sigVBargraph(label, sigMin, sigMax, sig)); }, arg("label"),
             arg("min"), arg("max"), arg("step"))
         .def(
             "sigHBargraph",
-            [](std::string& label, SigWrapper& sigMin, SigWrapper& sigMax, SigWrapper& sig)
+            [](const std::string& label, SigWrapper& sigMin, SigWrapper& sigMax, SigWrapper& sig)
             { return SigWrapper(sigHBargraph(label, sigMin, sigMax, sig)); }, arg("label"),
             arg("min"), arg("max"), arg("step"))
 
@@ -886,8 +886,8 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
 
         .def(
             "signalsToSource",
-            [](std::vector<SigWrapper>& wrappers, std::string& lang, std::string& class_name,
-               std::optional<std::vector<std::string>> in_argv)
+            [](std::vector<SigWrapper>& wrappers, const std::string& lang,
+               const std::string& class_name)
             {
                 tvec signals;
                 for (auto wrapper : wrappers)
@@ -911,12 +911,49 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
                 argv[argc++] = "-cn";
                 argv[argc++] = strdup(class_name.c_str());
 
-                if (in_argv.has_value())
+                std::string error_msg = "";
+
+                std::string source_code =
+                    createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
+
+                if (!error_msg.empty())
                 {
-                    for (auto v : *in_argv)
-                    {
-                        argv[argc++] = strdup(v.c_str());
-                    }
+                    throw std::runtime_error(error_msg);
+                }
+
+                return source_code;
+            },
+            arg("signals"), arg("language"), arg("class_name"))
+        .def(
+            "signalsToSource",
+            [](std::vector<SigWrapper>& wrappers, const std::string& lang,
+               const std::string& class_name, std::vector<std::string> in_argv)
+            {
+                tvec signals;
+                for (auto wrapper : wrappers)
+                {
+                    signals.push_back(wrapper);
+                }
+
+                auto pathToFaustLibraries = getPathToFaustLibraries();
+
+                if (pathToFaustLibraries.empty())
+                {
+                    throw std::runtime_error("Unable to load Faust Libraries.");
+                }
+
+                int argc = 0;
+                const char* argv[64];
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-cn";
+                argv[argc++] = strdup(class_name.c_str());
+
+                for (auto v : in_argv)
+                {
+                    argv[argc++] = strdup(v.c_str());
                 }
 
                 std::string error_msg = "";
@@ -931,7 +968,7 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
 
                 return source_code;
             },
-            arg("signals"), arg("language"), arg("class_name"), arg("argv") = nb::none(),
+            arg("signals"), arg("language"), arg("class_name"), arg("argv"),
             "Turn a list of signals into source code in a target language such "
             "as \"cpp\". The second argument `argv` is a list of strings to send "
             "to a Faust command line.")
