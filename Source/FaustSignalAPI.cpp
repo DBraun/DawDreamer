@@ -929,6 +929,16 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 std::string source_code =
                     createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
 
+                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
+                for (int i = 1; i < 4; i += 2)
+                {
+                    free((void*)argv[i]);
+                }
+                for (int i = 4; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
+
                 if (!error_msg.empty())
                 {
                     throw std::runtime_error(error_msg);

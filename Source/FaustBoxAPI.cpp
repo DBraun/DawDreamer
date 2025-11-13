@@ -258,7 +258,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 Box id;
                 bool res = getDefNameProperty((BoxWrapper&)b, id);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(id));
+                return py::make_tuple(res, BoxWrapper(id));
             },
             arg("box"),
             "Return a tuple of (bool, Box). If the bool is True, the input box "
@@ -415,20 +415,13 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             },
             arg("vals"), "Create a waveform from a list of values.")
         .def(
+            "boxSoundfile", [](const std::string& label, BoxWrapper& chan)
+            { return BoxWrapper(boxSoundfile(label, chan)); }, arg("filepath"), arg("chan"))
+        .def(
             "boxSoundfile",
-            [](std::string& label, BoxWrapper& chan, std::optional<BoxWrapper> part,
-               std::optional<BoxWrapper> rdx)
-            {
-                if (part.has_value() && rdx.has_value())
-                {
-                    return BoxWrapper(boxSoundfile(label, chan, *part, *rdx));
-                }
-                else
-                {
-                    return BoxWrapper(boxSoundfile(label, chan));
-                }
-            },
-            arg("filepath"), arg("chan"), arg("part") = py::none(), arg("ridx") = py::none(),
+            [](const std::string& label, BoxWrapper& chan, BoxWrapper& part, BoxWrapper& rdx)
+            { return BoxWrapper(boxSoundfile(label, chan, part, rdx)); }, arg("filepath"),
+            arg("chan"), arg("part"), arg("ridx"),
             "Create a soundfile from a path and channel count. The third "
             "optional argument for the `part` is in the [0..255] range to select "
             "a given sound number, a constant numerical expression. The fourth "
@@ -844,7 +837,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "size), such as 1, 2, 4, 8, etc.")
         .def(
             "boxFromDSP",
-            [](const std::string& dsp_content, std::optional<std::vector<std::string>> in_argv)
+            [](const std::string& dsp_content)
             {
                 int inputs = 0;
                 int outputs = 0;
@@ -864,16 +857,14 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
-                if (in_argv.has_value())
-                {
-                    for (auto v : *in_argv)
-                    {
-                        argv[argc++] = strdup(v.c_str());
-                    }
-                }
-
                 Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
                                      error_msg);
+
+                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
+                for (int i = 1; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
 
                 if (!error_msg.empty())
                 {
@@ -882,7 +873,51 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
 
                 return BoxWrapper(box, inputs, outputs);
             },
-            arg("dsp_code"), arg("argv") = py::none(),
+            arg("dsp_code"))
+        .def(
+            "boxFromDSP",
+            [](const std::string& dsp_content, const std::vector<std::string>& in_argv)
+            {
+                int inputs = 0;
+                int outputs = 0;
+                std::string error_msg = "";
+                const std::string dsp_content2 =
+                    std::string("import(\"stdfaust.lib\");\n") + dsp_content;
+
+                int argc = 0;
+                const char* argv[512];
+
+                auto pathToFaustLibraries = getPathToFaustLibraries();
+                if (pathToFaustLibraries.empty())
+                {
+                    throw std::runtime_error("Unable to load Faust Libraries.");
+                }
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                for (auto v : in_argv)
+                {
+                    argv[argc++] = strdup(v.c_str());
+                }
+
+                Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
+                                     error_msg);
+
+                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
+                for (int i = 1; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
+
+                if (!error_msg.empty())
+                {
+                    throw std::runtime_error(error_msg);
+                }
+
+                return BoxWrapper(box, inputs, outputs);
+            },
+            arg("dsp_code"), arg("argv"),
             "Convert Faust DSP code to a Box. This returns a tuple of the box, "
             "num inputs, and num outputs. The second argument `argv` is a list "
             "of strings to send to a Faust command line.")
@@ -894,10 +929,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxAbstr",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxAbstr(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -905,10 +939,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxAccess",
             [](BoxWrapper& box)
             {
-                Box b2, b3;
+                Box b2 = nullptr, b3 = nullptr;
                 bool res = isBoxAccess(box, b2, b3);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(b2),
-                                                                               BoxWrapper(b3));
+                return py::make_tuple(res, BoxWrapper(b2), BoxWrapper(b3));
             },
             arg("box"))
 
@@ -916,10 +949,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxAppl",
             [](BoxWrapper& box)
             {
-                Box b2, b3;
+                Box b2 = nullptr, b3 = nullptr;
                 bool res = isBoxAppl(box, b2, b3);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(b2),
-                                                                               BoxWrapper(b3));
+                return py::make_tuple(res, BoxWrapper(b2), BoxWrapper(b3));
             },
             arg("box_t"))
 
@@ -927,10 +959,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxButton",
             [](BoxWrapper& b)
             {
-                Box label;
+                Box label = nullptr;
                 bool res = isBoxButton(b, label);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res,
-                                                                               BoxWrapper(label));
+                return py::make_tuple(res, BoxWrapper(label));
             },
             arg("box"))
 
@@ -938,10 +969,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxCase",
             [](BoxWrapper& b)
             {
-                Box rules;
+                Box rules = nullptr;
                 bool res = isBoxCase(b, rules);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res,
-                                                                               BoxWrapper(rules));
+                return py::make_tuple(res, BoxWrapper(rules));
             },
             arg("box"))
 
@@ -949,10 +979,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxCheckbox",
             [](BoxWrapper& b)
             {
-                Box label;
+                Box label = nullptr;
                 bool res = isBoxCheckbox(b, label);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res,
-                                                                               BoxWrapper(label));
+                return py::make_tuple(res, BoxWrapper(label));
             },
             arg("box"))
 
@@ -960,10 +989,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxComponent",
             [](BoxWrapper& b)
             {
-                Box filename;
+                Box filename = nullptr;
                 bool res = isBoxComponent(b, filename);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(filename));
+                return py::make_tuple(res, BoxWrapper(filename));
             },
             arg("box"))
 
@@ -980,10 +1008,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxFConst",
             [](BoxWrapper& b)
             {
-                Box type, name, file;
+                Box type = nullptr, name = nullptr, file = nullptr;
                 bool res = isBoxFConst(b, type, name, file);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
+                return py::make_tuple(res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
             },
             arg("box"))
 
@@ -991,10 +1018,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxFFun",
             [](BoxWrapper& b)
             {
-                Box ffun;
+                Box ffun = nullptr;
                 bool res = isBoxFFun(b, ffun);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res,
-                                                                               BoxWrapper(ffun));
+                return py::make_tuple(res, BoxWrapper(ffun));
             },
             arg("box"))
 
@@ -1002,10 +1028,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxFVar",
             [](BoxWrapper& b)
             {
-                Box type, name, file;
+                Box type = nullptr, name = nullptr, file = nullptr;
                 bool res = isBoxFVar(b, type, name, file);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
+                return py::make_tuple(res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
             },
             arg("box"))
 
@@ -1013,10 +1038,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxHBargraph",
             [](BoxWrapper& b)
             {
-                Box label, a_min, a_max;
+                Box label = nullptr, a_min = nullptr, a_max = nullptr;
                 bool res = isBoxHBargraph(b, label, a_min, a_max);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
             },
             arg("box"))
 
@@ -1024,10 +1048,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxHGroup",
             [](BoxWrapper& b)
             {
-                Box label, x;
+                Box label = nullptr, x = nullptr;
                 bool res = isBoxHGroup(b, label, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(x));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(x));
             },
             arg("box"))
 
@@ -1035,11 +1058,11 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxHSlider",
             [](BoxWrapper& b)
             {
-                Box label, init, a_min, a_max, step;
+                Box label = nullptr, init = nullptr, a_min = nullptr, a_max = nullptr,
+                    step = nullptr;
                 bool res = isBoxHSlider(b, label, init, a_min, a_max, step);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min), BoxWrapper(a_max),
-                    BoxWrapper(step));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                                      BoxWrapper(a_max), BoxWrapper(step));
             },
             arg("box"))
 
@@ -1050,7 +1073,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
                 const char* str = nullptr;
                 bool res = isBoxIdent(b, &str);
                 std::string s = std::string(res ? str : "");
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, s);
+                return py::make_tuple(res, s);
             },
             arg("box"))
 
@@ -1058,9 +1081,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxInputs",
             [](BoxWrapper& b)
             {
-                Box x;
+                Box x = nullptr;
                 bool res = isBoxInputs(b, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x));
+                return py::make_tuple(res, BoxWrapper(x));
             },
             arg("box"))
 
@@ -1070,7 +1093,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 int i = 0;
                 bool res = isBoxInt(b, &i);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, i);
+                return py::make_tuple(res, i);
             },
             arg("box"))
 
@@ -1078,10 +1101,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxIPar",
             [](BoxWrapper& b)
             {
-                Box x, y, z;
+                Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxIPar(b, x, y, z);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -1089,10 +1111,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxIProd",
             [](BoxWrapper& b)
             {
-                Box x, y, z;
+                Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxIProd(b, x, y, z);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -1100,10 +1121,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxISeq",
             [](BoxWrapper& b)
             {
-                Box x, y, z;
+                Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxISeq(b, x, y, z);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -1111,10 +1131,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxISum",
             [](BoxWrapper& b)
             {
-                Box x, y, z;
+                Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxISum(b, x, y, z);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -1122,10 +1141,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxLibrary",
             [](BoxWrapper& b)
             {
-                Box filename;
+                Box filename = nullptr;
                 bool res = isBoxLibrary(b, filename);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(filename));
+                return py::make_tuple(res, BoxWrapper(filename));
             },
             arg("box"))
 
@@ -1133,10 +1151,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxMerge",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxMerge(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1144,10 +1161,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxMetadata",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxMetadata(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1155,11 +1171,11 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxNumEntry",
             [](BoxWrapper& b)
             {
-                Box label, init, a_min, a_max, step;
+                Box label = nullptr, init = nullptr, a_min = nullptr, a_max = nullptr,
+                    step = nullptr;
                 bool res = isBoxNumEntry(b, label, init, a_min, a_max, step);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min), BoxWrapper(a_max),
-                    BoxWrapper(step));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                                      BoxWrapper(a_max), BoxWrapper(step));
             },
             arg("box"))
 
@@ -1167,9 +1183,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxOutputs",
             [](BoxWrapper& b)
             {
-                Box x;
+                Box x = nullptr;
                 bool res = isBoxOutputs(b, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x));
+                return py::make_tuple(res, BoxWrapper(x));
             },
             arg("box"))
 
@@ -1177,10 +1193,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxPar",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxPar(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1190,8 +1205,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 prim0 p;
                 bool res = isBoxPrim0(b, &p);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, res ? prim0name(p) : "");
+                return py::make_tuple(res, res ? prim0name(p) : "");
             },
             arg("box"))
 
@@ -1201,8 +1215,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 prim1 p;
                 bool res = isBoxPrim1(b, &p);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, res ? prim1name(p) : "");
+                return py::make_tuple(res, res ? prim1name(p) : "");
             },
             arg("box"))
 
@@ -1212,8 +1225,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 prim2 p;
                 bool res = isBoxPrim2(b, &p);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, res ? prim2name(p) : "");
+                return py::make_tuple(res, res ? prim2name(p) : "");
             },
             arg("box"))
 
@@ -1223,8 +1235,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 prim3 p;
                 bool res = isBoxPrim3(b, &p);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, res ? prim3name(p) : "");
+                return py::make_tuple(res, res ? prim3name(p) : "");
             },
             arg("box"))
 
@@ -1234,8 +1245,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 prim4 p;
                 bool res = isBoxPrim4(b, &p);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, res ? prim4name(p) : "");
+                return py::make_tuple(res, res ? prim4name(p) : "");
             },
             arg("box"))
 
@@ -1245,8 +1255,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 prim5 p;
                 bool res = isBoxPrim5(b, &p);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, res ? prim5name(p) : "");
+                return py::make_tuple(res, res ? prim5name(p) : "");
             },
             arg("box"))
 
@@ -1256,7 +1265,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 double r = 0;
                 bool res = isBoxReal(b, &r);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, r);
+                return py::make_tuple(res, r);
             },
             arg("box"))
 
@@ -1264,10 +1273,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxRec",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxRec(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1275,10 +1283,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxRoute",
             [](BoxWrapper& b)
             {
-                Box n, m, r;
+                Box n = nullptr, m = nullptr, r = nullptr;
                 bool res = isBoxRoute(b, n, m, r);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(n), BoxWrapper(m), BoxWrapper(r));
+                return py::make_tuple(res, BoxWrapper(n), BoxWrapper(m), BoxWrapper(r));
             },
             arg("box"))
 
@@ -1286,10 +1293,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxSeq",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxSeq(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1299,7 +1305,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             {
                 int i = 0;
                 bool res = isBoxSlot(b, &i);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, i);
+                return py::make_tuple(res, i);
             },
             arg("box"))
 
@@ -1307,10 +1313,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxSoundfile",
             [](BoxWrapper& b)
             {
-                Box label, chan;
+                Box label = nullptr, chan = nullptr;
                 bool res = isBoxSoundfile(b, label, chan);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(chan));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(chan));
             },
             arg("box"))
 
@@ -1318,10 +1323,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxSplit",
             [](BoxWrapper& b)
             {
-                Box x, y;
+                Box x = nullptr, y = nullptr;
                 bool res = isBoxSplit(b, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, BoxWrapper(x),
-                                                                               BoxWrapper(y));
+                return py::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1329,10 +1333,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxSymbolic",
             [](BoxWrapper& b)
             {
-                Box slot, body;
+                Box slot = nullptr, body = nullptr;
                 bool res = isBoxSymbolic(b, slot, body);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(slot), BoxWrapper(body));
+                return py::make_tuple(res, BoxWrapper(slot), BoxWrapper(body));
             },
             arg("box"))
 
@@ -1340,10 +1343,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxTGroup",
             [](BoxWrapper& b)
             {
-                Box label, x;
+                Box label = nullptr, x = nullptr;
                 bool res = isBoxTGroup(b, label, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(x));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(x));
             },
             arg("box"))
 
@@ -1351,10 +1353,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxVBargraph",
             [](BoxWrapper& b)
             {
-                Box label, a_min, a_max;
+                Box label = nullptr, a_min = nullptr, a_max = nullptr;
                 bool res = isBoxVBargraph(b, label, a_min, a_max);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
             },
             arg("box"))
 
@@ -1362,10 +1363,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxVGroup",
             [](BoxWrapper& b)
             {
-                Box label, x;
+                Box label = nullptr, x = nullptr;
                 bool res = isBoxVGroup(b, label, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(x));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(x));
             },
             arg("box"))
 
@@ -1373,11 +1373,11 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxVSlider",
             [](BoxWrapper& b)
             {
-                Box label, init, a_min, a_max, step;
+                Box label = nullptr, init = nullptr, a_min = nullptr, a_max = nullptr,
+                    step = nullptr;
                 bool res = isBoxVSlider(b, label, init, a_min, a_max, step);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min), BoxWrapper(a_max),
-                    BoxWrapper(step));
+                return py::make_tuple(res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                                      BoxWrapper(a_max), BoxWrapper(step));
             },
             arg("box"))
 
@@ -1404,7 +1404,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
                         }
                     }
                 }
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, vals);
+                return py::make_tuple(res, vals);
             },
             arg("box"))
 
@@ -1415,10 +1415,9 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
             "isBoxWithLocalDef",
             [](BoxWrapper& b)
             {
-                Box body, ldef;
+                Box body = nullptr, ldef = nullptr;
                 bool res = isBoxWithLocalDef(b, body, ldef);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, BoxWrapper(body), BoxWrapper(ldef));
+                return py::make_tuple(res, BoxWrapper(body), BoxWrapper(ldef));
             },
             arg("box"))
 
@@ -1464,6 +1463,16 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
 
                 std::string source_code =
                     createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
+
+                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
+                for (int i = 1; i < 6; i += 2)
+                {
+                    free((void*)argv[i]);
+                }
+                for (int i = 6; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
 
                 if (source_code == "")
                 {
