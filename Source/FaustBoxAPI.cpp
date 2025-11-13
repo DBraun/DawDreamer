@@ -1423,8 +1423,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
 
         .def(
             "boxToSource",
-            [](BoxWrapper& box, std::string& lang, std::string& class_name,
-               std::optional<std::vector<std::string>> in_argv)
+            [](BoxWrapper& box, const std::string& lang, const std::string& class_name)
             {
                 auto pathToFaustLibraries = getPathToFaustLibraries();
 
@@ -1451,12 +1450,69 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
                 argv[argc++] = "-A";
                 argv[argc++] = strdup(pathToArchitecture.c_str());
 
-                if (in_argv.has_value())
+                std::string error_msg = "";
+
+                std::string source_code =
+                    createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
+
+                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
+                for (int i = 1; i < 6; i += 2)
                 {
-                    for (auto& v : *in_argv)
-                    {
-                        argv[argc++] = strdup(v.c_str());
-                    }
+                    free((void*)argv[i]);
+                }
+                for (int i = 6; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
+
+                if (source_code == "")
+                {
+                    throw std::runtime_error(error_msg);
+                }
+
+                std::variant<std::string, py::bytes> result;
+                if (lang == "wasm" || lang == "wast")
+                {
+                    result = py::bytes(source_code);
+                    return result;
+                }
+                result = source_code;
+                return result;
+            },
+            arg("box"), arg("language"), arg("class_name"))
+        .def(
+            "boxToSource",
+            [](BoxWrapper& box, const std::string& lang, const std::string& class_name,
+               const std::vector<std::string>& in_argv)
+            {
+                auto pathToFaustLibraries = getPathToFaustLibraries();
+
+                if (pathToFaustLibraries.empty())
+                {
+                    throw std::runtime_error("Unable to load Faust Libraries.");
+                }
+
+                auto pathToArchitecture = getPathToArchitectureFiles();
+                if (pathToArchitecture.empty())
+                {
+                    throw std::runtime_error("Unable to find Faust architecture files.");
+                }
+
+                int argc = 0;
+                const char* argv[512];
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-cn";
+                argv[argc++] = strdup(class_name.c_str());
+
+                argv[argc++] = "-A";
+                argv[argc++] = strdup(pathToArchitecture.c_str());
+
+                for (auto& v : in_argv)
+                {
+                    argv[argc++] = strdup(v.c_str());
                 }
 
                 std::string error_msg = "";
@@ -1488,7 +1544,7 @@ py::module_& create_bindings_for_faust_box(py::module& faust_module, py::module&
                 result = source_code;
                 return result;
             },
-            arg("box"), arg("language"), arg("class_name"), arg("argv") = py::none(),
+            arg("box"), arg("language"), arg("class_name"), arg("argv"),
             "Turn a box into source code in a target language such as \"cpp\". "
             "The second argument `argv` is a list of strings to send to a Faust "
             "command line.");

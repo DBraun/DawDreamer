@@ -891,8 +891,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
 
         .def(
             "signalsToSource",
-            [](std::vector<SigWrapper>& wrappers, std::string& lang, std::string& class_name,
-               std::optional<std::vector<std::string>> in_argv)
+            [](std::vector<SigWrapper>& wrappers, const std::string& lang,
+               const std::string& class_name)
             {
                 tvec signals;
                 for (auto wrapper : wrappers)
@@ -916,12 +916,59 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 argv[argc++] = "-cn";
                 argv[argc++] = strdup(class_name.c_str());
 
-                if (in_argv.has_value())
+                std::string error_msg = "";
+
+                std::string source_code =
+                    createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
+
+                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
+                for (int i = 1; i < 4; i += 2)
                 {
-                    for (auto v : *in_argv)
-                    {
-                        argv[argc++] = strdup(v.c_str());
-                    }
+                    free((void*)argv[i]);
+                }
+                for (int i = 4; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
+
+                if (!error_msg.empty())
+                {
+                    throw std::runtime_error(error_msg);
+                }
+
+                return source_code;
+            },
+            arg("signals"), arg("language"), arg("class_name"))
+        .def(
+            "signalsToSource",
+            [](std::vector<SigWrapper>& wrappers, const std::string& lang,
+               const std::string& class_name, const std::vector<std::string>& in_argv)
+            {
+                tvec signals;
+                for (auto wrapper : wrappers)
+                {
+                    signals.push_back(wrapper);
+                }
+
+                auto pathToFaustLibraries = getPathToFaustLibraries();
+
+                if (pathToFaustLibraries.empty())
+                {
+                    throw std::runtime_error("Unable to load Faust Libraries.");
+                }
+
+                int argc = 0;
+                const char* argv[64];
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-cn";
+                argv[argc++] = strdup(class_name.c_str());
+
+                for (auto v : in_argv)
+                {
+                    argv[argc++] = strdup(v.c_str());
                 }
 
                 std::string error_msg = "";
@@ -946,7 +993,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
 
                 return source_code;
             },
-            arg("signals"), arg("language"), arg("class_name"), arg("argv") = py::none(),
+            arg("signals"), arg("language"), arg("class_name"), arg("argv"),
             "Turn a list of signals into source code in a target language such "
             "as \"cpp\". The second argument `argv` is a list of strings to send "
             "to a Faust command line.")
