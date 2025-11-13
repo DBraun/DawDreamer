@@ -916,6 +916,12 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
                 std::string source_code =
                     createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
 
+                // Clean up strdup'd strings (only odd indices: 1, 3)
+                for (int i = 1; i < argc; i += 2)
+                {
+                    free((void*)argv[i]);
+                }
+
                 if (!error_msg.empty())
                 {
                     throw std::runtime_error(error_msg);
@@ -960,6 +966,16 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& bo
 
                 std::string source_code =
                     createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
+
+                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
+                for (int i = 1; i < 4; i += 2)
+                {
+                    free((void*)argv[i]);
+                }
+                for (int i = 4; i < argc; i++)
+                {
+                    free((void*)argv[i]);
+                }
 
                 if (!error_msg.empty())
                 {
