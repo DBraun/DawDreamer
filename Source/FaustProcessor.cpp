@@ -298,13 +298,10 @@ void FaustProcessor::automateParameters(AudioPlayHead::PositionInfo& posInfo, in
     if (anyAutomation && m_nvoices > 0 && m_groupVoices)
     {
         // When you want to access shared memory:
-        if (guiUpdateMutex.Lock())
-        {
-            // Have Faust update all GUIs.
-            GUI::updateAllGuis();
-
-            guiUpdateMutex.Unlock();
-        }
+        guiUpdateMutex.Lock();
+        // Have Faust update all GUIs.
+        GUI::updateAllGuis();
+        guiUpdateMutex.Unlock();
     }
 }
 
@@ -343,13 +340,10 @@ void FaustProcessor::reset()
         if (m_nvoices > 0 && m_groupVoices)
         {
             // When you want to access shared memory:
-            if (guiUpdateMutex.Lock())
-            {
-                // Have Faust update all GUIs.
-                GUI::updateAllGuis();
-
-                guiUpdateMutex.Unlock();
-            }
+            guiUpdateMutex.Lock();
+            // Have Faust update all GUIs.
+            GUI::updateAllGuis();
+            guiUpdateMutex.Unlock();
         }
     }
 
@@ -542,6 +536,22 @@ bool FaustProcessor::compile()
                                  ". Check the faustlibraries path: " + pathToFaustLibraries);
     }
 
+    // check if factory was created
+    if (is_polyphonic && !m_poly_factory)
+    {
+        clear();
+        throw std::runtime_error("FaustProcessor::compile(): Failed to create poly DSP factory (no "
+                                 "error message). Check the faustlibraries path: " +
+                                 pathToFaustLibraries);
+    }
+    if (!is_polyphonic && !m_factory)
+    {
+        clear();
+        throw std::runtime_error("FaustProcessor::compile(): Failed to create DSP factory (no "
+                                 "error message). Check the faustlibraries path: " +
+                                 pathToFaustLibraries);
+    }
+
     //// print where faustlib is looking for stdfaust.lib and the other lib files.
     // auto pathnames = m_factory->getIncludePathnames();
     // std::cout << "pathnames:\n" << std::endl;
@@ -554,64 +564,96 @@ bool FaustProcessor::compile()
     //    std::cout << name << "\n" << std::endl;
     //}
 
-    if (is_polyphonic)
+    try
     {
-        // (false, true) works
-        m_dsp_poly =
-            m_poly_factory->createPolyDSPInstance(m_nvoices, m_dynamicVoices, m_groupVoices);
-        if (!m_dsp_poly)
+        if (is_polyphonic)
         {
-            clear();
-            throw std::runtime_error("FaustProcessor::compile(): Cannot create Poly DSP instance.");
+            // (false, true) works
+            m_dsp_poly =
+                m_poly_factory->createPolyDSPInstance(m_nvoices, m_dynamicVoices, m_groupVoices);
+            if (!m_dsp_poly)
+            {
+                clear();
+                throw std::runtime_error(
+                    "FaustProcessor::compile(): Cannot create Poly DSP instance.");
+            }
+            // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
         }
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        else
+        {
+            // create DSP instance
+            m_dsp = m_factory->createDSPInstance();
+            if (!m_dsp)
+            {
+                clear();
+                throw std::runtime_error("FaustProcessor::compile(): Cannot create DSP instance.");
+            }
+        }
     }
-    else
+    catch (const std::exception& e)
     {
-        // create DSP instance
-        m_dsp = m_factory->createDSPInstance();
-        if (!m_dsp)
-        {
-            clear();
-            throw std::runtime_error("FaustProcessor::compile(): Cannot create DSP instance.");
-        }
+        clear();
+        throw std::runtime_error(
+            std::string("FaustProcessor::compile(): Exception creating DSP instance: ") + e.what());
+    }
+    catch (...)
+    {
+        clear();
+        throw std::runtime_error(
+            "FaustProcessor::compile(): Unknown exception creating DSP instance");
     }
 
     dsp* theDsp = is_polyphonic ? m_dsp_poly : m_dsp;
 
-    // get channels
-    int inputs = theDsp->getNumInputs();
-    int outputs = theDsp->getNumOutputs();
-
-    m_numInputChannels = inputs;
-    m_numOutputChannels = outputs;
-
-    setMainBusInputsAndOutputs(inputs, outputs);
-
-    // make new UI
-    if (is_polyphonic)
+    try
     {
-        m_midi_handler = rt_midi("my_midi");
-        m_midi_handler.addMidiIn(m_dsp_poly);
+        // get channels
+        int inputs = theDsp->getNumInputs();
+        int outputs = theDsp->getNumOutputs();
 
-        oneSampleInBuffer.setSize(m_numInputChannels, 1);
-        oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
+        m_numInputChannels = inputs;
+        m_numOutputChannels = outputs;
+
+        setMainBusInputsAndOutputs(inputs, outputs);
+
+        // make new UI
+        if (is_polyphonic)
+        {
+            m_midi_handler = rt_midi("my_midi");
+            m_midi_handler.addMidiIn(m_dsp_poly);
+
+            oneSampleInBuffer.setSize(m_numInputChannels, 1);
+            oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
+        }
+
+        m_ui = new APIUI();
+        theDsp->buildUserInterface(m_ui);
+
+        const int sr = (int)(mySampleRate + .5);
+
+        m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
+        theDsp->buildUserInterface(m_soundUI);
+
+        // init
+        theDsp->init(sr);
+
+        createParameterLayout();
+
+        m_compileState = is_polyphonic ? kPoly : kMono;
     }
-
-    m_ui = new APIUI();
-    theDsp->buildUserInterface(m_ui);
-
-    const int sr = (int)(mySampleRate + .5);
-
-    m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
-    theDsp->buildUserInterface(m_soundUI);
-
-    // init
-    theDsp->init(sr);
-
-    createParameterLayout();
-
-    m_compileState = is_polyphonic ? kPoly : kMono;
+    catch (const std::exception& e)
+    {
+        clear();
+        throw std::runtime_error(
+            std::string("FaustProcessor::compile(): Exception during DSP initialization: ") +
+            e.what());
+    }
+    catch (...)
+    {
+        clear();
+        throw std::runtime_error(
+            "FaustProcessor::compile(): Unknown exception during DSP initialization");
+    }
 
     return true;
 }
@@ -670,7 +712,7 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
     {
         // Allocate polyphonic DSP
         m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
         theDsp = m_dsp_poly;
     }
 
@@ -771,7 +813,7 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
     {
         // Allocate polyphonic DSP
         m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
         theDsp = m_dsp_poly;
     }
 
@@ -857,7 +899,7 @@ bool FaustProcessor::compileBox(BoxWrapper& box)
     {
         // Allocate polyphonic DSP
         m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
         theDsp = m_dsp_poly;
     }
 
@@ -948,7 +990,7 @@ bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>&
     {
         // Allocate polyphonic DSP
         m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
         theDsp = m_dsp_poly;
     }
 
@@ -1425,7 +1467,7 @@ void FaustProcessor::setReleaseLength(double sec)
     m_releaseLengthSec = sec;
     if (m_dsp_poly)
     {
-        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
     }
 }
 
