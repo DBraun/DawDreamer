@@ -370,10 +370,11 @@ class FaustProcessor : public ProcessorBase
 
     // public libfaust API
   public:
-    bool compileSignals(std::vector<SigWrapper>& wrappers,
-                        std::optional<std::vector<std::string>> in_argv);
+    bool compileSignals(std::vector<SigWrapper>& wrappers);
+    bool compileSignals(std::vector<SigWrapper>& wrappers, const std::vector<std::string>& in_argv);
 
-    bool compileBox(BoxWrapper& box, std::optional<std::vector<std::string>> in_argv);
+    bool compileBox(BoxWrapper& box);
+    bool compileBox(BoxWrapper& box, const std::vector<std::string>& in_argv);
 };
 
 inline void create_bindings_for_faust_processor(py::module& m)
@@ -475,10 +476,19 @@ inline void create_bindings_for_faust_processor(py::module& m)
              "Set the audio data that the FaustProcessor can use with the "
              "`soundfile` primitive.")
 
-        .def("compile_signals", &FaustProcessor::compileSignals, arg("signals"),
-             arg("argv") = py::none(), returnPolicy)
-        .def("compile_box", &FaustProcessor::compileBox, arg("box"), arg("argv") = py::none(),
+        .def("compile_signals",
+             py::overload_cast<std::vector<SigWrapper>&>(&FaustProcessor::compileSignals),
+             arg("signals"), returnPolicy)
+        .def("compile_signals",
+             py::overload_cast<std::vector<SigWrapper>&, const std::vector<std::string>&>(
+                 &FaustProcessor::compileSignals),
+             arg("signals"), arg("argv"), returnPolicy)
+        .def("compile_box", py::overload_cast<BoxWrapper&>(&FaustProcessor::compileBox), arg("box"),
              returnPolicy)
+        .def("compile_box",
+             py::overload_cast<BoxWrapper&, const std::vector<std::string>&>(
+                 &FaustProcessor::compileBox),
+             arg("box"), arg("argv"), returnPolicy)
 
         .doc() = "A Faust Processor can compile and execute FAUST code. See "
                  "https://faust.grame.fr for more information.";

@@ -616,8 +616,7 @@ bool FaustProcessor::compile()
     return true;
 }
 
-bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
-                                    std::optional<std::vector<std::string>> in_argv)
+bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
 {
     clear();
 
@@ -638,14 +637,6 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
     for (const auto& flag : m_compileFlags)
     {
         argv[argc++] = flag.c_str();
-    }
-
-    if (in_argv.has_value())
-    {
-        for (auto& s : *in_argv)
-        {
-            argv[argc++] = s.c_str();
-        }
     }
 
     tvec signals;
@@ -720,7 +711,8 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
     return true;
 }
 
-bool FaustProcessor::compileBox(BoxWrapper& box, std::optional<std::vector<std::string>> in_argv)
+bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
+                                    const std::vector<std::string>& in_argv)
 {
     clear();
 
@@ -743,12 +735,195 @@ bool FaustProcessor::compileBox(BoxWrapper& box, std::optional<std::vector<std::
         argv[argc++] = flag.c_str();
     }
 
-    if (in_argv.has_value())
+    for (auto& s : in_argv)
     {
-        for (auto& s : *in_argv)
-        {
-            argv[argc++] = s.c_str();
-        }
+        argv[argc++] = s.c_str();
+    }
+
+    tvec signals;
+    for (auto wrapper : wrappers)
+    {
+        signals.push_back(wrapper);
+    }
+
+    auto target = getTarget();
+    std::string error_msg;
+
+    m_factory = createDSPFactoryFromSignals("dawdreamer", signals, argc, argv, target, error_msg,
+                                            m_llvmOptLevel);
+
+    if (!m_factory)
+    {
+        clear();
+        throw std::runtime_error("FaustProcessor: " + error_msg);
+    }
+
+    m_dsp = m_factory->createDSPInstance();
+    if (!m_dsp)
+    {
+        throw std::runtime_error("FaustProcessor: m_dsp not created.");
+    }
+
+    // create new factory
+    bool is_polyphonic = m_nvoices > 0;
+    auto theDsp = m_dsp;
+    if (is_polyphonic)
+    {
+        // Allocate polyphonic DSP
+        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
+        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        theDsp = m_dsp_poly;
+    }
+
+    // get channels
+    int inputs = theDsp->getNumInputs();
+    int outputs = theDsp->getNumOutputs();
+
+    m_numInputChannels = inputs;
+    m_numOutputChannels = outputs;
+
+    setMainBusInputsAndOutputs(inputs, outputs);
+
+    // make new UI
+    if (is_polyphonic)
+    {
+        m_midi_handler = rt_midi("my_midi");
+        m_midi_handler.addMidiIn(m_dsp_poly);
+
+        oneSampleInBuffer.setSize(m_numInputChannels, 1);
+        oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
+    }
+
+    m_ui = new APIUI();
+    theDsp->buildUserInterface(m_ui);
+
+    const int sr = (int)(mySampleRate + .5);
+
+    m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
+    theDsp->buildUserInterface(m_soundUI);
+
+    // init
+    theDsp->init(sr);
+
+    createParameterLayout();
+
+    m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+    return true;
+}
+
+bool FaustProcessor::compileBox(BoxWrapper& box)
+{
+    clear();
+
+    auto pathToFaustLibraries = getPathToFaustLibraries();
+
+    int argc = 0;
+    const char* argv[512];
+
+    argv[argc++] = "-I";
+    argv[argc++] = pathToFaustLibraries.c_str();
+
+    for (const auto& p : m_faustLibrariesPaths)
+    {
+        argv[argc++] = "-I";
+        argv[argc++] = p.c_str();
+    }
+
+    for (const auto& flag : m_compileFlags)
+    {
+        argv[argc++] = flag.c_str();
+    }
+
+    auto target = this->getTarget();
+    std::string error_msg;
+
+    m_factory =
+        createDSPFactoryFromBoxes("dawdreamer", box, argc, argv, target, error_msg, m_llvmOptLevel);
+
+    if (!m_factory)
+    {
+        clear();
+        throw std::runtime_error("FaustProcessor: " + error_msg);
+    }
+
+    m_dsp = m_factory->createDSPInstance();
+    assert(m_dsp);
+
+    // create new factory
+    bool is_polyphonic = m_nvoices > 0;
+    auto theDsp = m_dsp;
+    if (is_polyphonic)
+    {
+        // Allocate polyphonic DSP
+        m_dsp_poly = new mydsp_poly(m_dsp, m_nvoices, m_dynamicVoices, m_groupVoices);
+        m_dsp_poly->setReleaseLength(m_releaseLengthSec);
+        theDsp = m_dsp_poly;
+    }
+
+    // get channels
+    int inputs = theDsp->getNumInputs();
+    int outputs = theDsp->getNumOutputs();
+
+    m_numInputChannels = inputs;
+    m_numOutputChannels = outputs;
+
+    setMainBusInputsAndOutputs(inputs, outputs);
+
+    // make new UI
+    if (is_polyphonic)
+    {
+        m_midi_handler = rt_midi("my_midi");
+        m_midi_handler.addMidiIn(m_dsp_poly);
+
+        oneSampleInBuffer.setSize(m_numInputChannels, 1);
+        oneSampleOutBuffer.setSize(m_numOutputChannels, 1);
+    }
+
+    m_ui = new APIUI();
+    theDsp->buildUserInterface(m_ui);
+
+    const int sr = (int)(mySampleRate + .5);
+
+    m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
+    theDsp->buildUserInterface(m_soundUI);
+
+    // init
+    theDsp->init(sr);
+
+    createParameterLayout();
+
+    m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+    return true;
+}
+
+bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>& in_argv)
+{
+    clear();
+
+    auto pathToFaustLibraries = getPathToFaustLibraries();
+
+    int argc = 0;
+    const char* argv[512];
+
+    argv[argc++] = "-I";
+    argv[argc++] = pathToFaustLibraries.c_str();
+
+    for (const auto& p : m_faustLibrariesPaths)
+    {
+        argv[argc++] = "-I";
+        argv[argc++] = p.c_str();
+    }
+
+    for (const auto& flag : m_compileFlags)
+    {
+        argv[argc++] = flag.c_str();
+    }
+
+    for (auto& s : in_argv)
+    {
+        argv[argc++] = s.c_str();
     }
 
     auto target = this->getTarget();
