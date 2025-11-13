@@ -258,7 +258,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box id = nullptr;
                 bool res = getDefNameProperty((BoxWrapper&)b, id);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(id));
+                return nb::make_tuple(res, BoxWrapper(id));
             },
             arg("box"),
             "Return a tuple of (bool, Box). If the bool is True, the input box "
@@ -648,7 +648,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             "size), such as 1, 2, 4, 8, etc.")
         .def(
             "boxFromDSP",
-            [](const std::string& dsp_content, std::optional<std::vector<std::string>> in_argv)
+            [](const std::string& dsp_content)
             {
                 int inputs = 0;
                 int outputs = 0;
@@ -668,12 +668,48 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
-                if (in_argv.has_value())
+                Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
+                                     error_msg);
+
+                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
+                for (int i = 1; i < argc; i++)
                 {
-                    for (auto v : *in_argv)
-                    {
-                        argv[argc++] = strdup(v.c_str());
-                    }
+                    free((void*)argv[i]);
+                }
+
+                if (!error_msg.empty())
+                {
+                    throw std::runtime_error(error_msg);
+                }
+
+                return BoxWrapper(box, inputs, outputs);
+            },
+            arg("dsp_code"), "Convert Faust DSP code to a Box.")
+        .def(
+            "boxFromDSP",
+            [](const std::string& dsp_content, const std::vector<std::string>& in_argv)
+            {
+                int inputs = 0;
+                int outputs = 0;
+                std::string error_msg = "";
+                const std::string dsp_content2 =
+                    std::string("import(\"stdfaust.lib\");\n") + dsp_content;
+
+                int argc = 0;
+                const char* argv[512];
+
+                auto pathToFaustLibraries = getPathToFaustLibraries();
+                if (pathToFaustLibraries.empty())
+                {
+                    throw std::runtime_error("Unable to load Faust Libraries.");
+                }
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                for (auto v : in_argv)
+                {
+                    argv[argc++] = strdup(v.c_str());
                 }
 
                 Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
@@ -692,9 +728,8 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
 
                 return BoxWrapper(box, inputs, outputs);
             },
-            arg("dsp_code"), arg("argv") = nb::none(),
-            "Convert Faust DSP code to a Box. This returns a tuple of the box, "
-            "num inputs, and num outputs. The second argument `argv` is a list "
+            arg("dsp_code"), arg("argv"),
+            "Convert Faust DSP code to a Box. The second argument `argv` is a list "
             "of strings to send to a Faust command line.")
 
         .def(
@@ -716,8 +751,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box b2 = nullptr, b3 = nullptr;
                 bool res = isBoxAccess(box, b2, b3);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(b2),
-                                                                     BoxWrapper(b3));
+                return nb::make_tuple(res, BoxWrapper(b2), BoxWrapper(b3));
             },
             arg("box"))
 
@@ -727,8 +761,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box b2 = nullptr, b3 = nullptr;
                 bool res = isBoxAppl(box, b2, b3);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(b2),
-                                                                     BoxWrapper(b3));
+                return nb::make_tuple(res, BoxWrapper(b2), BoxWrapper(b3));
             },
             arg("box_t"))
 
@@ -738,7 +771,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr;
                 bool res = isBoxButton(b, label);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(label));
+                return nb::make_tuple(res, BoxWrapper(label));
             },
             arg("box"))
 
@@ -748,7 +781,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box rules = nullptr;
                 bool res = isBoxCase(b, rules);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(rules));
+                return nb::make_tuple(res, BoxWrapper(rules));
             },
             arg("box"))
 
@@ -758,7 +791,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr;
                 bool res = isBoxCheckbox(b, label);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(label));
+                return nb::make_tuple(res, BoxWrapper(label));
             },
             arg("box"))
 
@@ -768,7 +801,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box filename = nullptr;
                 bool res = isBoxComponent(b, filename);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(filename));
+                return nb::make_tuple(res, BoxWrapper(filename));
             },
             arg("box"))
 
@@ -787,8 +820,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box type = nullptr, name = nullptr, file = nullptr;
                 bool res = isBoxFConst(b, type, name, file);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
+                return nb::make_tuple(res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
             },
             arg("box"))
 
@@ -798,7 +830,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box ffun = nullptr;
                 bool res = isBoxFFun(b, ffun);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(ffun));
+                return nb::make_tuple(res, BoxWrapper(ffun));
             },
             arg("box"))
 
@@ -808,8 +840,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box type = nullptr, name = nullptr, file = nullptr;
                 bool res = isBoxFVar(b, type, name, file);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
+                return nb::make_tuple(res, BoxWrapper(type), BoxWrapper(name), BoxWrapper(file));
             },
             arg("box"))
 
@@ -819,8 +850,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr, a_min = nullptr, a_max = nullptr;
                 bool res = isBoxHBargraph(b, label, a_min, a_max);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
             },
             arg("box"))
 
@@ -830,8 +860,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr, x = nullptr;
                 bool res = isBoxHGroup(b, label, x);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(label),
-                                                                     BoxWrapper(x));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(x));
             },
             arg("box"))
 
@@ -842,9 +871,8 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 Box label = nullptr, init = nullptr, a_min = nullptr, a_max = nullptr,
                     step = nullptr;
                 bool res = isBoxHSlider(b, label, init, a_min, a_max, step);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min), BoxWrapper(a_max),
-                    BoxWrapper(step));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                                      BoxWrapper(a_max), BoxWrapper(step));
             },
             arg("box"))
 
@@ -855,7 +883,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 const char* str = nullptr;
                 bool res = isBoxIdent(b, &str);
                 std::string s = std::string(res ? str : "");
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, s);
+                return nb::make_tuple(res, s);
             },
             arg("box"))
 
@@ -865,7 +893,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr;
                 bool res = isBoxInputs(b, x);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x));
+                return nb::make_tuple(res, BoxWrapper(x));
             },
             arg("box"))
 
@@ -875,7 +903,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 int i = 0;
                 bool res = isBoxInt(b, &i);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i);
+                return nb::make_tuple(res, i);
             },
             arg("box"))
 
@@ -885,8 +913,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxIPar(b, x, y, z);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y), BoxWrapper(z));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -896,8 +923,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxIProd(b, x, y, z);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y), BoxWrapper(z));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -907,8 +933,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxISeq(b, x, y, z);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y), BoxWrapper(z));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -918,8 +943,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr, z = nullptr;
                 bool res = isBoxISum(b, x, y, z);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y), BoxWrapper(z));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y), BoxWrapper(z));
             },
             arg("box"))
 
@@ -929,7 +953,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box filename = nullptr;
                 bool res = isBoxLibrary(b, filename);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(filename));
+                return nb::make_tuple(res, BoxWrapper(filename));
             },
             arg("box"))
 
@@ -939,8 +963,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr;
                 bool res = isBoxMerge(b, x, y);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -950,8 +973,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr;
                 bool res = isBoxMetadata(b, x, y);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -962,9 +984,8 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 Box label = nullptr, init = nullptr, a_min = nullptr, a_max = nullptr,
                     step = nullptr;
                 bool res = isBoxNumEntry(b, label, init, a_min, a_max, step);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min), BoxWrapper(a_max),
-                    BoxWrapper(step));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                                      BoxWrapper(a_max), BoxWrapper(step));
             },
             arg("box"))
 
@@ -974,7 +995,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr;
                 bool res = isBoxOutputs(b, x);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x));
+                return nb::make_tuple(res, BoxWrapper(x));
             },
             arg("box"))
 
@@ -984,8 +1005,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr;
                 bool res = isBoxPar(b, x, y);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -995,7 +1015,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 prim0 p;
                 bool res = isBoxPrim0(b, &p);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, res ? prim0name(p) : "");
+                return nb::make_tuple(res, res ? prim0name(p) : "");
             },
             arg("box"))
 
@@ -1005,7 +1025,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 prim1 p;
                 bool res = isBoxPrim1(b, &p);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, res ? prim1name(p) : "");
+                return nb::make_tuple(res, res ? prim1name(p) : "");
             },
             arg("box"))
 
@@ -1015,7 +1035,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 prim2 p;
                 bool res = isBoxPrim2(b, &p);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, res ? prim2name(p) : "");
+                return nb::make_tuple(res, res ? prim2name(p) : "");
             },
             arg("box"))
 
@@ -1025,7 +1045,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 prim3 p;
                 bool res = isBoxPrim3(b, &p);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, res ? prim3name(p) : "");
+                return nb::make_tuple(res, res ? prim3name(p) : "");
             },
             arg("box"))
 
@@ -1035,7 +1055,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 prim4 p;
                 bool res = isBoxPrim4(b, &p);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, res ? prim4name(p) : "");
+                return nb::make_tuple(res, res ? prim4name(p) : "");
             },
             arg("box"))
 
@@ -1045,7 +1065,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 prim5 p;
                 bool res = isBoxPrim5(b, &p);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, res ? prim5name(p) : "");
+                return nb::make_tuple(res, res ? prim5name(p) : "");
             },
             arg("box"))
 
@@ -1055,7 +1075,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 double r = 0;
                 bool res = isBoxReal(b, &r);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, r);
+                return nb::make_tuple(res, r);
             },
             arg("box"))
 
@@ -1065,8 +1085,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr;
                 bool res = isBoxRec(b, x, y);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1076,8 +1095,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box n = nullptr, m = nullptr, r = nullptr;
                 bool res = isBoxRoute(b, n, m, r);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(n),
-                                                                     BoxWrapper(m), BoxWrapper(r));
+                return nb::make_tuple(res, BoxWrapper(n), BoxWrapper(m), BoxWrapper(r));
             },
             arg("box"))
 
@@ -1087,8 +1105,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr;
                 bool res = isBoxSeq(b, x, y);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1098,7 +1115,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 int i = 0;
                 bool res = isBoxSlot(b, &i);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i);
+                return nb::make_tuple(res, i);
             },
             arg("box"))
 
@@ -1108,8 +1125,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr, chan = nullptr;
                 bool res = isBoxSoundfile(b, label, chan);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(label),
-                                                                     BoxWrapper(chan));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(chan));
             },
             arg("box"))
 
@@ -1119,8 +1135,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box x = nullptr, y = nullptr;
                 bool res = isBoxSplit(b, x, y);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(x),
-                                                                     BoxWrapper(y));
+                return nb::make_tuple(res, BoxWrapper(x), BoxWrapper(y));
             },
             arg("box"))
 
@@ -1130,8 +1145,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box slot = nullptr, body = nullptr;
                 bool res = isBoxSymbolic(b, slot, body);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(slot),
-                                                                     BoxWrapper(body));
+                return nb::make_tuple(res, BoxWrapper(slot), BoxWrapper(body));
             },
             arg("box"))
 
@@ -1141,8 +1155,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr, x = nullptr;
                 bool res = isBoxTGroup(b, label, x);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(label),
-                                                                     BoxWrapper(x));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(x));
             },
             arg("box"))
 
@@ -1152,8 +1165,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr, a_min = nullptr, a_max = nullptr;
                 bool res = isBoxVBargraph(b, label, a_min, a_max);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(a_min), BoxWrapper(a_max));
             },
             arg("box"))
 
@@ -1163,8 +1175,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box label = nullptr, x = nullptr;
                 bool res = isBoxVGroup(b, label, x);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(label),
-                                                                     BoxWrapper(x));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(x));
             },
             arg("box"))
 
@@ -1175,9 +1186,8 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 Box label = nullptr, init = nullptr, a_min = nullptr, a_max = nullptr,
                     step = nullptr;
                 bool res = isBoxVSlider(b, label, init, a_min, a_max, step);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(
-                    res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min), BoxWrapper(a_max),
-                    BoxWrapper(step));
+                return nb::make_tuple(res, BoxWrapper(label), BoxWrapper(init), BoxWrapper(a_min),
+                                      BoxWrapper(a_max), BoxWrapper(step));
             },
             arg("box"))
 
@@ -1204,7 +1214,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                         }
                     }
                 }
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, vals);
+                return nb::make_tuple(res, vals);
             },
             arg("box"))
 
@@ -1217,8 +1227,7 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
             {
                 Box body = nullptr, ldef = nullptr;
                 bool res = isBoxWithLocalDef(b, body, ldef);
-                return nb::make_tuple<nb::rv_policy::take_ownership>(res, BoxWrapper(body),
-                                                                     BoxWrapper(ldef));
+                return nb::make_tuple(res, BoxWrapper(body), BoxWrapper(ldef));
             },
             arg("box"))
 

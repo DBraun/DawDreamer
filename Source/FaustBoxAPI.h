@@ -59,6 +59,14 @@ struct BoxWrapper
 
     void calculateBoxType()
     {
+        if (!ptr)
+        {
+            mValid = false;
+            mInputs = 0;
+            mOutputs = 0;
+            return;
+        }
+
         int inputs = 0;
         int outputs = 0;
 
