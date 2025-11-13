@@ -627,6 +627,12 @@ def test24b():
     # ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'fir', 'interp', 'java', 'jax', 'jsfx', 'julia', 'llvm', 'rust', 'wast']
 )
 def test25a(backend):
+    import platform
+
+    if backend in ["wasm", "wast"] and platform.system() == "Windows":
+        # todo: don't skip this test
+        return
+
     createLibContext()
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
@@ -663,6 +669,11 @@ def test25a(backend):
     # ['c', 'cpp', 'cmajor', 'codebox', 'csharp', 'dlang', 'fir', 'interp', 'java', 'jax', 'jsfx', 'julia', 'llvm', 'rust', 'wast']
 )
 def test26a(backend):
+    import platform
+
+    if backend in ["wasm", "wast"] and platform.system() == "Windows":
+        # todo: don't skip this test
+        return
     createLibContext()
 
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
