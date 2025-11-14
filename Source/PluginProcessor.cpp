@@ -703,13 +703,13 @@ PluginProcessorWrapper::PluginProcessorWrapper(std::string newUniqueName, double
 {
 }
 
-void PluginProcessorWrapper::wrapperSetPatch(py::list listOfTuples)
+void PluginProcessorWrapper::wrapperSetPatch(nb::list listOfTuples)
 {
     PluginPatch patch = customBoost::listOfTuplesToPluginPatch(listOfTuples);
     PluginProcessor::setPatch(patch);
 }
 
-py::list PluginProcessorWrapper::wrapperGetPatch()
+nb::list PluginProcessorWrapper::wrapperGetPatch()
 {
     return customBoost::pluginPatchToListOfTuples(PluginProcessor::getPatch());
 }
@@ -956,11 +956,11 @@ PluginProcessor::getParameterValueRange(const int parameterIndex, int search_ste
     return getParameterRange(pluginParameter, search_steps, convert);
 }
 
-py::list PluginProcessorWrapper::getPluginParametersDescription()
+nb::list PluginProcessorWrapper::getPluginParametersDescription()
 {
     THROW_ERROR_IF_NO_PLUGIN
 
-    py::list myList;
+    nb::list myList;
 
     // get the parameters as an AudioProcessorParameter array
     const Array<AudioProcessorParameter*>& processorParams = myPlugin->getParameters();
@@ -1010,7 +1010,7 @@ py::list PluginProcessorWrapper::getPluginParametersDescription()
             break;
         }
 
-        py::dict myDictionary;
+        nb::dict myDictionary;
         myDictionary["index"] = i;
         myDictionary["name"] = theName;
         myDictionary["numSteps"] = processorParams[i]->getNumSteps();

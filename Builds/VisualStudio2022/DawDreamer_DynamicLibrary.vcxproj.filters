@@ -685,7 +685,10 @@
     <ClCompile Include="..\..\Source\CustomParameters.cpp">
       <Filter>DawDreamer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\custom_pybind_wrappers.cpp">
+    <ClCompile Include="..\..\Source\custom_nanobind_wrappers.cpp">
+      <Filter>DawDreamer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\thirdparty\nanobind\src\nb_combined.cpp">
       <Filter>DawDreamer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\RenderEngine.cpp">
@@ -3369,7 +3372,7 @@
     <ClInclude Include="..\..\Source\CustomParameters.h">
       <Filter>DawDreamer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\custom_pybind_wrappers.h">
+    <ClInclude Include="..\..\Source\custom_nanobind_wrappers.h">
       <Filter>DawDreamer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\RenderEngine.h">

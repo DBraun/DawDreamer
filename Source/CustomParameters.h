@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "custom_pybind_wrappers.h"
+#include "custom_nanobind_wrappers.h"
 
 using juce::AbstractFifo;
 using juce::ADSR;
@@ -116,7 +116,7 @@ class AutomateParameter
   public:
     AutomateParameter() {}
 
-    bool setAutomation(py::array_t<float> input, std::uint32_t newPPQN);
+    bool setAutomation(nb::ndarray<float> input, std::uint32_t newPPQN);
 
     void setAutomation(const float val);
 

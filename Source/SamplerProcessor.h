@@ -18,9 +18,7 @@ class SamplerProcessor : public ProcessorBase
         setMainBusInputsAndOutputs(0, inputData.size());
     }
 
-    SamplerProcessor(std::string newUniqueName,
-                     py::array_t<float, py::array::c_style | py::array::forcecast> input, double sr,
-                     int blocksize)
+    SamplerProcessor(std::string newUniqueName, nb::ndarray<float> input, double sr, int blocksize)
         : ProcessorBase{newUniqueName}, mySampleRate{sr}
     {
         createParameterLayout();
@@ -151,18 +149,27 @@ class SamplerProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "SamplerProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input)
+    void setData(nb::ndarray<float> input)
     {
         float* input_ptr = (float*)input.data();
 
-        std::vector<std::vector<float>> data =
-            std::vector<std::vector<float>>(input.shape(0), std::vector<float>(input.shape(1)));
+        int num_channels = (int)input.shape(0);
+        int num_samples = (int)input.shape(1);
 
-        for (int y = 0; y < input.shape(1); y++)
+        std::vector<std::vector<float>> data =
+            std::vector<std::vector<float>>(num_channels, std::vector<float>(num_samples));
+
+        // Get strides - nanobind returns ELEMENT strides, not byte strides
+        size_t elem_stride_ch = input.stride(0);     // stride for channel dimension (in elements)
+        size_t elem_stride_sample = input.stride(1); // stride for sample dimension (in elements)
+
+        // Copy data using strides (handles both C-contiguous and F-contiguous)
+        for (int chan = 0; chan < num_channels; chan++)
         {
-            for (int x = 0; x < input.shape(0); x++)
+            float* chan_ptr = input_ptr + (chan * elem_stride_ch);
+            for (int samp = 0; samp < num_samples; samp++)
             {
-                data[x][y] = input_ptr[x * input.shape(1) + y];
+                data[chan][samp] = chan_ptr[samp * elem_stride_sample];
             }
         }
 
@@ -316,9 +323,9 @@ class SamplerProcessor : public ProcessorBase
 
     int wrapperGetPluginParameterSize() { return sampler.getNumParameters(); }
 
-    py::list getParametersDescription()
+    nb::list getParametersDescription()
     {
-        py::list myList;
+        nb::list myList;
 
         // get the parameters as an AudioProcessorParameter array
         const Array<AudioProcessorParameter*>& processorParams = sampler.getParameters();
@@ -333,7 +340,7 @@ class SamplerProcessor : public ProcessorBase
                     .toStdString();
             std::string label = processorParams[i]->getLabel().toStdString();
 
-            py::dict myDictionary;
+            nb::dict myDictionary;
             myDictionary["index"] = i;
             myDictionary["name"] = theName;
             myDictionary["numSteps"] = processorParams[i]->getNumSteps();

@@ -3,10 +3,10 @@
 
 #define TREE2STR(res, t) res ? tree2str(t->branch(0)) : ""
 
-using arg = py::arg;
-using kw_only = py::kw_only;
+using arg = nb::arg;
+using kw_only = nb::kw_only;
 
-void add_operation(py::class_<SigWrapper>& cls, const char* name, Signal (*func)(Signal, Signal))
+void add_operation(nb::class_<SigWrapper>& cls, const char* name, Signal (*func)(Signal, Signal))
 {
     cls.def(name, [func](const SigWrapper& s, int other)
             { return SigWrapper(func((SigWrapper&)s, sigInt(other))); })
@@ -16,17 +16,17 @@ void add_operation(py::class_<SigWrapper>& cls, const char* name, Signal (*func)
              { return SigWrapper(func((SigWrapper&)s, s2)); });
 }
 
-void add_unary_operation(py::class_<SigWrapper>& cls, const char* name, Signal (*func)(Signal))
+void add_unary_operation(nb::class_<SigWrapper>& cls, const char* name, Signal (*func)(Signal))
 {
     cls.def(name, [func](const SigWrapper& s) { return SigWrapper(func((SigWrapper&)s)); });
 }
 
-void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_module)
+void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& signal_module)
 {
-    using arg = py::arg;
-    using kw_only = py::kw_only;
+    using arg = nb::arg;
+    using kw_only = nb::kw_only;
 
-    box_module.def(
+    faust_module.def(
         "boxToSignals",
         [](BoxWrapper& box)
         {
@@ -46,11 +46,9 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
 
             return outSignals;
         },
-        arg("box"), "Convert a box to a list of signals.", py::return_value_policy::take_ownership);
+        arg("box"), "Convert a box to a list of signals.", nb::rv_policy::take_ownership);
 
     // SIGNAL API
-    auto signal_module = faust_module.def_submodule("signal");
-
     signal_module.doc() = R"pbdoc(
         The Faust Signal API
         -------------------------------------------------------------
@@ -63,7 +61,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
            :toctree: _generate
     )pbdoc";
 
-    py::class_<SigWrapper> cls(signal_module, "Signal");
+    nb::class_<SigWrapper> cls(signal_module, "Signal");
 
     add_operation(cls, "__add__", static_cast<Signal (*)(Signal, Signal)>(sigAdd));
     add_operation(cls, "__radd__", static_cast<Signal (*)(Signal, Signal)>(sigAdd));
@@ -104,28 +102,28 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
     add_unary_operation(cls, "__floor__", static_cast<Signal (*)(Signal)>(sigFloor));
     add_unary_operation(cls, "__ceil__", static_cast<Signal (*)(Signal)>(sigCeil));
 
-    cls.def(py::init<float>(), arg("val"), "Init with a float")
-        .def(py::init<int>(), arg("val"), "Init with an int")
+    cls.def(nb::init<float>(), arg("val"), "Init with a float")
+        .def(nb::init<int>(), arg("val"), "Init with an int")
         .def("__repr__", [](const SigWrapper& s) { return tree2str((SigWrapper&)s); })
-        .def_property_readonly("userdata", [](const SigWrapper& s)
-                               { return bool(getUserData((SigWrapper&)s)); })
-        .def_property_readonly("branches",
-                               [](const SigWrapper& sig)
-                               {
-                                   std::vector<SigWrapper> branches;
-                                   for (Signal b : sig.ptr->branches())
-                                   {
-                                       branches.push_back(SigWrapper(b));
-                                   }
-                                   return branches;
-                               })
-        .def_property_readonly(
+        .def_prop_ro("userdata",
+                     [](const SigWrapper& s) { return bool(getUserData((SigWrapper&)s)); })
+        .def_prop_ro("branches",
+                     [](const SigWrapper& sig)
+                     {
+                         std::vector<SigWrapper> branches;
+                         for (Signal b : sig.ptr->branches())
+                         {
+                             branches.push_back(SigWrapper(b));
+                         }
+                         return branches;
+                     })
+        .def_prop_ro(
             "xtended_name", [](const SigWrapper& s1) { return xtendedName((SigWrapper&)s1); },
             "Return the name of the xtended signal.")
-        .def_property_readonly(
+        .def_prop_ro(
             "ffarity", [](const SigWrapper& s1) { return ffarity((SigWrapper&)s1); },
             "Return the arity of a foreign function.")
-        .def_property_readonly(
+        .def_prop_ro(
             "xtended_arity", [](const SigWrapper& s1) { return xtendedArity((SigWrapper&)s1); },
             "Return the arity of the xtended signal.")
         .def(
@@ -461,7 +459,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 int i = 0;
                 bool res = isSigInt(s1, &i);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, i);
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i);
             },
             arg("sig"))
 
@@ -471,7 +469,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 double r = 0;
                 bool res = isSigReal(s1, &r);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, r);
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, r);
             },
             arg("sig"))
 
@@ -484,7 +482,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 int i = 0;
                 bool res = isSigInput(s1, &i);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, i);
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i);
             },
             arg("sig"))
 
@@ -495,8 +493,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 int i = 0;
                 Signal s2;
                 bool res = isSigOutput(s1, &i, s2);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, i,
-                                                                               SigWrapper(s2));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i, SigWrapper(s2));
             },
             arg("sig"))
 
@@ -506,7 +503,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal s2;
                 bool res = isSigDelay1(s1, s2);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(s2));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(s2));
             },
             arg("sig"))
 
@@ -517,8 +514,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 Signal s2;
                 Signal s3;
                 bool res = isSigDelay(s1, s2, s3);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(s2),
-                                                                               SigWrapper(s3));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(s2),
+                                                                     SigWrapper(s3));
             },
             arg("sig"))
 
@@ -529,8 +526,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 Signal s2;
                 Signal s3;
                 bool res = isSigPrefix(s1, s2, s3);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(s2),
-                                                                               SigWrapper(s3));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(s2),
+                                                                     SigWrapper(s3));
             },
             arg("sig"))
 
@@ -540,7 +537,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal s2;
                 bool res = isSigIntCast(s1, s2);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(s2));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(s2));
             },
             arg("sig"))
 
@@ -550,7 +547,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal s2;
                 bool res = isSigFloatCast(s1, s2);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(s2));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(s2));
             },
             arg("sig"))
 
@@ -561,8 +558,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 Signal t;
                 Signal i;
                 bool res = isSigRDTbl(s, t, i);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(t),
-                                                                               SigWrapper(i));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(t),
+                                                                     SigWrapper(i));
             },
             arg("sig"))
 
@@ -572,7 +569,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal id, t, i, s;
                 bool res = isSigWRTbl(u, id, t, i, s);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(id), SigWrapper(t), SigWrapper(i), SigWrapper(s));
             },
             arg("sig"))
@@ -583,8 +580,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal n, init;
                 bool res = isSigDocConstantTbl(s, n, init);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(n),
-                                                                               SigWrapper(init));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(n),
+                                                                     SigWrapper(init));
             },
             arg("sig"))
 
@@ -594,7 +591,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal n, init, widx, wsig;
                 bool res = isSigDocWriteTbl(s, n, init, widx, wsig);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(n), SigWrapper(init), SigWrapper(widx), SigWrapper(wsig));
             },
             arg("sig"))
@@ -605,8 +602,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal doctbl, ridx;
                 bool res = isSigDocConstantTbl(s, doctbl, ridx);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, SigWrapper(doctbl), SigWrapper(ridx));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(doctbl),
+                                                                     SigWrapper(ridx));
             },
             arg("sig"))
 
@@ -616,7 +613,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal selector, s1, s2;
                 bool res = isSigSelect2(s, selector, s1, s2);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(selector), SigWrapper(s1), SigWrapper(s2));
             },
             arg("sig"))
@@ -627,7 +624,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal s1, s2, s3;
                 bool res = isSigAssertBounds(s, s1, s2, s3);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(s1), SigWrapper(s2), SigWrapper(s3));
             },
             arg("sig"))
@@ -640,8 +637,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 Signal rgroup;
                 bool res = isProj(s.ptr, &i, rgroup);
 
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, i,
-                                                                               SigWrapper(rgroup));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i, SigWrapper(rgroup));
             },
             arg("sig"))
 
@@ -651,8 +647,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal var, body;
                 bool res = isRec(s, var, body);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(var),
-                                                                               SigWrapper(body));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(var),
+                                                                     SigWrapper(body));
             },
             arg("sig"))
 
@@ -663,8 +659,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
                 Signal x, y;
                 int i = 0;
                 bool res = isSigBinOp(s, &i, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, i, SigWrapper(x), SigWrapper(y));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, i, SigWrapper(x),
+                                                                     SigWrapper(y));
             },
             arg("sig"))
 
@@ -674,8 +670,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label;
                 bool res = isSigButton(s, label);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, TREE2STR(res, label));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, TREE2STR(res, label));
             },
             arg("sig"))
 
@@ -685,8 +680,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label;
                 bool res = isSigCheckbox(s, label);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, TREE2STR(res, label));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, TREE2STR(res, label));
             },
             arg("sig"))
 
@@ -696,7 +690,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label, init, theMin, theMax, step;
                 bool res = isSigVSlider(s, label, init, theMin, theMax, step);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, TREE2STR(res, label), SigWrapper(init), SigWrapper(theMin),
                     SigWrapper(theMax), SigWrapper(step));
             },
@@ -708,7 +702,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label, init, theMin, theMax, step;
                 bool res = isSigHSlider(s, label, init, theMin, theMax, step);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, TREE2STR(res, label), SigWrapper(init), SigWrapper(theMin),
                     SigWrapper(theMax), SigWrapper(step));
             },
@@ -720,7 +714,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label, init, theMin, theMax, step;
                 bool res = isSigNumEntry(s, label, init, theMin, theMax, step);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, TREE2STR(res, label), SigWrapper(init), SigWrapper(theMin),
                     SigWrapper(theMax), SigWrapper(step));
             },
@@ -732,7 +726,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label, theMin, theMax, t0;
                 bool res = isSigVBargraph(s, label, theMin, theMax, t0);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, TREE2STR(res, label), SigWrapper(theMin), SigWrapper(theMax),
                     SigWrapper(t0));
             },
@@ -744,7 +738,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label, theMin, theMax, t0;
                 bool res = isSigHBargraph(s, label, theMin, theMax, t0);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, TREE2STR(res, label), SigWrapper(theMin), SigWrapper(theMax),
                     SigWrapper(t0));
             },
@@ -756,8 +750,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal x, y;
                 bool res = isSigAttach(s, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(x),
-                                                                               SigWrapper(y));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(x),
+                                                                     SigWrapper(y));
             },
             arg("sig"))
 
@@ -767,8 +761,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal x, y;
                 bool res = isSigEnable(s, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(x),
-                                                                               SigWrapper(y));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(x),
+                                                                     SigWrapper(y));
             },
             arg("sig"))
 
@@ -778,8 +772,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal x, y;
                 bool res = isSigControl(s, x, y);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(x),
-                                                                               SigWrapper(y));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(x),
+                                                                     SigWrapper(y));
             },
             arg("sig"))
 
@@ -789,8 +783,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal label;
                 bool res = isSigSoundfile(s, label);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
-                    res, TREE2STR(res, label));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, TREE2STR(res, label));
             },
             arg("sig"))
 
@@ -800,8 +793,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal sf, part;
                 bool res = isSigSoundfileLength(s, sf, part);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(sf),
-                                                                               SigWrapper(part));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(sf),
+                                                                     SigWrapper(part));
             },
             arg("sig"))
 
@@ -811,8 +804,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal sf, part;
                 bool res = isSigSoundfileRate(s, sf, part);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(sf),
-                                                                               SigWrapper(part));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(sf),
+                                                                     SigWrapper(part));
             },
             arg("sig"))
 
@@ -822,7 +815,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal sf, chan, part, ridx;
                 bool res = isSigSoundfileBuffer(s, sf, chan, part, ridx);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(sf), SigWrapper(chan), SigWrapper(part), SigWrapper(ridx));
             },
             arg("sig"))
@@ -833,7 +826,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal x;
                 bool res = isSigLowest(s, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(x));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(x));
             },
             arg("sig"))
 
@@ -843,7 +836,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal x;
                 bool res = isSigHighest(s, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(x));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(x));
             },
             arg("sig"))
 
@@ -853,7 +846,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal x;
                 bool res = isSigGen(s, x);
-                return py::make_tuple<py::return_value_policy::take_ownership>(res, SigWrapper(x));
+                return nb::make_tuple<nb::rv_policy::take_ownership>(res, SigWrapper(x));
             },
             arg("sig"))
 
@@ -863,7 +856,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal ff, largs;
                 bool res = isSigFFun(s, ff, largs);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, res ? tree2str(ff->branch(1)) : "", SigWrapper(largs));
             },
             arg("sig"))
@@ -873,7 +866,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal type, name, file;
                 bool res = isSigFVar(s, type, name, file);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(type), res ? tree2str(name) : "", res ? tree2str(file) : "");
             },
             arg("sig"))
@@ -884,7 +877,7 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
             {
                 Signal type, name, file;
                 bool res = isSigFConst(s, type, name, file);
-                return py::make_tuple<py::return_value_policy::take_ownership>(
+                return nb::make_tuple<nb::rv_policy::take_ownership>(
                     res, SigWrapper(type), res ? tree2str(name) : "", res ? tree2str(file) : "");
             },
             arg("sig"))
@@ -1000,8 +993,8 @@ void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_
 
         ;
 
-    py::implicitly_convertible<float, SigWrapper>();
-    py::implicitly_convertible<int, SigWrapper>();
+    nb::implicitly_convertible<float, SigWrapper>();
+    nb::implicitly_convertible<int, SigWrapper>();
 }
 
 #endif

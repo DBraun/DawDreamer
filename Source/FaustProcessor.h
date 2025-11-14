@@ -189,7 +189,8 @@ class FaustProcessor : public ProcessorBase
     const juce::String getName() const override { return "FaustProcessor"; }
 
     void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
-    bool setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn) override;
+    bool setAutomation(std::string& parameterName, nb::ndarray<float> input,
+                       std::uint32_t ppqn) override;
 
     // faust stuff
     void clear();
@@ -202,7 +203,7 @@ class FaustProcessor : public ProcessorBase
     std::string code();
     bool isCompiled() { return bool(m_compileState); };
 
-    py::list getPluginParametersDescription();
+    nb::list getPluginParametersDescription();
 
     void setNumVoices(int numVoices);
     int getNumVoices();
@@ -225,7 +226,7 @@ class FaustProcessor : public ProcessorBase
     bool addMidiNote(const uint8 midiNote, const uint8 midiVelocity, const double noteStart,
                      const double noteLength, bool isBeats);
 
-    void setSoundfiles(py::dict);
+    void setSoundfiles(nb::dict);
 
     double getReleaseLength();
 
@@ -377,12 +378,12 @@ class FaustProcessor : public ProcessorBase
     bool compileBox(BoxWrapper& box, const std::vector<std::string>& in_argv);
 };
 
-inline void create_bindings_for_faust_processor(py::module& m)
+inline void create_bindings_for_faust_processor(nb::module_& m)
 {
-    using arg = py::arg;
-    using kw_only = py::kw_only;
+    using arg = nb::arg;
+    using kw_only = nb::kw_only;
 
-    auto returnPolicy = py::return_value_policy::take_ownership;
+    auto returnPolicy = nb::rv_policy::take_ownership;
 
     // todo: for consistency, lookup these descriptions from source.cpp
     auto add_midi_description =
@@ -398,7 +399,7 @@ inline void create_bindings_for_faust_processor(py::module& m)
         "After rendering, you can save the MIDI to a file using absolute times "
         "(SMPTE format).";
 
-    py::class_<FaustProcessor, ProcessorBase> faustProcessor(m, "FaustProcessor");
+    nb::class_<FaustProcessor, ProcessorBase> faustProcessor(m, "FaustProcessor");
 
     faustProcessor
         .def("set_dsp", &FaustProcessor::setDSPFile, arg("filepath"),
@@ -408,8 +409,8 @@ inline void create_bindings_for_faust_processor(py::module& m)
         .def("compile", &FaustProcessor::compile,
              "Compile the FAUST object. You must have already set a dsp file "
              "path or dsp string.")
-        .def_property("auto_import", &FaustProcessor::getAutoImport, &FaustProcessor::setAutoImport,
-                      "The auto import string. Default is `import(\"stdfaust.lib\");`")
+        .def_prop_rw("auto_import", &FaustProcessor::getAutoImport, &FaustProcessor::setAutoImport,
+                     "The auto import string. Default is `import(\"stdfaust.lib\");`")
         .def("get_parameters_description", &FaustProcessor::getPluginParametersDescription,
              "Get a list of dictionaries describing the parameters of the most "
              "recently compiled FAUST code.")
@@ -419,50 +420,50 @@ inline void create_bindings_for_faust_processor(py::module& m)
              arg("value"))
         .def("set_parameter", &FaustProcessor::setAutomationVal, arg("parameter_path"),
              arg("value"))
-        .def_property_readonly("compiled", &FaustProcessor::isCompiled,
-                               "Did the most recent DSP code compile?")
-        .def_property_readonly("code", &FaustProcessor::code,
-                               "Get the most recently compiled Faust DSP code.")
-        .def_property("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices,
-                      "The number of voices for polyphony. Set to zero to "
-                      "disable polyphony. One or more enables polyphony.")
-        .def_property("group_voices", &FaustProcessor::getGroupVoices,
-                      &FaustProcessor::setGroupVoices,
-                      "If grouped, all polyphonic voices will share the same parameters. "
-                      "This parameter only matters if polyphony is enabled.")
-        .def_property("dynamic_voices", &FaustProcessor::getDynamicVoices,
-                      &FaustProcessor::setDynamicVoices,
-                      "If enabled (default), voices are dynamically enabled and "
-                      "disabled to save computation. This parameter only matters "
-                      "if polyphony is enabled.")
-        .def_property("release_length", &FaustProcessor::getReleaseLength,
-                      &FaustProcessor::setReleaseLength,
-                      "If using polyphony, specifying the release length accurately can "
-                      "help avoid warnings about voices being stolen.")
-        .def_property("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath,
-                      &FaustProcessor::setFaustLibrariesPath,
-                      "Absolute path to directory containing your custom "
-                      "\".lib\" files containing Faust code.")
-        .def_property("faust_libraries_paths", &FaustProcessor::getFaustLibrariesPaths,
-                      &FaustProcessor::setFaustLibrariesPaths,
-                      "List of absolute paths to directories containing your custom "
-                      "\".lib\" files containing Faust code.")
-        .def_property("faust_assets_path", &FaustProcessor::getFaustAssetsPath,
-                      &FaustProcessor::setFaustAssetsPath,
-                      "Absolute path to directory containing audio files to be "
-                      "used by Faust.")
-        .def_property("faust_assets_paths", &FaustProcessor::getFaustAssetsPaths,
-                      &FaustProcessor::setFaustAssetsPaths,
-                      "List of absolute paths to directories containing audio files to be "
-                      "used by Faust.")
-        .def_property("compile_flags", &FaustProcessor::getCompileFlags,
-                      &FaustProcessor::setCompileFlags, "List of compilation flags.")
-        .def_property("opt_level", &FaustProcessor::getLLVMOpt, &FaustProcessor::setLLVMOpt,
-                      "LLVM IR to IR optimization level (from -1 to 4, -1 means 'maximum "
-                      "possible value' * since the maximum value may change with new LLVM "
-                      "versions)")
-        .def_property_readonly("n_midi_events", &FaustProcessor::getNumMidiEvents,
-                               "The number of MIDI events stored in the buffer. \
+        .def_prop_ro("compiled", &FaustProcessor::isCompiled,
+                     "Did the most recent DSP code compile?")
+        .def_prop_ro("code", &FaustProcessor::code,
+                     "Get the most recently compiled Faust DSP code.")
+        .def_prop_rw("num_voices", &FaustProcessor::getNumVoices, &FaustProcessor::setNumVoices,
+                     "The number of voices for polyphony. Set to zero to "
+                     "disable polyphony. One or more enables polyphony.")
+        .def_prop_rw("group_voices", &FaustProcessor::getGroupVoices,
+                     &FaustProcessor::setGroupVoices,
+                     "If grouped, all polyphonic voices will share the same parameters. "
+                     "This parameter only matters if polyphony is enabled.")
+        .def_prop_rw("dynamic_voices", &FaustProcessor::getDynamicVoices,
+                     &FaustProcessor::setDynamicVoices,
+                     "If enabled (default), voices are dynamically enabled and "
+                     "disabled to save computation. This parameter only matters "
+                     "if polyphony is enabled.")
+        .def_prop_rw("release_length", &FaustProcessor::getReleaseLength,
+                     &FaustProcessor::setReleaseLength,
+                     "If using polyphony, specifying the release length accurately can "
+                     "help avoid warnings about voices being stolen.")
+        .def_prop_rw("faust_libraries_path", &FaustProcessor::getFaustLibrariesPath,
+                     &FaustProcessor::setFaustLibrariesPath,
+                     "Absolute path to directory containing your custom "
+                     "\".lib\" files containing Faust code.")
+        .def_prop_rw("faust_libraries_paths", &FaustProcessor::getFaustLibrariesPaths,
+                     &FaustProcessor::setFaustLibrariesPaths,
+                     "List of absolute paths to directories containing your custom "
+                     "\".lib\" files containing Faust code.")
+        .def_prop_rw("faust_assets_path", &FaustProcessor::getFaustAssetsPath,
+                     &FaustProcessor::setFaustAssetsPath,
+                     "Absolute path to directory containing audio files to be "
+                     "used by Faust.")
+        .def_prop_rw("faust_assets_paths", &FaustProcessor::getFaustAssetsPaths,
+                     &FaustProcessor::setFaustAssetsPaths,
+                     "List of absolute paths to directories containing audio files to be "
+                     "used by Faust.")
+        .def_prop_rw("compile_flags", &FaustProcessor::getCompileFlags,
+                     &FaustProcessor::setCompileFlags, "List of compilation flags.")
+        .def_prop_rw("opt_level", &FaustProcessor::getLLVMOpt, &FaustProcessor::setLLVMOpt,
+                     "LLVM IR to IR optimization level (from -1 to 4, -1 means 'maximum "
+                     "possible value' * since the maximum value may change with new LLVM "
+                     "versions)")
+        .def_prop_ro("n_midi_events", &FaustProcessor::getNumMidiEvents,
+                     "The number of MIDI events stored in the buffer. \
 		Note that note-ons and note-offs are counted separately.")
         .def("load_midi", &FaustProcessor::loadMidi, arg("filepath"), kw_only(),
              arg("clear_previous") = true, arg("beats") = false, arg("all_events") = true,
@@ -477,16 +478,16 @@ inline void create_bindings_for_faust_processor(py::module& m)
              "`soundfile` primitive.")
 
         .def("compile_signals",
-             py::overload_cast<std::vector<SigWrapper>&>(&FaustProcessor::compileSignals),
+             nb::overload_cast<std::vector<SigWrapper>&>(&FaustProcessor::compileSignals),
              arg("signals"), returnPolicy)
         .def("compile_signals",
-             py::overload_cast<std::vector<SigWrapper>&, const std::vector<std::string>&>(
+             nb::overload_cast<std::vector<SigWrapper>&, const std::vector<std::string>&>(
                  &FaustProcessor::compileSignals),
              arg("signals"), arg("argv"), returnPolicy)
-        .def("compile_box", py::overload_cast<BoxWrapper&>(&FaustProcessor::compileBox), arg("box"),
+        .def("compile_box", nb::overload_cast<BoxWrapper&>(&FaustProcessor::compileBox), arg("box"),
              returnPolicy)
         .def("compile_box",
-             py::overload_cast<BoxWrapper&, const std::vector<std::string>&>(
+             nb::overload_cast<BoxWrapper&, const std::vector<std::string>&>(
                  &FaustProcessor::compileBox),
              arg("box"), arg("argv"), returnPolicy)
 

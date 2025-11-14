@@ -14,6 +14,6 @@ struct SigWrapper
     operator CTree*() { return ptr; }
 };
 
-void create_bindings_for_faust_signal(py::module& faust_module, py::module& box_module);
+void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& signal_module);
 
 #endif

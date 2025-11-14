@@ -9,7 +9,8 @@ void ProcessorBase::getStateInformation(juce::MemoryBlock& destData) {}
 
 void ProcessorBase::setStateInformation(const void* data, int sizeInBytes) {}
 
-bool ProcessorBase::setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn)
+bool ProcessorBase::setAutomation(std::string& parameterName, nb::ndarray<float> input,
+                                  std::uint32_t ppqn)
 {
     for (auto& uncastedParameter : this->getParameters())
     {
@@ -26,7 +27,7 @@ bool ProcessorBase::setAutomation(std::string& parameterName, py::array input, s
     return false;
 }
 
-bool ProcessorBase::setAutomationByIndex(int& index, py::array input, std::uint32_t ppqn)
+bool ProcessorBase::setAutomationByIndex(int& index, nb::ndarray<float> input, std::uint32_t ppqn)
 {
     auto parameters = this->getParameters();
     if (index < 0 || index >= parameters.size())
@@ -166,25 +167,34 @@ float ProcessorBase::getAutomationAtZero(const std::string& parameterName)
     throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
 }
 
-py::array_t<float> ProcessorBase::getAutomationNumpy(const std::string& parameterName)
+nb::ndarray<nb::numpy, float> ProcessorBase::getAutomationNumpy(const std::string& parameterName)
 {
     std::vector<float> data = getAutomation(parameterName);
 
-    py::array_t<float, py::array::c_style> arr({(int)data.size()});
+    size_t size = data.size();
+    size_t shape[1] = {size};
+    float* array_data = new float[size];
 
-    auto ra = arr.mutable_unchecked();
+    std::memcpy(array_data, data.data(), size * sizeof(float));
 
-    for (size_t i = 0; i < data.size(); i++)
-    {
-        ra(i) = data[i];
-    }
+    auto capsule = nb::capsule(array_data,
+                               [](void* p) noexcept
+                               {
+                                   // Only delete if Python is still running
+                                   if (!Py_IsInitialized() || _Py_IsFinalizing())
+                                   {
+                                       // Python is shutting down, let it handle cleanup
+                                       return;
+                                   }
+                                   delete[] static_cast<float*>(p);
+                               });
 
-    return arr;
+    return nb::ndarray<nb::numpy, float>(array_data, 1, shape, capsule);
 }
 
-py::dict ProcessorBase::getAutomationAll()
+nb::dict ProcessorBase::getAutomationAll()
 {
-    py::dict outDict;
+    nb::dict outDict;
 
     for (auto it = m_recordedAutomationDict.begin(); it != m_recordedAutomationDict.end(); it++)
     {
@@ -279,30 +289,42 @@ void ProcessorBase::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuff
     }
 }
 
-py::array_t<float> ProcessorBase::bufferToPyArray(juce::AudioSampleBuffer& buffer)
+nb::ndarray<nb::numpy, float> ProcessorBase::bufferToPyArray(juce::AudioSampleBuffer& buffer)
 {
     size_t num_channels = buffer.getNumChannels();
     size_t num_samples = buffer.getNumSamples();
 
-    py::array_t<float, py::array::c_style> arr({(int)num_channels, (int)num_samples});
-
-    auto ra = arr.mutable_unchecked();
+    size_t shape[2] = {num_channels, num_samples};
+    float* array_data = new float[num_channels * num_samples];
 
     auto chans = buffer.getArrayOfReadPointers();
     for (size_t i = 0; i < num_channels; i++)
     {
         auto chanPtr = chans[i];
+        float* row = array_data + (i * num_samples);
 
         for (size_t j = 0; j < num_samples; j++)
         {
-            ra(i, j) = *(chanPtr++);
+            row[j] = *(chanPtr++);
         }
     }
 
-    return arr;
+    auto capsule = nb::capsule(array_data,
+                               [](void* p) noexcept
+                               {
+                                   // Only delete if Python is still running
+                                   if (!Py_IsInitialized() || _Py_IsFinalizing())
+                                   {
+                                       // Python is shutting down, let it handle cleanup
+                                       return;
+                                   }
+                                   delete[] static_cast<float*>(p);
+                               });
+
+    return nb::ndarray<nb::numpy, float>(array_data, 2, shape, capsule);
 }
 
-py::array_t<float> ProcessorBase::getAudioFrames()
+nb::ndarray<nb::numpy, float> ProcessorBase::getAudioFrames()
 {
     return bufferToPyArray(myRecordBuffer);
 }

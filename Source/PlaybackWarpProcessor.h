@@ -3,7 +3,7 @@
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
 
 #include "AbletonClipInfo.h"
-#include "custom_pybind_wrappers.h"
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 #include <rubberband/rubberband/RubberBandStretcher.h>
 
@@ -13,9 +13,8 @@ class PlaybackWarpProcessor : public ProcessorBase
     PlaybackWarpProcessor(std::string newUniqueName, std::vector<std::vector<float>> inputData,
                           double sr, double data_sr);
 
-    PlaybackWarpProcessor(std::string newUniqueName,
-                          py::array_t<float, py::array::c_style | py::array::forcecast> input,
-                          double sr, double data_sr);
+    PlaybackWarpProcessor(std::string newUniqueName, nb::ndarray<float> input, double sr,
+                          double data_sr);
 
     void prepareToPlay(double, int) override;
 
@@ -27,8 +26,7 @@ class PlaybackWarpProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "PlaybackWarpProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input,
-                 double data_sr);
+    void setData(nb::ndarray<float> input, double data_sr);
 
     void setTimeRatio(double ratio) { m_time_ratio_if_warp_off = ratio; }
     double getTimeRatio() { return m_time_ratio_if_warp_off; }
@@ -52,11 +50,11 @@ class PlaybackWarpProcessor : public ProcessorBase
     void setRubberBandOptions(int options);
     void defaultRubberBandOptions();
 
-    py::array_t<float> getWarpMarkers();
+    nb::ndarray<nb::numpy, float> getWarpMarkers();
 
     void resetWarpMarkers(double bpm);
 
-    void setWarpMarkers(py::array_t<float, py::array::c_style | py::array::forcecast> input);
+    void setWarpMarkers(nb::ndarray<float> input);
 
     bool setClipPositions(std::vector<std::tuple<double, double, double>> positions);
 

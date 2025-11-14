@@ -95,7 +95,8 @@ FaustProcessor::~FaustProcessor()
     delete myMidiIteratorSec;
 }
 
-bool FaustProcessor::setAutomation(std::string& parameterName, py::array input, std::uint32_t ppqn)
+bool FaustProcessor::setAutomation(std::string& parameterName, nb::ndarray<float> input,
+                                   std::uint32_t ppqn)
 {
     COMPILE_FAUST
     return ProcessorBase::setAutomation(parameterName, input, ppqn);
@@ -1190,11 +1191,11 @@ void FaustProcessor::createParameterLayout()
     }
 }
 
-py::list FaustProcessor::getPluginParametersDescription()
+nb::list FaustProcessor::getPluginParametersDescription()
 {
     COMPILE_FAUST
 
-    py::list myList;
+    nb::list myList;
 
     if (m_compileState)
     {
@@ -1234,7 +1235,7 @@ py::list FaustProcessor::getPluginParametersDescription()
             // bool isDiscrete = parameter->isDiscrete();
             // int numSteps = processorParams->getNumSteps();
 
-            py::dict myDictionary;
+            nb::dict myDictionary;
             myDictionary["index"] = i;
             myDictionary["name"] = theName;
             myDictionary["numSteps"] = numSteps;
@@ -1395,9 +1396,9 @@ void FaustProcessor::saveMIDI(std::string& savePath)
     file.writeTo(stream);
 }
 
-using myaudiotype = py::array_t<float, py::array::c_style | py::array::forcecast>;
+using myaudiotype = nb::ndarray<float>;
 
-void FaustProcessor::setSoundfiles(py::dict d)
+void FaustProcessor::setSoundfiles(nb::dict d)
 {
     m_compileState = kNotCompiled;
 
@@ -1405,7 +1406,7 @@ void FaustProcessor::setSoundfiles(py::dict d)
 
     for (auto&& [potentialString, potentialListOfAudio] : d)
     {
-        if (!py::isinstance<py::str>(potentialString))
+        if (!nb::isinstance<nb::str>(potentialString))
         {
             throw std::runtime_error(
                 "Error with FaustProcessor::setSoundfiles. Something was wrong with "
@@ -1413,9 +1414,9 @@ void FaustProcessor::setSoundfiles(py::dict d)
             return;
         }
 
-        auto soundfileName = potentialString.cast<std::string>();
+        auto soundfileName = nb::cast<std::string>(potentialString);
 
-        if (!py::isinstance<py::list>(potentialListOfAudio))
+        if (!nb::isinstance<nb::list>(potentialListOfAudio))
         {
             // todo: if it's audio, it's ok. Just use it.
             throw std::runtime_error("Error with FaustProcessor::setSoundfiles. The values of the "
@@ -1423,26 +1424,53 @@ void FaustProcessor::setSoundfiles(py::dict d)
             return;
         }
 
-        py::list listOfAudio = potentialListOfAudio.cast<py::list>();
+        nb::list listOfAudio = nb::cast<nb::list>(potentialListOfAudio);
 
-        for (py::handle potentialAudio : listOfAudio)
+        for (nb::handle potentialAudio : listOfAudio)
         {
-            // if (py::isinstance<myaudiotype>(potentialAudio)) {
+            // if (nb::isinstance<myaudiotype>(potentialAudio)) {
 
             // todo: safer casting?
-            auto audioData = potentialAudio.cast<myaudiotype>();
+            auto audioData = nb::cast<myaudiotype>(potentialAudio);
 
             float* input_ptr = (float*)audioData.data();
 
             AudioSampleBuffer buffer;
 
-            buffer.setSize((int)audioData.shape(0), (int)audioData.shape(1));
+            int num_channels = (int)audioData.shape(0);
+            int num_samples = (int)audioData.shape(1);
 
-            for (int y = 0; y < audioData.shape(1); y++)
+            buffer.setSize(num_channels, num_samples);
+
+            // Get strides - nanobind returns ELEMENT strides, not byte strides
+            size_t elem_stride_ch =
+                audioData.stride(0); // stride for channel dimension (in elements)
+            size_t elem_stride_sample =
+                audioData.stride(1); // stride for sample dimension (in elements)
+
+            // Check if C-contiguous (row-major): channels x samples
+            bool is_c_contiguous = (elem_stride_sample == 1 && elem_stride_ch == num_samples);
+
+            if (is_c_contiguous)
             {
-                for (int x = 0; x < audioData.shape(0); x++)
+                // Fast path for C-contiguous arrays
+                for (int chan = 0; chan < num_channels; chan++)
                 {
-                    buffer.setSample(x, y, input_ptr[x * audioData.shape(1) + y]);
+                    buffer.copyFrom(chan, 0, input_ptr, num_samples);
+                    input_ptr += num_samples;
+                }
+            }
+            else
+            {
+                // General path using strides (handles F-contiguous and other layouts)
+                for (int chan = 0; chan < num_channels; chan++)
+                {
+                    float* chan_ptr = input_ptr + (chan * elem_stride_ch);
+                    float* dest = buffer.getWritePointer(chan);
+                    for (int samp = 0; samp < num_samples; samp++)
+                    {
+                        dest[samp] = chan_ptr[samp * elem_stride_sample];
+                    }
                 }
             }
 
