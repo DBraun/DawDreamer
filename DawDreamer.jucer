@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.8.3"
+<JUCERPROJECT id="EHAJpP" name="DawDreamer" projectType="dll" version="0.8.4"
               bundleIdentifier="design.dirt.DawDreamer" includeBinaryInAppConfig="1"
               displaySplashScreen="1" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="17" companyCopyright="" jucerFormatVersion="1"
@@ -122,8 +122,7 @@
           file="Source/custom_nanobind_wrappers.h"/>
     <FILE id="p932XA" name="custom_nanobind_wrappers.cpp" compile="1" resource="0"
           file="Source/custom_nanobind_wrappers.cpp"/>
-    <FILE id="nb0001" name="nb_combined.cpp" compile="1" resource="0"
-          file="thirdparty/nanobind/src/nb_combined.cpp"/>
+    <FILE id="nb0001" name="nb_combined.cpp" compile="1" resource="0" file="thirdparty/nanobind/src/nb_combined.cpp"/>
     <FILE id="oio1wd" name="RenderEngine.h" compile="0" resource="0" file="Source/RenderEngine.h"/>
     <FILE id="pWXd7a" name="RenderEngine.cpp" compile="1" resource="0"
           file="Source/RenderEngine.cpp"/>

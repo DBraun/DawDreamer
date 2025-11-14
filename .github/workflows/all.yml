@@ -141,19 +141,6 @@ jobs:
         name: artifact-windows-${{ matrix.python-version}}
         path: ./wheelhouse/*.whl
 
-    - name: "Build docs for GitHub pages"
-      if: ${{ matrix.python-version == '3.11' && github.event_name == 'release' && github.event.action == 'published' }}
-      shell: cmd
-      run: |
-        pip install -U sphinx
-        cd docs && make.bat html
-    - name: Deploy docs
-      uses: peaceiris/actions-gh-pages@v4
-      if: ${{ matrix.python-version == '3.11' && github.event_name == 'release' && github.event.action == 'published' }}
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html
-
   build-macos:
     runs-on: ${{ matrix.os }}
     strategy:

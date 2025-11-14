@@ -23,10 +23,10 @@ Read the [introduction](https://arxiv.org/abs/2111.09931) to DawDreamer, which w
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features and beyond:
 * Composing graphs of multi-channel audio processors
 * Audio playback
-* [VST instruments and effects](https://github.com/DBraun/DawDreamer/wiki/Plugin-Processor) (with UI editing and state loading/saving)
-* [FAUST](https://github.com/DBraun/DawDreamer/wiki/Faust-Processor) effects and polyphonic instruments
-* [Time-stretching and looping](https://github.com/DBraun/DawDreamer/wiki/Playback-Warp-Processor), optionally according to Ableton Live warp markers
-* [Pitch-warping](https://github.com/DBraun/DawDreamer/wiki/Playback-Warp-Processor)
+* [VST instruments and effects](https://dirt.design/DawDreamer/user_guide/plugin_processor.html) (with UI editing and state loading/saving)
+* [FAUST](https://dirt.design/DawDreamer/user_guide/faust_processor.html) effects and polyphonic instruments
+* [Time-stretching and looping](https://dirt.design/DawDreamer/user_guide/playback_warp.html), optionally according to Ableton Live warp markers
+* [Pitch-warping](https://dirt.design/DawDreamer/user_guide/playback_warp.html)
 * Parameter automation at audio-rate and at pulses-per-quarter-note
 * Parameter automation saving in absolute audio-rate time
 * MIDI playback in absolute time and PPQN time
@@ -135,7 +135,16 @@ synth.clear_midi()
 # add midi again, render again, and so on...
 ```
 
-Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki), [examples](https://github.com/DBraun/DawDreamer/tree/main/examples/), [API documentation](https://dirt.design/DawDreamer), and [tests](https://github.com/DBraun/DawDreamer/tree/main/tests).
+## Documentation
+
+**Full documentation:** https://dirt.design/DawDreamer/
+
+* [Installation Guide](https://dirt.design/DawDreamer/installation.html)
+* [Quick Start](https://dirt.design/DawDreamer/quickstart.html)
+* [User Guide](https://dirt.design/DawDreamer/user_guide/index.html)
+* [API Reference](https://dirt.design/DawDreamer/api_reference/index.html)
+* [Examples](https://github.com/DBraun/DawDreamer/tree/main/examples/)
+* [Tests](https://github.com/DBraun/DawDreamer/tree/main/tests)
 
 ## License
 

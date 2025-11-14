@@ -123,19 +123,32 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    # 'github_banner': True,
-    "github_button": True,
-    "github_user": "dbraun",
+    "logo_only": False,
+    "display_version": True,
+    "prev_next_buttons_location": "bottom",
+    "style_external_links": False,
+    "vcs_pageview_mode": "",
+    # GitHub integration
+    "collapse_navigation": False,
+    "sticky_navigation": True,
+    "navigation_depth": 4,
+    "includehidden": True,
+    "titles_only": False,
+}
+
+# GitHub context for "Edit on GitHub" links
+html_context = {
+    "display_github": True,
+    "github_user": "DBraun",
     "github_repo": "DawDreamer",
-    "sidebar_width": "320px",
-    "page_width": "1200px",
-    # 'html_last_updated_fmt': '%b %d, %Y'
+    "github_version": "main",
+    "conf_py_path": "/docs/",
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

@@ -1,0 +1,71 @@
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'Source/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        submodules: recursive
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Get CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Clean faust libraries
+      run: |
+        Remove-Item -Recurse -Force "dawdreamer/faustlibraries/.git"
+
+    - name: Download libfaust
+      shell: cmd
+      run: |
+        cd thirdparty/libfaust
+        python download_libfaust.py
+
+    - name: Build libsamplerate
+      run: |
+        cd thirdparty/libsamplerate
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+        cd build_release
+        msbuild libsamplerate.sln /property:Configuration=Release
+
+    - name: Build DawDreamer (Release)
+      run: |
+        msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
+
+    - name: Install DawDreamer and Sphinx dependencies
+      shell: cmd
+      run: |
+        pip install -e .
+        pip install -U sphinx sphinx_rtd_theme
+
+    - name: Build documentation
+      shell: cmd
+      run: |
+        cd docs
+        make.bat html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html
