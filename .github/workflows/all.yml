@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
         - { python-version: "3.11", pythonLibPath: "/opt/python/cp311-cp311/lib", pythonInclude: "/opt/python/cp311-cp311/include/python3.11", cibwbuild: "cp311-manylinux_x86_64"}
-        # - { python-version: "3.12", pythonLibPath: "/opt/python/cp312-cp312/lib", pythonInclude: "/opt/python/cp312-cp312/include/python3.12", cibwbuild: "cp312-manylinux_x86_64"}
-        # - { python-version: "3.13", pythonLibPath: "/opt/python/cp313-cp313/lib", pythonInclude: "/opt/python/cp313-cp313/include/python3.13", cibwbuild: "cp313-manylinux_x86_64"}
-        # - { python-version: "3.14", pythonLibPath: "/opt/python/cp314-cp314/lib", pythonInclude: "/opt/python/cp314-cp314/include/python3.14", cibwbuild: "cp314-manylinux_x86_64"}
+        - { python-version: "3.12", pythonLibPath: "/opt/python/cp312-cp312/lib", pythonInclude: "/opt/python/cp312-cp312/include/python3.12", cibwbuild: "cp312-manylinux_x86_64"}
+        - { python-version: "3.13", pythonLibPath: "/opt/python/cp313-cp313/lib", pythonInclude: "/opt/python/cp313-cp313/include/python3.13", cibwbuild: "cp313-manylinux_x86_64"}
+        - { python-version: "3.14", pythonLibPath: "/opt/python/cp314-cp314/lib", pythonInclude: "/opt/python/cp314-cp314/include/python3.14", cibwbuild: "cp314-manylinux_x86_64"}
 
     steps:
     - uses: actions/checkout@v5
@@ -56,7 +56,7 @@ jobs:
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v . --ignore=test_jax.py"
         CIBW_ARCHS: auto64
         CIBW_ARCHS_LINUX: auto64 aarch64  # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
-        CIBW_TEST_SKIP: "*arm64* *313* *314*"  # Skip ARM64 tests and Python 3.13/3.14 tests until stable
+        CIBW_TEST_SKIP: "*arm64* *314*"  # Skip ARM64 tests and Python 3.13/3.14 tests until stable
 
     - uses: actions/upload-artifact@v4
       with:
@@ -80,9 +80,9 @@ jobs:
       matrix:
         include:
         - { os: windows-2022, python-version: "3.11", CIBW-BUILD: "cp311*"}
-        # - { os: windows-2022, python-version: "3.12", CIBW-BUILD: "cp312*"}
-        # - { os: windows-2022, python-version: "3.13", CIBW-BUILD: "cp313*"}
-        # - { os: windows-2022, python-version: "3.14", CIBW-BUILD: "cp314*"}
+        - { os: windows-2022, python-version: "3.12", CIBW-BUILD: "cp312*"}
+        - { os: windows-2022, python-version: "3.13", CIBW-BUILD: "cp313*"}
+        - { os: windows-2022, python-version: "3.14", CIBW-BUILD: "cp314*"}
 
     steps:
     - uses: actions/checkout@v5
@@ -147,11 +147,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        # Apple Silicon only (macos-14 = M1/M2/M3 runners)
+        # Apple Silicon only
         - { os: macos-14, build: cp311-macosx_arm64, python-version: "3.11", ARCHS: "arm64" }
-        # - { os: macos-14, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
-        # - { os: macos-14, build: cp313-macosx_arm64, python-version: "3.13", ARCHS: "arm64" }
-        # - { os: macos-14, build: cp314-macosx_arm64, python-version: "3.14", ARCHS: "arm64" }
+        - { os: macos-14, build: cp312-macosx_arm64, python-version: "3.12", ARCHS: "arm64" }
+        - { os: macos-14, build: cp313-macosx_arm64, python-version: "3.13", ARCHS: "arm64" }
+        - { os: macos-14, build: cp314-macosx_arm64, python-version: "3.14", ARCHS: "arm64" }
 
     steps:
     - uses: actions/checkout@v5
@@ -164,7 +164,7 @@ jobs:
     - name: Build libsamplerate
       run: |
         cd thirdparty/libsamplerate
-        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="${{matrix.ARCHS}}" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0
+        cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="${{matrix.ARCHS}}" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
         make --directory=build_release
         cd ../..
 
@@ -182,7 +182,7 @@ jobs:
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-version }}
-        MACOSX_DEPLOYMENT_TARGET: 14.0
+        MACOSX_DEPLOYMENT_TARGET: 11.0
         CIBW_BUILD_VERBOSITY: 1
         CIBW_BEFORE_BUILD: |
           export pythonLocation=$(python${{matrix.python-version}}-config --prefix)
@@ -196,7 +196,7 @@ jobs:
         CIBW_ARCHS: arm64
         CIBW_ARCHS_MACOS: arm64
         CIBW_ENVIRONMENT_MACOS: ARCHS="arm64"
-        CIBW_TEST_SKIP: "*313* *314*"  # Skip Python 3.13/3.14 tests until stable
+        CIBW_TEST_SKIP: "*314*"  # Skip Python 3.14 tests until stable
 
     - uses: actions/upload-artifact@v4
       with:

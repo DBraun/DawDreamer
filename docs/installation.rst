@@ -15,19 +15,19 @@ System Requirements
 
 **macOS:**
 
-* 64-bit Python 3.10-3.12
-* Apple Silicon (arm64) or Intel (x86_64) CPU
+* 64-bit Python 3.11-3.14
+* Apple Silicon (arm64)
 * macOS 11.0 or higher
 
 **Windows:**
 
 * x86_64 CPU
-* 64-bit Python 3.10-3.12
+* 64-bit Python 3.11-3.14
 
 **Linux:**
 
 * x86_64 CPU
-* 64-bit Python 3.10-3.12
+* 64-bit Python 3.11-3.14
 
 Building from Source
 --------------------
@@ -83,14 +83,14 @@ Linux
         git \
         cmake \
         python3 \
-        python3.10-dev
+        python3.11-dev
 
 2. Set environment variables:
 
    .. code-block:: bash
 
-      export PYTHONLIBPATH=/usr/lib/python3.10
-      export PYTHONINCLUDEPATH=/usr/include/python3.10
+      export PYTHONLIBPATH=/usr/lib/python3.11
+      export PYTHONINCLUDEPATH=/usr/include/python3.11
 
 3. Build libsamplerate:
 
@@ -164,7 +164,7 @@ macOS
    * Xcode with command line tools (Xcode 14-16 tested)
    * `CMake <https://cmake.org/download/>`_ (via Homebrew: ``brew install cmake``)
    * `Faust compiler <https://faust.grame.fr/>`_ (via Homebrew: ``brew install faust``)
-   * Python 3.10-3.12 (install from `python.org <https://www.python.org/downloads/>`_ with standard settings)
+   * Python 3.11-3.14 (install from `python.org <https://www.python.org/downloads/>`_ with standard settings)
 
 2. Set environment variables:
 
@@ -255,7 +255,7 @@ Troubleshooting
 If you encounter issues:
 
 1. Check the `GitHub Issues <https://github.com/DBraun/DawDreamer/issues>`_ for known problems
-2. Verify Python version: ``python --version`` (should be 3.10-3.12)
-3. On macOS, ensure you're using the correct architecture (arm64 vs x86_64)
+2. Verify Python version: ``python --version`` (should be 3.11-3.14)
+3. On macOS, ensure you're using the correct architecture arm64
 4. On Windows, ensure you're using the x64 Native Tools Command Prompt
 5. See the `CLAUDE.md <https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md>`_ file for detailed troubleshooting

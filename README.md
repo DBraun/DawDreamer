@@ -14,7 +14,7 @@
 [![PyPI version fury.io](https://badge.fury.io/py/ansicolortags.svg)](https://pypi.python.org/pypi/dawdreamer/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/DBraun/DawDreamer/blob/main/LICENSE)
 ![GitHub Repo stars](https://img.shields.io/github/stars/DBraun/DawDreamer?style=social)
-[![Generic badge](https://img.shields.io/badge/Documentation-passing-brightgreen.svg)](https://dirt.design/DawDreamer/)
+[![Generic badge](https://img.shields.io/badge/Documentation-passing-brightgreen.svg)](https://dbraun.github.io/DawDreamer/)
 
 # DawDreamer
 
@@ -23,10 +23,10 @@ Read the [introduction](https://arxiv.org/abs/2111.09931) to DawDreamer, which w
 DawDreamer is an audio-processing Python framework supporting core [DAW](https://en.wikipedia.org/wiki/Digital_audio_workstation) features and beyond:
 * Composing graphs of multi-channel audio processors
 * Audio playback
-* [VST instruments and effects](https://dirt.design/DawDreamer/user_guide/plugin_processor.html) (with UI editing and state loading/saving)
-* [FAUST](https://dirt.design/DawDreamer/user_guide/faust_processor.html) effects and polyphonic instruments
-* [Time-stretching and looping](https://dirt.design/DawDreamer/user_guide/playback_warp.html), optionally according to Ableton Live warp markers
-* [Pitch-warping](https://dirt.design/DawDreamer/user_guide/playback_warp.html)
+* [VST instruments and effects](https://dbraun.github.io/DawDreamer/user_guide/plugin_processor.html) (with UI editing and state loading/saving)
+* [FAUST](https://dbraun.github.io/DawDreamer/user_guide/faust_processor.html) effects and polyphonic instruments
+* [Time-stretching and looping](https://dbraun.github.io/DawDreamer/user_guide/playback_warp.html), optionally according to Ableton Live warp markers
+* [Pitch-warping](https://dbraun.github.io/DawDreamer/user_guide/playback_warp.html)
 * Parameter automation at audio-rate and at pulses-per-quarter-note
 * Parameter automation saving in absolute audio-rate time
 * MIDI playback in absolute time and PPQN time
@@ -43,17 +43,17 @@ DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a 
 ## Installation
 
 macOS requirements:
-* 64-bit Python 3.10-3.12
-* Apple Silicon or Intel CPU
+* 64-bit Python 3.11-3.14
+* Apple Silicon
 * macOS 11.0 or higher
 
 Windows requirements:
 * x86_64 CPU
-* 64-bit Python 3.10-3.12
+* 64-bit Python 3.11-3.14
 
 Linux requirements:
 * x86_64 CPU
-* 64-bit Python 3.10-3.12
+* 64-bit Python 3.11-3.14
 
 Install with [PyPI](https://pypi.org/project/dawdreamer/):
 
@@ -61,7 +61,7 @@ Install with [PyPI](https://pypi.org/project/dawdreamer/):
 
 ## API Documentation
 
-[https://dirt.design/DawDreamer/](https://dirt.design/DawDreamer/dawdreamer.html)
+[https://dbraun.github.io/DawDreamer/](https://dbraun.github.io/DawDreamer/dawdreamer.html)
 
 ## Basic Example
 
@@ -91,7 +91,7 @@ faust_processor.set_parameter("/MySine/vol", -6.)  # -6 dB volume
 engine.set_bpm(120.)
 engine.render(4., beats=True)  # render 4 beats.
 audio = engine.get_audio()  # shaped (2, N samples)
-wavfile.write('sine_demo.wav', SAMPLE_RATE, audio.transpose())
+wavfile.write("sine_demo.wav", SAMPLE_RATE, audio.T)
 
 # Change settings and re-render
 faust_processor.set_parameter("/MySine/freq", 880.)  # 880 Hz
@@ -112,14 +112,17 @@ engine = daw.RenderEngine(SAMPLE_RATE, 512)
 engine.set_bpm(120.)
 
 synth = engine.make_plugin_processor("synth", INSTRUMENT_PATH)
-print('inputs:', synth.get_num_input_channels())
-print('outputs:', synth.get_num_output_channels())
+print("inputs:", synth.get_num_input_channels())
+print("outputs:", synth.get_num_output_channels())
 print(synth.get_parameters_description())
 
 synth.set_parameter(7, .1234)
 
 # (MIDI note, velocity, start sec, duration sec)
 synth.add_midi_note(60, 100, 0.0, 2.)
+
+# optionally capture intermediate audio
+synth.record = True
 
 effect = engine.make_plugin_processor("effect", EFFECT_PATH)
 
@@ -130,28 +133,24 @@ engine.load_graph([
 
 engine.render(4.)  # render 4 seconds.
 audio = engine.get_audio()
-wavfile.write('synth_demo.wav', SAMPLE_RATE, audio.transpose())
+wavfile.write("synth_demo_wet.wav", SAMPLE_RATE, audio.T)
+synth_audio = engine.get_audio("synth")
+wavfile.write("synth_demo_dry.wav", SAMPLE_RATE, synth_audio.T)
 synth.clear_midi()
 # add midi again, render again, and so on...
 ```
 
 ## Documentation
 
-**Full documentation:** https://dirt.design/DawDreamer/
+**Full documentation:** https://dbraun.github.io/DawDreamer/
 
-* [Installation Guide](https://dirt.design/DawDreamer/installation.html)
-* [Quick Start](https://dirt.design/DawDreamer/quickstart.html)
-* [User Guide](https://dirt.design/DawDreamer/user_guide/index.html)
-* [API Reference](https://dirt.design/DawDreamer/api_reference/index.html)
+* [Installation Guide](https://dbraun.github.io/DawDreamer/installation.html)
+* [Quick Start](https://dbraun.github.io/DawDreamer/quickstart.html)
+* [User Guide](https://dbraun.github.io/DawDreamer/user_guide/index.html)
+* [API Reference](https://dbraun.github.io/DawDreamer/api_reference/index.html)
 * [Examples](https://github.com/DBraun/DawDreamer/tree/main/examples/)
 * [Tests](https://github.com/DBraun/DawDreamer/tree/main/tests)
 
 ## License
 
 DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of [JUCE](https://github.com/juce-framework/JUCE/), [nanobind](https://github.com/wjakob/nanobind/), [Libsamplerate](https://github.com/libsndfile/libsamplerate), [Rubber Band Library](https://github.com/breakfastquay/rubberband/), [Steinberg VST2/3](https://www.steinberg.net/vst-instruments/), and [FAUST](https://github.com/grame-cncm/faust).
-
-## Thanks to contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
-* [fedden](https://github.com/fedden), RenderMan creator
-* [jgefele](https://github.com/jgefele)
-* [harritaylor](https://github.com/harritaylor)
-* [cannoneyed](https://github.com/cannoneyed/)
