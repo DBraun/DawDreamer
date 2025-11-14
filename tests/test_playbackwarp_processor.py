@@ -26,7 +26,7 @@ def test_playbackwarp_processor1(buffer_size: int):
 
     other.set_clip_file(abspath(ASSETS / "Music Delta - Disco" / "other.wav.asd"))
 
-    warp_markers = drums.get_warp_markers()
+    warp_markers = drums.warp_markers
 
     print("drums.start_marker: ", drums.start_marker)
     print("drums.end_marker: ", drums.end_marker)
@@ -34,11 +34,11 @@ def test_playbackwarp_processor1(buffer_size: int):
     print("drums.loop_start: ", drums.loop_start)
     print("drums.loop_end: ", drums.loop_end)
     print("drums.warp_on: ", drums.warp_on)
-    print("drums.warp_markers: ", drums.get_warp_markers())
+    print("drums.warp_markers: ", drums.warp_markers)
 
     # re-assign and test that it stayed the same
-    drums.set_warp_markers(warp_markers)
-    assert (drums.get_warp_markers() == warp_markers).all()
+    drums.warp_markers = warp_markers
+    assert (drums.warp_markers == warp_markers).all()
 
     # add one interpolated warp marker in the middle
     warp1 = warp_markers[0]
@@ -50,9 +50,9 @@ def test_playbackwarp_processor1(buffer_size: int):
     assert warp_markers.shape[0] == 3
     assert warp_markers.shape[1] == 2
 
-    drums.set_warp_markers(warp_markers)
+    drums.warp_markers = warp_markers
 
-    assert (drums.get_warp_markers() == warp_markers).all()
+    assert (drums.warp_markers == warp_markers).all()
 
     # test the RubberBand option
     rb_option = daw.PlaybackWarpProcessor.option
