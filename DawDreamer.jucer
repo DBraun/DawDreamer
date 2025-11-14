@@ -169,7 +169,7 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
                 cppLanguageStandard="-std=c++11" vstLegacyFolder="thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK"
                 extraDefs="SAMPLER_SKIP_UI&#10;JUCE_MODAL_LOOPS_PERMITTED&#10;HAVE_LIBSAMPLERATE&#10;USE_BUILTIN_FFT&#10;USE_PTHREADS&#10;BUILD_DAWDREAMER_FAUST&#10;BUILD_DAWDREAMER_RUBBERBAND"
-                externalLibraries="samplerate&#10;faustwithllvm">
+                externalLibraries="samplerate&#10;faustwithllvm&#10;tinfo">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
                        libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>

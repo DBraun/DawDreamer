@@ -17,7 +17,8 @@ opus-devel \
 flac-devel \
 flac-libs \
 alsa-lib-devel \
-alsa-utils
+alsa-utils \
+ncurses-devel
 
 echo "Build libsamplerate"
 cd thirdparty/libsamplerate || exit
