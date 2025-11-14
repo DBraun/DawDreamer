@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "PYTHONLIBPATH: $PYTHONLIBPATH"
 echo "PYTHONINCLUDEPATH: $PYTHONINCLUDEPATH"
 
@@ -16,16 +17,17 @@ opus-devel \
 flac-devel \
 flac-libs \
 alsa-lib-devel \
-alsa-utils
+alsa-utils \
+ncurses-devel
 
 echo "Build libsamplerate"
-cd thirdparty/libsamplerate
+cd thirdparty/libsamplerate || exit
 cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-cd build_release
+cd build_release || exit
 make CONFIG=Release
 cd ../../..
 
-cd Builds/LinuxMakefile
+cd Builds/LinuxMakefile || exit
 ldconfig
 
 # faust/architecture/faust/midi/RtMidi.cpp has #include <alsa/asoundlib.h>

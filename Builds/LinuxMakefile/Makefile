@@ -47,9 +47,9 @@ ifeq ($(CONFIG),Debug)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -g -ggdb -O0 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2 gl) -fvisibility=hidden -lrt -ldl -lpthread -lsamplerate -lfaustwithllvm $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2 gl) -fvisibility=hidden -lrt -ldl -lpthread -lsamplerate -lfaustwithllvm -ltinfo $(LDFLAGS)
 
-  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
+  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) $(JUCE_OBJDIR)
 endif
 
 ifeq ($(CONFIG),Release)
@@ -70,9 +70,9 @@ ifeq ($(CONFIG),Release)
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -fPIC -O3 -fPIC $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++17 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Release/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2 gl) -fvisibility=hidden -lrt -ldl -lpthread -lsamplerate -lfaustwithllvm $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L/usr/local/lib -L../../thirdparty/libfaust/ubuntu-x86_64/Release/lib -L../../thirdparty/libsamplerate/build_release/src $(shell $(PKG_CONFIG) --libs alsa freetype2 gl) -fvisibility=hidden -lrt -ldl -lpthread -lsamplerate -lfaustwithllvm -ltinfo $(LDFLAGS)
 
-  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
+  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY) $(JUCE_OBJDIR)
 endif
 
 OBJECTS_DYNAMIC_LIBRARY := \
@@ -292,6 +292,6 @@ clean:
 
 strip:
 	@echo Stripping DawDreamer
-	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)
+	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(JUCE_TARGET_DYNAMIC_LIBRARY)
 
 -include $(OBJECTS_DYNAMIC_LIBRARY:%.o=%.d)

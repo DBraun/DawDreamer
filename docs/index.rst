@@ -9,5 +9,3 @@ Contents:
    dawdreamer
 
 .. autosummary::
-
-   

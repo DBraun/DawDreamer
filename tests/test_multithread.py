@@ -1,22 +1,21 @@
-from dawdreamer_utils import *
-
-from dawdreamer.faust.box import boxMul, boxPar, boxWire, boxReal
-from dawdreamer.faust import FaustContext
+import multiprocessing
 
 import numpy as np
+from dawdreamer_utils import *
 
-import multiprocessing
+from dawdreamer.faust import FaustContext
+from dawdreamer.faust.box import boxMul, boxPar, boxReal, boxWire
 
 # GLOBAL PARAMETERS
 BPM = 160
-DURATION = .25
+DURATION = 0.25
 
 # Static parameters
 SAMPLE_RATE = 44100
 BLOCK_SIZE = 512
 
-from unittest.mock import patch
 from pytest import fixture
+
 
 class MockPoolApplyResult:
     def __init__(self, func, args):
@@ -29,9 +28,15 @@ class MockPoolApplyResult:
 
 @fixture(autouse=True)
 def mock_pool_apply_async(monkeypatch):
-    monkeypatch.setattr("multiprocessing.pool.Pool.apply_async",
-                        lambda self, func, args=(), kwds={}, callback=None, error_callback=None:
-                        MockPoolApplyResult(func, args))
+    monkeypatch.setattr(
+        "multiprocessing.pool.Pool.apply_async",
+        lambda self,
+        func,
+        args=(),
+        kwds={},
+        callback=None,
+        error_callback=None: MockPoolApplyResult(func, args),
+    )
 
 
 def instrument(synthPlugin, name):
@@ -40,7 +45,7 @@ def instrument(synthPlugin, name):
 
     synth = engine.make_plugin_processor("synth", synthPlugin)
 
-    synth.add_midi_note(60, 100, 0.0, .15)
+    synth.add_midi_note(60, 100, 0.0, 0.15)
 
     graph = [(synth, [])]
     engine.load_graph(graph)
@@ -51,9 +56,10 @@ def instrument(synthPlugin, name):
 
     output = engine.get_audio()
 
-    assert np.abs(output).mean() > .001
+    assert np.abs(output).mean() > 0.001
 
     return output
+
 
 def playback(audio, name):
     engine = daw.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
@@ -69,16 +75,19 @@ def playback(audio, name):
 
     output = engine.get_audio()
 
-    assert np.allclose(audio[:,:output.shape[1]], output)
+    assert np.allclose(audio[:, : output.shape[1]], output)
 
     return output
+
 
 def faust_playback(audio, name):
     engine = daw.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
     engine.set_bpm(BPM)
     playbackProcessor = engine.make_playback_processor("playback", audio)
     faustProcessor = engine.make_faust_processor("faust")
-    faustProcessor.set_dsp_string("""process = si.bus(2) : sp.stereoize(_*hslider("vol",1,0,1,0.001));""")
+    faustProcessor.set_dsp_string(
+        """process = si.bus(2) : sp.stereoize(_*hslider("vol",1,0,1,0.001));"""
+    )
     assert faustProcessor.compile()
 
     graph = [(playbackProcessor, []), (faustProcessor, ["playback"])]
@@ -90,9 +99,10 @@ def faust_playback(audio, name):
 
     output = engine.get_audio()
 
-    assert np.allclose(audio[:,:output.shape[1]], output)
+    assert np.allclose(audio[:, : output.shape[1]], output)
 
     return output
+
 
 def faust_boxes(audio, name):
     engine = daw.RenderEngine(SAMPLE_RATE, BLOCK_SIZE)
@@ -117,16 +127,17 @@ def faust_boxes(audio, name):
 
     # confirm that the input was multiplied by 0.5
     minSize = min(output.shape[1], audio.shape[1])
-    assert np.allclose(audio[:,:minSize]*.5, output[:,:minSize])
+    assert np.allclose(audio[:, :minSize] * 0.5, output[:, :minSize])
 
     return output
 
 
 class TestClass:
-
     @staticmethod
     def get_audio():
-        return load_audio_file(str(ASSETS / "Music Delta - Disco/drums.wav"), duration=10, offset=0.26)
+        return load_audio_file(
+            str(ASSETS / "Music Delta - Disco/drums.wav"), duration=10, offset=0.26
+        )
 
     @staticmethod
     def get_pool():
@@ -135,32 +146,33 @@ class TestClass:
     # currently skipping this test (by putting underscore in front) because it fails on some plugins
     @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS[0:1])
     def _test_instrument(self, plugin_path):
-        audio_data = self.get_audio()
+        self.get_audio()
         with self.get_pool() as pool:
             tasks = [pool.apply_async(instrument, (plugin_path, f"test{i}")) for i in range(8)]
             # Collect tasks:
-            outputs = [res.get() for res in tasks]
+            [res.get() for res in tasks]
 
     def test_playback(self):
         audio_data = self.get_audio()
         with self.get_pool() as pool:
             tasks = [pool.apply_async(playback, (audio_data, f"test{i}")) for i in range(100)]
             # Collect tasks:
-            outputs = [res.get() for res in tasks]
+            [res.get() for res in tasks]
 
     def test_faust_playback(self):
         audio_data = self.get_audio()
         with self.get_pool() as pool:
             tasks = [pool.apply_async(faust_playback, (audio_data, f"test{i}")) for i in range(100)]
             # Collect tasks:
-            outputs = [res.get() for res in tasks]
+            [res.get() for res in tasks]
 
     def test_faust_boxes(self):
         audio_data = self.get_audio()
         with self.get_pool() as pool:
             tasks = [pool.apply_async(faust_boxes, (audio_data, f"test{i}")) for i in range(20)]
             # Collect tasks:
-            outputs = [res.get() for res in tasks]
+            [res.get() for res in tasks]
+
 
 if __name__ == "__main__":
     test_class = TestClass()
@@ -168,4 +180,4 @@ if __name__ == "__main__":
     test_class.test_playback()
     test_class.test_faust_playback()
     test_class.test_faust_boxes()
-    print('all done')
+    print("all done")

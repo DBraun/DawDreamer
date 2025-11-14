@@ -58,7 +58,7 @@ if __name__ == "__main__":
         sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
     parser = argparse.ArgumentParser(description="Download and install Libfaust.")
-    parser.add_argument("-v", "--version", default="2.70.3", help="Specify the version of Faust to download.")
+    parser.add_argument("-v", "--version", default="2.81.10", help="Specify the version of Faust to download.")
     parser.add_argument("--force", action="store_true", help="Force download even if files already exist.")
     args = parser.parse_args()
 

@@ -1,3 +1,67 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+# Target Python 3.11+
+target-version = "py311"
+
+# Line length
+line-length = 100
+
+# Exclude directories
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "thirdparty",
+    "JuceLibraryCode",
+    "Builds",
+    "build",
+    "dist",
+    "wheelhouse",
+    "dawdreamer.egg-info",
+    "docs/_build",
+    "__pycache__",
+]
+
+[tool.ruff.lint]
+# Enable recommended rules
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+
+# Ignore specific rules if needed
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+]
+
+# Per-file ignores for star imports
+[tool.ruff.lint.per-file-ignores]
+"dawdreamer/__init__.py" = ["F403", "F405"]  # Main module imports from C++ extension
+"tests/*.py" = ["F403", "F405", "E402", "F401", "E722", "B007", "B028", "SIM115", "B018", "F811"]  # Allow star imports and test-specific patterns
+"tests/box_instruments.py" = ["F403", "F405"]
+"tests/dawdreamer_utils.py" = ["E731", "F401"]  # Re-exports imports for other test files via star imports
+"dawdreamer/faust/**/*.py" = ["F403", "F405"]  # Faust API uses star imports intentionally
+"examples/**/*.py" = ["F403", "F405", "B007", "B904"]  # Examples often use star imports for brevity
+
+[tool.ruff.lint.isort]
+# Sort imports
+known-first-party = ["dawdreamer"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Indent with spaces
+indent-style = "space"
+
+# Respect magic trailing commas
+skip-magic-trailing-comma = false

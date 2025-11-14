@@ -1,129 +1,121 @@
 #pragma once
 
-#include "ProcessorBase.h"
 #include "custom_pybind_wrappers.h"
+#include "ProcessorBase.h"
 
 typedef std::vector<std::pair<int, float>> PluginPatch;
 
 // Alias for variant that can hold either float or string
 using ValueType = std::variant<float, std::string>;
 
-class PluginProcessor : public ProcessorBase {
- public:
-  PluginProcessor(std::string newUniqueName, double sampleRate,
-                  int samplesPerBlock, std::string path);
-  ~PluginProcessor();
+class PluginProcessor : public ProcessorBase
+{
+  public:
+    PluginProcessor(std::string newUniqueName, double sampleRate, int samplesPerBlock,
+                    std::string path);
+    ~PluginProcessor();
 
-  bool canApplyBusesLayout(
-      const juce::AudioProcessor::BusesLayout& layout) override;
+    bool canApplyBusesLayout(const juce::AudioProcessor::BusesLayout& layout) override;
 
-  bool setBusesLayout(const BusesLayout& arr) override;
+    bool setBusesLayout(const BusesLayout& arr) override;
 
-  void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
-  void releaseResources() override;
+    void releaseResources() override;
 
-  void processBlock(juce::AudioSampleBuffer& buffer,
-                    juce::MidiBuffer& midiBuffer) override;
+    void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override;
 
-  void automateParameters(AudioPlayHead::PositionInfo& posInfo,
-                          int numSamples) override;
+    void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override;
 
-  bool acceptsMidi() const override {
-    return myPlugin.get() && myPlugin->acceptsMidi();
-  }
-  bool producesMidi() const override {
-    return myPlugin.get() && myPlugin->producesMidi();
-  }
-  double getTailLengthSeconds() const override;
-  int getLatencySamples();
+    bool acceptsMidi() const override { return myPlugin.get() && myPlugin->acceptsMidi(); }
+    bool producesMidi() const override { return myPlugin.get() && myPlugin->producesMidi(); }
+    double getTailLengthSeconds() const override;
+    int getLatencySamples();
 
-  void reset() override;
+    void reset() override;
 
-  bool loadPreset(const std::string& path);
-  bool loadVST3Preset(const std::string& path);
+    bool loadPreset(const std::string& path);
+    bool loadVST3Preset(const std::string& path);
 
-  void createParameterLayout();
+    void createParameterLayout();
 
-  void setPatch(const PluginPatch patch);
+    void setPatch(const PluginPatch patch);
 
-  std::string getParameterAsText(const int parameter);
-  const PluginPatch getPatch();
-  const size_t getPluginParameterSize();
-  std::map<std::pair<float, float>, ValueType> getParameterValueRange(
-      const int parameterIndex, int search_steps, bool convert);
+    std::string getParameterAsText(const int parameter);
+    const PluginPatch getPatch();
+    const size_t getPluginParameterSize();
+    std::map<std::pair<float, float>, ValueType>
+    getParameterValueRange(const int parameterIndex, int search_steps, bool convert);
 
-  const juce::String getName() const override { return "PluginProcessor"; }
+    const juce::String getName() const override { return "PluginProcessor"; }
 
-  bool loadMidi(const std::string& path, bool clearPrevious, bool isBeats,
-                bool allEvents);
+    bool loadMidi(const std::string& path, bool clearPrevious, bool isBeats, bool allEvents);
 
-  void clearMidi();
+    void clearMidi();
 
-  int getNumMidiEvents();
+    int getNumMidiEvents();
 
-  bool addMidiNote(const uint8 midiNote, const uint8 midiVelocity,
-                   const double noteStart, const double noteLength,
-                   bool isBeats);
+    bool addMidiNote(const uint8 midiNote, const uint8 midiVelocity, const double noteStart,
+                     const double noteLength, bool isBeats);
 
-  void setPlayHead(AudioPlayHead* newPlayHead) override;
+    void setPlayHead(AudioPlayHead* newPlayHead) override;
 
-  void openEditor();
+    void openEditor();
 
-  void loadStateInformation(std::string filepath);
+    void loadStateInformation(std::string filepath);
 
-  void saveStateInformation(std::string filepath);
+    void saveStateInformation(std::string filepath);
 
-  void saveMIDI(std::string& savePath);
+    void saveMIDI(std::string& savePath);
 
- private:
-  bool loadPlugin(double sampleRate, int samplesPerBlock);
+  private:
+    bool loadPlugin(double sampleRate, int samplesPerBlock);
 
-  std::string myPluginPath;
-  double mySampleRate;
+    std::string myPluginPath;
+    double mySampleRate;
 
-  MidiBuffer myMidiBufferQN;
-  MidiBuffer myMidiBufferSec;
+    MidiBuffer myMidiBufferQN;
+    MidiBuffer myMidiBufferSec;
 
-  MidiBuffer myRenderMidiBuffer;
-  MidiMessageSequence myRecordedMidiSequence;  // for fetching by user later.
+    MidiBuffer myRenderMidiBuffer;
+    MidiMessageSequence myRecordedMidiSequence; // for fetching by user later.
 
-  MidiMessage myMidiMessageQN;
-  MidiMessage myMidiMessageSec;
+    MidiMessage myMidiMessageQN;
+    MidiMessage myMidiMessageSec;
 
-  int myMidiMessagePositionQN = -1;
-  int myMidiMessagePositionSec = -1;
+    int myMidiMessagePositionQN = -1;
+    int myMidiMessagePositionSec = -1;
 
-  MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
-  MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
+    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
 
-  bool myIsMessageBetweenQN = false;
-  bool myIsMessageBetweenSec = false;
+    bool myIsMessageBetweenQN = false;
+    bool myIsMessageBetweenSec = false;
 
-  bool myMidiEventsDoRemainQN = false;
-  bool myMidiEventsDoRemainSec = false;
+    bool myMidiEventsDoRemainQN = false;
+    bool myMidiEventsDoRemainSec = false;
 
- protected:
-  std::unique_ptr<juce::AudioPluginInstance,
-                  std::default_delete<juce::AudioPluginInstance>>
-      myPlugin = nullptr;
+  protected:
+    std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>>
+        myPlugin = nullptr;
 };
 
 //==========================================================================
-class PluginProcessorWrapper : public PluginProcessor {
- public:
-  PluginProcessorWrapper(std::string newUniqueName, double sampleRate,
-                         int samplesPerBlock, std::string path);
+class PluginProcessorWrapper : public PluginProcessor
+{
+  public:
+    PluginProcessorWrapper(std::string newUniqueName, double sampleRate, int samplesPerBlock,
+                           std::string path);
 
-  void wrapperSetPatch(py::list listOfTuples);
+    void wrapperSetPatch(py::list listOfTuples);
 
-  py::list wrapperGetPatch();
+    py::list wrapperGetPatch();
 
-  std::string wrapperGetParameterName(const int& parameter);
+    std::string wrapperGetParameterName(const int& parameter);
 
-  bool wrapperSetParameter(const int& parameterIndex, const float& value);
+    bool wrapperSetParameter(const int& parameterIndex, const float& value);
 
-  int wrapperGetPluginParameterSize();
+    int wrapperGetPluginParameterSize();
 
-  py::list getPluginParametersDescription();
+    py::list getPluginParametersDescription();
 };

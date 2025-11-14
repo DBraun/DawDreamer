@@ -111,49 +111,51 @@ using juce::VST3PluginFormat;
 using juce::VSTPluginFormat;
 using juce::WildcardFileFilter;
 
-class AutomateParameter {
- public:
-  AutomateParameter() {}
+class AutomateParameter
+{
+  public:
+    AutomateParameter() {}
 
-  bool setAutomation(py::array_t<float> input, std::uint32_t newPPQN);
+    bool setAutomation(py::array_t<float> input, std::uint32_t newPPQN);
 
-  void setAutomation(const float val);
+    void setAutomation(const float val);
 
-  std::vector<float> getAutomation();
+    std::vector<float> getAutomation();
 
-  float sample(AudioPlayHead::PositionInfo& posInfo);
+    float sample(AudioPlayHead::PositionInfo& posInfo);
 
-  ~AutomateParameter() {}
+    ~AutomateParameter() {}
 
-  bool isAutomated() { return m_hasAutomation; }
+    bool isAutomated() { return m_hasAutomation; }
 
- protected:
-  bool m_hasAutomation = false;
-  std::vector<float> myAutomation;
-  std::uint32_t m_ppqn = 0;
+  protected:
+    bool m_hasAutomation = false;
+    std::vector<float> myAutomation;
+    std::uint32_t m_ppqn = 0;
 };
 
-class AutomateParameterFloat : public AutomateParameter,
-                               public AudioParameterFloat {
- public:
-  AutomateParameterFloat(
-      const String& parameterID, const String& parameterName,
-      NormalisableRange<float> normalisableRange, float defaultValue,
-      const String& parameterLabel = juce::String(),
-      Category parameterCategory = AudioProcessorParameter::genericParameter,
-      std::function<String(float value, int maximumStringLength)>
-          stringFromValue = nullptr,
-      std::function<float(const String& text)> valueFromString = nullptr)
-      :
+class AutomateParameterFloat : public AutomateParameter, public AudioParameterFloat
+{
+  public:
+    AutomateParameterFloat(
+        const String& parameterID, const String& parameterName,
+        NormalisableRange<float> normalisableRange, float defaultValue,
+        const String& parameterLabel = juce::String(),
+        Category parameterCategory = AudioProcessorParameter::genericParameter,
+        std::function<String(float value, int maximumStringLength)> stringFromValue = nullptr,
+        std::function<float(const String& text)> valueFromString = nullptr)
+        :
 
-        AutomateParameter(),
-        AudioParameterFloat(parameterID, parameterName, normalisableRange,
-                            defaultValue, parameterLabel, parameterCategory,
-                            stringFromValue, valueFromString) {}
+          AutomateParameter(),
+          AudioParameterFloat(parameterID, parameterName, normalisableRange, defaultValue,
+                              parameterLabel, parameterCategory, stringFromValue, valueFromString)
+    {
+    }
 
-  AutomateParameterFloat(String parameterID, String parameterName,
-                         float minValue, float maxValue, float defaultValue)
-      : AutomateParameter(),
-        AudioParameterFloat(parameterID, parameterName, minValue, maxValue,
-                            defaultValue) {}
+    AutomateParameterFloat(String parameterID, String parameterName, float minValue, float maxValue,
+                           float defaultValue)
+        : AutomateParameter(),
+          AudioParameterFloat(parameterID, parameterName, minValue, maxValue, defaultValue)
+    {
+    }
 };

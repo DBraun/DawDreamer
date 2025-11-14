@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ -z "$PYTHONMAJOR" ]; then
   echo "Build failed. You must set the environment variable PYTHONMAJOR to a value such as 3.11"
   exit 1
@@ -22,7 +23,7 @@ fi
 CONFIGURATION=Release-$ARCHS
 
 # Build Libsamplerate
-cd thirdparty/libsamplerate
+cd thirdparty/libsamplerate || exit
 cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_OSX_ARCHITECTURES="$ARCHS" -DLIBSAMPLERATE_EXAMPLES=off -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
 make --directory=build_release
 cd ../..
@@ -37,7 +38,7 @@ cp Builds/MacOSX/build/$CONFIGURATION/dawdreamer.so tests/dawdreamer.so
 # # To make a wheel locally:
 # pip install setuptools wheel build delocate
 # python3 -m build --wheel
-# delocate-listdeps dist/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl 
+# delocate-listdeps dist/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl
 # delocate-wheel --require-archs x86_64 -w repaired_wheel dist/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl
 # pip install repaired_wheel/dawdreamer-0.5.9-cp39-cp39-macosx_10_15_universal2.whl
 # cd tests
