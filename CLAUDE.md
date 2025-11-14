@@ -12,11 +12,11 @@ DawDreamer is a **Digital Audio Workstation (DAW) framework for Python**. It ena
 - Parameter automation at audio-rate and PPQN (pulses-per-quarter-note) rates
 - MIDI playback and file export
 - Multi-processor parallel rendering
-- Transpilation: Faust to JAX/Flax, C++, Rust, WebAssembly
-- Full platform support: macOS (Apple Silicon/Intel), Windows, Linux, Google Colab
+- Transpilation: Faust to JAX/Flax, C++, Rust, WebAssembly, etc.
+- Full platform support: macOS (Apple Silicon/Intel), Windows, Linux, Google Colab, Docker
 
-**Platforms**: macOS 11.0+, Windows (x86_64), Linux (x86_64)
-**Python Support**: 3.10-3.12 (3.8-3.12 in wheel metadata)
+**Platforms**: macOS 12.0+, Windows (x86_64), Linux (x86_64)
+**Python Support**: 3.11-3.14 (3.8-3.12 in wheel metadata)
 
 ---
 
@@ -49,19 +49,18 @@ DawDreamer/
 │   ├── __init__.py
 │   ├── dawdreamer.so (or .pyd/.dll) # Compiled C++ extension module
 │   ├── architecture/                # Faust architecture files
-│   └── faustlibraries/              # Faust standard library
+│   └── faustlibraries/              # Faust standard library - https://github.com/grame-cncm/faustlibraries
 ├── tests/                           # pytest test suite
 │   ├── dawdreamer_utils.py          # Shared test utilities
 │   ├── test_*.py                    # Test modules
 │   ├── assets/                      # Test audio files
 │   └── faust_dsp/                   # Faust DSP test files
 └── thirdparty/                      # External dependencies (git submodules)
-    ├── JUCE/                        # Audio framework
+    ├── JUCE/                        # Audio framework (pinned to JUCE 5)
     ├── nanobind/                    # C++ ↔ Python bindings
     ├── faust/                       # Faust DSP compiler
     ├── libsamplerate/               # High-quality sample rate conversion
-    ├── rubberband/                  # Time-stretch/pitch-shift library
-    └── faustlibraries/              # Faust standard library
+    └── rubberband/                  # Time-stretch/pitch-shift library
 ```
 
 ### Core Components & Responsibilities
@@ -140,9 +139,9 @@ DawDreamer uses a **multi-step build process**:
 1. **Download dependencies**: Prebuilt libfaust libraries (via Python script)
 2. **Build C++ dependencies**: libsamplerate (via CMake)
 3. **Build C++ extension**: DawDreamer itself (via Xcode/VS/Make)
-4. **Package Python module**: Combine compiled extension with Python wrapper (via setup.py)
+4. **Package Python module**: Combine compiled extension with Python wrapper (via `setup.py`)
 
-**Key insight**: Unlike typical Python packages that build with `pip install`, DawDreamer requires pre-building the C++ components before running setup.py. This is because JUCE-based projects use platform-specific build systems (Xcode, Visual Studio, Makefiles) rather than setuptools' build process.
+**Key insight**: Unlike typical Python packages that build with `pip install`, DawDreamer requires pre-building the C++ components before running `setup.py`. This is because JUCE-based projects use platform-specific build systems (Xcode, Visual Studio, Makefiles) rather than setuptools' build process.
 
 ### Build Tools & Dependencies
 
@@ -155,7 +154,7 @@ DawDreamer uses a **multi-step build process**:
 
 **Python Side:**
 - **setuptools**: Wheel packaging
-- **Python 3.10-3.12**: Required headers and libs
+- **Python 3.11-3.14**: Required headers and libs
 
 **Build Flow by Platform:**
 
@@ -165,7 +164,7 @@ DawDreamer uses a **multi-step build process**:
 # - Xcode with command line tools
 # - CMake (can install via Homebrew: brew install cmake)
 # - Faust compiler (can install via Homebrew: brew install faust)
-# - Python 3.10-3.12 installed
+# - Python 3.11-3.14 installed
 
 # Setup environment
 export PYTHONMAJOR=3.11
@@ -207,18 +206,6 @@ ARCHS=$ARCHS python3.11 setup.py develop
 # Verify installation
 python3.11 -c "import dawdreamer as daw; print('Success!')"
 ```
-
-**Common Issues & Solutions:**
-
-1. **"Configuration Release is not in the project"**: Use `Release-arm64` or `Release-x86_64` instead of just `Release`
-
-2. **"library 'samplerate' not found"**: Build libsamplerate first (Step 3)
-
-3. **"library 'faustwithllvm' not found"**: Download libfaust prebuilt libraries (Step 2)
-
-4. **"dawdreamer.so not found" during setup.py**: The Xcode build outputs `dawdreamer.so.dylib` but setup.py expects `dawdreamer.so`. Copy/rename the file (Step 5)
-
-5. **Wrong architecture**: Make sure `ARCHS` matches your system (arm64 for Apple Silicon, x86_64 for Intel)
 
 #### Linux (CMake/Makefile)
 ```bash
@@ -305,7 +292,7 @@ msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
 - Xcode with command line tools (tested with Xcode 16.0.1, older versions should work)
 - CMake (`brew install cmake`)
 - Faust compiler (`brew install faust`)
-- Python 3.10-3.12 with development headers
+- Python 3.11-3.14 with development headers
 - Architecture: Apple Silicon (arm64) or Intel (x86_64)
 
 **Linux:**
@@ -313,13 +300,13 @@ msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
 - libboost-dev
 - X11 development libraries (libx11-dev, libxext-dev, libxrandr-dev, etc.)
 - ALSA/JACK audio development libraries
-- CMake, Python 3.10-3.12 with development headers
+- CMake, Python 3.11-3.14 with development headers
 - Faust compiler
 
 **Windows:**
 - Visual Studio 2022 with C++ desktop development workload
 - CMake
-- Python 3.10-3.12 with development libraries
+- Python 3.11-3.14 with development libraries
 - Faust compiler
 
 ### Getting Started
@@ -459,7 +446,7 @@ engine = daw.RenderEngine(44100, 512)
 
 # 2. Create processors (factory methods on engine)
 synth = engine.make_faust_processor("synth")
-synth.set_dsp_string("process = hslider(...) : os.osc;")
+synth.set_dsp_string("process = hslider(...) : os.osc;")  # pseudocode
 
 effect = engine.make_plugin_processor("reverb", "path/to/plugin.dll")
 
@@ -587,7 +574,7 @@ audio = engine.get_audio()
 | libfaust        | Pre-compiled Faust runtime        | Downloaded via script          |
 | libsamplerate   | Sample rate conversion            | Built from source (CMake)     |
 | RubberBand      | Time/pitch modification           | Submodule, optional build flag|
-| Python headers  | C API and development files       | 3.10-3.12 required            |
+| Python headers  | C API and development files       | 3.11-3.14 required            |
 
 ---
 
@@ -608,6 +595,7 @@ audio = engine.get_audio()
 
 ## Documentation & Resources
 
+- **Local Documentation**: The `docs/` directory contains comprehensive documentation including user guides, API reference, installation instructions, and examples. This is an excellent starting point for understanding how to use DawDreamer.
 - **API Docs**: https://dirt.design/DawDreamer/
 - **GitHub Wiki**: Processor tutorials, examples
 - **Examples**: `/examples` directory with real-world usage
@@ -650,20 +638,6 @@ audio = engine.get_audio()
 
 ### Build Issues
 
-**"Configuration Release is not in the project"**
-- **Cause**: Trying to use `-configuration Release` instead of `-configuration Release-arm64` or `-configuration Release-x86_64`
-- **Solution**: Use the full configuration name: `xcodebuild -configuration Release-arm64`
-
-**"library 'samplerate' not found" or "library 'faustwithllvm' not found"**
-- **Cause**: Dependencies not built yet
-- **Solution**:
-  1. Build libsamplerate: `cd thirdparty/libsamplerate && mkdir -p build_release && cd build_release && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 && make`
-  2. Download libfaust: `cd thirdparty/libfaust && python download_libfaust.py`
-
-**"dawdreamer.so not found" during setup.py**
-- **Cause**: Xcode outputs `dawdreamer.so.dylib` but setup.py expects `dawdreamer.so`
-- **Solution**: Copy the file: `cp Builds/MacOSX/build/Release-$ARCHS/dawdreamer.so.dylib Builds/MacOSX/build/Release-$ARCHS/dawdreamer.so`
-
 **"ERROR: file:///...thirdparty/libfaust does not appear to be a Python project"**
 - **Cause**: Using `pip install -e .` instead of `setup.py develop`
 - **Solution**: Use `ARCHS=arm64 python3.11 setup.py develop` instead
@@ -674,20 +648,6 @@ audio = engine.get_audio()
   - Apple Silicon: `export ARCHS=arm64`
   - Intel Mac: `export ARCHS=x86_64`
   - Check your architecture: `uname -m`
-
-**Xcode version compatibility**
-- **Note**: Originally documentation suggested Xcode 14 only, but Xcode 16.0.1 has been tested successfully
-- **Solution**: Most recent Xcode versions should work. If issues persist, try Xcode 14-16 range.
-
-**Submodules not initialized**
-- **Cause**: Missing thirdparty dependencies
-- **Solution**: `git submodule update --init --recursive`
-
-**CMake not found**
-- **Solution**: Install via Homebrew: `brew install cmake`
-
-**Faust compiler not found**
-- **Solution**: Install via Homebrew: `brew install faust`
 
 ### Runtime Issues
 
@@ -703,7 +663,7 @@ audio = engine.get_audio()
 
 **Test Failures:**
 - Ensure test assets exist in `tests/assets/`
-- Check Python version: 3.10-3.12
+- Check Python version: 3.11-3.14
 - For VST tests: plugins must exist at specified paths
 - Audio comparison tolerance might need adjustment for platform
 

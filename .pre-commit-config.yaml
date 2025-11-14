@@ -59,9 +59,11 @@ exclude: |
     ^JuceLibraryCode/|
     ^Builds/|
     ^dawdreamer\.egg-info/|
+    ^tests/plugins/|
     ^dist/|
     ^wheelhouse/|
     ^docs/_build/|
+    \.dsp$|
     \.so$|
     \.pyd$|
     \.dll$|
