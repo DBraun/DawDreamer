@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Set up QEMU for aarch64 on Linux
       # if: endsWith(${{matrix.cibwbuild}}, "aarch64")
@@ -68,7 +68,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Build Docker image
       run: docker build -t dawdreamer .
@@ -87,7 +87,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -169,7 +169,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Get CMake
       uses: lukka/get-cmake@latest

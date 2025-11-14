@@ -4,7 +4,7 @@
 
 #include "ProcessorBase.h"
 
-bool AutomateParameter::setAutomation(py::array_t<float> input, std::uint32_t newPPQN)
+bool AutomateParameter::setAutomation(nb::ndarray<float> input, std::uint32_t newPPQN)
 {
     if (newPPQN < 0)
     {
@@ -20,7 +20,7 @@ bool AutomateParameter::setAutomation(py::array_t<float> input, std::uint32_t ne
 
         myAutomation = std::vector<float>(numSamples, 0.f);
 
-        memcpy(myAutomation.data(), (float*)input.data(), numSamples * sizeof(float));
+        memcpy(myAutomation.data(), input.data(), numSamples * sizeof(float));
         m_hasAutomation = numSamples > 1;
     }
     catch (const std::exception& e)

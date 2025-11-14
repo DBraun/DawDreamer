@@ -1,14 +1,14 @@
-#include "custom_pybind_wrappers.h"
+#include "custom_nanobind_wrappers.h"
 
 typedef std::vector<std::pair<int, float>> PluginPatch;
 
 namespace customBoost
 {
 
-template <class T> py::list arrayToList(std::array<T, 13> array)
+template <class T> nb::list arrayToList(std::array<T, 13> array)
 {
     typename std::array<T, 13>::iterator iter;
-    py::list list;
+    nb::list list;
     for (iter = array.begin(); iter != array.end(); ++iter)
     {
         list.append(*iter);
@@ -17,10 +17,10 @@ template <class T> py::list arrayToList(std::array<T, 13> array)
 }
 
 // Converts a C++ vector to a python list
-template <class T> py::list toPythonList(std::vector<T> vector)
+template <class T> nb::list toPythonList(std::vector<T> vector)
 {
     typename std::vector<T>::iterator iter;
-    py::list list;
+    nb::list list;
     for (iter = vector.begin(); iter != vector.end(); ++iter)
     {
         list.append(*iter);
@@ -32,20 +32,20 @@ template <class T> py::list toPythonList(std::vector<T> vector)
 // Converts a std::pair which is used as a parameter in C++
 // into a tuple with the respective types int and float for
 // use in Python.
-py::tuple parameterToTuple(std::pair<int, float> parameter)
+nb::tuple parameterToTuple(std::pair<int, float> parameter)
 {
-    py::tuple parameterTuple;
-    parameterTuple = py::make_tuple(parameter.first, parameter.second);
+    nb::tuple parameterTuple;
+    parameterTuple = nb::make_tuple(parameter.first, parameter.second);
     return parameterTuple;
 }
 
 //==========================================================================
 // Converts a PluginPatch ( std::vector <std::pair <int, float>> )
 // to a Python list.
-py::list pluginPatchToListOfTuples(PluginPatch parameters)
+nb::list pluginPatchToListOfTuples(PluginPatch parameters)
 {
     std::vector<std::pair<int, float>>::iterator iter;
-    py::list list;
+    nb::list list;
     for (iter = parameters.begin(); iter != parameters.end(); ++iter)
     {
         auto tup = parameterToTuple(*iter);
@@ -55,19 +55,19 @@ py::list pluginPatchToListOfTuples(PluginPatch parameters)
 }
 
 //==========================================================================
-PluginPatch listOfTuplesToPluginPatch(py::list listOfTuples)
+PluginPatch listOfTuplesToPluginPatch(nb::list listOfTuples)
 {
     PluginPatch patch;
-    const int size = py::len(listOfTuples);
+    const int size = nb::len(listOfTuples);
     patch.reserve(size);
     std::pair<int, float> parameter;
     for (int i = 0; i < size; ++i)
     {
-        py::tuple tup;
+        nb::tuple tup;
 
-        tup = listOfTuples[i].cast<py::tuple>();
-        int index = int(tup[0].cast<float>()); // todo: go straight to int?
-        float value = tup[1].cast<float>();
+        tup = nb::cast<nb::tuple>(listOfTuples[i]);
+        int index = int(nb::cast<float>(tup[0])); // todo: go straight to int?
+        float value = nb::cast<float>(tup[1]);
         parameter = std::make_pair(index, value);
         patch.push_back(parameter);
     }

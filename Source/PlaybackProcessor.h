@@ -1,6 +1,6 @@
 #pragma once
 
-#include "custom_pybind_wrappers.h"
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class PlaybackProcessor : public ProcessorBase
@@ -20,8 +20,7 @@ class PlaybackProcessor : public ProcessorBase
         setMainBusInputsAndOutputs(0, m_numChannels);
     }
 
-    PlaybackProcessor(std::string newUniqueName,
-                      py::array_t<float, py::array::c_style | py::array::forcecast> input)
+    PlaybackProcessor(std::string newUniqueName, nb::ndarray<float> input)
         : ProcessorBase{newUniqueName}
     {
         setData(input);
@@ -51,7 +50,7 @@ class PlaybackProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "PlaybackProcessor"; }
 
-    void setData(py::array_t<float, py::array::c_style | py::array::forcecast> input)
+    void setData(nb::ndarray<float> input)
     {
         float* input_ptr = (float*)input.data();
 
@@ -60,10 +59,34 @@ class PlaybackProcessor : public ProcessorBase
 
         myPlaybackData.setSize(m_numChannels, numSamples);
 
-        for (int chan = 0; chan < m_numChannels; chan++)
+        // Get strides - nanobind returns ELEMENT strides, not byte strides
+        size_t elem_stride_ch = input.stride(0);     // stride for channel dimension (in elements)
+        size_t elem_stride_sample = input.stride(1); // stride for sample dimension (in elements)
+
+        // Check if C-contiguous (row-major): channels x samples
+        bool is_c_contiguous = (elem_stride_sample == 1 && elem_stride_ch == numSamples);
+
+        if (is_c_contiguous)
         {
-            myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
-            input_ptr += numSamples;
+            // Fast path for C-contiguous arrays
+            for (int chan = 0; chan < m_numChannels; chan++)
+            {
+                myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
+                input_ptr += numSamples;
+            }
+        }
+        else
+        {
+            // General path using strides (handles F-contiguous and other layouts)
+            for (int chan = 0; chan < m_numChannels; chan++)
+            {
+                float* chan_ptr = input_ptr + (chan * elem_stride_ch);
+                float* dest = myPlaybackData.getWritePointer(chan);
+                for (int samp = 0; samp < numSamples; samp++)
+                {
+                    dest[samp] = chan_ptr[samp * elem_stride_sample];
+                }
+            }
         }
 
         setMainBusInputsAndOutputs(0, m_numChannels);

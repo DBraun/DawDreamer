@@ -51,9 +51,8 @@ PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName,
     resetWarpMarkers(120.);
 }
 
-PlaybackWarpProcessor::PlaybackWarpProcessor(
-    std::string newUniqueName, py::array_t<float, py::array::c_style | py::array::forcecast> input,
-    double sr, double data_sr)
+PlaybackWarpProcessor::PlaybackWarpProcessor(std::string newUniqueName, nb::ndarray<float> input,
+                                             double sr, double data_sr)
     : ProcessorBase{newUniqueName}
 {
     createParameterLayout();
@@ -89,21 +88,34 @@ void PlaybackWarpProcessor::automateParameters(AudioPlayHead::PositionInfo& posI
     m_rbstretcher->setPitchScale(scale * myPlaybackDataSR / m_sample_rate);
 }
 
-py::array_t<float> PlaybackWarpProcessor::getWarpMarkers()
+nb::ndarray<nb::numpy, float> PlaybackWarpProcessor::getWarpMarkers()
 {
-    py::array_t<float, py::array::c_style> arr({(int)m_clipInfo.warp_markers.size(), 2});
+    size_t numMarkers = m_clipInfo.warp_markers.size();
+    size_t shape[2] = {numMarkers, 2};
 
-    auto ra = arr.mutable_unchecked();
+    float* array_data = new float[numMarkers * 2];
 
-    int i = 0;
+    size_t i = 0;
     for (auto& warp_marker : m_clipInfo.warp_markers)
     {
-        ra(i, 0) = warp_marker.first;  // time in seconds in the audio
-        ra(i, 1) = warp_marker.second; // time in beats in the audio, relative to 1.1.1
+        array_data[i * 2 + 0] = warp_marker.first;  // time in seconds in the audio
+        array_data[i * 2 + 1] = warp_marker.second; // time in beats in the audio, relative to 1.1.1
         i++;
     }
 
-    return arr;
+    auto capsule = nb::capsule(array_data,
+                               [](void* p) noexcept
+                               {
+                                   // Only delete if Python is still running
+                                   if (!Py_IsInitialized() || _Py_IsFinalizing())
+                                   {
+                                       // Python is shutting down, let it handle cleanup
+                                       return;
+                                   }
+                                   delete[] static_cast<float*>(p);
+                               });
+
+    return nb::ndarray<nb::numpy, float>(array_data, 2, shape, capsule);
 }
 
 void PlaybackWarpProcessor::resetWarpMarkers(double bpm)
@@ -124,8 +136,7 @@ void PlaybackWarpProcessor::resetWarpMarkers(double bpm)
         (bpm / 60.) * (myPlaybackData.getNumSamples() / myPlaybackDataSR);
 }
 
-void PlaybackWarpProcessor::setWarpMarkers(
-    py::array_t<float, py::array::c_style | py::array::forcecast> input)
+void PlaybackWarpProcessor::setWarpMarkers(nb::ndarray<float> input)
 {
     if (input.ndim() != 2)
     {
@@ -422,8 +433,7 @@ void PlaybackWarpProcessor::reset()
     ProcessorBase::reset();
 }
 
-void PlaybackWarpProcessor::setData(
-    py::array_t<float, py::array::c_style | py::array::forcecast> input, double data_sr)
+void PlaybackWarpProcessor::setData(nb::ndarray<float> input, double data_sr)
 {
     float* input_ptr = (float*)input.data();
 
@@ -432,10 +442,35 @@ void PlaybackWarpProcessor::setData(
     const int numSamples = (int)input.shape(1);
 
     myPlaybackData.setSize(m_numChannels, numSamples);
-    for (int chan = 0; chan < m_numChannels; chan++)
+
+    // Get strides - nanobind returns ELEMENT strides, not byte strides
+    size_t elem_stride_ch = input.stride(0);     // stride for channel dimension (in elements)
+    size_t elem_stride_sample = input.stride(1); // stride for sample dimension (in elements)
+
+    // Check if C-contiguous (row-major): channels x samples
+    bool is_c_contiguous = (elem_stride_sample == 1 && elem_stride_ch == numSamples);
+
+    if (is_c_contiguous)
     {
-        myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
-        input_ptr += numSamples;
+        // Fast path for C-contiguous arrays
+        for (int chan = 0; chan < m_numChannels; chan++)
+        {
+            myPlaybackData.copyFrom(chan, 0, input_ptr, numSamples);
+            input_ptr += numSamples;
+        }
+    }
+    else
+    {
+        // General path using strides (handles F-contiguous and other layouts)
+        for (int chan = 0; chan < m_numChannels; chan++)
+        {
+            float* chan_ptr = input_ptr + (chan * elem_stride_ch);
+            float* dest = myPlaybackData.getWritePointer(chan);
+            for (int samp = 0; samp < numSamples; samp++)
+            {
+                dest[samp] = chan_ptr[samp * elem_stride_sample];
+            }
+        }
     }
 
     if (data_sr)
