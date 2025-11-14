@@ -1,0 +1,768 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playback Warp Processor &mdash; DawDreamer 0.8.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b41f4c93"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Built-In Effect Processors" href="other_processors.html" />
+    <link rel="prev" title="Playback Processor" href="playback.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DawDreamer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#quick-install">Quick Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-from-source">Building from Source</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#platform-specific-build-instructions">Platform-Specific Build Instructions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../installation.html#linux">Linux</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../installation.html#docker">Docker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../installation.html#windows">Windows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../installation.html#macos">macOS</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#building-a-wheel">Building a Wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#faust-libraries">Faust Libraries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#basic-concepts">Basic Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#example-1-faust-sine-wave">Example 1: Faust Sine Wave</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#example-2-vst-plugin-chain">Example 2: VST Plugin Chain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#example-3-audio-playback-and-effects">Example 3: Audio Playback and Effects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#key-concepts-explained">Key Concepts Explained</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#renderengine">RenderEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#processor-graph">Processor Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#parameter-automation">Parameter Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#bpm-and-timing">BPM and Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="render_engine.html">Render Engine and BPM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#creating-a-renderengine">Creating a RenderEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#setting-bpm">Setting BPM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#static-bpm">Static BPM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#dynamic-bpm-automation">Dynamic BPM Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#rendering-audio">Rendering Audio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#render-by-duration">Render by Duration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#render-by-beats">Render by Beats</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#getting-audio-output">Getting Audio Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#graph-management">Graph Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#re-rendering">Re-rendering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#timing-and-synchronization">Timing and Synchronization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#audio-rate-automation">Audio-Rate Automation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#ppqn-rate-automation">PPQN-Rate Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#best-practices">Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#example-complete-workflow">Example: Complete Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="faust_processor.html">Faust Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#new-to-faust">New to Faust?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#creating-a-faust-processor">Creating a Faust Processor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#loading-dsp-from-file">Loading DSP from File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#loading-dsp-from-string">Loading DSP from String</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#parameters">Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#listing-parameters">Listing Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#example-stereo-reverb">Example: Stereo Reverb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#multi-channel-processing">Multi-Channel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#polyphony">Polyphony</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#enabling-polyphony">Enabling Polyphony</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#soundfiles">Soundfiles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#id1">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#advanced-example-88-key-piano">Advanced Example: 88-Key Piano</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#parameter-automation">Parameter Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_processor.html">Plugin Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#creating-a-plugin-processor">Creating a Plugin Processor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#plugin-state-management">Plugin State Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#opening-the-editor">Opening the Editor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#saving-and-loading-state">Saving and Loading State</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#loading-presets">Loading Presets</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#parameters">Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#listing-parameters">Listing Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#getting-parameter-ranges">Getting Parameter Ranges</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#parameter-automation">Parameter Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#midi-support">MIDI Support</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#adding-individual-notes">Adding Individual Notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#loading-midi-files">Loading MIDI Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#saving-midi-files">Saving MIDI Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#clearing-midi">Clearing MIDI</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#graph-integration">Graph Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#basic-chain">Basic Chain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#re-rendering">Re-rendering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#multi-channel-buses">Multi-Channel Buses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#checking-bus-support">Checking Bus Support</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#sidechain-processing">Sidechain Processing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#channel-counts">Channel Counts</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#complete-example">Complete Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="playback.html">Playback Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#changing-playback-data">Changing Playback Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#multi-channel-audio">Multi-Channel Audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#looping">Looping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#working-with-different-sample-rates">Working with Different Sample Rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#complete-example">Complete Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#advanced-time-stretching-and-pitch-shifting">Advanced: Time-Stretching and Pitch-Shifting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="playback.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Playback Warp Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#time-stretching-and-pitch-shifting">Time-Stretching and Pitch-Shifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-options">Advanced Options</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ableton-live-warp-markers">Ableton Live Warp Markers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#loading-asd-files">Loading <cite>.asd</cite> Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clip-properties">Clip Properties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#manual-warp-markers">Manual Warp Markers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-clip-positions">Multiple Clip Positions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-example">Complete Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="other_processors.html">Built-In Effect Processors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#add-processor-mixer">Add Processor (Mixer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#setting-gain-levels">Setting Gain Levels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#complete-example">Complete Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#filter-processor">Filter Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#filter-modes">Filter Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id1">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#parameter-automation">Parameter Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#compressor-processor">Compressor Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#parameters">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id2">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#adjusting-parameters">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#reverb-processor">Reverb Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id3">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id4">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id5">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#panner-processor">Panner Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#panning-rules">Panning Rules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id6">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id7">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#delay-processor">Delay Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id8">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id9">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="other_processors.html#id10">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="other_processors.html#processor-specific-tips">Processor-Specific Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#processor-types">Processor Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#basic-workflow">Basic Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#multi-channel-routing">Multi-Channel Routing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#parallel-processing">Parallel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#parameter-automation">Parameter Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#recording-intermediate-outputs">Recording Intermediate Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#complete-example-multi-track-mix">Complete Example: Multi-Track Mix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#faust-box-api">Faust Box API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#faust-to-jax-flax-transpilation">Faust to JAX/Flax Transpilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#faust-to-qdax">Faust to QDax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#mashup-generator">Mashup Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#dj-mixing">DJ Mixing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#multiprocessing-with-plugins">Multiprocessing with Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#xml-synth-sound-rendering">XML Synth Sound Rendering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#running-the-examples">Running the Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#jupyter-notebooks">Jupyter Notebooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples.html#python-scripts">Python Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#additional-resources">Additional Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#contributing-examples">Contributing Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/index.html#core-classes">Core Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#renderengine">RenderEngine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.RenderEngine"><code class="docutils literal notranslate"><span class="pre">RenderEngine</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#processorbase">ProcessorBase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.ProcessorBase"><code class="docutils literal notranslate"><span class="pre">ProcessorBase</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/index.html#processors">Processors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#faustprocessor">FaustProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.FaustProcessor"><code class="docutils literal notranslate"><span class="pre">FaustProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#pluginprocessor">PluginProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.PluginProcessor"><code class="docutils literal notranslate"><span class="pre">PluginProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#playbackprocessor">PlaybackProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.PlaybackProcessor"><code class="docutils literal notranslate"><span class="pre">PlaybackProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#playbackwarpprocessor">PlaybackWarpProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.PlaybackWarpProcessor"><code class="docutils literal notranslate"><span class="pre">PlaybackWarpProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#filterprocessor">FilterProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.FilterProcessor"><code class="docutils literal notranslate"><span class="pre">FilterProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#compressorprocessor">CompressorProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.CompressorProcessor"><code class="docutils literal notranslate"><span class="pre">CompressorProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#reverbprocessor">ReverbProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.ReverbProcessor"><code class="docutils literal notranslate"><span class="pre">ReverbProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#pannerprocessor">PannerProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.PannerProcessor"><code class="docutils literal notranslate"><span class="pre">PannerProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#delayprocessor">DelayProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.DelayProcessor"><code class="docutils literal notranslate"><span class="pre">DelayProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#addprocessor">AddProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.AddProcessor"><code class="docutils literal notranslate"><span class="pre">AddProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#samplerprocessor">SamplerProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.SamplerProcessor"><code class="docutils literal notranslate"><span class="pre">SamplerProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#oscillatorprocessor">OscillatorProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.OscillatorProcessor"><code class="docutils literal notranslate"><span class="pre">OscillatorProcessor</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/index.html#faust-api">Faust API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#faust-module">Faust Module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.FaustContext"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.FaustContext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.createLibContext"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.createLibContext()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.destroyLibContext"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.destroyLibContext()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.boxToSignals"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.boxToSignals()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#faust-box-api">Faust Box API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.box.Box"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.box.Box</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.box.SType"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.box.SType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#audio-primitives">Audio Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#math-operations">Math Operations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#trigonometric-functions">Trigonometric Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#delay-and-memory">Delay and Memory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#user-interface-elements">User Interface Elements</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#faust-signal-api">Faust Signal API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.Signal"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.Signal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.sigInt"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigInt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.sigReal"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigReal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.sigInput"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigInput()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.sigDelay"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigDelay()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.sigIntCast"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigIntCast()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api_reference/index.html#dawdreamer.faust.signal.sigFloatCast"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigFloatCast()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference/index.html#indices-and-tables">Indices and Tables</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../compatibility.html">Plugin Compatibility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#legend">Legend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#effect-plugins">Effect Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#instrument-synthesizer-plugins">Instrument/Synthesizer Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#general-compatibility-notes">General Compatibility Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../compatibility.html#format-compatibility">Format Compatibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../compatibility.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../compatibility.html#platform-specific-notes">Platform-Specific Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#testing-your-plugins">Testing Your Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#contributing-compatibility-info">Contributing Compatibility Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#alternative-to-vst-plugins">Alternative to VST Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compatibility.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-4-2025">v0.8.4 (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-7-3-2023-09-18">v0.7.3 (2023-09-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-7-1-2023-06-01">v0.7.1 (2023-06-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-7-0-2023-05-18">v0.7.0 (2023-05-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-3-2022-04-19">v0.6.3 (2022-04-19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-1-2022-04-04">v0.6.1 (2022-04-04)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-0-2022-03-24">v0.6.0 (2022-03-24)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-8-1-2021-01-13">v0.5.8.1 (2021-01-13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-7-8-2021-10-09">v0.5.7.8 (2021-10-09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-7-2021-08-14">v0.5.7 (2021-08-14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-6-2021-05-09">v0.5.6 (2021-05-09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-0-2021-04-01">v0.5.0 (2021-04-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-4-0-2020-12-01">v0.4.0 (2020-12-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-1-0-2020-08-14">v0.1.0 (2020-08-14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#upgrade-guide">Upgrade Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../release_notes.html#v0-8-0-breaking-changes">v0.8.0 Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../release_notes.html#v0-7-0-breaking-changes">v0.7.0 Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../release_notes.html#v0-6-0-breaking-changes">v0.6.0 Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../release_notes.html#v0-5-7-breaking-changes">v0.5.7 Breaking Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#versioning-scheme">Versioning Scheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#future-roadmap">Future Roadmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#contributing">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DawDreamer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Playback Warp Processor</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/DBraun/DawDreamer/blob/main/docs/user_guide/playback_warp.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="playback-warp-processor">
+<h1>Playback Warp Processor<a class="headerlink" href="#playback-warp-processor" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">PlaybackWarpProcessor</span></code> provides time-stretching and pitch-shifting using the Rubber Band Library. It also supports Ableton Live warp markers for beat-matching.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For warp marker manipulation, see the companion project <a class="reference external" href="https://github.com/DBraun/AbletonParsing">AbletonParsing</a>.</p>
+</div>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<section id="time-stretching-and-pitch-shifting">
+<h3>Time-Stretching and Pitch-Shifting<a class="headerlink" href="#time-stretching-and-pitch-shifting" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
+
+<span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
+<span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">512</span>
+
+<span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
+
+<span class="c1"># Load audio</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drums.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Create playback warp processor</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+
+<span class="c1"># Time-stretch: play in twice the amount of time (slowed down)</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">time_ratio</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+<span class="c1"># Pitch-shift: down 5 semitones</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">transpose</span> <span class="o">=</span> <span class="o">-</span><span class="mf">5.0</span>
+
+<span class="c1"># Load graph and render</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">playback</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span>
+<span class="n">audio_out</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time_ratio</span></code>: Time-stretching factor. Values &gt; 1 slow down, &lt; 1 speed up.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transpose</span></code>: Pitch shift in semitones. Positive = up, negative = down.</p></li>
+</ul>
+</section>
+<section id="advanced-options">
+<h3>Advanced Options<a class="headerlink" href="#advanced-options" title="Link to this heading"></a></h3>
+<p>The Rubber Band Library provides many quality and behavior options:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set advanced Rubber Band options</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span>
+    <span class="n">daw</span><span class="o">.</span><span class="n">PlaybackWarpProcessor</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">OptionTransientsSmooth</span> <span class="o">|</span>
+    <span class="n">daw</span><span class="o">.</span><span class="n">PlaybackWarpProcessor</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">OptionPitchHighQuality</span> <span class="o">|</span>
+    <span class="n">daw</span><span class="o">.</span><span class="n">PlaybackWarpProcessor</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">OptionChannelsTogether</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Common options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">OptionTransientsSmooth</span></code> / <code class="docutils literal notranslate"><span class="pre">OptionTransientsCrisp</span></code>: Transient handling</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OptionPitchHighQuality</span></code> / <code class="docutils literal notranslate"><span class="pre">OptionPitchHighSpeed</span></code>: Quality/speed tradeoff</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OptionChannelsTogether</span></code> / <code class="docutils literal notranslate"><span class="pre">OptionChannelsApart</span></code>: Multi-channel handling</p></li>
+</ul>
+<p>See the <a class="reference external" href="https://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html">Rubber Band API documentation</a> for all available options.</p>
+</section>
+</section>
+<section id="ableton-live-warp-markers">
+<h2>Ableton Live Warp Markers<a class="headerlink" href="#ableton-live-warp-markers" title="Link to this heading"></a></h2>
+<section id="loading-asd-files">
+<h3>Loading <cite>.asd</cite> Files<a class="headerlink" href="#loading-asd-files" title="Link to this heading"></a></h3>
+<p>Ableton Live stores warp marker information in <code class="docutils literal notranslate"><span class="pre">.asd</span></code> files. DawDreamer can load these files to perform beat-matched time-stretching:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
+
+<span class="c1"># Suppose the Ableton clip info thinks the input audio is 120 BPM,</span>
+<span class="c1"># but we want to play it back at 130 BPM</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">130.</span><span class="p">)</span>
+
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+
+<span class="c1"># Load warp markers from .asd file</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_file</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav.asd&quot;</span><span class="p">)</span>
+
+<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">playback</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">8.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Render 8 beats at 130 BPM</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">.asd</span></code> file automatically sets several clip properties.</p>
+</section>
+<section id="clip-properties">
+<h3>Clip Properties<a class="headerlink" href="#clip-properties" title="Link to this heading"></a></h3>
+<p>After loading an <code class="docutils literal notranslate"><span class="pre">.asd</span></code> file, the following properties are set (and can be modified):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Warp markers: array of (time in seconds, time in beats) pairs</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">warp_markers</span>  <span class="c1"># np.array shape [N, 2]</span>
+
+<span class="c1"># Timeline markers (in beats relative to 1.1.1)</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">start_marker</span> <span class="o">=</span> <span class="mf">0.0</span>   <span class="c1"># Clip start</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">end_marker</span> <span class="o">=</span> <span class="mf">4.0</span>     <span class="c1"># Clip end</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">loop_start</span> <span class="o">=</span> <span class="mf">0.0</span>     <span class="c1"># Loop start</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">loop_end</span> <span class="o">=</span> <span class="mf">4.0</span>       <span class="c1"># Loop end</span>
+
+<span class="c1"># Flags</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">warp_on</span> <span class="o">=</span> <span class="kc">True</span>   <span class="c1"># Enable warping</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">loop_on</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Enable looping</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">warp_on</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, any value set by <code class="docutils literal notranslate"><span class="pre">time_ratio</span></code> is ignored. The warp markers control time-stretching instead.</p>
+</div>
+</section>
+<section id="manual-warp-markers">
+<h3>Manual Warp Markers<a class="headerlink" href="#manual-warp-markers" title="Link to this heading"></a></h3>
+<p>You can set warp markers manually without an <code class="docutils literal notranslate"><span class="pre">.asd</span></code> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># Define warp markers: (seconds, beats)</span>
+<span class="n">warp_markers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>      <span class="c1"># 0 seconds = 0 beats</span>
+    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>      <span class="c1"># 1 second = 2 beats (faster tempo)</span>
+    <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]</span>       <span class="c1"># 3 seconds = 4 beats (slower tempo)</span>
+<span class="p">])</span>
+
+<span class="n">playback</span><span class="o">.</span><span class="n">warp_markers</span> <span class="o">=</span> <span class="n">warp_markers</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">warp_on</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="multiple-clip-positions">
+<h2>Multiple Clip Positions<a class="headerlink" href="#multiple-clip-positions" title="Link to this heading"></a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">set_clip_positions()</span></code> to place the same audio clip at multiple timeline positions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Each tuple: (global start, global end, local offset)</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_positions</span><span class="p">([</span>
+    <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>   <span class="c1"># First instance: beats 0-4, no offset</span>
+    <span class="p">[</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">9.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]</span>    <span class="c1"># Second instance: beats 5-9, 1 beat offset</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><strong>Global start/end</strong>: Position on the global timeline (in beats)</p></li>
+<li><p><strong>Local offset</strong>: Offset relative to the clip’s start marker (in beats)</p></li>
+</ul>
+<p>This is like dragging the same clip onto an arrangement view multiple times with different offsets.</p>
+</section>
+<section id="complete-example">
+<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
+
+<span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
+<span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">512</span>
+
+<span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">130.</span><span class="p">)</span>
+
+<span class="c1"># Load audio</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Create processor</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+
+<span class="c1"># Load Ableton warp markers</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_file</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav.asd&quot;</span><span class="p">)</span>
+
+<span class="c1"># Adjust clip properties</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">loop_on</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">loop_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">loop_end</span> <span class="o">=</span> <span class="mf">4.0</span>
+
+<span class="c1"># Place clip twice on timeline</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_positions</span><span class="p">([</span>
+    <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>    <span class="c1"># First loop</span>
+    <span class="p">[</span><span class="mf">4.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span>     <span class="c1"># Second loop</span>
+<span class="p">])</span>
+
+<span class="c1"># Set Rubber Band options</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span>
+    <span class="n">daw</span><span class="o">.</span><span class="n">PlaybackWarpProcessor</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">OptionTransientsCrisp</span> <span class="o">|</span>
+    <span class="n">daw</span><span class="o">.</span><span class="n">PlaybackWarpProcessor</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">OptionPitchHighQuality</span>
+<span class="p">)</span>
+
+<span class="c1"># Render</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">playback</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">8.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Save</span>
+<span class="n">audio_out</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;warped_drums.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio_out</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="tips-and-best-practices">
+<h2>Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>Time-stretching quality</strong></dt><dd><ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">OptionPitchHighQuality</span></code> for better quality at the cost of CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OptionTransientsCrisp</span></code> for percussive material, <code class="docutils literal notranslate"><span class="pre">OptionTransientsSmooth</span></code> for melodic</p></li>
+</ul>
+</dd>
+<dt><strong>Warp markers</strong></dt><dd><ul class="simple">
+<li><p>Warp markers define tempo changes across the clip</p></li>
+<li><p>More markers = more flexible tempo mapping, but harder to manage</p></li>
+<li><p>Use Ableton Live to visually place warp markers, then export <code class="docutils literal notranslate"><span class="pre">.asd</span></code></p></li>
+</ul>
+</dd>
+<dt><strong>Beat-matching</strong></dt><dd><ul class="simple">
+<li><p>Set engine BPM to target tempo</p></li>
+<li><p>Load <code class="docutils literal notranslate"><span class="pre">.asd</span></code> file with <code class="docutils literal notranslate"><span class="pre">set_clip_file()</span></code></p></li>
+<li><p>Enable <code class="docutils literal notranslate"><span class="pre">warp_on</span></code> to use warp markers instead of <code class="docutils literal notranslate"><span class="pre">time_ratio</span></code></p></li>
+</ul>
+</dd>
+<dt><strong>Multiple instances</strong></dt><dd><ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">set_clip_positions()</span></code> for repeated patterns</p></li>
+<li><p>More efficient than creating multiple processors for the same audio</p></li>
+</ul>
+</dd>
+<dt><strong>Performance</strong></dt><dd><ul class="simple">
+<li><p>Time-stretching is CPU-intensive, especially at high quality settings</p></li>
+<li><p>Larger <code class="docutils literal notranslate"><span class="pre">time_ratio</span></code> changes (e.g., 2x or 0.5x) are more expensive</p></li>
+<li><p>Consider pre-rendering complex warp scenarios</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="common-issues">
+<h2>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><strong>Artifacts or glitches</strong></dt><dd><ul class="simple">
+<li><p>Try different Rubber Band options (crisp vs smooth, quality vs speed)</p></li>
+<li><p>Increase buffer size for more stable processing</p></li>
+<li><p>Check for extreme time ratios (&lt; 0.5 or &gt; 2.0)</p></li>
+</ul>
+</dd>
+<dt><strong>Warp markers not working</strong></dt><dd><ul class="simple">
+<li><p>Ensure <code class="docutils literal notranslate"><span class="pre">warp_on</span> <span class="pre">=</span> <span class="pre">True</span></code></p></li>
+<li><p>Verify warp marker format: shape [N, 2], (seconds, beats)</p></li>
+<li><p>Check that <code class="docutils literal notranslate"><span class="pre">.asd</span></code> file corresponds to the correct audio file</p></li>
+</ul>
+</dd>
+<dt><strong>Timing mismatch</strong></dt><dd><ul class="simple">
+<li><p>Verify engine BPM matches intended playback tempo</p></li>
+<li><p>Check start/end markers align with clip boundaries</p></li>
+<li><p>Ensure clip positions don’t overlap unexpectedly</p></li>
+</ul>
+</dd>
+<dt><strong>Loop not working</strong></dt><dd><ul class="simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">loop_on</span> <span class="pre">=</span> <span class="pre">True</span></code></p></li>
+<li><p>Verify <code class="docutils literal notranslate"><span class="pre">loop_start</span></code> and <code class="docutils literal notranslate"><span class="pre">loop_end</span></code> are within clip bounds</p></li>
+<li><p>Check that render duration is long enough to hear the loop</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="render_engine.html"><span class="doc">Render Engine and BPM</span></a> - BPM and tempo control</p></li>
+<li><p><a class="reference internal" href="other_processors.html"><span class="doc">Built-In Effect Processors</span></a> - Standard playback processor</p></li>
+<li><p><a class="reference external" href="https://breakfastquay.com/rubberband/">Rubber Band Library Homepage</a></p></li>
+<li><p><a class="reference external" href="https://github.com/DBraun/AbletonParsing">AbletonParsing Project</a> - Warp marker tools</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="playback.html" class="btn btn-neutral float-left" title="Playback Processor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="other_processors.html" class="btn btn-neutral float-right" title="Built-In Effect Processors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, David Braun.
+      <span class="lastupdated">Last updated on Nov 14, 2025.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

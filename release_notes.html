@@ -1,0 +1,887 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Release Notes &mdash; DawDreamer 0.8.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=b41f4c93"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Plugin Compatibility" href="compatibility.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DawDreamer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#quick-install">Quick Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#building-from-source">Building from Source</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#platform-specific-build-instructions">Platform-Specific Build Instructions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#linux">Linux</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#docker">Docker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#windows">Windows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation.html#macos">macOS</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#building-a-wheel">Building a Wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#faust-libraries">Faust Libraries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#basic-concepts">Basic Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#example-1-faust-sine-wave">Example 1: Faust Sine Wave</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#example-2-vst-plugin-chain">Example 2: VST Plugin Chain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#example-3-audio-playback-and-effects">Example 3: Audio Playback and Effects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#key-concepts-explained">Key Concepts Explained</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#renderengine">RenderEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#processor-graph">Processor Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#parameter-automation">Parameter Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#bpm-and-timing">BPM and Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/render_engine.html">Render Engine and BPM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#creating-a-renderengine">Creating a RenderEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#setting-bpm">Setting BPM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#static-bpm">Static BPM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#dynamic-bpm-automation">Dynamic BPM Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#rendering-audio">Rendering Audio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#render-by-duration">Render by Duration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#render-by-beats">Render by Beats</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#getting-audio-output">Getting Audio Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#graph-management">Graph Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#re-rendering">Re-rendering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#timing-and-synchronization">Timing and Synchronization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#audio-rate-automation">Audio-Rate Automation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#ppqn-rate-automation">PPQN-Rate Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#best-practices">Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#example-complete-workflow">Example: Complete Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/faust_processor.html">Faust Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#new-to-faust">New to Faust?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#creating-a-faust-processor">Creating a Faust Processor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#loading-dsp-from-file">Loading DSP from File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#loading-dsp-from-string">Loading DSP from String</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#parameters">Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#listing-parameters">Listing Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#example-stereo-reverb">Example: Stereo Reverb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#multi-channel-processing">Multi-Channel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#polyphony">Polyphony</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#enabling-polyphony">Enabling Polyphony</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#soundfiles">Soundfiles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#id1">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#advanced-example-88-key-piano">Advanced Example: 88-Key Piano</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#parameter-automation">Parameter Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/plugin_processor.html">Plugin Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#creating-a-plugin-processor">Creating a Plugin Processor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#plugin-state-management">Plugin State Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#opening-the-editor">Opening the Editor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#saving-and-loading-state">Saving and Loading State</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#loading-presets">Loading Presets</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#parameters">Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#listing-parameters">Listing Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-parameter-ranges">Getting Parameter Ranges</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#parameter-automation">Parameter Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#midi-support">MIDI Support</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#adding-individual-notes">Adding Individual Notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#loading-midi-files">Loading MIDI Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#saving-midi-files">Saving MIDI Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#clearing-midi">Clearing MIDI</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#graph-integration">Graph Integration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#basic-chain">Basic Chain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#re-rendering">Re-rendering</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#multi-channel-buses">Multi-Channel Buses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#checking-bus-support">Checking Bus Support</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#sidechain-processing">Sidechain Processing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#channel-counts">Channel Counts</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#complete-example">Complete Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/playback.html">Playback Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#changing-playback-data">Changing Playback Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#multi-channel-audio">Multi-Channel Audio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#looping">Looping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#working-with-different-sample-rates">Working with Different Sample Rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#complete-example">Complete Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#advanced-time-stretching-and-pitch-shifting">Advanced: Time-Stretching and Pitch-Shifting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/playback_warp.html">Playback Warp Processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/playback_warp.html#time-stretching-and-pitch-shifting">Time-Stretching and Pitch-Shifting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/playback_warp.html#advanced-options">Advanced Options</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#ableton-live-warp-markers">Ableton Live Warp Markers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/playback_warp.html#loading-asd-files">Loading <cite>.asd</cite> Files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/playback_warp.html#clip-properties">Clip Properties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/playback_warp.html#manual-warp-markers">Manual Warp Markers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#multiple-clip-positions">Multiple Clip Positions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#complete-example">Complete Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/other_processors.html">Built-In Effect Processors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#add-processor-mixer">Add Processor (Mixer)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#setting-gain-levels">Setting Gain Levels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#complete-example">Complete Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#filter-processor">Filter Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#filter-modes">Filter Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id1">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#parameter-automation">Parameter Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#compressor-processor">Compressor Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#parameters">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id2">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#adjusting-parameters">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#reverb-processor">Reverb Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id3">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id4">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id5">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#panner-processor">Panner Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#panning-rules">Panning Rules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id6">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id7">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#delay-processor">Delay Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id8">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id9">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id10">Adjusting Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#processor-specific-tips">Processor-Specific Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#processor-types">Processor Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#basic-workflow">Basic Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#multi-channel-routing">Multi-Channel Routing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#parallel-processing">Parallel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#parameter-automation">Parameter Automation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#recording-intermediate-outputs">Recording Intermediate Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#complete-example-multi-track-mix">Complete Example: Multi-Track Mix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#faust-box-api">Faust Box API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#faust-to-jax-flax-transpilation">Faust to JAX/Flax Transpilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#faust-to-qdax">Faust to QDax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#mashup-generator">Mashup Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#dj-mixing">DJ Mixing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#multiprocessing-with-plugins">Multiprocessing with Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#xml-synth-sound-rendering">XML Synth Sound Rendering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#running-the-examples">Running the Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="examples.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="examples.html#jupyter-notebooks">Jupyter Notebooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="examples.html#python-scripts">Python Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#additional-resources">Additional Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#contributing-examples">Contributing Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_reference/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_reference/index.html#core-classes">Core Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#renderengine">RenderEngine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.RenderEngine"><code class="docutils literal notranslate"><span class="pre">RenderEngine</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#processorbase">ProcessorBase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.ProcessorBase"><code class="docutils literal notranslate"><span class="pre">ProcessorBase</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference/index.html#processors">Processors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#faustprocessor">FaustProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.FaustProcessor"><code class="docutils literal notranslate"><span class="pre">FaustProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#pluginprocessor">PluginProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.PluginProcessor"><code class="docutils literal notranslate"><span class="pre">PluginProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#playbackprocessor">PlaybackProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.PlaybackProcessor"><code class="docutils literal notranslate"><span class="pre">PlaybackProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#playbackwarpprocessor">PlaybackWarpProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.PlaybackWarpProcessor"><code class="docutils literal notranslate"><span class="pre">PlaybackWarpProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#filterprocessor">FilterProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.FilterProcessor"><code class="docutils literal notranslate"><span class="pre">FilterProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#compressorprocessor">CompressorProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.CompressorProcessor"><code class="docutils literal notranslate"><span class="pre">CompressorProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#reverbprocessor">ReverbProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.ReverbProcessor"><code class="docutils literal notranslate"><span class="pre">ReverbProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#pannerprocessor">PannerProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.PannerProcessor"><code class="docutils literal notranslate"><span class="pre">PannerProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#delayprocessor">DelayProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.DelayProcessor"><code class="docutils literal notranslate"><span class="pre">DelayProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#addprocessor">AddProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.AddProcessor"><code class="docutils literal notranslate"><span class="pre">AddProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#samplerprocessor">SamplerProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.SamplerProcessor"><code class="docutils literal notranslate"><span class="pre">SamplerProcessor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#oscillatorprocessor">OscillatorProcessor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.OscillatorProcessor"><code class="docutils literal notranslate"><span class="pre">OscillatorProcessor</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference/index.html#faust-api">Faust API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#faust-module">Faust Module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.FaustContext"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.FaustContext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.createLibContext"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.createLibContext()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.destroyLibContext"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.destroyLibContext()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.boxToSignals"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.boxToSignals()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#faust-box-api">Faust Box API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.box.Box"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.box.Box</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.box.SType"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.box.SType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#audio-primitives">Audio Primitives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#math-operations">Math Operations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#trigonometric-functions">Trigonometric Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#delay-and-memory">Delay and Memory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#user-interface-elements">User Interface Elements</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#faust-signal-api">Faust Signal API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.Signal"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.Signal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.sigInt"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigInt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.sigReal"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigReal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.sigInput"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigInput()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.sigDelay"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigDelay()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.sigIntCast"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigIntCast()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api_reference/index.html#dawdreamer.faust.signal.sigFloatCast"><code class="docutils literal notranslate"><span class="pre">dawdreamer.faust.signal.sigFloatCast()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api_reference/index.html#indices-and-tables">Indices and Tables</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Resources</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="compatibility.html">Plugin Compatibility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#legend">Legend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#effect-plugins">Effect Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#instrument-synthesizer-plugins">Instrument/Synthesizer Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#general-compatibility-notes">General Compatibility Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="compatibility.html#format-compatibility">Format Compatibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="compatibility.html#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="compatibility.html#platform-specific-notes">Platform-Specific Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#testing-your-plugins">Testing Your Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#contributing-compatibility-info">Contributing Compatibility Info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#alternative-to-vst-plugins">Alternative to VST Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compatibility.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Release Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-8-4-2025">v0.8.4 (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-7-3-2023-09-18">v0.7.3 (2023-09-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-7-1-2023-06-01">v0.7.1 (2023-06-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-7-0-2023-05-18">v0.7.0 (2023-05-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-6-3-2022-04-19">v0.6.3 (2022-04-19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-6-1-2022-04-04">v0.6.1 (2022-04-04)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-6-0-2022-03-24">v0.6.0 (2022-03-24)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-5-8-1-2021-01-13">v0.5.8.1 (2021-01-13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-5-7-8-2021-10-09">v0.5.7.8 (2021-10-09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-5-7-2021-08-14">v0.5.7 (2021-08-14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-5-6-2021-05-09">v0.5.6 (2021-05-09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-5-0-2021-04-01">v0.5.0 (2021-04-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-4-0-2020-12-01">v0.4.0 (2020-12-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-0-2020-08-14">v0.1.0 (2020-08-14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#upgrade-guide">Upgrade Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#v0-8-0-breaking-changes">v0.8.0 Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#v0-7-0-breaking-changes">v0.7.0 Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#v0-6-0-breaking-changes">v0.6.0 Breaking Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#v0-5-7-breaking-changes">v0.5.7 Breaking Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#versioning-scheme">Versioning Scheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#future-roadmap">Future Roadmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DawDreamer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Release Notes</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/DBraun/DawDreamer/blob/main/docs/release_notes.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="release-notes">
+<h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading"></a></h1>
+<p>This page documents major changes and new features across DawDreamer versions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Versioning</strong>: DawDreamer uses effort-based versioning. Version numbers reflect the scope of changes rather than strict semantic versioning rules.</p>
+</div>
+<section id="v0-8-4-2025">
+<h2>v0.8.4 (2025)<a class="headerlink" href="#v0-8-4-2025" title="Link to this heading"></a></h2>
+<p><strong>Infrastructure upgrades:</strong></p>
+<ul class="simple">
+<li><p><strong>Switched from pybind11 to nanobind</strong> - Modern C++17 Python bindings with improved performance and smaller binary size</p></li>
+<li><p><strong>Updated libfaust to 2.81.10</strong> - Latest Faust compiler with bug fixes and improvements</p></li>
+<li><p><strong>Comprehensive documentation overhaul</strong>:</p>
+<ul>
+<li><p>Migrated GitHub Wiki content to Sphinx documentation</p></li>
+<li><p>New user guide with detailed processor documentation</p></li>
+<li><p>Added Faust Box and Signal API reference</p></li>
+<li><p>Improved Quick Start guide with <code class="docutils literal notranslate"><span class="pre">record</span></code> and <code class="docutils literal notranslate"><span class="pre">get_parameter_range()</span></code> examples</p></li>
+<li><p>Better organization with dedicated pages for Playback and PlaybackWarp processors</p></li>
+<li><p>Switched to Read the Docs theme for improved navigation</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Under the hood:</strong></p>
+<ul class="simple">
+<li><p>Better cross-platform build system</p></li>
+<li><p>Improved Python 3.10-3.12 compatibility</p></li>
+<li><p>Enhanced type hints and docstrings</p></li>
+</ul>
+</section>
+<section id="v0-8-3-2024-09-09">
+<h2>v0.8.3 (2024-09-09)<a class="headerlink" href="#v0-8-3-2024-09-09" title="Link to this heading"></a></h2>
+<p><strong>System Requirements:</strong></p>
+<ul class="simple">
+<li><p>macOS builds require macOS 12 (Monterey) or later</p></li>
+<li><p>All platforms require Python 3.10 or higher</p></li>
+</ul>
+<p><strong>Plugin Processor enhancements:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_parameter_range(index:</span> <span class="pre">int,</span> <span class="pre">search_steps:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1000,</span> <span class="pre">convert:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True)</span></code> - Extract parameter ranges with optional text-to-numerical conversion</p></li>
+</ul>
+<p><strong>Faust Processor enhancements:</strong></p>
+<ul class="simple">
+<li><p><strong>Updated to libfaust 2.70.3</strong> - Latest Faust compiler version</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opt_level</span></code> property - Control LLVM optimization level</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.faust_libraries_paths</span></code> - Support for multiple library paths (plural)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.faust_assets_paths</span></code> - Support for multiple asset paths (plural)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boxFFun</span></code> and <code class="docutils literal notranslate"><span class="pre">sigFFun</span></code> added to Box and Signal APIs</p></li>
+<li><p>Fixed bug where <code class="docutils literal notranslate"><span class="pre">boxVGroup</span></code> incorrectly referenced <code class="docutils literal notranslate"><span class="pre">boxHGroup</span></code></p></li>
+</ul>
+</section>
+<section id="v0-8-0-2023-11-17">
+<h2>v0.8.0 (2023-11-17)<a class="headerlink" href="#v0-8-0-2023-11-17" title="Link to this heading"></a></h2>
+<p><strong>Breaking Changes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">boxFromDSP</span></code> now returns just a <code class="docutils literal notranslate"><span class="pre">box</span></code> instead of tuple <code class="docutils literal notranslate"><span class="pre">(box,</span> <span class="pre">inputs,</span> <span class="pre">outputs)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">getBoxType</span></code> has been removed</p></li>
+</ul>
+<p><strong>Box API improvements:</strong></p>
+<ul class="simple">
+<li><p>Box objects gained new properties: <code class="docutils literal notranslate"><span class="pre">.valid</span></code>, <code class="docutils literal notranslate"><span class="pre">.inputs</span></code>, and <code class="docutils literal notranslate"><span class="pre">.outputs</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FaustProcessor.compile_box</span></code> now searches for library files in <code class="docutils literal notranslate"><span class="pre">.faust_libraries_path</span></code></p></li>
+</ul>
+<p><strong>Dependency updates:</strong></p>
+<ul class="simple">
+<li><p>Updated libfaust to 2.69.3</p></li>
+<li><p>Updated JUCE to 7.0.8</p></li>
+<li><p>Added Python 3.12 support in PyPI builds</p></li>
+</ul>
+<p><strong>Documentation:</strong></p>
+<ul class="simple">
+<li><p>Minor refinements to Faust-to-JAX and Faust-to-QDax notebook documentation</p></li>
+</ul>
+</section>
+<section id="v0-7-4-2023-09-26">
+<h2>v0.7.4 (2023-09-26)<a class="headerlink" href="#v0-7-4-2023-09-26" title="Link to this heading"></a></h2>
+<p><strong>System Requirements:</strong></p>
+<ul class="simple">
+<li><p>Python 3.8+ required for Windows/Linux</p></li>
+<li><p>Python 3.9+ required for macOS</p></li>
+</ul>
+<p><strong>Bug Fixes:</strong></p>
+<ul class="simple">
+<li><p>Improved MIDI note termination between renders - ensures all notes turn off properly when a render concludes before a Note Off event</p></li>
+<li><p>Corrected off-by-one sample error in <code class="docutils literal notranslate"><span class="pre">RenderEngine.cpp</span></code> affecting output size with block size 2</p></li>
+</ul>
+<p><strong>Dependency updates:</strong></p>
+<ul class="simple">
+<li><p>JUCE upgraded to 7.0.7</p></li>
+<li><p>libfaust updated to 2.68.1</p></li>
+<li><p>Updated pybind11, rubberband, libsamplerate</p></li>
+</ul>
+<p><strong>Faust Processor enhancements:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">soundfile</span></code> primitive can now load directly from filesystem with automatic fallback to <code class="docutils literal notranslate"><span class="pre">set_soundfiles()</span></code> dictionary</p></li>
+<li><p>Enhanced <code class="docutils literal notranslate"><span class="pre">boxSoundfile</span></code> support for loading files specified via compilation</p></li>
+<li><p>Python numeric types can implicitly convert to <code class="docutils literal notranslate"><span class="pre">boxReal</span></code>/<code class="docutils literal notranslate"><span class="pre">boxInt</span></code> and <code class="docutils literal notranslate"><span class="pre">sigReal</span></code>/<code class="docutils literal notranslate"><span class="pre">sigInt</span></code> functions</p></li>
+</ul>
+</section>
+<section id="v0-7-3-2023-09-18">
+<h2>v0.7.3 (2023-09-18)<a class="headerlink" href="#v0-7-3-2023-09-18" title="Link to this heading"></a></h2>
+<p><strong>System Requirements:</strong></p>
+<ul class="simple">
+<li><p>PyPI now requires Python 3.8+ for Windows/Linux</p></li>
+<li><p>PyPI now requires Python 3.9+ for macOS</p></li>
+</ul>
+<p><strong>Bug Fixes:</strong></p>
+<ul class="simple">
+<li><p>Enhanced MIDI note handling between renders to ensure notes turn off properly if a render ends before a Note Off event</p></li>
+<li><p>Corrected output render size calculation in <code class="docutils literal notranslate"><span class="pre">RenderEngine.cpp</span></code> (off-by-one sample when block size = 2)</p></li>
+</ul>
+<p><strong>Dependency updates:</strong></p>
+<ul class="simple">
+<li><p>JUCE upgraded to 7.0.7</p></li>
+<li><p>libfaust updated to 2.68.1</p></li>
+<li><p>Updated pybind11</p></li>
+</ul>
+<p><strong>Faust Processor enhancements:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">soundfile</span></code> primitive can load directly from filesystem with automatic fallback</p></li>
+<li><p>Python numeric types can implicitly convert to Box and Signal API functions</p></li>
+</ul>
+<p><strong>Code organization:</strong></p>
+<ul class="simple">
+<li><p>Refactored Sampler Processor Plugin project</p></li>
+<li><p>Refactored libfaust Box/Signal API files</p></li>
+</ul>
+</section>
+<section id="v0-7-1-2023-06-01">
+<h2>v0.7.1 (2023-06-01)<a class="headerlink" href="#v0-7-1-2023-06-01" title="Link to this heading"></a></h2>
+<p><strong>Multiprocessing support:</strong></p>
+<ul class="simple">
+<li><p>Added multiprocessing capabilities with new tests and examples</p></li>
+<li><p>See <code class="docutils literal notranslate"><span class="pre">tests/test_multiprocessing.py</span></code> for usage examples</p></li>
+</ul>
+<p><strong>Architecture improvements:</strong></p>
+<ul class="simple">
+<li><p>Removed mutex in <code class="docutils literal notranslate"><span class="pre">PluginProcessor</span></code> (no longer necessary)</p></li>
+<li><p>JUCE <code class="docutils literal notranslate"><span class="pre">MessageManager</span></code> instance now created before <code class="docutils literal notranslate"><span class="pre">AudioProcessorGraph</span></code> for better performance</p></li>
+</ul>
+</section>
+<section id="v0-7-0-2023-05-18">
+<h2>v0.7.0 (2023-05-18)<a class="headerlink" href="#v0-7-0-2023-05-18" title="Link to this heading"></a></h2>
+<p><strong>Breaking Changes:</strong></p>
+<ul class="simple">
+<li><p>Dropped PyPI builds for macOS Python 3.7/3.8 - Python 3.9+ required</p></li>
+<li><p>Minimum macOS version raised to 11.0</p></li>
+</ul>
+<p><strong>Bug Fixes:</strong></p>
+<ul class="simple">
+<li><p>Fixed crash issue with <code class="docutils literal notranslate"><span class="pre">PluginProcessor.record_automation</span></code></p></li>
+<li><p>Fixed certain <code class="docutils literal notranslate"><span class="pre">isBox</span></code> functions in the Faust Box API</p></li>
+</ul>
+<p><strong>Faust updates:</strong></p>
+<ul class="simple">
+<li><p>Updated to Faust 2.59.6 and associated Faust Libraries</p></li>
+<li><p>Enhanced Box/Signal APIs with new functions</p></li>
+</ul>
+<p><strong>Build system changes:</strong></p>
+<ul class="simple">
+<li><p>Removed libfaust files from repository</p></li>
+<li><p>Build now dynamically downloads libfaust</p></li>
+<li><p>Updated faust, faustlibraries, and pybind11 submodules</p></li>
+</ul>
+<p><strong>Known Issues:</strong></p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/DBraun/DawDreamer/issues/152">Issue #152</a> identified as high-priority bug (unresolved)</p></li>
+</ul>
+</section>
+<section id="v0-6-3-2022-04-19">
+<h2>v0.6.3 (2022-04-19)<a class="headerlink" href="#v0-6-3-2022-04-19" title="Link to this heading"></a></h2>
+<p><strong>Plugin Processor enhancements:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">open_editor()</span></code> - Open plugin GUI for editing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">load_state(filepath:</span> <span class="pre">str)</span></code> - Load complete plugin state</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_state(filepath:</span> <span class="pre">str)</span></code> - Save complete plugin state</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">can_set_bus(inputs:</span> <span class="pre">int,</span> <span class="pre">outputs:</span> <span class="pre">int)</span></code> - Check bus configuration support</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_bus(inputs:</span> <span class="pre">int,</span> <span class="pre">outputs:</span> <span class="pre">int)</span></code> - Set multi-channel bus configuration</p></li>
+</ul>
+<p>See <code class="docutils literal notranslate"><span class="pre">tests/test_plugins.py</span></code> for usage examples.</p>
+</section>
+<section id="v0-6-1-2022-04-04">
+<h2>v0.6.1 (2022-04-04)<a class="headerlink" href="#v0-6-1-2022-04-04" title="Link to this heading"></a></h2>
+<p><strong>Playback Warp Processor improvements:</strong></p>
+<ul class="simple">
+<li><p>Fixed issue when warping is disabled (<a class="reference external" href="https://github.com/DBraun/DawDreamer/issues/81">Issue #81</a>)</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">reset_warp_markers(bpm:</span> <span class="pre">float)</span></code> - Reset warp markers to steady BPM</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">warp_markers</span></code> property - Set warp markers as 2D array (<a class="reference external" href="https://github.com/DBraun/DawDreamer/issues/73">Issue #73</a>)</p></li>
+</ul>
+<p>See <code class="docutils literal notranslate"><span class="pre">tests/test_playbackwarp_processor.py</span></code> for usage examples.</p>
+</section>
+<section id="v0-6-0-2022-03-24">
+<h2>v0.6.0 (2022-03-24)<a class="headerlink" href="#v0-6-0-2022-03-24" title="Link to this heading"></a></h2>
+<p><strong>Breaking Changes:</strong></p>
+<ul class="simple">
+<li><p>Functions like <code class="docutils literal notranslate"><span class="pre">load_graph()</span></code> now <strong>throw exceptions</strong> instead of returning bools</p></li>
+<li><p>Previously: <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">engine.load_graph(graph)</span></code></p></li>
+<li><p>Now: Use <code class="docutils literal notranslate"><span class="pre">try/except</span></code> blocks to catch errors instead of <code class="docutils literal notranslate"><span class="pre">assert</span></code></p></li>
+<li><p><strong>Benefit</strong>: Clearer error messages without needing <code class="docutils literal notranslate"><span class="pre">assert</span></code> everywhere</p></li>
+</ul>
+<p><strong>Non-breaking changes:</strong></p>
+<ul class="simple">
+<li><p>Fixed bug in Faust processor MIDI file loading</p></li>
+<li><p>Fixed bug in Add Processor channel count (now always stereo)</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">all_events</span></code> keyword arg to <code class="docutils literal notranslate"><span class="pre">load_midi()</span></code> for Plugin Processor (default: True for backwards compatibility)</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">faust_libraries_path</span></code> property to Faust Processor for custom <code class="docutils literal notranslate"><span class="pre">.lib</span></code> file locations</p></li>
+<li><p>Added Faust property for release length to avoid false-positive voice stealing warnings</p></li>
+<li><p>Revised Render Engine graph construction to warn instead of error when too many signals connect to a node</p></li>
+<li><p>Upgraded JUCE, Faust, and pybind11 dependencies</p></li>
+</ul>
+</section>
+<section id="v0-5-8-1-2021-01-13">
+<h2>v0.5.8.1 (2021-01-13)<a class="headerlink" href="#v0-5-8-1-2021-01-13" title="Link to this heading"></a></h2>
+<p><strong>Multi-channel support:</strong></p>
+<ul class="simple">
+<li><p>Multi-channel support for VSTs, Faust, and other processors</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">get_num_input_channels()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_num_output_channels()</span></code></p></li>
+</ul>
+<p><strong>macOS improvements:</strong></p>
+<ul class="simple">
+<li><p>Better macOS support for all CPU types (Apple Silicon and Intel)</p></li>
+<li><p>Improved <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dawdreamer</span></code> experience</p></li>
+</ul>
+</section>
+<section id="v0-5-7-8-2021-10-09">
+<h2>v0.5.7.8 (2021-10-09)<a class="headerlink" href="#v0-5-7-8-2021-10-09" title="Link to this heading"></a></h2>
+<p><strong>Faust soundfile primitive:</strong></p>
+<ul class="simple">
+<li><p>Faust code can now use the <code class="docutils literal notranslate"><span class="pre">soundfile</span></code> primitive</p></li>
+<li><p>Pass NumPy audio from Python to Faust with <code class="docutils literal notranslate"><span class="pre">set_soundfiles()</span></code> method</p></li>
+<li><p>Enables sample-based instruments and convolution reverbs</p></li>
+</ul>
+</section>
+<section id="v0-5-7-2021-08-14">
+<h2>v0.5.7 (2021-08-14)<a class="headerlink" href="#v0-5-7-2021-08-14" title="Link to this heading"></a></h2>
+<p><strong>Breaking Change:</strong></p>
+<ul class="simple">
+<li><p><strong>Plugin Processor automation changed</strong>: <code class="docutils literal notranslate"><span class="pre">set_automation(str,</span> <span class="pre">np.array)</span></code> → <code class="docutils literal notranslate"><span class="pre">set_automation(int,</span> <span class="pre">np.array)</span></code></p></li>
+<li><p><strong>Reason</strong>: Parameter names aren’t always unique, so parameters must be identified by index</p></li>
+<li><p><strong>Migration</strong>: Use parameter index instead of name string</p></li>
+</ul>
+</section>
+<section id="v0-5-6-2021-05-09">
+<h2>v0.5.6 (2021-05-09)<a class="headerlink" href="#v0-5-6-2021-05-09" title="Link to this heading"></a></h2>
+<p><strong>Major additions:</strong></p>
+<ul class="simple">
+<li><p><strong>Faust Processor added</strong> - Real-time Faust DSP compilation and execution</p></li>
+<li><p>Removed JUCE from global namespace (cleaner API)</p></li>
+</ul>
+</section>
+<section id="v0-5-0-2021-04-01">
+<h2>v0.5.0 (2021-04-01)<a class="headerlink" href="#v0-5-0-2021-04-01" title="Link to this heading"></a></h2>
+<p><strong>Linux support:</strong></p>
+<ul class="simple">
+<li><p>Added Linux build (thanks <a class="reference external" href="https://github.com/guillaumephd">&#64;guillaumephd</a>)</p></li>
+<li><p>Expanded platform support to macOS, Windows, and Linux</p></li>
+</ul>
+</section>
+<section id="v0-4-0-2020-12-01">
+<h2>v0.4.0 (2020-12-01)<a class="headerlink" href="#v0-4-0-2020-12-01" title="Link to this heading"></a></h2>
+<p><strong>Parameter automation:</strong></p>
+<ul class="simple">
+<li><p>Added parameter automation feature</p></li>
+<li><p>Support for audio-rate and PPQN-rate automation</p></li>
+<li><p>Enables dynamic parameter control over time</p></li>
+</ul>
+</section>
+<section id="v0-1-0-2020-08-14">
+<h2>v0.1.0 (2020-08-14)<a class="headerlink" href="#v0-1-0-2020-08-14" title="Link to this heading"></a></h2>
+<p><strong>Initial release:</strong></p>
+<ul class="simple">
+<li><p>First public release of DawDreamer</p></li>
+<li><p>Core RenderEngine and processor graph system</p></li>
+<li><p>VST plugin hosting</p></li>
+<li><p>Basic audio processing capabilities</p></li>
+</ul>
+</section>
+<section id="upgrade-guide">
+<h2>Upgrade Guide<a class="headerlink" href="#upgrade-guide" title="Link to this heading"></a></h2>
+<section id="v0-8-0-breaking-changes">
+<h3>v0.8.0 Breaking Changes<a class="headerlink" href="#v0-8-0-breaking-changes" title="Link to this heading"></a></h3>
+<p><strong>Old code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">box</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">boxFromDSP</span><span class="p">(</span><span class="n">dsp_string</span><span class="p">)</span>
+<span class="n">box_type</span> <span class="o">=</span> <span class="n">getBoxType</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>New code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">boxFromDSP</span><span class="p">(</span><span class="n">dsp_string</span><span class="p">)</span>
+<span class="c1"># Use new Box properties instead</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">inputs</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">outputs</span>
+<span class="n">is_valid</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">valid</span>
+<span class="c1"># getBoxType() removed - use Box properties</span>
+</pre></div>
+</div>
+</section>
+<section id="v0-7-0-breaking-changes">
+<h3>v0.7.0 Breaking Changes<a class="headerlink" href="#v0-7-0-breaking-changes" title="Link to this heading"></a></h3>
+<p><strong>Platform requirements changed:</strong></p>
+<ul class="simple">
+<li><p>macOS builds now require Python 3.9+ (dropped 3.7/3.8)</p></li>
+<li><p>macOS minimum version raised to 11.0</p></li>
+</ul>
+<p>If using macOS Python 3.7 or 3.8, upgrade to Python 3.9 or later.</p>
+</section>
+<section id="v0-6-0-breaking-changes">
+<h3>v0.6.0 Breaking Changes<a class="headerlink" href="#v0-6-0-breaking-changes" title="Link to this heading"></a></h3>
+<p><strong>Old code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">synth</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="n">dsp_path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>New code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">synth</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="n">dsp_path</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="v0-5-7-breaking-changes">
+<h3>v0.5.7 Breaking Changes<a class="headerlink" href="#v0-5-7-breaking-changes" title="Link to this heading"></a></h3>
+<p><strong>Old code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;A Pan&quot;</span><span class="p">,</span> <span class="n">automation_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>New code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get parameter index first</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">()</span>
+<span class="c1"># Find index of &quot;A Pan&quot; parameter</span>
+<span class="n">index</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Example</span>
+
+<span class="n">synth</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">automation_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="versioning-scheme">
+<h2>Versioning Scheme<a class="headerlink" href="#versioning-scheme" title="Link to this heading"></a></h2>
+<p>DawDreamer uses <strong>effort-based versioning</strong>, where version numbers reflect the scope and effort of changes rather than strict semantic versioning rules.</p>
+<ul class="simple">
+<li><p><strong>Major changes</strong> (0.X.0): Significant new features, infrastructure upgrades, or architectural changes</p></li>
+<li><p><strong>Minor changes</strong> (0.0.X): Bug fixes, small improvements, documentation updates</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Breaking API changes are noted explicitly in release notes. Check the Upgrade Guide for migration instructions when breaking changes occur.</p>
+</div>
+</section>
+<section id="future-roadmap">
+<h2>Future Roadmap<a class="headerlink" href="#future-roadmap" title="Link to this heading"></a></h2>
+<p>Planned features (subject to change):</p>
+<ul class="simple">
+<li><p>Additional audio effects and processors</p></li>
+<li><p>Improved VST3 compatibility</p></li>
+<li><p>Real-time audio I/O support</p></li>
+<li><p>MIDI input/output devices</p></li>
+<li><p>Enhanced automation curves (bezier, exponential, etc.)</p></li>
+<li><p>More Faust transpilation targets</p></li>
+</ul>
+<p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/issues">GitHub Issues</a> for feature requests and known bugs.</p>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h2>
+<p>DawDreamer is open source (GPLv3). Contributions are welcome:</p>
+<ul class="simple">
+<li><p><strong>Bug reports</strong>: <a class="reference external" href="https://github.com/DBraun/DawDreamer/issues">Open an issue</a></p></li>
+<li><p><strong>Feature requests</strong>: Discuss in <a class="reference external" href="https://github.com/DBraun/DawDreamer/discussions">GitHub Discussions</a></p></li>
+<li><p><strong>Code contributions</strong>: Submit a pull request</p></li>
+<li><p><strong>Documentation</strong>: Help improve these docs</p></li>
+</ul>
+<p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/blob/main/CONTRIBUTING.md">Contributing Guide</a> for details.</p>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> - Installation instructions</p></li>
+<li><p><a class="reference internal" href="quickstart.html"><span class="doc">Quick Start Guide</span></a> - Getting started guide</p></li>
+<li><p><a class="reference external" href="https://github.com/DBraun/DawDreamer/releases">GitHub Releases</a> - Download specific versions</p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/dawdreamer/">PyPI</a> - Python Package Index page</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="compatibility.html" class="btn btn-neutral float-left" title="Plugin Compatibility" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, David Braun.
+      <span class="lastupdated">Last updated on Nov 14, 2025.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
