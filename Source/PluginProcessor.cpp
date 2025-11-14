@@ -912,15 +912,24 @@ std::map<std::pair<float, float>, ValueType> getParameterRange(AudioProcessorPar
         }
     }
 
-    if (text.empty())
+    if (ranges.empty())
     {
-        const std::string parameterName =
-            parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
-        throw std::runtime_error("Plugin parameter '" + parameterName +
-                                 "' failed to return a valid string for its value.");
+        if (text.empty())
+        {
+            const std::string parameterName =
+                parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+            throw std::runtime_error("Plugin parameter '" + parameterName +
+                                     "' failed to return a valid string for its value.");
+        }
+        else
+        {
+            ranges[{0.0f, 1.0f}] = text;
+        }
     }
-
-    ranges[{ranges.rbegin()->first.second, 1.0f}] = text; // Final range
+    else
+    {
+        ranges[{ranges.rbegin()->first.second, 1.0f}] = text; // Final range
+    }
 
     if (!convert)
     {
