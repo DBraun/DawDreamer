@@ -469,6 +469,7 @@
   <section id="dawdreamer-documentation">
 <h1>DawDreamer Documentation<a class="headerlink" href="#dawdreamer-documentation" title="Link to this heading"></a></h1>
 <p>DawDreamer is a <strong>Digital Audio Workstation (DAW) framework for Python</strong>. It enables programmatic audio processing with support for VST plugins, Faust DSP code, and complex audio routing graphs.</p>
+<p>Read the <a class="reference external" href="https://arxiv.org/abs/2111.09931">introduction to DawDreamer</a>, which was presented as a Late-Breaking Demo at the <a class="reference external" href="https://ismir2021.ismir.net/lbd/">2021 ISMIR Conference</a>.</p>
 <img alt="Platform support" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" />
 <a class="reference external image-reference" href="https://pypi.org/project/dawdreamer/"><img alt="PyPI version" src="https://img.shields.io/pypi/v/dawdreamer" />
 </a>
@@ -477,14 +478,17 @@
 <section id="key-features">
 <h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Composable audio processor graphs</strong> - Build complex signal processing chains with DAG-based routing</p></li>
+<li><p><strong>Composable audio processor graphs</strong> - Build complex signal processing chains with <a class="reference external" href="https://en.wikipedia.org/wiki/Digital_audio_workstation">DAG</a>-based routing</p></li>
 <li><p><strong>VST 2/3 support</strong> - Host instrument and effect plugins with full state management and automation</p></li>
 <li><p><strong>Faust DSP integration</strong> - Real-time compilation of Faust code for custom effects and instruments</p></li>
 <li><p><strong>Time-stretching and pitch-shifting</strong> - RubberBand integration with Ableton Live warp marker support</p></li>
 <li><p><strong>Parameter automation</strong> - Audio-rate and PPQN-based automation for precise control</p></li>
 <li><p><strong>MIDI support</strong> - Playback, recording, and file export</p></li>
-<li><p><strong>Multi-platform</strong> - macOS (Apple Silicon/Intel), Windows, Linux, Google Colab</p></li>
-<li><p><strong>Transpilation</strong> - Convert Faust to JAX/Flax, C++, Rust, WebAssembly</p></li>
+<li><p><strong>Multi-platform</strong> - macOS (Apple Silicon/Intel), Windows, Linux, Google Colab, Docker</p></li>
+<li><p><strong>Transpilation</strong> - Convert Faust to <a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/examples/Faust_to_JAX">JAX/Flax</a>, C++, Rust, WebAssembly</p></li>
+<li><p><strong>Faust Box and Signal APIs</strong> - Advanced Faust programming with the <a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/examples/Box_API">Box API</a></p></li>
+<li><p><strong>Machine learning experiments</strong> - Integration with <a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/examples/Faust_to_QDax">QDax</a></p></li>
+<li><p><strong>Multiprocessing support</strong> - Parallel processing capabilities (<a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/examples/multiprocessing_plugins">example</a>)</p></li>
 </ul>
 </section>
 <section id="quick-start">
@@ -601,6 +605,14 @@
 <li><p><strong>Issue Tracker</strong>: <a class="reference external" href="https://github.com/DBraun/DawDreamer/issues">https://github.com/DBraun/DawDreamer/issues</a></p></li>
 <li><p><strong>Original Paper</strong>: <a class="reference external" href="https://arxiv.org/abs/2111.09931">https://arxiv.org/abs/2111.09931</a></p></li>
 </ul>
+</section>
+<section id="built-with">
+<h2>Built With<a class="headerlink" href="#built-with" title="Link to this heading"></a></h2>
+<p>DawDreamer’s foundation is <a class="reference external" href="https://github.com/juce-framework/JUCE">JUCE</a>, with a user-friendly Python interface thanks to <a class="reference external" href="https://github.com/wjakob/nanobind">nanobind</a>. DawDreamer evolved from an earlier VSTi audio “renderer”, <a class="reference external" href="https://github.com/fedden/RenderMan">RenderMan</a>.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of JUCE, nanobind, <a class="reference external" href="https://github.com/libsndfile/libsamplerate">Libsamplerate</a>, <a class="reference external" href="https://github.com/breakfastquay/rubberband/">Rubber Band Library</a>, <a class="reference external" href="https://www.steinberg.net/vst-instruments/">Steinberg VST2/3</a>, and <a class="reference external" href="https://github.com/grame-cncm/faust">FAUST</a>.</p>
 </section>
 </section>
 <section id="indices-and-tables">

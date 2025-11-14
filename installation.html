@@ -480,19 +480,19 @@
 <h2>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h2>
 <p><strong>macOS:</strong></p>
 <ul class="simple">
-<li><p>64-bit Python 3.10-3.12</p></li>
-<li><p>Apple Silicon (arm64) or Intel (x86_64) CPU</p></li>
+<li><p>64-bit Python 3.11-3.14</p></li>
+<li><p>Apple Silicon (arm64)</p></li>
 <li><p>macOS 11.0 or higher</p></li>
 </ul>
 <p><strong>Windows:</strong></p>
 <ul class="simple">
 <li><p>x86_64 CPU</p></li>
-<li><p>64-bit Python 3.10-3.12</p></li>
+<li><p>64-bit Python 3.11-3.14</p></li>
 </ul>
 <p><strong>Linux:</strong></p>
 <ul class="simple">
 <li><p>x86_64 CPU</p></li>
-<li><p>64-bit Python 3.10-3.12</p></li>
+<li><p>64-bit Python 3.11-3.14</p></li>
 </ul>
 </section>
 <section id="building-from-source">
@@ -543,13 +543,13 @@ python<span class="w"> </span>download_libfaust.py
 <span class="w">  </span>git<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>cmake<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>python3<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>python3.10-dev
+<span class="w">  </span>python3.11-dev
 </pre></div>
 </div>
 </li>
 <li><p>Set environment variables:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONLIBPATH</span><span class="o">=</span>/usr/lib/python3.10
-<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONINCLUDEPATH</span><span class="o">=</span>/usr/include/python3.10
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONLIBPATH</span><span class="o">=</span>/usr/lib/python3.11
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONINCLUDEPATH</span><span class="o">=</span>/usr/include/python3.11
 </pre></div>
 </div>
 </li>
@@ -623,7 +623,7 @@ If you later build a wheel, you should <strong>remove</strong> this file to avoi
 <li><p>Xcode with command line tools (Xcode 14-16 tested)</p></li>
 <li><p><a class="reference external" href="https://cmake.org/download/">CMake</a> (via Homebrew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">cmake</span></code>)</p></li>
 <li><p><a class="reference external" href="https://faust.grame.fr/">Faust compiler</a> (via Homebrew: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">faust</span></code>)</p></li>
-<li><p>Python 3.10-3.12 (install from <a class="reference external" href="https://www.python.org/downloads/">python.org</a> with standard settings)</p></li>
+<li><p>Python 3.11-3.14 (install from <a class="reference external" href="https://www.python.org/downloads/">python.org</a> with standard settings)</p></li>
 </ul>
 </li>
 <li><p>Set environment variables:</p>
@@ -708,8 +708,8 @@ python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </
 <p>If you encounter issues:</p>
 <ol class="arabic simple">
 <li><p>Check the <a class="reference external" href="https://github.com/DBraun/DawDreamer/issues">GitHub Issues</a> for known problems</p></li>
-<li><p>Verify Python version: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> (should be 3.10-3.12)</p></li>
-<li><p>On macOS, ensure you’re using the correct architecture (arm64 vs x86_64)</p></li>
+<li><p>Verify Python version: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> (should be 3.11-3.14)</p></li>
+<li><p>On macOS, ensure you’re using the correct architecture arm64</p></li>
 <li><p>On Windows, ensure you’re using the x64 Native Tools Command Prompt</p></li>
 <li><p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md">CLAUDE.md</a> file for detailed troubleshooting</p></li>
 </ol>
