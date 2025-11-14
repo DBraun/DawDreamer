@@ -38,7 +38,7 @@ DawDreamer is an audio-processing Python framework supporting core [DAW](https:/
 * [Multiprocessing support](https://github.com/DBraun/DawDreamer/tree/main/examples/multiprocessing_plugins)
 * Full support on macOS, Windows, Linux, Google Colab, and Ubuntu Dockerfile
 
-DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [pybind11](https://github.com/pybind/pybind11). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
+DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a user-friendly Python interface thanks to [nanobind](https://github.com/wjakob/nanobind). DawDreamer evolved from an earlier VSTi audio "renderer", [RenderMan](https://github.com/fedden/RenderMan).
 
 ## Installation
 
@@ -139,7 +139,7 @@ Please refer to the [Wiki](https://github.com/DBraun/DawDreamer/wiki), [examples
 
 ## License
 
-DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of [JUCE](https://github.com/juce-framework/JUCE/), [pybind11](https://github.com/pybind/pybind11/), [Libsamplerate](https://github.com/libsndfile/libsamplerate), [Rubber Band Library](https://github.com/breakfastquay/rubberband/), [Steinberg VST2/3](https://www.steinberg.net/vst-instruments/), and [FAUST](https://github.com/grame-cncm/faust).
+DawDreamer is licensed under GPLv3 to make it easier to comply with all of the dependent projects. If you use DawDreamer, you must obey the licenses of [JUCE](https://github.com/juce-framework/JUCE/), [nanobind](https://github.com/wjakob/nanobind/), [Libsamplerate](https://github.com/libsndfile/libsamplerate), [Rubber Band Library](https://github.com/breakfastquay/rubberband/), [Steinberg VST2/3](https://www.steinberg.net/vst-instruments/), and [FAUST](https://github.com/grame-cncm/faust).
 
 ## Thanks to contributors to the original [RenderMan](https://github.com/fedden/RenderMan)
 * [fedden](https://github.com/fedden), RenderMan creator

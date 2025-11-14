@@ -27,7 +27,7 @@ DawDreamer is a **Digital Audio Workstation (DAW) framework for Python**. It ena
 ```
 DawDreamer/
 ├── Source/                          # C++ core implementation
-│   ├── source.cpp                   # pybind11 Python bindings (entry point)
+│   ├── source.cpp                   # nanobind Python bindings (entry point)
 │   ├── RenderEngine.{h,cpp}         # Main audio engine & DAG execution
 │   ├── ProcessorBase.{h,cpp}        # Abstract processor base class
 │   ├── *Processor.h                 # Processor implementations (Faust, Plugin, Playback, etc.)
@@ -57,7 +57,7 @@ DawDreamer/
 │   └── faust_dsp/                   # Faust DSP test files
 └── thirdparty/                      # External dependencies (git submodules)
     ├── JUCE/                        # Audio framework
-    ├── pybind11/                    # C++ ↔ Python bindings
+    ├── nanobind/                    # C++ ↔ Python bindings
     ├── faust/                       # Faust DSP compiler
     ├── libsamplerate/               # High-quality sample rate conversion
     ├── rubberband/                  # Time-stretch/pitch-shift library
@@ -125,7 +125,7 @@ Each processor is a `ProcessorBase` subclass handling a specific audio function:
 - Provides synchronized parameter automation
 
 #### 6. **Python Bindings** (Source/source.cpp)
-- **pybind11-based** C++ → Python interface
+- **nanobind-based** C++ → Python interface
 - Exposes all processors, RenderEngine, parameters
 - Converts numpy arrays ↔ C++ audio buffers
 - Handles memory safety and reference counting
@@ -151,7 +151,7 @@ DawDreamer uses a **multi-step build process**:
 - **Faust**: DSP language compiler (embedded)
 - **libsamplerate**: SRC for time-stretching audio
 - **RubberBand**: Advanced time/pitch modification library
-- **pybind11**: C++11 → Python 3 bindings
+- **nanobind**: Modern C++17 → Python 3 bindings
 
 **Python Side:**
 - **setuptools**: Wheel packaging
@@ -275,7 +275,7 @@ msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
 
 ### DawDreamer.jucer (JUCE Project File)
 - XML configuration for JUCE Projucer tool
-- Defines C++ header paths (includes pybind11, Faust, libsamplerate)
+- Defines C++ header paths (includes nanobind, Faust, libsamplerate)
 - Specifies compiler flags and linked libraries:
   - macOS: `samplerate`, `faustwithllvm`
   - Linux: Similar deps via Makefile
@@ -411,13 +411,13 @@ ARCHS=$ARCHS python3.11 -m build --wheel
 **Adding a New Processor:**
 1. Create `Source/MyProcessor.h` (header-only or with .cpp)
 2. Implement as `public ProcessorBase` subclass
-3. Add pybind11 binding in `Source/source.cpp`
+3. Add nanobind binding in `Source/source.cpp`
 4. Add factory method to RenderEngine
 5. Update DawDreamer.jucer to include new files
 6. Rebuild
 
 ### Modifying Python Bindings
-- Edit `Source/source.cpp` (the pybind11 glue code)
+- Edit `Source/source.cpp` (the nanobind glue code)
 - Rebuild C++ extension
 - Changes affect module structure and Python API
 
@@ -582,7 +582,7 @@ audio = engine.get_audio()
 | Dependency      | Purpose                           | Version/Notes                 |
 |-----------------|-----------------------------------|-------------------------------|
 | JUCE            | Audio framework                   | Latest main branch            |
-| pybind11        | C++/Python bindings               | Submodule, header-only        |
+| nanobind        | C++/Python bindings               | Submodule, header-only        |
 | Faust           | DSP language compiler             | Submodule, embedded compiler  |
 | libfaust        | Pre-compiled Faust runtime        | Downloaded via script          |
 | libsamplerate   | Sample rate conversion            | Built from source (CMake)     |
@@ -622,7 +622,7 @@ audio = engine.get_audio()
 **Why C++ + Python?**
 - Audio processing performance-critical → C++
 - User-facing API simple and flexible → Python
-- pybind11 provides clean, minimal overhead binding
+- nanobind provides clean, minimal overhead binding with better performance than pybind11
 
 **Why JUCE?**
 - Cross-platform audio I/O, MIDI, VST hosting
