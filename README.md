@@ -140,6 +140,26 @@ synth.clear_midi()
 # add midi again, render again, and so on...
 ```
 
+## Known Issues
+
+### Compatibility with JAX and other LLVM-based libraries
+
+DawDreamer must be imported **before** JAX or other LLVM-based libraries (such as PyTorch with TorchScript, Numba, etc.) to avoid LLVM initialization conflicts that can cause segmentation faults:
+
+```python
+# CORRECT:
+import dawdreamer as daw  # Import DawDreamer first!
+import jax
+
+# WRONG - May cause segfault:
+import jax
+import dawdreamer as daw  # Importing after JAX can crash!
+```
+
+**Why?** Both DawDreamer (via Faust's LLVM backend) and JAX use LLVM internally. When JAX initializes LLVM first (e.g., by calling `jax.devices()`), importing DawDreamer afterward can cause conflicts in LLVM's global state, resulting in a crash.
+
+**Workaround:** Always import `dawdreamer` at the top of your Python file, before any JAX or related libraries.
+
 ## Documentation
 
 **Full documentation:** https://dbraun.github.io/DawDreamer/
