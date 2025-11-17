@@ -917,12 +917,12 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& si
                 std::string source_code =
                     createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
 
-                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
-                for (int i = 1; i < 4; i += 2)
+                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
+                for (int i = 1; i < 6; i += 2)
                 {
                     free((void*)argv[i]);
                 }
-                for (int i = 4; i < argc; i++)
+                for (int i = 6; i < argc; i++)
                 {
                     free((void*)argv[i]);
                 }
@@ -975,12 +975,12 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& si
                 std::string source_code =
                     createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
 
-                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
-                for (int i = 1; i < 4; i += 2)
+                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
+                for (int i = 1; i < 6; i += 2)
                 {
                     free((void*)argv[i]);
                 }
-                for (int i = 4; i < argc; i++)
+                for (int i = 6; i < argc; i++)
                 {
                     free((void*)argv[i]);
                 }

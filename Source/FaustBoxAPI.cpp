@@ -861,11 +861,9 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
                                      error_msg);
 
-                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
-                for (int i = 1; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                // Clean up strdup'd strings (odd indices only: argv[1] and argv[3])
+                free((void*)argv[1]);
+                free((void*)argv[3]);
 
                 if (!error_msg.empty())
                 {
@@ -908,8 +906,10 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
                                      error_msg);
 
-                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
-                for (int i = 1; i < argc; i++)
+                // Clean up strdup'd strings (argv[1], argv[3], and argv[4] onwards)
+                free((void*)argv[1]);
+                free((void*)argv[3]);
+                for (int i = 4; i < argc; i++)
                 {
                     free((void*)argv[i]);
                 }
@@ -1462,12 +1462,12 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 std::string source_code =
                     createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
 
-                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
-                for (int i = 1; i < 6; i += 2)
+                // Clean up strdup'd strings (odd indices 1,3,5,7 and all from index 8 onwards)
+                for (int i = 1; i < 8; i += 2)
                 {
                     free((void*)argv[i]);
                 }
-                for (int i = 6; i < argc; i++)
+                for (int i = 8; i < argc; i++)
                 {
                     free((void*)argv[i]);
                 }
@@ -1530,12 +1530,12 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 std::string source_code =
                     createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
 
-                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
-                for (int i = 1; i < 6; i += 2)
+                // Clean up strdup'd strings (odd indices 1,3,5,7 and all from index 8 onwards)
+                for (int i = 1; i < 8; i += 2)
                 {
                     free((void*)argv[i]);
                 }
-                for (int i = 6; i < argc; i++)
+                for (int i = 8; i < argc; i++)
                 {
                     free((void*)argv[i]);
                 }

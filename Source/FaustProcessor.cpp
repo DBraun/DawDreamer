@@ -524,6 +524,9 @@ bool FaustProcessor::compile()
                                                m_errorString, m_llvmOptLevel);
     }
 
+    // Free the strdup'd DX7 path
+    free((void*)argv[3]);
+
     for (int i = 0; i < argc; i++)
     {
         argv[i] = NULL;
@@ -757,6 +760,9 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 
+    // Free the strdup'd DX7 path
+    free((void*)argv[3]);
+
     return true;
 }
 
@@ -861,6 +867,9 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 
+    // Free the strdup'd DX7 path
+    free((void*)argv[3]);
+
     return true;
 }
 
@@ -949,6 +958,9 @@ bool FaustProcessor::compileBox(BoxWrapper& box)
     createParameterLayout();
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+    // Free the strdup'd DX7 path
+    free((void*)argv[3]);
 
     return true;
 }
@@ -1043,6 +1055,9 @@ bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>&
     createParameterLayout();
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
+
+    // Free the strdup'd DX7 path
+    free((void*)argv[3]);
 
     return true;
 }
