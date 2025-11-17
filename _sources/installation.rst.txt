@@ -27,7 +27,8 @@ System Requirements
 **Linux:**
 
 * x86_64 CPU
-* 64-bit Python 3.11-3.14
+* 64-bit Python 3.11-3.14 (tested with 3.12 on Ubuntu/WSL2)
+* For WSL2 users: Expect longer installation times (1-2 minutes) due to cross-filesystem I/O
 
 Building from Source
 --------------------
@@ -80,17 +81,28 @@ Linux
         freeglut3-dev \
         libxcomposite-dev \
         libcurl4-gnutls-dev \
+        libncurses-dev \
         git \
         cmake \
         python3 \
-        python3.11-dev
+        python3-dev
 
-2. Set environment variables:
+   .. note::
+      Replace ``python3-dev`` with your specific Python version if needed (e.g., ``python3.12-dev``).
+      Python 3.11-3.14 are supported. Check your version with ``python3 --version``.
+
+   .. note::
+      **ncurses/tinfo dependency (Linux only)**: The ``libncurses-dev`` package provides ``libtinfo.so`` which is
+      required for Faust's LLVM linking on Linux. On some systems you may need ``libtinfo-dev`` instead.
+      This is NOT needed on macOS (ncurses is part of the system).
+      Verify after build with: ``ldd dawdreamer/dawdreamer.so | grep tinfo``
+
+2. Set environment variables (adjust version as needed):
 
    .. code-block:: bash
 
-      export PYTHONLIBPATH=/usr/lib/python3.11
-      export PYTHONINCLUDEPATH=/usr/include/python3.11
+      export PYTHONLIBPATH=/usr/lib/python3.12
+      export PYTHONINCLUDEPATH=/usr/include/python3.12
 
 3. Build libsamplerate:
 
@@ -106,6 +118,44 @@ Linux
    .. code-block:: bash
 
       sh build_linux.sh
+
+5. Install the Python package:
+
+   .. code-block:: bash
+
+      python3 setup.py develop
+
+   .. note::
+      On WSL2 with NTFS filesystems, this step can take 1-2 minutes due to processing
+      thousands of Faust library files across the filesystem boundary. This is normal.
+      You'll see "Building editable for dawdreamer (pyproject.toml): still running..."
+      which indicates progress is being made.
+
+6. Verify the installation:
+
+   .. code-block:: python
+
+      python3 -c "import dawdreamer as daw; engine = daw.RenderEngine(44100, 512); print('Success!')"
+
+**Streamlined Installation for Automation/LLMs:**
+
+If you want minimal command-line output (useful for LLMs or automated builds):
+
+.. code-block:: bash
+
+   # Quick install if C++ library already exists (minimal output)
+   python3 setup.py develop --quiet 2>&1 | grep -E '(Successfully|ERROR|Failed)' || \
+     (echo "Installing (1-2 min on WSL2)..." && \
+      python3 setup.py develop --quiet && \
+      echo "✓ Installed successfully")
+
+   # Verify silently
+   python3 -c "import dawdreamer; dawdreamer.RenderEngine(44100, 512)" && \
+     echo "✓ Working" || echo "✗ Failed"
+
+.. note::
+   The ``--quiet`` flag suppresses verbose output. On WSL2, you'll see a brief pause
+   (1-2 minutes) while processing Faust libraries - this is normal.
 
 Docker
 ^^^^^^
@@ -258,4 +308,30 @@ If you encounter issues:
 2. Verify Python version: ``python --version`` (should be 3.11-3.14)
 3. On macOS, ensure you're using the correct architecture arm64
 4. On Windows, ensure you're using the x64 Native Tools Command Prompt
-5. See the `CLAUDE.md <https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md>`_ file for detailed troubleshooting
+5. On Linux/WSL2, ``setup.py develop`` taking 1-2 minutes is normal when processing Faust libraries
+6. If the C++ library is already built (``dawdreamer/dawdreamer.so`` exists), you can skip the build steps and just run ``python3 setup.py develop``
+7. See the `CLAUDE.md <https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md>`_ file for detailed troubleshooting
+
+Common Issues
+~~~~~~~~~~~~~
+
+**Linux: "setup.py develop" is taking a long time**
+
+This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
+and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
+You'll see "Successfully installed dawdreamer-0.8.4" when done.
+
+**ImportError after installation**
+
+Verify that the installation completed:
+
+.. code-block:: bash
+
+   python3 -c "import dawdreamer; print('Installed successfully')"
+
+If it fails, try reinstalling:
+
+.. code-block:: bash
+
+   python3 setup.py develop --uninstall
+   python3 setup.py develop

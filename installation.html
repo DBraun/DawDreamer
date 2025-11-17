@@ -61,7 +61,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a><ul>
@@ -492,7 +495,8 @@
 <p><strong>Linux:</strong></p>
 <ul class="simple">
 <li><p>x86_64 CPU</p></li>
-<li><p>64-bit Python 3.11-3.14</p></li>
+<li><p>64-bit Python 3.11-3.14 (tested with 3.12 on Ubuntu/WSL2)</p></li>
+<li><p>For WSL2 users: Expect longer installation times (1-2 minutes) due to cross-filesystem I/O</p></li>
 </ul>
 </section>
 <section id="building-from-source">
@@ -540,16 +544,29 @@ python<span class="w"> </span>download_libfaust.py
 <span class="w">  </span>freeglut3-dev<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>libxcomposite-dev<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>libcurl4-gnutls-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libncurses-dev<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>git<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>cmake<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>python3<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>python3.11-dev
+<span class="w">  </span>python3-dev
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Replace <code class="docutils literal notranslate"><span class="pre">python3-dev</span></code> with your specific Python version if needed (e.g., <code class="docutils literal notranslate"><span class="pre">python3.12-dev</span></code>).
+Python 3.11-3.14 are supported. Check your version with <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">--version</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>ncurses/tinfo dependency (Linux only)</strong>: The <code class="docutils literal notranslate"><span class="pre">libncurses-dev</span></code> package provides <code class="docutils literal notranslate"><span class="pre">libtinfo.so</span></code> which is
+required for Faust’s LLVM linking on Linux. On some systems you may need <code class="docutils literal notranslate"><span class="pre">libtinfo-dev</span></code> instead.
+This is NOT needed on macOS (ncurses is part of the system).
+Verify after build with: <code class="docutils literal notranslate"><span class="pre">ldd</span> <span class="pre">dawdreamer/dawdreamer.so</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">tinfo</span></code></p>
+</div>
 </li>
-<li><p>Set environment variables:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONLIBPATH</span><span class="o">=</span>/usr/lib/python3.11
-<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONINCLUDEPATH</span><span class="o">=</span>/usr/include/python3.11
+<li><p>Set environment variables (adjust version as needed):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONLIBPATH</span><span class="o">=</span>/usr/lib/python3.12
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONINCLUDEPATH</span><span class="o">=</span>/usr/include/python3.12
 </pre></div>
 </div>
 </li>
@@ -566,7 +583,42 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build_release<span c
 </pre></div>
 </div>
 </li>
+<li><p>Install the Python package:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>develop
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>On WSL2 with NTFS filesystems, this step can take 1-2 minutes due to processing
+thousands of Faust library files across the filesystem boundary. This is normal.
+You’ll see “Building editable for dawdreamer (pyproject.toml): still running…”
+which indicates progress is being made.</p>
+</div>
+</li>
+<li><p>Verify the installation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import dawdreamer as daw; engine = daw.RenderEngine(44100, 512); print(&#39;Success!&#39;)&quot;</span>
+</pre></div>
+</div>
+</li>
 </ol>
+<p><strong>Streamlined Installation for Automation/LLMs:</strong></p>
+<p>If you want minimal command-line output (useful for LLMs or automated builds):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick install if C++ library already exists (minimal output)</span>
+python3<span class="w"> </span>setup.py<span class="w"> </span>develop<span class="w"> </span>--quiet<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;(Successfully|ERROR|Failed)&#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Installing (1-2 min on WSL2)...&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>python3<span class="w"> </span>setup.py<span class="w"> </span>develop<span class="w"> </span>--quiet<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Installed successfully&quot;</span><span class="o">)</span>
+
+<span class="c1"># Verify silently</span>
+python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import dawdreamer; dawdreamer.RenderEngine(44100, 512)&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Working&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✗ Failed&quot;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--quiet</span></code> flag suppresses verbose output. On WSL2, you’ll see a brief pause
+(1-2 minutes) while processing Faust libraries - this is normal.</p>
+</div>
 </section>
 <section id="docker">
 <h4>Docker<a class="headerlink" href="#docker" title="Link to this heading"></a></h4>
@@ -711,8 +763,27 @@ python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </
 <li><p>Verify Python version: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> (should be 3.11-3.14)</p></li>
 <li><p>On macOS, ensure you’re using the correct architecture arm64</p></li>
 <li><p>On Windows, ensure you’re using the x64 Native Tools Command Prompt</p></li>
+<li><p>On Linux/WSL2, <code class="docutils literal notranslate"><span class="pre">setup.py</span> <span class="pre">develop</span></code> taking 1-2 minutes is normal when processing Faust libraries</p></li>
+<li><p>If the C++ library is already built (<code class="docutils literal notranslate"><span class="pre">dawdreamer/dawdreamer.so</span></code> exists), you can skip the build steps and just run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code></p></li>
 <li><p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md">CLAUDE.md</a> file for detailed troubleshooting</p></li>
 </ol>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Linux: “setup.py develop” is taking a long time</strong></p>
+<p>This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
+and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
+You’ll see “Successfully installed dawdreamer-0.8.4” when done.</p>
+<p><strong>ImportError after installation</strong></p>
+<p>Verify that the installation completed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import dawdreamer; print(&#39;Installed successfully&#39;)&quot;</span>
+</pre></div>
+</div>
+<p>If it fails, try reinstalling:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>develop<span class="w"> </span>--uninstall
+python3<span class="w"> </span>setup.py<span class="w"> </span>develop
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
