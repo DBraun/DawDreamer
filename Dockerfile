@@ -14,7 +14,31 @@ RUN python3.10 download_libfaust.py
 WORKDIR /DawDreamer
 ENV PYTHONLIBPATH=/opt/python/cp310-cp310/lib
 ENV PYTHONINCLUDEPATH=/opt/python/cp310-cp310/include/python3.10
-RUN sh -v build_linux.sh
+
+# Install build dependencies
+RUN yum install -y \
+    ncurses-devel \
+    libX11-devel \
+    libXrandr-devel \
+    libXinerama-devel \
+    libXrender-devel \
+    libXcomposite-devel \
+    libXcursor-devel \
+    freetype-devel \
+    alsa-lib-devel
+
+# Build libsamplerate
+RUN cd thirdparty/libsamplerate && \
+    cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON && \
+    cmake --build build_release --config Release && \
+    cd ../..
+
+# Build DawDreamer
+RUN cd Builds/LinuxMakefile && \
+    make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L$PYTHONLIBPATH" CXXFLAGS="-I$PYTHONINCLUDEPATH" && \
+    strip --strip-unneeded build/libdawdreamer.so && \
+    mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so && \
+    cd ../..
 
 # Setup python virtual environment and requirements
 WORKDIR /DawDreamer

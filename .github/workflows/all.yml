@@ -48,8 +48,21 @@ jobs:
         CIBW_BUILD_VERBOSITY: 3
         CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux_2_34_x86_64
         CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux_2_34_aarch64
-        CIBW_BEFORE_BUILD_LINUX:
-          export PYTHONLIBPATH=${{ matrix.pythonLibPath }} && export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} && sh -v build_linux.sh
+        CIBW_BEFORE_BUILD_LINUX: >
+          yum install -y ncurses-devel libX11-devel libXrandr-devel libXinerama-devel
+          libXrender-devel libXcomposite-devel libXcursor-devel freetype-devel
+          alsa-lib-devel &&
+          export PYTHONLIBPATH=${{ matrix.pythonLibPath }} &&
+          export PYTHONINCLUDEPATH=${{ matrix.pythonInclude }} &&
+          cd thirdparty/libsamplerate &&
+          cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release -DCMAKE_POSITION_INDEPENDENT_CODE=ON &&
+          cmake --build build_release --config Release &&
+          cd ../.. &&
+          cd Builds/LinuxMakefile &&
+          make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L$PYTHONLIBPATH" CXXFLAGS="-I$PYTHONINCLUDEPATH" &&
+          strip --strip-unneeded build/libdawdreamer.so &&
+          mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so &&
+          cd ../..
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer:$PWD/thirdparty/libfaust/ubuntu-x86_64/Release/lib && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2_34 {wheel})
         CIBW_TEST_REQUIRES: -r test-requirements.txt soundfile
