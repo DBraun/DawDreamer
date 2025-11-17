@@ -485,25 +485,19 @@ bool FaustProcessor::compile()
                                  pathToFaustLibraries);
     }
 
-    int argc = 0;
-    const char** argv = new const char*[64];
-
-    argv[argc++] = "-I";
-    argv[argc++] = pathToFaustLibraries.c_str();
-
-    argv[argc++] = "-I";
-    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+    FaustArgvBuilder args;
+    args.add("-I");
+    args.add(pathToFaustLibraries);
+    args.add("-I");
+    args.add(pathToFaustLibraries + "/dx7");
 
     for (const auto& p : m_faustLibrariesPaths)
     {
-        argv[argc++] = "-I";
-        argv[argc++] = p.c_str();
+        args.add("-I");
+        args.add(p);
     }
 
-    for (const auto& flag : m_compileFlags)
-    {
-        argv[argc++] = flag.c_str();
-    }
+    args.add(m_compileFlags);
 
     auto theCode = m_autoImport + "\n" + m_code;
 
@@ -515,24 +509,14 @@ bool FaustProcessor::compile()
     bool is_polyphonic = m_nvoices > 0;
     if (is_polyphonic)
     {
-        m_poly_factory = createPolyDSPFactoryFromString("dawdreamer", theCode, argc, argv, target,
-                                                        m_errorString, m_llvmOptLevel);
+        m_poly_factory = createPolyDSPFactoryFromString(
+            "dawdreamer", theCode, args.argc(), args.argv(), target, m_errorString, m_llvmOptLevel);
     }
     else
     {
-        m_factory = createDSPFactoryFromString("dawdreamer", theCode, argc, argv, target,
-                                               m_errorString, m_llvmOptLevel);
+        m_factory = createDSPFactoryFromString("dawdreamer", theCode, args.argc(), args.argv(),
+                                               target, m_errorString, m_llvmOptLevel);
     }
-
-    // Free the strdup'd DX7 path
-    free((void*)argv[3]);
-
-    for (int i = 0; i < argc; i++)
-    {
-        argv[i] = NULL;
-    }
-    delete[] argv;
-    argv = nullptr;
 
     // check for error
     if (!m_errorString.empty())
@@ -671,25 +655,19 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
 
-    int argc = 0;
-    const char* argv[512];
-
-    argv[argc++] = "-I";
-    argv[argc++] = pathToFaustLibraries.c_str();
-
-    argv[argc++] = "-I";
-    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+    FaustArgvBuilder args;
+    args.add("-I");
+    args.add(pathToFaustLibraries);
+    args.add("-I");
+    args.add(pathToFaustLibraries + "/dx7");
 
     for (const auto& p : m_faustLibrariesPaths)
     {
-        argv[argc++] = "-I";
-        argv[argc++] = p.c_str();
+        args.add("-I");
+        args.add(p);
     }
 
-    for (const auto& flag : m_compileFlags)
-    {
-        argv[argc++] = flag.c_str();
-    }
+    args.add(m_compileFlags);
 
     tvec signals;
     for (auto wrapper : wrappers)
@@ -700,8 +678,8 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
     auto target = getTarget();
     std::string error_msg;
 
-    m_factory = createDSPFactoryFromSignals("dawdreamer", signals, argc, argv, target, error_msg,
-                                            m_llvmOptLevel);
+    m_factory = createDSPFactoryFromSignals("dawdreamer", signals, args.argc(), args.argv(), target,
+                                            error_msg, m_llvmOptLevel);
 
     if (!m_factory)
     {
@@ -759,9 +737,6 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
     createParameterLayout();
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
-
-    // Free the strdup'd DX7 path
-    free((void*)argv[3]);
 
     return true;
 }
@@ -773,30 +748,20 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
 
-    int argc = 0;
-    const char* argv[512];
-
-    argv[argc++] = "-I";
-    argv[argc++] = pathToFaustLibraries.c_str();
-
-    argv[argc++] = "-I";
-    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+    FaustArgvBuilder args;
+    args.add("-I");
+    args.add(pathToFaustLibraries);
+    args.add("-I");
+    args.add(pathToFaustLibraries + "/dx7");
 
     for (const auto& p : m_faustLibrariesPaths)
     {
-        argv[argc++] = "-I";
-        argv[argc++] = p.c_str();
+        args.add("-I");
+        args.add(p);
     }
 
-    for (const auto& flag : m_compileFlags)
-    {
-        argv[argc++] = flag.c_str();
-    }
-
-    for (auto& s : in_argv)
-    {
-        argv[argc++] = s.c_str();
-    }
+    args.add(m_compileFlags);
+    args.add(in_argv);
 
     tvec signals;
     for (auto wrapper : wrappers)
@@ -807,8 +772,8 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
     auto target = getTarget();
     std::string error_msg;
 
-    m_factory = createDSPFactoryFromSignals("dawdreamer", signals, argc, argv, target, error_msg,
-                                            m_llvmOptLevel);
+    m_factory = createDSPFactoryFromSignals("dawdreamer", signals, args.argc(), args.argv(), target,
+                                            error_msg, m_llvmOptLevel);
 
     if (!m_factory)
     {
@@ -867,9 +832,6 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
 
-    // Free the strdup'd DX7 path
-    free((void*)argv[3]);
-
     return true;
 }
 
@@ -879,31 +841,25 @@ bool FaustProcessor::compileBox(BoxWrapper& box)
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
 
-    int argc = 0;
-    const char* argv[512];
-
-    argv[argc++] = "-I";
-    argv[argc++] = pathToFaustLibraries.c_str();
-
-    argv[argc++] = "-I";
-    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+    FaustArgvBuilder args;
+    args.add("-I");
+    args.add(pathToFaustLibraries);
+    args.add("-I");
+    args.add(pathToFaustLibraries + "/dx7");
 
     for (const auto& p : m_faustLibrariesPaths)
     {
-        argv[argc++] = "-I";
-        argv[argc++] = p.c_str();
+        args.add("-I");
+        args.add(p);
     }
 
-    for (const auto& flag : m_compileFlags)
-    {
-        argv[argc++] = flag.c_str();
-    }
+    args.add(m_compileFlags);
 
     auto target = this->getTarget();
     std::string error_msg;
 
-    m_factory =
-        createDSPFactoryFromBoxes("dawdreamer", box, argc, argv, target, error_msg, m_llvmOptLevel);
+    m_factory = createDSPFactoryFromBoxes("dawdreamer", box, args.argc(), args.argv(), target,
+                                          error_msg, m_llvmOptLevel);
 
     if (!m_factory)
     {
@@ -958,9 +914,6 @@ bool FaustProcessor::compileBox(BoxWrapper& box)
     createParameterLayout();
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
-
-    // Free the strdup'd DX7 path
-    free((void*)argv[3]);
 
     return true;
 }
@@ -971,36 +924,26 @@ bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>&
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
 
-    int argc = 0;
-    const char* argv[512];
-
-    argv[argc++] = "-I";
-    argv[argc++] = pathToFaustLibraries.c_str();
-
-    argv[argc++] = "-I";
-    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+    FaustArgvBuilder args;
+    args.add("-I");
+    args.add(pathToFaustLibraries);
+    args.add("-I");
+    args.add(pathToFaustLibraries + "/dx7");
 
     for (const auto& p : m_faustLibrariesPaths)
     {
-        argv[argc++] = "-I";
-        argv[argc++] = p.c_str();
+        args.add("-I");
+        args.add(p);
     }
 
-    for (const auto& flag : m_compileFlags)
-    {
-        argv[argc++] = flag.c_str();
-    }
-
-    for (auto& s : in_argv)
-    {
-        argv[argc++] = s.c_str();
-    }
+    args.add(m_compileFlags);
+    args.add(in_argv);
 
     auto target = this->getTarget();
     std::string error_msg;
 
-    m_factory =
-        createDSPFactoryFromBoxes("dawdreamer", box, argc, argv, target, error_msg, m_llvmOptLevel);
+    m_factory = createDSPFactoryFromBoxes("dawdreamer", box, args.argc(), args.argv(), target,
+                                          error_msg, m_llvmOptLevel);
 
     if (!m_factory)
     {
@@ -1055,9 +998,6 @@ bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>&
     createParameterLayout();
 
     m_compileState = is_polyphonic ? kSignalPoly : kSignalMono;
-
-    // Free the strdup'd DX7 path
-    free((void*)argv[3]);
 
     return true;
 }

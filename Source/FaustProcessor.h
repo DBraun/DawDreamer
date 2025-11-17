@@ -16,6 +16,7 @@
 
 #include <map>
 
+#include "FaustArgvBuilder.h"
 #include "FaustSignalAPI.h"
 
 /*
