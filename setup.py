@@ -30,6 +30,10 @@ def get_dawdreamer_version():
 
 DAWDREAMER_VERSION = get_dawdreamer_version()
 
+# Write version file so it's available in installed packages
+version_file = Path(this_dir) / "dawdreamer" / "_version.py"
+version_file.write_text(f'__version__ = "{DAWDREAMER_VERSION}"\n')
+
 
 class BinaryDistribution(Distribution):
     """Distribution which always forces a binary package with platform name"""
