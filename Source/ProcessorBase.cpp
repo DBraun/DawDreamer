@@ -177,17 +177,8 @@ nb::ndarray<nb::numpy, float> ProcessorBase::getAutomationNumpy(const std::strin
 
     std::memcpy(array_data, data.data(), size * sizeof(float));
 
-    auto capsule = nb::capsule(array_data,
-                               [](void* p) noexcept
-                               {
-                                   // Only delete if Python is still running
-                                   if (!Py_IsInitialized() || _Py_IsFinalizing())
-                                   {
-                                       // Python is shutting down, let it handle cleanup
-                                       return;
-                                   }
-                                   delete[] static_cast<float*>(p);
-                               });
+    auto capsule =
+        nb::capsule(array_data, [](void* p) noexcept { delete[] static_cast<float*>(p); });
 
     return nb::ndarray<nb::numpy, float>(array_data, 1, shape, capsule);
 }
@@ -309,17 +300,8 @@ nb::ndarray<nb::numpy, float> ProcessorBase::bufferToPyArray(juce::AudioSampleBu
         }
     }
 
-    auto capsule = nb::capsule(array_data,
-                               [](void* p) noexcept
-                               {
-                                   // Only delete if Python is still running
-                                   if (!Py_IsInitialized() || _Py_IsFinalizing())
-                                   {
-                                       // Python is shutting down, let it handle cleanup
-                                       return;
-                                   }
-                                   delete[] static_cast<float*>(p);
-                               });
+    auto capsule =
+        nb::capsule(array_data, [](void* p) noexcept { delete[] static_cast<float*>(p); });
 
     return nb::ndarray<nb::numpy, float>(array_data, 2, shape, capsule);
 }

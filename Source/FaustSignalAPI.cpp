@@ -1,5 +1,6 @@
 #ifdef BUILD_DAWDREAMER_FAUST
 #include "FaustSignalAPI.h"
+#include "FaustArgvBuilder.h"
 
 #define TREE2STR(res, t) res ? tree2str(t->branch(0)) : ""
 
@@ -900,29 +901,18 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& si
                     throw std::runtime_error("Unable to load Faust Libraries.");
                 }
 
-                int argc = 0;
-                const char* argv[64];
-
-                argv[argc++] = "-I";
-                argv[argc++] = strdup(pathToFaustLibraries.c_str());
-
-                argv[argc++] = "-cn";
-                argv[argc++] = strdup(class_name.c_str());
+                FaustArgvBuilder args;
+                args.add("-I");
+                args.add(pathToFaustLibraries);
+                args.add("-I");
+                args.add(pathToFaustLibraries + "/dx7");
+                args.add("-cn");
+                args.add(class_name);
 
                 std::string error_msg = "";
 
-                std::string source_code =
-                    createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
-
-                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
-                for (int i = 1; i < 4; i += 2)
-                {
-                    free((void*)argv[i]);
-                }
-                for (int i = 4; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                std::string source_code = createSourceFromSignals(
+                    "dawdreamer", signals, lang, args.argc(), args.argv(), error_msg);
 
                 if (!error_msg.empty())
                 {
@@ -950,34 +940,19 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& si
                     throw std::runtime_error("Unable to load Faust Libraries.");
                 }
 
-                int argc = 0;
-                const char* argv[64];
-
-                argv[argc++] = "-I";
-                argv[argc++] = strdup(pathToFaustLibraries.c_str());
-
-                argv[argc++] = "-cn";
-                argv[argc++] = strdup(class_name.c_str());
-
-                for (auto v : in_argv)
-                {
-                    argv[argc++] = strdup(v.c_str());
-                }
+                FaustArgvBuilder args;
+                args.add("-I");
+                args.add(pathToFaustLibraries);
+                args.add("-I");
+                args.add(pathToFaustLibraries + "/dx7");
+                args.add("-cn");
+                args.add(class_name);
+                args.add(in_argv);
 
                 std::string error_msg = "";
 
-                std::string source_code =
-                    createSourceFromSignals("dawdreamer", signals, lang, argc, argv, error_msg);
-
-                // Clean up strdup'd strings (odd indices 1,3 and all from index 4 onwards)
-                for (int i = 1; i < 4; i += 2)
-                {
-                    free((void*)argv[i]);
-                }
-                for (int i = 4; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                std::string source_code = createSourceFromSignals(
+                    "dawdreamer", signals, lang, args.argc(), args.argv(), error_msg);
 
                 if (!error_msg.empty())
                 {

@@ -1,5 +1,6 @@
 #ifdef BUILD_DAWDREAMER_FAUST
 #include "FaustBoxAPI.h"
+#include "FaustArgvBuilder.h"
 
 #ifdef WIN32
 #include <assert.h>
@@ -843,26 +844,20 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 const std::string dsp_content2 =
                     std::string("import(\"stdfaust.lib\");\n") + dsp_content;
 
-                int argc = 0;
-                const char* argv[512];
-
                 auto pathToFaustLibraries = getPathToFaustLibraries();
                 if (pathToFaustLibraries.empty())
                 {
                     throw std::runtime_error("Unable to load Faust Libraries.");
                 }
 
-                argv[argc++] = "-I";
-                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+                FaustArgvBuilder args;
+                args.add("-I");
+                args.add(pathToFaustLibraries);
+                args.add("-I");
+                args.add(pathToFaustLibraries + "/dx7");
 
-                Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
-                                     error_msg);
-
-                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
-                for (int i = 1; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                Box box = DSPToBoxes("dawdreamer", dsp_content2, args.argc(), args.argv(), &inputs,
+                                     &outputs, error_msg);
 
                 if (!error_msg.empty())
                 {
@@ -882,31 +877,21 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 const std::string dsp_content2 =
                     std::string("import(\"stdfaust.lib\");\n") + dsp_content;
 
-                int argc = 0;
-                const char* argv[512];
-
                 auto pathToFaustLibraries = getPathToFaustLibraries();
                 if (pathToFaustLibraries.empty())
                 {
                     throw std::runtime_error("Unable to load Faust Libraries.");
                 }
 
-                argv[argc++] = "-I";
-                argv[argc++] = strdup(pathToFaustLibraries.c_str());
+                FaustArgvBuilder args;
+                args.add("-I");
+                args.add(pathToFaustLibraries);
+                args.add("-I");
+                args.add(pathToFaustLibraries + "/dx7");
+                args.add(in_argv);
 
-                for (auto v : in_argv)
-                {
-                    argv[argc++] = strdup(v.c_str());
-                }
-
-                Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
-                                     error_msg);
-
-                // Clean up strdup'd strings (skip argv[0] which is "-I" literal)
-                for (int i = 1; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                Box box = DSPToBoxes("dawdreamer", dsp_content2, args.argc(), args.argv(), &inputs,
+                                     &outputs, error_msg);
 
                 if (!error_msg.empty())
                 {
@@ -1436,32 +1421,20 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                     throw std::runtime_error("Unable to find Faust architecture files.");
                 }
 
-                int argc = 0;
-                const char* argv[512];
-
-                argv[argc++] = "-I";
-                argv[argc++] = strdup(pathToFaustLibraries.c_str());
-
-                argv[argc++] = "-cn";
-                argv[argc++] = strdup(class_name.c_str());
-
-                argv[argc++] = "-A";
-                argv[argc++] = strdup(pathToArchitecture.c_str());
+                FaustArgvBuilder args;
+                args.add("-I");
+                args.add(pathToFaustLibraries);
+                args.add("-I");
+                args.add(pathToFaustLibraries + "/dx7");
+                args.add("-cn");
+                args.add(class_name);
+                args.add("-A");
+                args.add(pathToArchitecture);
 
                 std::string error_msg = "";
 
-                std::string source_code =
-                    createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
-
-                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
-                for (int i = 1; i < 6; i += 2)
-                {
-                    free((void*)argv[i]);
-                }
-                for (int i = 6; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                std::string source_code = createSourceFromBoxes(
+                    "dawdreamer", box, lang, args.argc(), args.argv(), error_msg);
 
                 if (source_code == "")
                 {
@@ -1496,37 +1469,21 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                     throw std::runtime_error("Unable to find Faust architecture files.");
                 }
 
-                int argc = 0;
-                const char* argv[512];
-
-                argv[argc++] = "-I";
-                argv[argc++] = strdup(pathToFaustLibraries.c_str());
-
-                argv[argc++] = "-cn";
-                argv[argc++] = strdup(class_name.c_str());
-
-                argv[argc++] = "-A";
-                argv[argc++] = strdup(pathToArchitecture.c_str());
-
-                for (auto& v : in_argv)
-                {
-                    argv[argc++] = strdup(v.c_str());
-                }
+                FaustArgvBuilder args;
+                args.add("-I");
+                args.add(pathToFaustLibraries);
+                args.add("-I");
+                args.add(pathToFaustLibraries + "/dx7");
+                args.add("-cn");
+                args.add(class_name);
+                args.add("-A");
+                args.add(pathToArchitecture);
+                args.add(in_argv);
 
                 std::string error_msg = "";
 
-                std::string source_code =
-                    createSourceFromBoxes("dawdreamer", box, lang, argc, argv, error_msg);
-
-                // Clean up strdup'd strings (odd indices 1,3,5 and all from index 6 onwards)
-                for (int i = 1; i < 6; i += 2)
-                {
-                    free((void*)argv[i]);
-                }
-                for (int i = 6; i < argc; i++)
-                {
-                    free((void*)argv[i]);
-                }
+                std::string source_code = createSourceFromBoxes(
+                    "dawdreamer", box, lang, args.argc(), args.argv(), error_msg);
 
                 if (source_code == "")
                 {

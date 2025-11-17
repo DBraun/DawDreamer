@@ -41,7 +41,7 @@ jobs:
         python download_libfaust.py
 
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2.20.0
+      uses: pypa/cibuildwheel@v3.3.0
       env:
         CIBW_PLATFORM: linux
         CIBW_BUILD: ${{ matrix.cibwbuild }}
@@ -178,7 +178,7 @@ jobs:
         python download_libfaust.py
 
     - name: Build wheels ${{ matrix.python-version }}
-      uses: pypa/cibuildwheel@v2.20.0
+      uses: pypa/cibuildwheel@v3.3.0
       env:
         # note that the Projucer project refers to PYTHONMAJOR and pythonLocation, so they must be set here
         PYTHONMAJOR: ${{ matrix.python-version }}

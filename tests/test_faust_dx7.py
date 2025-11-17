@@ -1,7 +1,7 @@
 from dawdreamer_utils import *
 
 
-@pytest.mark.parametrize("algorithm", [0, 1])
+@pytest.mark.parametrize("algorithm", [1, 2])
 def test_faust_dx7(algorithm, num_voices=8, buffer_size=2048):
     # There are 32 algorithms.
 
@@ -11,15 +11,13 @@ def test_faust_dx7(algorithm, num_voices=8, buffer_size=2048):
     faust_processor.num_voices = num_voices
     faust_processor.group_voices = True
 
-    dsp_path = abspath(FAUST_DSP / "dx7.dsp")
-    dsp_code = open(dsp_path).read()
-    dsp_code = f"ALGORITHM = {algorithm};\n" + dsp_code
+    dsp_code = "process = dx.algorithm(1) <: _,_;"
 
     faust_processor.set_dsp_string(dsp_code)
     faust_processor.compile()
 
     desc = faust_processor.get_parameters_description()
-    if algorithm == 0:
+    if algorithm == 1:
         for par in desc:
             print(par)
 
