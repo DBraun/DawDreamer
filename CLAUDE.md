@@ -165,6 +165,7 @@ DawDreamer uses a **multi-step build process**:
 # - CMake (can install via Homebrew: brew install cmake)
 # - Faust compiler (can install via Homebrew: brew install faust)
 # - Python 3.11-3.14 installed
+# Note: ncurses/tinfo NOT needed on macOS (part of system)
 
 # Setup environment
 export PYTHONMAJOR=3.11
@@ -209,21 +210,113 @@ python3.11 -c "import dawdreamer as daw; print('Success!')"
 
 #### Linux (CMake/Makefile)
 ```bash
-# Setup Python paths
-export PYTHONLIBPATH=/usr/lib/python3.10
-export PYTHONINCLUDEPATH=/usr/include/python3.10
+# Prerequisites:
+# - build-essential, clang, pkg-config
+# - libboost-all-dev, libfreetype6-dev
+# - X11 development libraries (libx11-dev, libxinerama-dev, libxrandr-dev, libxcursor-dev, libxcomposite-dev)
+# - ALSA/audio libraries (libasound2-dev, freeglut3-dev, mesa-common-dev)
+# - ncurses library (libncurses-dev or libtinfo-dev) - required for Faust LLVM linking (Linux only, not needed on macOS)
+# - CMake, Python 3.11-3.14 with development headers
+# - Git
 
-# Build libsamplerate
-cd thirdparty/libsamplerate
-cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
-make -C build_release
+# Step 1: Initialize git submodules (required on first build)
+git submodule update --init --recursive
+
+# Step 2: Download prebuilt libfaust libraries
+cd thirdparty/libfaust
+python3 download_libfaust.py
 cd ../..
 
-# Build via Makefile
+# Step 3: Build libsamplerate dependency
+cd thirdparty/libsamplerate
+cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
+cmake --build build_release --config Release
+cd ../..
+
+# Step 4: Build DawDreamer via Makefile (for Python 3.12, adjust version as needed)
+export PYTHONLIBPATH=/usr/lib/python3.12
+export PYTHONINCLUDEPATH=/usr/include/python3.12
+
 cd Builds/LinuxMakefile
 make CONFIG=Release CXXFLAGS="-I$PYTHONINCLUDEPATH" LDFLAGS="-L$PYTHONLIBPATH"
 cd ../..
+
 # Output: dawdreamer/dawdreamer.so
+
+# Step 5: Install Python package in development mode
+python3 setup.py develop
+
+# Note: On WSL2/NTFS, setup.py develop can take 1-2 minutes due to processing
+# thousands of Faust library files with slower cross-filesystem I/O.
+
+# Step 6: Verify installation
+python3 -c "import dawdreamer as daw; engine = daw.RenderEngine(44100, 512); print('Success!')"
+```
+
+**Quick Install (if C++ library is already built):**
+```bash
+# If dawdreamer/dawdreamer.so already exists, just install the Python package:
+python3 setup.py develop
+
+# This installs in editable mode - changes to Python code take effect immediately
+# The installation processes many Faust library files, which can take time on WSL2
+```
+
+**Streamlined Install for LLMs/Automation (Minimal Output):**
+```bash
+# If C++ library is already built, install with minimal output:
+python3 setup.py develop --quiet 2>&1 | grep -E '(Successfully|ERROR|Failed|Traceback)' || \
+  (echo "Installation in progress (this takes 1-2 min on WSL2)..." && \
+   python3 setup.py develop --quiet && \
+   echo "✓ DawDreamer installed successfully")
+
+# Or use pip for even quieter installation:
+pip install -e . --quiet --disable-pip-version-check 2>&1 | \
+  grep -vE '(Preparing|Building|Installing build dependencies)' || \
+  echo "✓ Installation complete"
+
+# Verify silently (exit code 0 = success):
+python3 -c "import dawdreamer; dawdreamer.RenderEngine(44100, 512)" && \
+  echo "✓ DawDreamer working" || echo "✗ Import failed"
+```
+
+**Full Build (Streamlined for Automation):**
+```bash
+# Complete build with minimal output (Linux)
+set -e  # Exit on any error
+
+# Check if already built
+if [ -f dawdreamer/dawdreamer.so ]; then
+  echo "✓ C++ library already built, skipping to installation..."
+else
+  echo "Building C++ library..."
+
+  # Build libsamplerate if needed
+  if [ ! -f thirdparty/libsamplerate/build_release/src/libsamplerate.a ]; then
+    cd thirdparty/libsamplerate
+    cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release >/dev/null 2>&1
+    cmake --build build_release --config Release >/dev/null 2>&1
+    cd ../..
+    echo "✓ libsamplerate built"
+  fi
+
+  # Build DawDreamer (requires PYTHONLIBPATH/PYTHONINCLUDEPATH set)
+  cd Builds/LinuxMakefile
+  make CONFIG=Release 2>&1 | grep -E '(error|Error|ERROR|warning:)' || true
+  cd ../..
+  echo "✓ DawDreamer C++ library built"
+fi
+
+# Install Python package quietly
+echo "Installing Python package (1-2 min on WSL2)..."
+python3 setup.py develop --quiet 2>&1 | grep -E '(Successfully installed|ERROR|Failed)' || \
+  python3 setup.py develop --quiet
+echo "✓ Installation complete"
+
+# Verify
+python3 -c "import dawdreamer; dawdreamer.RenderEngine(44100, 512)" && \
+  echo "✓ DawDreamer verified and ready" || \
+  (echo "✗ Verification failed" && exit 1)
 ```
 
 #### Windows (Visual Studio 2022)
@@ -246,7 +339,7 @@ msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
 ### Wheel Packaging (setup.py)
 1. Expects pre-compiled native binary at expected path
 2. Copies binary to `dawdreamer/` package directory (renamed to .so/.pyd/.dll)
-3. Includes Faust architecture files and faustlibraries as package data
+3. Includes Faust architecture files and faustlibraries as package data (~200+ files)
 4. Creates multi-platform wheel with native extension
 5. Uses `BinaryDistribution` class to force platform-specific wheel tag
 
@@ -255,6 +348,13 @@ msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release
 - Platform-specific binary path detection
 - Bundles licenses and Faust resources
 - Creates non-zip-safe wheel (binary extension)
+- Processes many files during editable install (can take 1-2 min on WSL2)
+
+**Reducing Verbosity (for LLMs/Automation):**
+- Use `--quiet` flag: `python3 setup.py develop --quiet`
+- Filter output: `python3 setup.py develop 2>&1 | grep -E '(Successfully|ERROR|Failed)'`
+- Use pip: `pip install -e . --quiet --disable-pip-version-check`
+- The verbose package_data list (~200 lines) is suppressed with `--quiet`
 
 ---
 
@@ -648,6 +748,30 @@ audio = engine.get_audio()
   - Apple Silicon: `export ARCHS=arm64`
   - Intel Mac: `export ARCHS=x86_64`
   - Check your architecture: `uname -m`
+
+**setup.py develop is very slow (Linux/WSL2)**
+- **Cause**: Processing thousands of Faust library files across NTFS filesystem boundary
+- **Behavior**: Installation can take 1-2 minutes (normal on WSL2)
+- **What's happening**:
+  - Building editable wheel with ~200+ architecture files and ~50+ Faust library files/directories
+  - Cross-filesystem I/O between WSL2 Linux and Windows NTFS is slow
+  - You'll see "Building editable for dawdreamer (pyproject.toml): still running..." for ~30-60 seconds
+- **Solution**: Be patient, this is expected. Process will complete successfully.
+- **Verification**: Once complete, you'll see "Successfully installed dawdreamer-0.8.4"
+
+**Python version compatibility (Linux)**
+- **Supported**: Python 3.11-3.14 (tested with 3.12 on WSL2)
+- **Note**: No special environment variables needed for installation step on Linux
+- **Check version**: `python3 --version`
+
+**Missing libtinfo.so dependency (Linux)**
+- **Symptom**: `ImportError: libtinfo.so.6: cannot open shared object file`
+- **Cause**: Missing ncurses/tinfo library
+- **Solution**:
+  - Ubuntu/Debian: `sudo apt-get install libncurses-dev` or `libtinfo-dev`
+  - RedHat/CentOS/Fedora: `sudo yum install ncurses-devel`
+  - Verify: `ldd dawdreamer/dawdreamer.so | grep tinfo`
+- **Why needed**: Faust compiler uses LLVM which depends on libtinfo for terminal handling
 
 ### Runtime Issues
 
