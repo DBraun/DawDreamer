@@ -906,6 +906,9 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& si
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
+                argv[argc++] = "-I";
+                argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+
                 argv[argc++] = "-cn";
                 argv[argc++] = strdup(class_name.c_str());
 
@@ -955,6 +958,9 @@ void create_bindings_for_faust_signal(nb::module_& faust_module, nb::module_& si
 
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
 
                 argv[argc++] = "-cn";
                 argv[argc++] = strdup(class_name.c_str());

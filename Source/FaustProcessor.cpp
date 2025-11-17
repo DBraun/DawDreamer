@@ -491,6 +491,9 @@ bool FaustProcessor::compile()
     argv[argc++] = "-I";
     argv[argc++] = pathToFaustLibraries.c_str();
 
+    argv[argc++] = "-I";
+    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+
     for (const auto& p : m_faustLibrariesPaths)
     {
         argv[argc++] = "-I";
@@ -671,6 +674,9 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
     argv[argc++] = "-I";
     argv[argc++] = pathToFaustLibraries.c_str();
 
+    argv[argc++] = "-I";
+    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+
     for (const auto& p : m_faustLibrariesPaths)
     {
         argv[argc++] = "-I";
@@ -766,6 +772,9 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
 
     argv[argc++] = "-I";
     argv[argc++] = pathToFaustLibraries.c_str();
+
+    argv[argc++] = "-I";
+    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
 
     for (const auto& p : m_faustLibrariesPaths)
     {
@@ -867,6 +876,9 @@ bool FaustProcessor::compileBox(BoxWrapper& box)
     argv[argc++] = "-I";
     argv[argc++] = pathToFaustLibraries.c_str();
 
+    argv[argc++] = "-I";
+    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+
     for (const auto& p : m_faustLibrariesPaths)
     {
         argv[argc++] = "-I";
@@ -952,6 +964,9 @@ bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>&
 
     argv[argc++] = "-I";
     argv[argc++] = pathToFaustLibraries.c_str();
+
+    argv[argc++] = "-I";
+    argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
 
     for (const auto& p : m_faustLibrariesPaths)
     {

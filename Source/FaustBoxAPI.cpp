@@ -855,6 +855,9 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
+                argv[argc++] = "-I";
+                argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+
                 Box box = DSPToBoxes("dawdreamer", dsp_content2, argc, argv, &inputs, &outputs,
                                      error_msg);
 
@@ -893,6 +896,9 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
 
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
 
                 for (auto v : in_argv)
                 {
@@ -1442,6 +1448,9 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
 
+                argv[argc++] = "-I";
+                argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
+
                 argv[argc++] = "-cn";
                 argv[argc++] = strdup(class_name.c_str());
 
@@ -1501,6 +1510,9 @@ nb::module_& create_bindings_for_faust_box(nb::module_& faust_module, nb::module
 
                 argv[argc++] = "-I";
                 argv[argc++] = strdup(pathToFaustLibraries.c_str());
+
+                argv[argc++] = "-I";
+                argv[argc++] = strdup((pathToFaustLibraries + "/dx7").c_str());
 
                 argv[argc++] = "-cn";
                 argv[argc++] = strdup(class_name.c_str());
