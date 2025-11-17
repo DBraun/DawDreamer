@@ -578,10 +578,13 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build_release<span c
 </pre></div>
 </div>
 </li>
-<li><p>Run the build script:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sh<span class="w"> </span>build_linux.sh
+<li><p>Build DawDreamer:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Builds/LinuxMakefile
+make<span class="w"> </span><span class="nv">CONFIG</span><span class="o">=</span>Release<span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-I</span><span class="nv">$PYTHONINCLUDEPATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-L</span><span class="nv">$PYTHONLIBPATH</span><span class="s2">&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>../..
 </pre></div>
 </div>
+<p>This will create <code class="docutils literal notranslate"><span class="pre">dawdreamer/dawdreamer.so</span></code>.</p>
 </li>
 <li><p>Install the Python package:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>setup.py<span class="w"> </span>develop

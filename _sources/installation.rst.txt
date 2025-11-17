@@ -113,11 +113,15 @@ Linux
       cmake --build build_release --config Release
       cd ../..
 
-4. Run the build script:
+4. Build DawDreamer:
 
    .. code-block:: bash
 
-      sh build_linux.sh
+      cd Builds/LinuxMakefile
+      make CONFIG=Release CXXFLAGS="-I$PYTHONINCLUDEPATH" LDFLAGS="-L$PYTHONLIBPATH"
+      cd ../..
+
+   This will create ``dawdreamer/dawdreamer.so``.
 
 5. Install the Python package:
 
