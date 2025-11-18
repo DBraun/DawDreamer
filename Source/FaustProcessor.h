@@ -233,6 +233,149 @@ class FaustProcessor : public ProcessorBase
 
     void setReleaseLength(double sec);
 
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["sample_rate"] = mySampleRate;
+        state["faust_code"] = m_code;
+        state["auto_import"] = m_autoImport;
+
+        // Convert library paths vector to list
+        nb::list lib_paths;
+        for (const auto& path : m_faustLibrariesPaths)
+            lib_paths.append(path);
+        state["library_paths"] = lib_paths;
+
+        // Convert asset paths vector to list
+        nb::list asset_paths;
+        for (const auto& path : m_faustAssetsPaths)
+            asset_paths.append(path);
+        state["asset_paths"] = asset_paths;
+
+        // Convert compile flags vector to list
+        nb::list compile_flags;
+        for (const auto& flag : m_compileFlags)
+            compile_flags.append(flag);
+        state["compile_flags"] = compile_flags;
+
+        state["num_voices"] = m_nvoices;
+        state["group_voices"] = m_groupVoices;
+        state["dynamic_voices"] = m_dynamicVoices;
+        state["llvm_opt_level"] = m_llvmOptLevel;
+        state["release_length"] = m_releaseLengthSec;
+
+        // Soundfiles
+        nb::dict soundfiles;
+        for (const auto& [name, buffers] : m_SoundfileMap)
+        {
+            nb::list buffer_list;
+            for (auto& buffer : buffers)
+            {
+                // Need to make a non-const copy for bufferToPyArray
+                juce::AudioSampleBuffer buf_copy(buffer);
+                buffer_list.append(bufferToPyArray(buf_copy));
+            }
+            soundfiles[name.c_str()] = buffer_list;
+        }
+        state["soundfiles"] = soundfiles;
+
+        // Parameters
+        nb::dict params;
+        for (auto* parameter : getParameters())
+        {
+            std::string name = parameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+            if (!name.empty())
+            {
+                // Cast to AutomateParameterFloat to access automation value
+                auto* autoParam = (AutomateParameterFloat*)parameter;
+                auto automation = autoParam->getAutomation();
+                if (!automation.empty())
+                {
+                    params[name.c_str()] = automation[0];
+                }
+                else
+                {
+                    params[name.c_str()] = parameter->getValue();
+                }
+            }
+        }
+        state["parameters"] = params;
+
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        double sample_rate = nb::cast<double>(state["sample_rate"]);
+        int buffer_size = 512; // Default, will be updated by prepareToPlay
+
+        // Use placement new to construct the object in-place
+        new (this) FaustProcessor(name, sample_rate, buffer_size);
+
+        // Set Faust code and configuration
+        m_code = nb::cast<std::string>(state["faust_code"]);
+        m_autoImport = nb::cast<std::string>(state["auto_import"]);
+
+        // Library paths
+        if (state.contains("library_paths"))
+        {
+            nb::list lib_paths = nb::cast<nb::list>(state["library_paths"]);
+            m_faustLibrariesPaths.clear();
+            for (nb::handle path : lib_paths)
+                m_faustLibrariesPaths.push_back(nb::cast<std::string>(path));
+        }
+
+        // Asset paths
+        if (state.contains("asset_paths"))
+        {
+            nb::list asset_paths = nb::cast<nb::list>(state["asset_paths"]);
+            m_faustAssetsPaths.clear();
+            for (nb::handle path : asset_paths)
+                m_faustAssetsPaths.push_back(nb::cast<std::string>(path));
+        }
+
+        // Compile flags
+        if (state.contains("compile_flags"))
+        {
+            nb::list compile_flags = nb::cast<nb::list>(state["compile_flags"]);
+            m_compileFlags.clear();
+            for (nb::handle flag : compile_flags)
+                m_compileFlags.push_back(nb::cast<std::string>(flag));
+        }
+
+        m_nvoices = nb::cast<int>(state["num_voices"]);
+        m_groupVoices = nb::cast<bool>(state["group_voices"]);
+        m_dynamicVoices = nb::cast<bool>(state["dynamic_voices"]);
+        m_llvmOptLevel = nb::cast<int>(state["llvm_opt_level"]);
+        m_releaseLengthSec = nb::cast<double>(state["release_length"]);
+
+        // Compile the Faust code
+        if (!m_code.empty())
+        {
+            compile();
+        }
+
+        // Restore soundfiles
+        if (state.contains("soundfiles"))
+        {
+            setSoundfiles(nb::cast<nb::dict>(state["soundfiles"]));
+        }
+
+        // Restore parameter values
+        if (state.contains("parameters"))
+        {
+            nb::dict params = nb::cast<nb::dict>(state["parameters"]);
+            for (auto item : params)
+            {
+                std::string param_name = nb::cast<std::string>(item.first);
+                float param_value = nb::cast<float>(item.second);
+                setAutomationVal(param_name.c_str(), param_value);
+            }
+        }
+    }
+
     void setFaustLibrariesPath(std::string faustLibrariesPath)
     {
         m_faustLibrariesPaths.clear();
@@ -491,6 +634,9 @@ inline void create_bindings_for_faust_processor(nb::module_& m)
              nb::overload_cast<BoxWrapper&, const std::vector<std::string>&>(
                  &FaustProcessor::compileBox),
              arg("box"), arg("argv"), returnPolicy)
+
+        .def("__getstate__", &FaustProcessor::getPickleState)
+        .def("__setstate__", &FaustProcessor::setPickleState)
 
         .doc() = "A Faust Processor can compile and execute FAUST code. See "
                  "https://faust.grame.fr for more information.";

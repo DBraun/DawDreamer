@@ -50,6 +50,24 @@ class PlaybackProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "PlaybackProcessor"; }
 
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["audio_data"] = bufferToPyArray(myPlaybackData);
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        // Extract state
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        nb::ndarray<float> audio_data = nb::cast<nb::ndarray<float>>(state["audio_data"]);
+
+        // Use placement new to construct the object in-place
+        new (this) PlaybackProcessor(name, audio_data);
+    }
+
     void setData(nb::ndarray<float> input)
     {
         float* input_ptr = (float*)input.data();

@@ -97,6 +97,8 @@ A simple sine oscillator, mainly for testing.
     nb::class_<PlaybackProcessor, ProcessorBase>(m, "PlaybackProcessor")
         .def("set_data", &PlaybackProcessor::setData, arg("data"),
              "Set the audio as a numpy array shaped (Channels, Samples).")
+        .def("__getstate__", &PlaybackProcessor::getPickleState)
+        .def("__setstate__", &PlaybackProcessor::setPickleState)
         .doc() = "The Playback Processor can play audio data provided as an argument.";
 
 #ifdef BUILD_DAWDREAMER_RUBBERBAND
@@ -514,5 +516,7 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
              arg("rule") = "linear", arg("pan") = 0.f, "Make a Panner Processor")
         .def("make_compressor_processor", &RenderEngine::makeCompressorProcessor, returnPolicy,
              arg("name"), arg("threshold") = 0.f, arg("ratio") = 2.f, arg("attack") = 2.0f,
-             arg("release") = 50.f, "Make a Compressor Processor");
+             arg("release") = 50.f, "Make a Compressor Processor")
+        .def("__getstate__", &RenderEngine::getPickleState)
+        .def("__setstate__", &RenderEngine::setPickleState);
 }
