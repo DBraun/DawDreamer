@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class CompressorProcessor : public ProcessorBase
@@ -60,6 +61,27 @@ class CompressorProcessor : public ProcessorBase
 
     void setRelease(float release) { setAutomationVal("release", release); }
     float getRelease() { return getAutomationAtZero("release"); }
+
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["threshold"] = getThreshold();
+        state["ratio"] = getRatio();
+        state["attack"] = getAttack();
+        state["release"] = getRelease();
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        float threshold = nb::cast<float>(state["threshold"]);
+        float ratio = nb::cast<float>(state["ratio"]);
+        float attack = nb::cast<float>(state["attack"]);
+        float release = nb::cast<float>(state["release"]);
+        new (this) CompressorProcessor(name, threshold, ratio, attack, release);
+    }
 
   private:
     juce::dsp::Compressor<float> myCompressor;

@@ -90,7 +90,10 @@ NB_MODULE(dawdreamer, m)
     The abstract Processor Base class, which all processors subclass.
 )pbdoc";
 
-    nb::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor").doc() = R"pbdoc(
+    nb::class_<OscillatorProcessor, ProcessorBase>(m, "OscillatorProcessor")
+        .def("__getstate__", &OscillatorProcessor::getPickleState)
+        .def("__setstate__", &OscillatorProcessor::setPickleState)
+        .doc() = R"pbdoc(
 A simple sine oscillator, mainly for testing.
 )pbdoc";
 
@@ -221,6 +224,8 @@ play the audio in double the amount of time, so it will sound slowed down.")
                      "\"sin4p5dB\", \"sin6dB\", \"squareRoot3dB\", \"squareRoot4p5dB.\"")
         .def_prop_rw("pan", &PannerProcessor::getPan, &PannerProcessor::setPan,
                      "The pan value between -1.0 and 1.0.")
+        .def("__getstate__", &PannerProcessor::getPickleState)
+        .def("__setstate__", &PannerProcessor::setPickleState)
         .doc() = "The Panner Processor class";
 
     nb::class_<CompressorProcessor, ProcessorBase>(m, "CompressorProcessor")
@@ -233,6 +238,8 @@ play the audio in double the amount of time, so it will sound slowed down.")
                      "The compressor's attack in millisecods.")
         .def_prop_rw("release", &CompressorProcessor::getRelease, &CompressorProcessor::setRelease,
                      "The compressor's release in millisecods.")
+        .def("__getstate__", &CompressorProcessor::getPickleState)
+        .def("__setstate__", &CompressorProcessor::setPickleState)
         .doc() = "A compressor from JUCE.";
 
     nb::class_<DelayProcessor, ProcessorBase>(m, "DelayProcessor")
@@ -240,6 +247,8 @@ play the audio in double the amount of time, so it will sound slowed down.")
                      "The delay in milliseconds.")
         .def_prop_rw("wet", &DelayProcessor::getWet, &DelayProcessor::setWet,
                      "A wet level between 0.0 and 1.0.")
+        .def("__getstate__", &DelayProcessor::getPickleState)
+        .def("__setstate__", &DelayProcessor::setPickleState)
         .doc() = "A delay from JUCE.";
 
     nb::class_<FilterProcessor, ProcessorBase>(m, "FilterProcessor")
@@ -253,6 +262,8 @@ play the audio in double the amount of time, so it will sound slowed down.")
         .def_prop_rw("gain", &FilterProcessor::getGain, &FilterProcessor::setGain,
                      "The gain parameter only matters when the mode is "
                      "low_shelf or high_shelf. A value of 1.0 has no effect.")
+        .def("__getstate__", &FilterProcessor::getPickleState)
+        .def("__setstate__", &FilterProcessor::setPickleState)
         .doc() =
         "A Filter Processor applies one of several kinds of filters. The filter cutoff, Q-value and gain can be adjusted, \
 but the filter mode cannot under automation.";
@@ -268,11 +279,15 @@ but the filter mode cannot under automation.";
                      "A dry level between 0.0 and 1.0.")
         .def_prop_rw("width", &ReverbProcessor::getWidth, &ReverbProcessor::setWidth,
                      "The stereo width from 0.0 to 1.0.")
+        .def("__getstate__", &ReverbProcessor::getPickleState)
+        .def("__setstate__", &ReverbProcessor::setPickleState)
         .doc() = "A Reverb Processor applies reverb with the FreeVerb algorithm.";
 
     nb::class_<AddProcessor, ProcessorBase>(m, "AddProcessor")
         .def_prop_rw("gain_levels", &AddProcessor::getGainLevels, &AddProcessor::setGainLevels,
                      "A list of gain levels to apply to the corresponding inputs.")
+        .def("__getstate__", &AddProcessor::getPickleState)
+        .def("__setstate__", &AddProcessor::setPickleState)
         .doc() = "An Add Processor adds one or more stereo inputs with corresponding gain "
                  "parameters.";
 

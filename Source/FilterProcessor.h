@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 enum class FILTER_FilterFormat
@@ -39,6 +40,27 @@ class FilterProcessor : public ProcessorBase
 
     void setGain(float gain);
     float getGain();
+
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["mode"] = getMode();
+        state["frequency"] = getFrequency();
+        state["q"] = getQ();
+        state["gain"] = getGain();
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        std::string mode = nb::cast<std::string>(state["mode"]);
+        float freq = nb::cast<float>(state["frequency"]);
+        float q = nb::cast<float>(state["q"]);
+        float gain = nb::cast<float>(state["gain"]);
+        new (this) FilterProcessor(name, mode, freq, q, gain);
+    }
 
   private:
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>,

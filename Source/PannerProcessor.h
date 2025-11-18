@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class PannerProcessor : public ProcessorBase
@@ -60,6 +61,23 @@ class PannerProcessor : public ProcessorBase
         myPanner.setRule(myRule);
     }
     std::string getRule() { return ruleToString(myRule); }
+
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["rule"] = getRule();
+        state["pan"] = getPan();
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        std::string rule = nb::cast<std::string>(state["rule"]);
+        float pan = nb::cast<float>(state["pan"]);
+        new (this) PannerProcessor(name, rule, pan);
+    }
 
     void createParameterLayout()
     {

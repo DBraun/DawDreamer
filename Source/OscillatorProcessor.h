@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class OscillatorProcessor : public ProcessorBase
@@ -43,6 +44,21 @@ class OscillatorProcessor : public ProcessorBase
     }
 
     const juce::String getName() const override { return "OscillatorProcessor"; }
+
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["frequency"] = myFreq;
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        float freq = nb::cast<float>(state["frequency"]);
+        new (this) OscillatorProcessor(name, freq);
+    }
 
     float myFreq;
 

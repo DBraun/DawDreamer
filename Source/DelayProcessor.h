@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class DelayProcessor : public ProcessorBase
@@ -31,25 +32,23 @@ class DelayProcessor : public ProcessorBase
 
     void processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuffer& midiBuffer) override
     {
-        // auto posInfo = getPlayHead()->getPosition();
-
         delayBuffer.makeCopyOf(buffer);
         juce::dsp::AudioBlock<float> block(delayBuffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         myDelay.process(context);
 
-        buffer.applyGain(1.f - *myWetLevel);
+        buffer.applyGain(1.f - myWetLevel);
 
         for (int chan = 0; chan < buffer.getNumChannels(); chan++)
         {
-            buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), *myWetLevel);
+            buffer.addFrom(chan, 0, delayBuffer, chan, 0, buffer.getNumSamples(), myWetLevel);
         }
         ProcessorBase::processBlock(buffer, midiBuffer);
     }
 
     void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) override
     {
-        *myWetLevel = getAutomationVal("wet_level", posInfo);
+        myWetLevel = getAutomationVal("wet_level", posInfo);
 
         // convert milliseconds to samples
         myDelay.setDelay((getAutomationVal("delay", posInfo)) * .001f * (float)mySampleRate);
@@ -69,6 +68,25 @@ class DelayProcessor : public ProcessorBase
     void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
     float getWet() { return getAutomationAtZero("wet_level"); }
 
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["rule"] = myRule;
+        state["delay"] = getDelay();
+        state["wet"] = getWet();
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        std::string rule = nb::cast<std::string>(state["rule"]);
+        float delay = nb::cast<float>(state["delay"]);
+        float wet = nb::cast<float>(state["wet"]);
+        new (this) DelayProcessor(name, rule, delay, wet);
+    }
+
   private:
     double mySampleRate = 44100.;
 
@@ -76,9 +94,9 @@ class DelayProcessor : public ProcessorBase
     // changing the type later difficult.
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> myDelay;
 
-    std::atomic<float>* myWetLevel; // 0 means use all of original signal and none of the "wet"
-                                    // delayed signal. 1. is the opposite.
-    std::string myRule;             // todo: ugly because storing an enum would probably be better.
+    float myWetLevel = 0.1f; // 0 means use all of original signal and none of the "wet"
+                             // delayed signal. 1. is the opposite.
+    std::string myRule;      // todo: ugly because storing an enum would probably be better.
 
     juce::AudioSampleBuffer delayBuffer;
 

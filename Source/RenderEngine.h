@@ -144,6 +144,62 @@ class RenderEngine : public AudioPlayHead
                 continue;
             }
 
+            if (auto* osc_proc = dynamic_cast<OscillatorProcessor*>(proc))
+            {
+                proc_dict["type"] = "OscillatorProcessor";
+                proc_dict["state"] = osc_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
+            if (auto* filter_proc = dynamic_cast<FilterProcessor*>(proc))
+            {
+                proc_dict["type"] = "FilterProcessor";
+                proc_dict["state"] = filter_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
+            if (auto* compressor_proc = dynamic_cast<CompressorProcessor*>(proc))
+            {
+                proc_dict["type"] = "CompressorProcessor";
+                proc_dict["state"] = compressor_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
+            if (auto* reverb_proc = dynamic_cast<ReverbProcessor*>(proc))
+            {
+                proc_dict["type"] = "ReverbProcessor";
+                proc_dict["state"] = reverb_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
+            if (auto* panner_proc = dynamic_cast<PannerProcessor*>(proc))
+            {
+                proc_dict["type"] = "PannerProcessor";
+                proc_dict["state"] = panner_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
+            if (auto* delay_proc = dynamic_cast<DelayProcessor*>(proc))
+            {
+                proc_dict["type"] = "DelayProcessor";
+                proc_dict["state"] = delay_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
+            if (auto* add_proc = dynamic_cast<AddProcessor*>(proc))
+            {
+                proc_dict["type"] = "AddProcessor";
+                proc_dict["state"] = add_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
             // If we get here, the processor type is not supported for pickling
             // We'll skip it rather than error
         }
@@ -277,11 +333,69 @@ class RenderEngine : public AudioPlayHead
 #endif
                     if (proc_type == "PlaybackProcessor")
                 {
-                    // For PlaybackProcessor, we can create it directly from state
                     std::string name = nb::cast<std::string>(proc_state["unique_name"]);
                     nb::ndarray<float> audio_data =
                         nb::cast<nb::ndarray<float>>(proc_state["audio_data"]);
                     new_proc = makePlaybackProcessor(name, audio_data);
+                }
+                else if (proc_type == "OscillatorProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    float freq = nb::cast<float>(proc_state["frequency"]);
+                    new_proc = makeOscillatorProcessor(name, freq);
+                }
+                else if (proc_type == "FilterProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    std::string mode = nb::cast<std::string>(proc_state["mode"]);
+                    float freq = nb::cast<float>(proc_state["frequency"]);
+                    float q = nb::cast<float>(proc_state["q"]);
+                    float gain = nb::cast<float>(proc_state["gain"]);
+                    new_proc = makeFilterProcessor(name, mode, freq, q, gain);
+                }
+                else if (proc_type == "CompressorProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    float threshold = nb::cast<float>(proc_state["threshold"]);
+                    float ratio = nb::cast<float>(proc_state["ratio"]);
+                    float attack = nb::cast<float>(proc_state["attack"]);
+                    float release = nb::cast<float>(proc_state["release"]);
+                    new_proc = makeCompressorProcessor(name, threshold, ratio, attack, release);
+                }
+                else if (proc_type == "ReverbProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    float roomSize = nb::cast<float>(proc_state["room_size"]);
+                    float damping = nb::cast<float>(proc_state["damping"]);
+                    float wetLevel = nb::cast<float>(proc_state["wet_level"]);
+                    float dryLevel = nb::cast<float>(proc_state["dry_level"]);
+                    float width = nb::cast<float>(proc_state["width"]);
+                    new_proc =
+                        makeReverbProcessor(name, roomSize, damping, wetLevel, dryLevel, width);
+                }
+                else if (proc_type == "PannerProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    std::string rule = nb::cast<std::string>(proc_state["rule"]);
+                    float pan = nb::cast<float>(proc_state["pan"]);
+                    new_proc = makePannerProcessor(name, rule, pan);
+                }
+                else if (proc_type == "DelayProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    std::string rule = nb::cast<std::string>(proc_state["rule"]);
+                    float delay = nb::cast<float>(proc_state["delay"]);
+                    float wet = nb::cast<float>(proc_state["wet"]);
+                    new_proc = makeDelayProcessor(name, rule, delay, wet);
+                }
+                else if (proc_type == "AddProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    nb::list gain_list = nb::cast<nb::list>(proc_state["gain_levels"]);
+                    std::vector<float> gains;
+                    for (nb::handle item : gain_list)
+                        gains.push_back(nb::cast<float>(item));
+                    new_proc = makeAddProcessor(name, gains);
                 }
 
                 if (new_proc)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class AddProcessor : public ProcessorBase
@@ -62,6 +63,32 @@ class AddProcessor : public ProcessorBase
         setMainBusInputsAndOutputs((int)gainLevels.size() * 2, 2);
     }
     const std::vector<float> getGainLevels() { return myGainLevels; }
+
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+
+        // Convert vector to list
+        nb::list gain_list;
+        for (float gain : myGainLevels)
+            gain_list.append(gain);
+        state["gain_levels"] = gain_list;
+
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        nb::list gain_list = nb::cast<nb::list>(state["gain_levels"]);
+
+        std::vector<float> gains;
+        for (nb::handle item : gain_list)
+            gains.push_back(nb::cast<float>(item));
+
+        new (this) AddProcessor(name, gains);
+    }
 
   private:
     std::vector<float> myGainLevels;

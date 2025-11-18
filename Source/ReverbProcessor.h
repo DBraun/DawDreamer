@@ -1,5 +1,6 @@
 #pragma once
 
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class ReverbProcessor : public ProcessorBase
@@ -68,6 +69,29 @@ class ReverbProcessor : public ProcessorBase
 
     void setWidth(float width) { setAutomationVal("width", width); }
     float getWidth() { return getAutomationAtZero("width"); }
+
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["room_size"] = getRoomSize();
+        state["damping"] = getDamping();
+        state["wet_level"] = getWetLevel();
+        state["dry_level"] = getDryLevel();
+        state["width"] = getWidth();
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        float roomSize = nb::cast<float>(state["room_size"]);
+        float damping = nb::cast<float>(state["damping"]);
+        float wetLevel = nb::cast<float>(state["wet_level"]);
+        float dryLevel = nb::cast<float>(state["dry_level"]);
+        float width = nb::cast<float>(state["width"]);
+        new (this) ReverbProcessor(name, roomSize, damping, wetLevel, dryLevel, width);
+    }
 
     void createParameterLayout()
     {
