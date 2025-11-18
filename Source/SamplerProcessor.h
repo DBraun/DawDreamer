@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "../Source/Sampler/Source/SamplerAudioProcessor.h"
+#include "custom_nanobind_wrappers.h"
 #include "ProcessorBase.h"
 
 class SamplerProcessor : public ProcessorBase
@@ -12,6 +13,9 @@ class SamplerProcessor : public ProcessorBase
                      double sr, int blocksize)
         : ProcessorBase{newUniqueName}, mySampleRate{sr}
     {
+        // Store original data before upsampling
+        myOriginalSampleData = inputData;
+
         createParameterLayout();
         sampler.setNonRealtime(true);
         sampler.setSample(inputData, mySampleRate);
@@ -149,6 +153,39 @@ class SamplerProcessor : public ProcessorBase
 
     const juce::String getName() const override { return "SamplerProcessor"; }
 
+    nb::ndarray<nb::numpy, float> getData()
+    {
+        // Return the original non-upsampled data for serialization
+        if (myOriginalSampleData.empty())
+        {
+            // Return empty array if no sample loaded
+            size_t shape[2] = {0, 0};
+            return nb::ndarray<nb::numpy, float>(nullptr, 2, shape);
+        }
+
+        int num_channels = (int)myOriginalSampleData.size();
+        int num_samples = (int)myOriginalSampleData[0].size();
+
+        // Allocate output array
+        size_t shape[2] = {(size_t)num_channels, (size_t)num_samples};
+        float* array_data = new float[num_channels * num_samples];
+        auto capsule =
+            nb::capsule(array_data, [](void* p) noexcept { delete[] static_cast<float*>(p); });
+        nb::ndarray<nb::numpy, float> output =
+            nb::ndarray<nb::numpy, float>(array_data, 2, shape, capsule);
+
+        // Copy data from original sample data
+        for (int chan = 0; chan < num_channels; chan++)
+        {
+            for (int sample = 0; sample < num_samples; sample++)
+            {
+                array_data[chan * num_samples + sample] = myOriginalSampleData[chan][sample];
+            }
+        }
+
+        return output;
+    }
+
     void setData(nb::ndarray<float> input)
     {
         float* input_ptr = (float*)input.data();
@@ -172,6 +209,9 @@ class SamplerProcessor : public ProcessorBase
                 data[chan][samp] = chan_ptr[samp * elem_stride_sample];
             }
         }
+
+        // Store original data before upsampling
+        myOriginalSampleData = data;
 
         sampler.setSample(data, mySampleRate);
     }
@@ -385,10 +425,54 @@ class SamplerProcessor : public ProcessorBase
         }
     }
 
+    nb::dict getPickleState()
+    {
+        nb::dict state;
+        state["unique_name"] = getUniqueName();
+        state["sample_rate"] = mySampleRate;
+
+        // Get sample data
+        state["sample_data"] = getData();
+
+        // Get all parameter values
+        nb::list params;
+        for (int i = 0; i < sampler.getNumParameters(); i++)
+        {
+            params.append(getAutomationAtZeroByIndex(i));
+        }
+        state["parameters"] = params;
+
+        return state;
+    }
+
+    void setPickleState(nb::dict state)
+    {
+        std::string name = nb::cast<std::string>(state["unique_name"]);
+        double sr = nb::cast<double>(state["sample_rate"]);
+        nb::ndarray<float> sample_data = nb::cast<nb::ndarray<float>>(state["sample_data"]);
+
+        // Reconstruct using placement new
+        new (this) SamplerProcessor(name, sample_data, sr, 512);
+
+        // Restore parameters
+        if (state.contains("parameters"))
+        {
+            nb::list params = nb::cast<nb::list>(state["parameters"]);
+            for (int i = 0; i < nb::len(params); i++)
+            {
+                float value = nb::cast<float>(params[i]);
+                setAutomationValByIndex(i, value);
+            }
+        }
+    }
+
   private:
     double mySampleRate;
 
     SamplerAudioProcessor sampler;
+
+    // Store original non-upsampled sample data for serialization
+    std::vector<std::vector<float>> myOriginalSampleData;
 
     MidiBuffer myMidiBufferQN;
     MidiBuffer myMidiBufferSec;

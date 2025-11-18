@@ -396,6 +396,7 @@ or effects. Some plugins such as ones that do sidechain compression can accept t
 
     nb::class_<SamplerProcessor, ProcessorBase>(m, "SamplerProcessor")
         .def("set_data", &SamplerProcessor::setData, arg("data"), "Set an audio sample.")
+        .def("get_data", &SamplerProcessor::getData, "Get the audio sample data.")
         .def("get_parameter", &SamplerProcessor::getAutomationAtZeroByIndex, arg("index"),
              "Get a parameter's value.")
         .def("get_parameter_name", &SamplerProcessor::wrapperGetParameterName, arg("index"),
@@ -419,6 +420,8 @@ Note that note-ons and note-offs are counted separately.")
              arg("start_time"), arg("duration"), kw_only(), arg("beats") = false,
              add_midi_description)
         .def("save_midi", &SamplerProcessor::saveMIDI, arg("filepath"), save_midi_description)
+        .def("__getstate__", &SamplerProcessor::getPickleState)
+        .def("__setstate__", &SamplerProcessor::setPickleState)
         .doc() =
         "The Sampler Processor works like a basic Sampler instrument. It takes a typically short audio sample and can play it back \
 at different pitches and speeds. It has parameters for an ADSR envelope controlling the amplitude and another for controlling a low-pass filter cutoff. \

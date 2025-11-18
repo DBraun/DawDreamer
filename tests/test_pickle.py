@@ -461,6 +461,53 @@ def test_render_engine_with_add_processor():
     assert np.allclose(original_audio, restored_audio, atol=1e-05)
 
 
+def test_render_engine_with_sampler_processor():
+    """Test pickling SamplerProcessor preserves sample data and parameters.
+
+    Note: MIDI events are not yet preserved during pickling (future work).
+    This test verifies sample data and parameter preservation only.
+    """
+    DURATION = 1.0
+
+    # Create a simple sine wave sample
+    freq = 440
+    t = np.linspace(0, DURATION, int(SAMPLE_RATE * DURATION), False)
+    sample_data = np.sin(2 * np.pi * freq * t).astype(np.float32)
+    sample_data = np.stack([sample_data, sample_data])  # stereo
+
+    # Create engine with sampler
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    sampler = engine.make_sampler_processor("sampler", sample_data)
+
+    # Set some parameters
+    sampler.set_parameter(0, 50.0)  # attack
+    sampler.set_parameter(1, 100.0)  # decay
+    original_attack = sampler.get_parameter(0)
+    original_decay = sampler.get_parameter(1)
+
+    # Verify sample data is preserved before pickling
+    retrieved_sample = sampler.get_data()
+    assert np.allclose(
+        sample_data, retrieved_sample
+    ), "Sample data should match original before pickle"
+
+    # Pickle and unpickle the sampler directly
+    pickled = pickle.dumps(sampler)
+    restored_sampler = pickle.loads(pickled)
+
+    # Verify sample data is preserved after pickling
+    restored_sample = restored_sampler.get_data()
+    assert np.allclose(
+        sample_data, restored_sample
+    ), "Sample data should match original after pickle"
+
+    # Verify parameters are preserved
+    restored_attack = restored_sampler.get_parameter(0)
+    restored_decay = restored_sampler.get_parameter(1)
+    assert abs(original_attack - restored_attack) < 0.01, "Attack parameter should be preserved"
+    assert abs(original_decay - restored_decay) < 0.01, "Decay parameter should be preserved"
+
+
 def test_render_engine_with_all_processors():
     """Test pickling RenderEngine with a complex graph containing all supported processor types."""
     DURATION = 1.0

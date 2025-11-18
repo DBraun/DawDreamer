@@ -192,6 +192,14 @@ class RenderEngine : public AudioPlayHead
                 continue;
             }
 
+            if (auto* sampler_proc = dynamic_cast<SamplerProcessor*>(proc))
+            {
+                proc_dict["type"] = "SamplerProcessor";
+                proc_dict["state"] = sampler_proc->getPickleState();
+                processors_list.append(proc_dict);
+                continue;
+            }
+
             if (auto* add_proc = dynamic_cast<AddProcessor*>(proc))
             {
                 proc_dict["type"] = "AddProcessor";
@@ -247,6 +255,7 @@ class RenderEngine : public AudioPlayHead
         // Recreate processors from their states
         std::map<std::string, ProcessorBase*> name_to_processor;
         std::map<std::string, nb::dict> processor_params_to_restore;
+        std::map<std::string, nb::list> processor_indexed_params_to_restore;
 
         if (state.contains("processors"))
         {
@@ -388,6 +397,20 @@ class RenderEngine : public AudioPlayHead
                     float wet = nb::cast<float>(proc_state["wet"]);
                     new_proc = makeDelayProcessor(name, rule, delay, wet);
                 }
+                else if (proc_type == "SamplerProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    nb::ndarray<float> sample_data =
+                        nb::cast<nb::ndarray<float>>(proc_state["sample_data"]);
+                    new_proc = makeSamplerProcessor(name, sample_data);
+
+                    // Save indexed parameters for later restoration
+                    if (proc_state.contains("parameters"))
+                    {
+                        processor_indexed_params_to_restore[name] =
+                            nb::cast<nb::list>(proc_state["parameters"]);
+                    }
+                }
                 else if (proc_type == "AddProcessor")
                 {
                     std::string name = nb::cast<std::string>(proc_state["unique_name"]);
@@ -449,6 +472,22 @@ class RenderEngine : public AudioPlayHead
                     std::string param_name = nb::cast<std::string>(item.first);
                     float param_value = nb::cast<float>(item.second);
                     proc->setAutomationVal(param_name.c_str(), param_value);
+                }
+            }
+        }
+
+        // Restore indexed parameters (for SamplerProcessor, etc.)
+        for (const auto& [proc_name, params] : processor_indexed_params_to_restore)
+        {
+            auto it = name_to_processor.find(proc_name);
+            if (it != name_to_processor.end())
+            {
+                ProcessorBase* proc = it->second;
+                size_t num_params = nb::len(params);
+                for (size_t i = 0; i < num_params; i++)
+                {
+                    float param_value = nb::cast<float>(params[i]);
+                    proc->setAutomationValByIndex((int)i, param_value);
                 }
             }
         }
