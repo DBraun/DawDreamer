@@ -127,8 +127,7 @@ class RenderEngine : public AudioPlayHead
             nb::dict proc_dict;
 
             // Helper lambda to save automation for any processor
-            auto save_automation = [&proc, &proc_dict]()
-            {
+            auto save_automation = [&proc, &proc_dict]() {
                 nb::dict automation_dict;
                 for (auto* param : proc->getParameters())
                 {
@@ -143,8 +142,9 @@ class RenderEngine : public AudioPlayHead
                             size_t size = automation.size();
                             float* array_data = new float[size];
                             std::copy(automation.begin(), automation.end(), array_data);
-                            auto capsule = nb::capsule(array_data, [](void* p) noexcept
-                                                       { delete[] static_cast<float*>(p); });
+                            auto capsule = nb::capsule(array_data, [](void* p) noexcept {
+                                delete[] static_cast<float*>(p);
+                            });
                             nb::ndarray<nb::numpy, float> automation_array =
                                 nb::ndarray<nb::numpy, float>(array_data, 1, &size, capsule);
                             automation_dict[param_name.c_str()] = automation_array;
@@ -212,7 +212,6 @@ class RenderEngine : public AudioPlayHead
             {
                 proc_dict["type"] = "ReverbProcessor";
                 proc_dict["state"] = reverb_proc->getPickleState();
-                save_automation();
                 processors_list.append(proc_dict);
                 continue;
             }
@@ -221,7 +220,6 @@ class RenderEngine : public AudioPlayHead
             {
                 proc_dict["type"] = "PannerProcessor";
                 proc_dict["state"] = panner_proc->getPickleState();
-                save_automation();
                 processors_list.append(proc_dict);
                 continue;
             }
@@ -230,7 +228,6 @@ class RenderEngine : public AudioPlayHead
             {
                 proc_dict["type"] = "DelayProcessor";
                 proc_dict["state"] = delay_proc->getPickleState();
-                save_automation();
                 processors_list.append(proc_dict);
                 continue;
             }
@@ -239,7 +236,6 @@ class RenderEngine : public AudioPlayHead
             {
                 proc_dict["type"] = "SamplerProcessor";
                 proc_dict["state"] = sampler_proc->getPickleState();
-                save_automation();
                 processors_list.append(proc_dict);
                 continue;
             }
@@ -248,7 +244,6 @@ class RenderEngine : public AudioPlayHead
             {
                 proc_dict["type"] = "PluginProcessor";
                 proc_dict["state"] = plugin_proc->getPickleState();
-                save_automation();
                 processors_list.append(proc_dict);
                 continue;
             }
@@ -257,7 +252,6 @@ class RenderEngine : public AudioPlayHead
             {
                 proc_dict["type"] = "AddProcessor";
                 proc_dict["state"] = add_proc->getPickleState();
-                save_automation();
                 processors_list.append(proc_dict);
                 continue;
             }
@@ -310,7 +304,6 @@ class RenderEngine : public AudioPlayHead
         std::map<std::string, ProcessorBase*> name_to_processor;
         std::map<std::string, nb::dict> processor_params_to_restore;
         std::map<std::string, nb::list> processor_indexed_params_to_restore;
-        std::map<std::string, nb::dict> processor_automation_to_restore;
 
         if (state.contains("processors"))
         {
@@ -472,8 +465,7 @@ class RenderEngine : public AudioPlayHead
                     std::string plugin_path = nb::cast<std::string>(proc_state["plugin_path"]);
                     new_proc = makePluginProcessor(name, plugin_path);
 
-                    // Restore plugin state separately (don't use setPickleState which does
-                    // placement new)
+                    // Restore plugin state separately (don't use setPickleState which does placement new)
                     auto plugin_proc = dynamic_cast<PluginProcessor*>(new_proc);
                     if (plugin_proc)
                     {
@@ -494,13 +486,6 @@ class RenderEngine : public AudioPlayHead
                 {
                     std::string proc_name = nb::cast<std::string>(proc_state["unique_name"]);
                     name_to_processor[proc_name] = new_proc;
-
-                    // Save automation for later restoration (after graph is compiled)
-                    if (proc_dict.contains("automation"))
-                    {
-                        processor_automation_to_restore[proc_name] =
-                            nb::cast<nb::dict>(proc_dict["automation"]);
-                    }
                 }
             }
         }
@@ -564,30 +549,6 @@ class RenderEngine : public AudioPlayHead
                 {
                     float param_value = nb::cast<float>(params[i]);
                     proc->setAutomationValByIndex((int)i, param_value);
-                }
-            }
-        }
-
-        // Restore automation curves (must be done AFTER graph is compiled and parameters
-        // initialized)
-        for (const auto& [proc_name, automation_dict] : processor_automation_to_restore)
-        {
-            auto it = name_to_processor.find(proc_name);
-            if (it != name_to_processor.end())
-            {
-                ProcessorBase* proc = it->second;
-                for (auto item : automation_dict)
-                {
-                    std::string param_name = nb::cast<std::string>(item.first);
-                    nb::ndarray<float> automation_curve = nb::cast<nb::ndarray<float>>(item.second);
-                    try
-                    {
-                        proc->setAutomation(param_name, automation_curve, ProcessorBase::PPQN);
-                    }
-                    catch (...)
-                    {
-                        // Parameter might not exist or accept automation, skip it
-                    }
                 }
             }
         }

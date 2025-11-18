@@ -508,6 +508,153 @@ def test_render_engine_with_sampler_processor():
     assert abs(original_decay - restored_decay) < 0.01, "Decay parameter should be preserved"
 
 
+def test_render_engine_with_automation():
+    """Test that parameter automation curves are preserved through pickling."""
+    DURATION = 1.0
+
+    # Get the correct Faust libraries path
+    faust_lib_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "thirdparty", "faust", "libraries"
+    )
+
+    # Create engine with Faust processor
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    faust = engine.make_faust_processor("faust")
+    faust.faust_libraries_paths = [faust_lib_path]
+
+    faust_code = """
+    import("stdfaust.lib");
+    freq = hslider("freq", 440, 20, 20000, 1);
+    gain = hslider("gain", 0.5, 0, 1, 0.01);
+    process = os.osc(freq) * gain;
+    """
+    faust.set_dsp_string(faust_code)
+    faust.compile()
+
+    # Set automation on parameters
+    freq_automation = np.array([440.0, 880.0, 1320.0, 880.0, 440.0], dtype=np.float32)
+    gain_automation = np.array([0.1, 0.3, 0.5, 0.7, 0.9], dtype=np.float32)
+
+    params = faust.get_parameters_description()
+    freq_param_name = params[0]["name"]
+    gain_param_name = params[1]["name"]
+
+    faust.set_automation(freq_param_name, freq_automation)
+    faust.set_automation(gain_param_name, gain_automation)
+
+    # Load graph
+    graph = [(faust, [])]
+    engine.load_graph(graph)
+
+    # Render original
+    engine.render(DURATION)
+    original_audio = engine.get_audio()
+
+    # Pickle and unpickle
+    pickled = pickle.dumps(engine)
+    restored_engine = pickle.loads(pickled)
+
+    # Render with restored engine
+    restored_engine.render(DURATION)
+    restored_audio = restored_engine.get_audio()
+
+    # Audio should match (verifies automation curves were preserved)
+    assert np.allclose(original_audio, restored_audio, atol=1e-05), "Automation should be preserved"
+
+
+def test_faust_midi_preservation():
+    """Test that MIDI events are preserved through pickling for FaustProcessor."""
+    # Get the correct Faust libraries path
+    faust_lib_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "thirdparty", "faust", "libraries"
+    )
+
+    # Create Faust processor
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    faust = engine.make_faust_processor("faust")
+    faust.faust_libraries_paths = [faust_lib_path]
+
+    faust_code = """
+    import("stdfaust.lib");
+    process = no.noise * 0.1;
+    """
+    faust.set_dsp_string(faust_code)
+    faust.compile()
+
+    # Add MIDI notes
+    faust.add_midi_note(60, 100, 0.0, 0.5, beats=False)
+    faust.add_midi_note(64, 100, 0.5, 0.5, beats=False)
+    faust.add_midi_note(67, 100, 1.0, 0.5, beats=False)
+
+    num_midi_before = faust.n_midi_events
+    assert num_midi_before == 6, "Should have 6 MIDI events (3 note-ons + 3 note-offs)"
+
+    # Pickle and unpickle
+    pickled = pickle.dumps(faust)
+    restored_faust = pickle.loads(pickled)
+
+    num_midi_after = restored_faust.n_midi_events
+    assert num_midi_after == num_midi_before, "MIDI events should be preserved"
+
+
+def test_render_engine_with_plugin_processor():
+    """Test pickling RenderEngine with a PluginProcessor (VST effect).
+
+    Test is skipped as VST plugins may not be available in all environments.
+    """
+    import platform
+
+    if platform.system() != "Darwin":
+        pytest.skip("Plugin test only runs on macOS")
+
+    DURATION = 1.0
+    # We'll skip this test for now since VST effect plugins are not available in CI
+    # This test is here as a template for when VST effect plugins are available
+    pytest.skip("VST plugins not available - test serves as implementation template")
+
+    plugin_path = "/path/to/effect.vst3"  # Placeholder for future testing
+
+    if not os.path.isdir(plugin_path):
+        pytest.skip(f"Plugin not found: {plugin_path}")
+
+    # Create engine with audio data and plugin effect
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+
+    # Create some test audio
+    data = np.random.rand(2, int(SAMPLE_RATE * DURATION)) * 0.3
+    playback = engine.make_playback_processor("playback", data)
+
+    # Create plugin effect
+    plugin = engine.make_plugin_processor("effect", plugin_path)
+
+    # Set some parameters to test state preservation
+    if plugin.get_plugin_parameter_size() > 0:
+        plugin.set_parameter(0, 0.5)
+    if plugin.get_plugin_parameter_size() > 1:
+        plugin.set_parameter(1, 0.7)
+
+    # Build graph
+    graph = [(playback, []), (plugin, ["playback"])]
+    engine.load_graph(graph)
+
+    # Render original
+    engine.render(DURATION)
+    original_audio = engine.get_audio()
+
+    # Pickle and unpickle
+    pickled = pickle.dumps(engine)
+    restored_engine = pickle.loads(pickled)
+
+    # Render with restored engine
+    restored_engine.render(DURATION)
+    restored_audio = restored_engine.get_audio()
+
+    # Audio should match (verifies plugin state and parameters are preserved)
+    assert np.allclose(
+        original_audio, restored_audio, rtol=1e-04, atol=1e-05
+    ), "Audio output should match after pickle"
+
+
 def test_render_engine_with_all_processors():
     """Test pickling RenderEngine with a complex graph containing all supported processor types."""
     DURATION = 1.0
@@ -608,11 +755,23 @@ if __name__ == "__main__":
     test_render_engine_with_panner_processor()
     print("✓ test_render_engine_with_panner_processor passed")
 
-    # Skip DelayProcessor - has pre-existing crash bug
-    # test_render_engine_with_delay_processor()
+    test_render_engine_with_delay_processor()
+    print("✓ test_render_engine_with_delay_processor passed")
 
     test_render_engine_with_add_processor()
     print("✓ test_render_engine_with_add_processor passed")
+
+    test_render_engine_with_sampler_processor()
+    print("✓ test_render_engine_with_sampler_processor passed")
+
+    test_render_engine_with_automation()
+    print("✓ test_render_engine_with_automation passed")
+
+    test_faust_midi_preservation()
+    print("✓ test_faust_midi_preservation passed")
+
+    test_render_engine_with_plugin_processor()
+    print("✓ test_render_engine_with_plugin_processor passed (or skipped)")
 
     test_render_engine_with_all_processors()
     print("✓ test_render_engine_with_all_processors passed")

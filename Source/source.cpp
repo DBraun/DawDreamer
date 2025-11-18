@@ -390,6 +390,8 @@ Note that note-ons and note-offs are counted separately.")
              arg("start_time"), arg("duration"), kw_only(), arg("beats") = false,
              add_midi_description)
         .def("save_midi", &PluginProcessorWrapper::saveMIDI, arg("filepath"), save_midi_description)
+        .def("__getstate__", &PluginProcessorWrapper::getPickleState)
+        .def("__setstate__", &PluginProcessorWrapper::setPickleState)
         .doc() =
         "A Plugin Processor can load VST \".dll\" and \".vst3\" files on Windows. It can load \".vst\", \".vst3\", and \".component\" files on macOS. The files can be for either instruments \
 or effects. Some plugins such as ones that do sidechain compression can accept two inputs when loading a graph.";
