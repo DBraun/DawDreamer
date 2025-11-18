@@ -282,3 +282,47 @@ def test_playbackwarp_sample_rate_diff(warp_on: bool):
 
     warp_str = "_warp_on" if warp_on else ""
     render(engine, file_path=OUTPUT / f"test_playbackwarp_sample_rate_diff{warp_str}.wav")
+
+
+def test_playbackwarp_pickle():
+    """Test that PlaybackWarpProcessor can be pickled and unpickled correctly."""
+    import pickle
+
+    DURATION = 2.0
+
+    engine = daw.RenderEngine(SAMPLE_RATE, 512)
+    engine.set_bpm(120.0)
+
+    # Create processor with audio data
+    audio = load_audio_file(ASSETS / "Music Delta - Disco" / "drums.wav", duration=5.0)
+    drums = engine.make_playbackwarp_processor("drums", audio, sr=96000)
+
+    # Set various properties
+    drums.time_ratio = 1.5
+    drums.transpose = 2.0
+    drums.warp_on = True
+    drums.loop_on = True
+    drums.loop_start = 1.0
+    drums.loop_end = 3.0
+    drums.start_marker = 0.5
+    drums.end_marker = 4.0
+
+    # Set warp markers
+    warp_markers = np.array([[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]])
+    drums.warp_markers = warp_markers
+
+    # Load graph and render
+    engine.load_graph([(drums, [])])
+    engine.render(DURATION)
+    original_audio = engine.get_audio()
+
+    # Pickle and unpickle the entire engine
+    pickled = pickle.dumps(engine)
+    restored_engine = pickle.loads(pickled)
+
+    # Render with restored engine
+    restored_engine.render(DURATION)
+    restored_audio = restored_engine.get_audio()
+
+    # Audio should match
+    assert np.allclose(original_audio, restored_audio, atol=1e-05)

@@ -62,7 +62,7 @@ class AddProcessor : public ProcessorBase
         myGainLevels = gainLevels;
         setMainBusInputsAndOutputs((int)gainLevels.size() * 2, 2);
     }
-    const std::vector<float> getGainLevels() { return myGainLevels; }
+    const std::vector<float> getGainLevels() const { return myGainLevels; }
 
     nb::dict getPickleState()
     {

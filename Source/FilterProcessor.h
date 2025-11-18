@@ -33,13 +33,13 @@ class FilterProcessor : public ProcessorBase
     std::string getMode();
 
     void setFrequency(float freq);
-    float getFrequency();
+    float getFrequency() const;
 
     void setQ(float q);
-    float getQ();
+    float getQ() const;
 
     void setGain(float gain);
-    float getGain();
+    float getGain() const;
 
     nb::dict getPickleState()
     {

@@ -51,16 +51,16 @@ class CompressorProcessor : public ProcessorBase
     const juce::String getName() const override { return "CompressorProcessor"; };
 
     void setThreshold(float threshold) { setAutomationVal("threshold", threshold); }
-    float getThreshold() { return getAutomationAtZero("threshold"); }
+    float getThreshold() const { return getAutomationAtZero("threshold"); }
 
     void setRatio(float ratio) { setAutomationVal("ratio", ratio); }
-    float getRatio() { return getAutomationAtZero("ratio"); }
+    float getRatio() const { return getAutomationAtZero("ratio"); }
 
     void setAttack(float attack) { setAutomationVal("attack", attack); }
-    float getAttack() { return getAutomationAtZero("attack"); }
+    float getAttack() const { return getAutomationAtZero("attack"); }
 
     void setRelease(float release) { setAutomationVal("release", release); }
-    float getRelease() { return getAutomationAtZero("release"); }
+    float getRelease() const { return getAutomationAtZero("release"); }
 
     nb::dict getPickleState()
     {

@@ -63,10 +63,10 @@ class DelayProcessor : public ProcessorBase
     const juce::String getName() const override { return "DelayProcessor"; };
 
     void setDelay(float newDelaySize) { setAutomationVal("delay", newDelaySize); }
-    float getDelay() { return getAutomationAtZero("delay"); }
+    float getDelay() const { return getAutomationAtZero("delay"); }
 
     void setWet(float newWet) { setAutomationVal("wet_level", newWet); }
-    float getWet() { return getAutomationAtZero("wet_level"); }
+    float getWet() const { return getAutomationAtZero("wet_level"); }
 
     nb::dict getPickleState()
     {

@@ -56,19 +56,19 @@ class ReverbProcessor : public ProcessorBase
     const juce::String getName() const override { return "ReverbProcessor"; };
 
     void setRoomSize(float roomSize) { setAutomationVal("room_size", roomSize); }
-    float getRoomSize() { return getAutomationAtZero("room_size"); }
+    float getRoomSize() const { return getAutomationAtZero("room_size"); }
 
     void setDamping(float damping) { setAutomationVal("damping", damping); }
-    float getDamping() { return getAutomationAtZero("damping"); }
+    float getDamping() const { return getAutomationAtZero("damping"); }
 
     void setWetLevel(float wetLevel) { setAutomationVal("wet_level", wetLevel); }
-    float getWetLevel() { return getAutomationAtZero("wet_level"); }
+    float getWetLevel() const { return getAutomationAtZero("wet_level"); }
 
     void setDryLevel(float dryLevel) { setAutomationVal("dry_level", dryLevel); }
-    float getDryLevel() { return getAutomationAtZero("dry_level"); }
+    float getDryLevel() const { return getAutomationAtZero("dry_level"); }
 
     void setWidth(float width) { setAutomationVal("width", width); }
-    float getWidth() { return getAutomationAtZero("width"); }
+    float getWidth() const { return getAutomationAtZero("width"); }
 
     nb::dict getPickleState()
     {

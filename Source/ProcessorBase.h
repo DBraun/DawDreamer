@@ -78,8 +78,8 @@ class ProcessorBase : public juce::AudioProcessor
 
     float getAutomationVal(const char* parameterName, AudioPlayHead::PositionInfo& posInfo);
     float getAutomationVal(const std::string& parameterName, AudioPlayHead::PositionInfo& posInfo);
-    float getAutomationAtZero(const std::string& parameterName);
-    float getAutomationAtZeroByIndex(const int& index);
+    float getAutomationAtZero(const std::string& parameterName) const;
+    float getAutomationAtZeroByIndex(const int& index) const;
 
     std::vector<float> getAutomation(const std::string& parameterName);
     std::vector<float> getAutomationByIndex(const int& index);
@@ -87,16 +87,16 @@ class ProcessorBase : public juce::AudioProcessor
     nb::dict getAutomationAll();
 
     //==============================================================================
-    std::string getUniqueName() { return myUniqueName; }
+    std::string getUniqueName() const { return myUniqueName; }
 
     virtual void automateParameters(AudioPlayHead::PositionInfo& posInfo, int numSamples) {};
     void recordAutomation(AudioPlayHead::PositionInfo& posInfo, int numSamples);
 
     void setRecordEnable(bool recordEnable) { m_recordEnable = recordEnable; }
-    bool getRecordEnable() { return m_recordEnable; }
+    bool getRecordEnable() const { return m_recordEnable; }
 
     void setRecordAutomationEnable(bool recordAutomation) { m_recordAutomation = recordAutomation; }
-    bool getRecordAutomationEnable() { return m_recordAutomation; }
+    bool getRecordAutomationEnable() const { return m_recordAutomation; }
 
     nb::ndarray<nb::numpy, float> bufferToPyArray(juce::AudioSampleBuffer& buffer);
 
@@ -110,7 +110,7 @@ class ProcessorBase : public juce::AudioProcessor
 
     virtual void numChannelsChanged() override;
 
-    bool isConnectedInGraph() { return m_isConnectedInGraph; }
+    bool isConnectedInGraph() const { return m_isConnectedInGraph; }
     void setConnectedInGraph(bool isConnected) { m_isConnectedInGraph = isConnected; }
 
     bool setMainBusInputsAndOutputs(int inputs, int outputs)

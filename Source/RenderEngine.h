@@ -183,6 +183,17 @@ class RenderEngine : public AudioPlayHead
                 continue;
             }
 
+#ifdef BUILD_DAWDREAMER_RUBBERBAND
+            if (auto* playbackwarp_proc = dynamic_cast<PlaybackWarpProcessor*>(proc))
+            {
+                proc_dict["type"] = "PlaybackWarpProcessor";
+                proc_dict["state"] = playbackwarp_proc->getPickleState();
+                save_automation();
+                processors_list.append(proc_dict);
+                continue;
+            }
+#endif
+
             if (auto* osc_proc = dynamic_cast<OscillatorProcessor*>(proc))
             {
                 proc_dict["type"] = "OscillatorProcessor";
@@ -416,6 +427,21 @@ class RenderEngine : public AudioPlayHead
                         nb::cast<nb::ndarray<float>>(proc_state["audio_data"]);
                     new_proc = makePlaybackProcessor(name, audio_data);
                 }
+#ifdef BUILD_DAWDREAMER_RUBBERBAND
+                else if (proc_type == "PlaybackWarpProcessor")
+                {
+                    std::string name = nb::cast<std::string>(proc_state["unique_name"]);
+                    nb::ndarray<float> audio_data =
+                        nb::cast<nb::ndarray<float>>(proc_state["audio_data"]);
+                    double sample_rate = nb::cast<double>(proc_state["sample_rate"]);
+                    double data_sample_rate = nb::cast<double>(proc_state["data_sample_rate"]);
+                    auto* playbackwarp_proc =
+                        makePlaybackWarpProcessor(name, audio_data, data_sample_rate);
+                    // Restore full state (warp markers, clip info, etc.)
+                    playbackwarp_proc->setPickleState(proc_state);
+                    new_proc = playbackwarp_proc;
+                }
+#endif
                 else if (proc_type == "OscillatorProcessor")
                 {
                     std::string name = nb::cast<std::string>(proc_state["unique_name"]);

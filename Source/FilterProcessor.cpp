@@ -165,7 +165,7 @@ void FilterProcessor::setFrequency(float freq)
 {
     setAutomationVal("freq", freq);
 }
-float FilterProcessor::getFrequency()
+float FilterProcessor::getFrequency() const
 {
     return getAutomationAtZero("freq");
 }
@@ -174,7 +174,7 @@ void FilterProcessor::setQ(float q)
 {
     setAutomationVal("q", q);
 }
-float FilterProcessor::getQ()
+float FilterProcessor::getQ() const
 {
     return getAutomationAtZero("q");
 }
@@ -183,7 +183,7 @@ void FilterProcessor::setGain(float gain)
 {
     setAutomationVal("gain", gain);
 }
-float FilterProcessor::getGain()
+float FilterProcessor::getGain() const
 {
     return getAutomationAtZero("gain");
 }

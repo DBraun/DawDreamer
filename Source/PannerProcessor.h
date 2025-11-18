@@ -53,14 +53,14 @@ class PannerProcessor : public ProcessorBase
     const juce::String getName() const override { return "PannerProcessor"; };
 
     void setPan(float newPanVal) { setAutomationVal("pan", newPanVal); }
-    float getPan() { return getAutomationAtZero("pan"); }
+    float getPan() const { return getAutomationAtZero("pan"); }
 
     void setRule(std::string newRule)
     {
         myRule = stringToRule(newRule);
         myPanner.setRule(myRule);
     }
-    std::string getRule() { return ruleToString(myRule); }
+    std::string getRule() const { return ruleToString(myRule); }
 
     nb::dict getPickleState()
     {
@@ -101,7 +101,7 @@ class PannerProcessor : public ProcessorBase
     juce::dsp::Panner<float> myPanner;
     juce::dsp::PannerRule myRule;
 
-    std::string ruleToString(juce::dsp::PannerRule rule)
+    std::string ruleToString(juce::dsp::PannerRule rule) const
     {
         switch (rule)
         {

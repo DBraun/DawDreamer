@@ -17,7 +17,7 @@ bool ProcessorBase::setAutomation(std::string& parameterName, nb::ndarray<float>
         if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString() ==
             parameterName)
         {
-            auto parameter = (AutomateParameterFloat*)uncastedParameter;
+            auto parameter = static_cast<AutomateParameterFloat*>(uncastedParameter);
             parameter->setAutomation(input, ppqn);
             return true;
         }
@@ -36,7 +36,7 @@ bool ProcessorBase::setAutomationByIndex(int& index, nb::ndarray<float> input, s
                                  std::to_string(index));
     }
 
-    auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+    auto parameter = static_cast<AutomateParameterFloat*>(parameters.getUnchecked(index));
     parameter->setAutomation(input, ppqn);
     return true;
 }
@@ -54,7 +54,7 @@ bool ProcessorBase::setAutomationValByStr(std::string& parameterName, float val)
         if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString() ==
             parameterName)
         {
-            auto parameter = (AutomateParameterFloat*)uncastedParameter;
+            auto parameter = static_cast<AutomateParameterFloat*>(uncastedParameter);
             parameter->setAutomation(val);
             return true;
         }
@@ -72,7 +72,7 @@ bool ProcessorBase::setAutomationValByIndex(int index, float val)
         throw std::runtime_error("Failed to set parameter at index " + std::to_string(index));
     }
 
-    auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+    auto parameter = static_cast<AutomateParameterFloat*>(parameters.getUnchecked(index));
     parameter->setAutomation(val);
     return true;
 }
@@ -84,7 +84,7 @@ std::vector<float> ProcessorBase::getAutomation(const std::string& parameterName
         if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString() ==
             parameterName)
         {
-            auto parameter = (AutomateParameterFloat*)uncastedParameter;
+            auto parameter = static_cast<AutomateParameterFloat*>(uncastedParameter);
             return parameter->getAutomation();
         }
     }
@@ -101,7 +101,7 @@ std::vector<float> ProcessorBase::getAutomationByIndex(const int& index)
                                  std::to_string(index));
     }
 
-    auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+    auto parameter = static_cast<AutomateParameterFloat*>(parameters.getUnchecked(index));
     return parameter->getAutomation();
 }
 
@@ -120,10 +120,10 @@ float ProcessorBase::getAutomationVal(const std::string& parameterName,
         if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString() ==
             parameterName)
         {
-            auto parameter =
-                (AutomateParameterFloat*)uncastedParameter; // todo: why do we have to cast to
-                                                            // AutomateParameterFloat instead of
-                                                            // AutomateParameter
+            auto parameter = static_cast<AutomateParameterFloat*>(
+                uncastedParameter); // todo: why do we have to cast to
+                                    // AutomateParameterFloat instead of
+                                    // AutomateParameter
             return parameter->sample(posInfo);
         }
     }
@@ -131,7 +131,7 @@ float ProcessorBase::getAutomationVal(const std::string& parameterName,
     throw std::runtime_error("Failed to get automation value for parameter: " + parameterName);
 }
 
-float ProcessorBase::getAutomationAtZeroByIndex(const int& index)
+float ProcessorBase::getAutomationAtZeroByIndex(const int& index) const
 {
     auto parameters = this->getParameters();
 
@@ -141,14 +141,14 @@ float ProcessorBase::getAutomationAtZeroByIndex(const int& index)
                                  std::to_string(index));
     }
 
-    auto parameter = (AutomateParameterFloat*)parameters.getUnchecked(index);
+    auto parameter = static_cast<AutomateParameterFloat*>(parameters.getUnchecked(index));
     AudioPlayHead::PositionInfo posInfo;
     posInfo.setTimeInSamples(0.);
     posInfo.setTimeInSeconds(0.);
     return parameter->sample(posInfo);
 }
 
-float ProcessorBase::getAutomationAtZero(const std::string& parameterName)
+float ProcessorBase::getAutomationAtZero(const std::string& parameterName) const
 {
     auto parameters = this->getParameters();
     for (auto& uncastedParameter : parameters)
@@ -156,7 +156,7 @@ float ProcessorBase::getAutomationAtZero(const std::string& parameterName)
         if (uncastedParameter->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString() ==
             parameterName)
         {
-            auto parameter = (AutomateParameterFloat*)uncastedParameter;
+            auto parameter = static_cast<AutomateParameterFloat*>(uncastedParameter);
             AudioPlayHead::PositionInfo posInfo;
             posInfo.setTimeInSamples(0.);
             posInfo.setTimeInSeconds(0.);
@@ -205,7 +205,7 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int n
 
         for (int i = 0; i < this->getNumParameters(); i++)
         {
-            auto theParameter = (AutomateParameterFloat*)processorParams[i];
+            auto theParameter = static_cast<AutomateParameterFloat*>(processorParams[i]);
 
             // Note that we don't use label because it's sometimes blank. The same
             // choice must be made in reset()
