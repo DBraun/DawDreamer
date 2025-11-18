@@ -635,6 +635,21 @@ class RenderEngine : public AudioPlayHead
 
     bool loadGraphWrapper(nb::object dagObj);
 
+    ProcessorBase* getProcessorByName(const std::string& name)
+    {
+        // Search for processor by unique name using the name-to-node-ID map
+        auto it = m_UniqueNameToNodeID.find(name);
+        if (it != m_UniqueNameToNodeID.end())
+        {
+            auto node = m_mainProcessorGraph->getNodeForId(it->second);
+            if (node)
+            {
+                return dynamic_cast<ProcessorBase*>(node->getProcessor());
+            }
+        }
+        return nullptr;
+    }
+
   protected:
     double mySampleRate;
     int myBufferSize;

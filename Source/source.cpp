@@ -497,6 +497,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
              "Remove a processor based on its unique name. Existing "
              "Python "
              "references to the processor will become invalid.")
+        .def("get_processor", &RenderEngine::getProcessorByName, arg("name"),
+             "Get a processor by its unique name. Returns None if not found.", returnPolicy)
         .def("load_graph", &RenderEngine::loadGraphWrapper, arg("dag"),
              "Load a directed acyclic graph of processors.")
         .def("make_oscillator_processor", &RenderEngine::makeOscillatorProcessor, arg("name"),

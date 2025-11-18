@@ -654,5 +654,12 @@ bool RenderEngine::loadGraphWrapper(nb::object dagObj)
 
     auto result = RenderEngine::loadGraph(*buildingDag);
 
+    // Connect the graph to populate m_connectedProcessors and prepare processors
+    // This ensures processors are ready for pickling and the graph is fully loaded
+    if (result)
+    {
+        connectGraph();
+    }
+
     return result;
 }
