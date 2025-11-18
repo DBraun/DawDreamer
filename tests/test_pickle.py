@@ -597,6 +597,138 @@ def test_faust_midi_preservation():
     assert num_midi_after == num_midi_before, "MIDI events should be preserved"
 
 
+def test_sampler_midi_preservation():
+    """Test that MIDI events are preserved through pickling for SamplerProcessor."""
+    DURATION = 2.0
+
+    # Create a simple sine wave sample
+    freq = 440
+    t = np.linspace(0, DURATION, int(SAMPLE_RATE * DURATION), False)
+    sample_data = np.sin(2 * np.pi * freq * t).astype(np.float32)
+    sample_data = np.stack([sample_data, sample_data])  # stereo
+
+    # Create engine with sampler
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    sampler = engine.make_sampler_processor("sampler", sample_data)
+
+    # Add MIDI notes at different times
+    sampler.add_midi_note(60, 100, 0.0, 0.5, beats=False)
+    sampler.add_midi_note(64, 80, 0.5, 0.3, beats=False)
+    sampler.add_midi_note(67, 90, 1.0, 0.4, beats=False)
+
+    num_midi_before = sampler.n_midi_events
+    assert num_midi_before == 6, "Should have 6 MIDI events (3 note-ons + 3 note-offs)"
+
+    # Pickle and unpickle
+    pickled = pickle.dumps(sampler)
+    restored_sampler = pickle.loads(pickled)
+
+    num_midi_after = restored_sampler.n_midi_events
+    assert num_midi_after == num_midi_before, "MIDI events should be preserved"
+
+
+def test_plugin_midi_preservation():
+    """Test that MIDI events are preserved through pickling for PluginProcessor.
+
+    Test is skipped as VST plugins may not be available in all environments.
+    """
+    import platform
+
+    if platform.system() != "Darwin":
+        pytest.skip("Plugin test only runs on macOS")
+
+    # Skip for now - plugin not available
+    pytest.skip("VST instrument plugins not available - test serves as implementation template")
+
+    plugin_path = "/path/to/instrument.vst3"  # Placeholder
+
+    if not os.path.isdir(plugin_path):
+        pytest.skip(f"Plugin not found: {plugin_path}")
+
+    # Create plugin instrument
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    plugin = engine.make_plugin_processor("instrument", plugin_path)
+
+    # Add MIDI notes
+    plugin.add_midi_note(60, 100, 0.0, 0.5, beats=False)
+    plugin.add_midi_note(64, 100, 0.5, 0.5, beats=False)
+    plugin.add_midi_note(67, 100, 1.0, 0.5, beats=False)
+
+    num_midi_before = plugin.n_midi_events
+    assert num_midi_before == 6, "Should have 6 MIDI events (3 note-ons + 3 note-offs)"
+
+    # Pickle and unpickle
+    pickled = pickle.dumps(plugin)
+    restored_plugin = pickle.loads(pickled)
+
+    num_midi_after = restored_plugin.n_midi_events
+    assert num_midi_after == num_midi_before, "MIDI events should be preserved"
+
+
+def test_midi_edge_cases():
+    """Test MIDI serialization edge cases: empty buffers, large buffers, interleaved events."""
+    # Get the correct Faust libraries path
+    faust_lib_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "thirdparty", "faust", "libraries"
+    )
+
+    # Test 1: Empty MIDI buffer
+    engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
+    faust = engine.make_faust_processor("faust")
+    faust.faust_libraries_paths = [faust_lib_path]
+    faust.set_dsp_string("process = _, _;")
+    faust.compile()
+
+    num_midi_before = faust.n_midi_events
+    assert num_midi_before == 0, "Should start with no MIDI events"
+
+    pickled = pickle.dumps(faust)
+    restored_faust = pickle.loads(pickled)
+
+    num_midi_after = restored_faust.n_midi_events
+    assert num_midi_after == 0, "Empty MIDI buffer should be preserved"
+
+    # Test 2: Large MIDI buffer (many events)
+    faust2 = engine.make_faust_processor("faust2")
+    faust2.faust_libraries_paths = [faust_lib_path]
+    faust2.set_dsp_string("process = _, _;")
+    faust2.compile()
+
+    # Add 50 notes across 5 seconds
+    for i in range(50):
+        note = 60 + (i % 12)  # C4 to B4
+        start_time = i * 0.1
+        faust2.add_midi_note(note, 100, start_time, 0.05, beats=False)
+
+    num_midi_before = faust2.n_midi_events
+    assert num_midi_before == 100, "Should have 100 MIDI events (50 note-ons + 50 note-offs)"
+
+    pickled = pickle.dumps(faust2)
+    restored_faust2 = pickle.loads(pickled)
+
+    num_midi_after = restored_faust2.n_midi_events
+    assert num_midi_after == num_midi_before, "Large MIDI buffer should be preserved"
+
+    # Test 3: Beat-based vs second-based MIDI events
+    faust3 = engine.make_faust_processor("faust3")
+    faust3.faust_libraries_paths = [faust_lib_path]
+    faust3.set_dsp_string("process = _, _;")
+    faust3.compile()
+
+    # Add both beat-based and second-based events
+    faust3.add_midi_note(60, 100, 0.0, 0.5, beats=False)  # seconds
+    faust3.add_midi_note(64, 100, 0.0, 1.0, beats=True)  # beats
+
+    num_midi_before = faust3.n_midi_events
+    assert num_midi_before == 4, "Should have 4 MIDI events (2 note-ons + 2 note-offs)"
+
+    pickled = pickle.dumps(faust3)
+    restored_faust3 = pickle.loads(pickled)
+
+    num_midi_after = restored_faust3.n_midi_events
+    assert num_midi_after == num_midi_before, "Mixed beat/second MIDI events should be preserved"
+
+
 def test_render_engine_with_plugin_processor():
     """Test pickling RenderEngine with a PluginProcessor (VST effect).
 

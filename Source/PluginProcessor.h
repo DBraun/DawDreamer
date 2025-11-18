@@ -1,6 +1,8 @@
 #pragma once
 
 #include "custom_nanobind_wrappers.h"
+#include "MidiSerialization.h"
+#include "PickleVersion.h"
 #include "ProcessorBase.h"
 
 typedef std::vector<std::pair<int, float>> PluginPatch;
@@ -71,6 +73,7 @@ class PluginProcessor : public ProcessorBase
     nb::dict getPickleState()
     {
         nb::dict state;
+        state["pickle_version"] = DawDreamerPickle::getVersion();
         state["unique_name"] = getUniqueName();
         state["plugin_path"] = myPluginPath;
         state["sample_rate"] = mySampleRate;
@@ -90,82 +93,25 @@ class PluginProcessor : public ProcessorBase
             state["plugin_state"] = nb::bytes("", 0);
         }
 
-        // Serialize MIDI buffers
-        state["midi_qn"] = serializeMidiBuffer(myMidiBufferQN);
-        state["midi_sec"] = serializeMidiBuffer(myMidiBufferSec);
+        // Serialize MIDI buffers using shared helper
+        state["midi_qn"] = MidiSerialization::serializeMidiBuffer(myMidiBufferQN);
+        state["midi_sec"] = MidiSerialization::serializeMidiBuffer(myMidiBufferSec);
 
         return state;
     }
 
-    // Helper method to serialize a MidiBuffer to bytes
-    nb::bytes serializeMidiBuffer(const juce::MidiBuffer& buffer)
-    {
-        std::vector<uint8_t> data;
-
-        // Iterate through all MIDI messages in the buffer
-        for (const auto metadata : buffer)
-        {
-            auto message = metadata.getMessage();
-            int samplePosition = metadata.samplePosition;
-
-            // Store sample position (4 bytes, big-endian)
-            data.push_back((samplePosition >> 24) & 0xFF);
-            data.push_back((samplePosition >> 16) & 0xFF);
-            data.push_back((samplePosition >> 8) & 0xFF);
-            data.push_back(samplePosition & 0xFF);
-
-            // Store message size (2 bytes for safety, though MIDI messages are small)
-            int numBytes = message.getRawDataSize();
-            data.push_back((numBytes >> 8) & 0xFF);
-            data.push_back(numBytes & 0xFF);
-
-            // Store message data
-            const uint8_t* rawData = message.getRawData();
-            for (int i = 0; i < numBytes; i++)
-            {
-                data.push_back(rawData[i]);
-            }
-        }
-
-        return nb::bytes((const char*)data.data(), data.size());
-    }
-
-    // Helper method to deserialize bytes to a MidiBuffer
-    void deserializeMidiBuffer(juce::MidiBuffer& buffer, nb::bytes data)
-    {
-        buffer.clear();
-
-        const uint8_t* bytes = (const uint8_t*)data.c_str();
-        size_t size = data.size();
-        size_t pos = 0;
-
-        while (pos + 6 <= size) // Need at least 6 bytes (4 for position + 2 for size)
-        {
-            // Read sample position (4 bytes, big-endian)
-            int samplePosition = (bytes[pos] << 24) | (bytes[pos + 1] << 16) |
-                                 (bytes[pos + 2] << 8) | bytes[pos + 3];
-            pos += 4;
-
-            // Read message size (2 bytes)
-            int numBytes = (bytes[pos] << 8) | bytes[pos + 1];
-            pos += 2;
-
-            // Read message data
-            if (pos + numBytes <= size)
-            {
-                juce::MidiMessage message(bytes + pos, numBytes, samplePosition);
-                buffer.addEvent(message, samplePosition);
-                pos += numBytes;
-            }
-            else
-            {
-                break; // Corrupted data
-            }
-        }
-    }
-
     void setPickleState(nb::dict state)
     {
+        // Check pickle version
+        if (state.contains("pickle_version"))
+        {
+            int version = nb::cast<int>(state["pickle_version"]);
+            if (!DawDreamerPickle::isCompatibleVersion(version))
+            {
+                throw std::runtime_error(DawDreamerPickle::getVersionErrorMessage(version));
+            }
+        }
+
         std::string name = nb::cast<std::string>(state["unique_name"]);
         std::string plugin_path = nb::cast<std::string>(state["plugin_path"]);
         double sr = nb::cast<double>(state["sample_rate"]);
@@ -192,17 +138,17 @@ class PluginProcessor : public ProcessorBase
             }
         }
 
-        // Restore MIDI buffers
+        // Restore MIDI buffers using shared helper
         if (state.contains("midi_qn"))
         {
             nb::bytes midi_qn_data = nb::cast<nb::bytes>(state["midi_qn"]);
-            deserializeMidiBuffer(myMidiBufferQN, midi_qn_data);
+            MidiSerialization::deserializeMidiBuffer(myMidiBufferQN, midi_qn_data);
         }
 
         if (state.contains("midi_sec"))
         {
             nb::bytes midi_sec_data = nb::cast<nb::bytes>(state["midi_sec"]);
-            deserializeMidiBuffer(myMidiBufferSec, midi_sec_data);
+            MidiSerialization::deserializeMidiBuffer(myMidiBufferSec, midi_sec_data);
         }
     }
 
@@ -227,17 +173,17 @@ class PluginProcessor : public ProcessorBase
             }
         }
 
-        // Restore MIDI buffers
+        // Restore MIDI buffers using shared helper
         if (state.contains("midi_qn"))
         {
             nb::bytes midi_qn_data = nb::cast<nb::bytes>(state["midi_qn"]);
-            deserializeMidiBuffer(myMidiBufferQN, midi_qn_data);
+            MidiSerialization::deserializeMidiBuffer(myMidiBufferQN, midi_qn_data);
         }
 
         if (state.contains("midi_sec"))
         {
             nb::bytes midi_sec_data = nb::cast<nb::bytes>(state["midi_sec"]);
-            deserializeMidiBuffer(myMidiBufferSec, midi_sec_data);
+            MidiSerialization::deserializeMidiBuffer(myMidiBufferSec, midi_sec_data);
         }
     }
 

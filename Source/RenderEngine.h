@@ -16,6 +16,7 @@
 #include "FilterProcessor.h"
 #include "OscillatorProcessor.h"
 #include "PannerProcessor.h"
+#include "PickleVersion.h"
 #include "PlaybackProcessor.h"
 #include "PlaybackWarpProcessor.h"
 #include "PluginProcessor.h"
@@ -100,6 +101,7 @@ class RenderEngine : public AudioPlayHead
     nb::dict getPickleState()
     {
         nb::dict state;
+        state["pickle_version"] = DawDreamerPickle::getVersion();
         state["sample_rate"] = mySampleRate;
         state["buffer_size"] = myBufferSize;
         state["ppqn"] = m_BPM_PPQN;
@@ -286,6 +288,18 @@ class RenderEngine : public AudioPlayHead
 
     void setPickleState(nb::dict state)
     {
+        // Check pickle version for compatibility
+        if (state.contains("pickle_version"))
+        {
+            int version = nb::cast<int>(state["pickle_version"]);
+            if (!DawDreamerPickle::isCompatibleVersion(version))
+            {
+                throw std::runtime_error(DawDreamerPickle::getVersionErrorMessage(version));
+            }
+        }
+        // If no version field, assume it's from an old version (pre-versioning)
+        // For now we'll try to load it anyway, but future versions may reject it
+
         double sample_rate = nb::cast<double>(state["sample_rate"]);
         int buffer_size = nb::cast<int>(state["buffer_size"]);
 

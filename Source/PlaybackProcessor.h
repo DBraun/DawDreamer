@@ -1,6 +1,7 @@
 #pragma once
 
 #include "custom_nanobind_wrappers.h"
+#include "PickleVersion.h"
 #include "ProcessorBase.h"
 
 class PlaybackProcessor : public ProcessorBase
@@ -53,6 +54,7 @@ class PlaybackProcessor : public ProcessorBase
     nb::dict getPickleState()
     {
         nb::dict state;
+        state["pickle_version"] = DawDreamerPickle::getVersion();
         state["unique_name"] = getUniqueName();
         state["audio_data"] = bufferToPyArray(myPlaybackData);
         return state;
@@ -60,6 +62,16 @@ class PlaybackProcessor : public ProcessorBase
 
     void setPickleState(nb::dict state)
     {
+        // Check pickle version
+        if (state.contains("pickle_version"))
+        {
+            int version = nb::cast<int>(state["pickle_version"]);
+            if (!DawDreamerPickle::isCompatibleVersion(version))
+            {
+                throw std::runtime_error(DawDreamerPickle::getVersionErrorMessage(version));
+            }
+        }
+
         // Extract state
         std::string name = nb::cast<std::string>(state["unique_name"]);
         nb::ndarray<float> audio_data = nb::cast<nb::ndarray<float>>(state["audio_data"]);

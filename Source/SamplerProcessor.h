@@ -4,6 +4,7 @@
 
 #include "../Source/Sampler/Source/SamplerAudioProcessor.h"
 #include "custom_nanobind_wrappers.h"
+#include "MidiSerialization.h"
 #include "ProcessorBase.h"
 
 class SamplerProcessor : public ProcessorBase
@@ -442,6 +443,10 @@ class SamplerProcessor : public ProcessorBase
         }
         state["parameters"] = params;
 
+        // Serialize MIDI buffers using shared helper
+        state["midi_qn"] = MidiSerialization::serializeMidiBuffer(myMidiBufferQN);
+        state["midi_sec"] = MidiSerialization::serializeMidiBuffer(myMidiBufferSec);
+
         return state;
     }
 
@@ -463,6 +468,19 @@ class SamplerProcessor : public ProcessorBase
                 float value = nb::cast<float>(params[i]);
                 setAutomationValByIndex(i, value);
             }
+        }
+
+        // Restore MIDI buffers using shared helper
+        if (state.contains("midi_qn"))
+        {
+            nb::bytes midi_qn_data = nb::cast<nb::bytes>(state["midi_qn"]);
+            MidiSerialization::deserializeMidiBuffer(myMidiBufferQN, midi_qn_data);
+        }
+
+        if (state.contains("midi_sec"))
+        {
+            nb::bytes midi_sec_data = nb::cast<nb::bytes>(state["midi_sec"]);
+            MidiSerialization::deserializeMidiBuffer(myMidiBufferSec, midi_sec_data);
         }
     }
 
