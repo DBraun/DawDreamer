@@ -63,7 +63,7 @@ elif platform.system() == "Linux":
     for file in files:
         filepath = os.path.abspath(file)
         assert os.path.isfile(filepath), ValueError("File not found: " + filepath)
-    print("Using compiled files: ", str(files))
+    # print("Using compiled files: ", str(files))
 
     package_data += files
 
@@ -142,7 +142,7 @@ package_data = [
     os.path.relpath(os.path.abspath(a), os.path.join(this_dir, "dawdreamer")).replace("\\", "/")
     for a in package_data
 ]
-print("package_data: ", package_data)
+# print("package_data: ", package_data)
 long_description = (Path(__file__).parent / "README.md").read_text()
 
 setup(
