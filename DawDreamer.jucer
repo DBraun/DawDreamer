@@ -139,12 +139,17 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug-x86_64" isDebug="1" optimisation="1" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
-                       libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug/lib&#10;../../thirdparty/libsamplerate/build_debug/src"
+                       libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-x64/Debug/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib&#10;../../thirdparty/libsamplerate/build_debug/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
         <CONFIGURATION name="Release-x86_64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
                        libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-x64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
                        enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"/>
+        <CONFIGURATION name="Debug-arm64" isDebug="1" optimisation="1" targetName="dawdreamer.so"
+                       headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
+                       libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-arm64/Debug/lib&#10;../../thirdparty/libfaust/darwin-arm64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
+                       enablePluginBinaryCopyStep="1" osxCompatibility="11.0 SDK" macOSDeploymentTarget="11.0"
+                       linkTimeOptimisation="0"/>
         <CONFIGURATION name="Release-arm64" isDebug="0" optimisation="3" targetName="dawdreamer.so"
                        headerPath="$(pythonLocation)/include/python$(PYTHONMAJOR);"
                        libraryPath="$(pythonLocation)/lib&#10;../../thirdparty/libfaust/darwin-arm64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
@@ -173,8 +178,9 @@
                 externalLibraries="samplerate&#10;faustwithllvm&#10;tinfo">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="dawdreamer"
-                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="dawdreamer" libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+                       libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Debug/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="dawdreamer" libraryPath="/usr/local/lib&#10;../../thirdparty/libfaust/ubuntu-x86_64/Release/lib&#10;../../thirdparty/libsamplerate/build_release/src"
+                       linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>

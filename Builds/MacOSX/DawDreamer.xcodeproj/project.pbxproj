@@ -522,6 +522,55 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		159D70D3F1FF3F00BB77ED43 /* Debug-arm64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = NO;
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_MISSING_PARENTHESES = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CODE_SIGN_FLAGS = --timestamp;
+				PRODUCT_NAME = "dawdreamer.so";
+				SDKROOT = macosx;
+				WARNING_CFLAGS = "-Wreorder";
+				ZERO_LINK = NO;
+			};
+			name = "Debug-arm64";
+		};
 		2AE45FF97A8B5B5B149589A2 /* Release-arm64 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -700,6 +749,7 @@
 					"$(inherited)",
 					"\"$(pythonLocation)/lib\"",
 					"\"../../thirdparty/libfaust/darwin-x64/Debug/lib\"",
+					"\"../../thirdparty/libfaust/darwin-x64/Release/lib\"",
 					"\"../../thirdparty/libsamplerate/build_debug/src\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
@@ -812,6 +862,104 @@
 				VALID_ARCHS = "arm64 x86_64";
 			};
 			name = "Release-x86_64";
+		};
+		8D073076003E32EEAF67F8D7 /* Debug-arm64 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
+				COPY_PHASE_STRIP = NO;
+				EXCLUDED_ARCHS = "i386 arm64e";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_DEBUG=1",
+					"DEBUG=1",
+					"PIP_JUCE_EXAMPLES_DIRECTORY=QzpcdG9vbHNcSlVDRVxleGFtcGxlcw==",
+					"SAMPLER_SKIP_UI",
+					"JUCE_MODAL_LOOPS_PERMITTED",
+					"HAVE_LIBSAMPLERATE",
+					"HAVE_VDSP",
+					"USE_PTHREADS",
+					"BUILD_DAWDREAMER_FAUST",
+					"BUILD_DAWDREAMER_RUBBERBAND",
+					"JUCER_XCODE_MAC_F6D2F4CF=1",
+					"JUCE_APP_VERSION=0.8.4",
+					"JUCE_APP_VERSION_HEX=0x804",
+					"JucePlugin_Build_VST=0",
+					"JucePlugin_Build_VST3=0",
+					"JucePlugin_Build_AU=0",
+					"JucePlugin_Build_AUv3=0",
+					"JucePlugin_Build_AAX=0",
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
+				);
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK",
+					"$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK",
+					"$(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../JuceLibraryCode/modules",
+					"$(pythonLocation)/include/python$(PYTHONMAJOR)",
+					"$(SRCROOT)/../../thirdparty",
+					"$(SRCROOT)/../../thirdparty/nanobind/include",
+					"$(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include",
+					"$(SRCROOT)/../../thirdparty/faust/architecture",
+					"$(SRCROOT)/../../thirdparty/faust/compiler",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/boxes",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/documentator",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/draw",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/draw/device",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/draw/schema",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/errors",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/evaluate",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/extended",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/generator",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/normalize",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/parallelize",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/parser",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/propagate",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/signals",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/tlib",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/transform",
+					"$(SRCROOT)/../../thirdparty/faust/compiler/utils",
+					"$(SRCROOT)/../../thirdparty/libsamplerate/src",
+					"$(SRCROOT)/../../thirdparty/libsamplerate/include",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(pythonLocation)/lib\"",
+					"\"../../thirdparty/libfaust/darwin-arm64/Debug/lib\"",
+					"\"../../thirdparty/libfaust/darwin-arm64/Release/lib\"",
+					"\"../../thirdparty/libsamplerate/build_release/src\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../JuceLibraryCode/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../thirdparty/JUCE/modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../JuceLibraryCode/modules $(pythonLocation)/include/python$(PYTHONMAJOR) $(SRCROOT)/../../thirdparty $(SRCROOT)/../../thirdparty/nanobind/include $(SRCROOT)/../../thirdparty/nanobind/ext/robin_map/include $(SRCROOT)/../../thirdparty/faust/architecture $(SRCROOT)/../../thirdparty/faust/compiler $(SRCROOT)/../../thirdparty/faust/compiler/boxes $(SRCROOT)/../../thirdparty/faust/compiler/documentator $(SRCROOT)/../../thirdparty/faust/compiler/draw $(SRCROOT)/../../thirdparty/faust/compiler/draw/device $(SRCROOT)/../../thirdparty/faust/compiler/draw/schema $(SRCROOT)/../../thirdparty/faust/compiler/errors $(SRCROOT)/../../thirdparty/faust/compiler/evaluate $(SRCROOT)/../../thirdparty/faust/compiler/extended $(SRCROOT)/../../thirdparty/faust/compiler/generator $(SRCROOT)/../../thirdparty/faust/compiler/generator/interpreter $(SRCROOT)/../../thirdparty/faust/compiler/normalize $(SRCROOT)/../../thirdparty/faust/compiler/parallelize $(SRCROOT)/../../thirdparty/faust/compiler/parser $(SRCROOT)/../../thirdparty/faust/compiler/patternmatcher $(SRCROOT)/../../thirdparty/faust/compiler/propagate $(SRCROOT)/../../thirdparty/faust/compiler/signals $(SRCROOT)/../../thirdparty/faust/compiler/tlib $(SRCROOT)/../../thirdparty/faust/compiler/transform $(SRCROOT)/../../thirdparty/faust/compiler/utils $(SRCROOT)/../../thirdparty/libsamplerate/src $(SRCROOT)/../../thirdparty/libsamplerate/include";
+				OTHER_CFLAGS = "-fPIC";
+				OTHER_CPLUSPLUSFLAGS = "-fPIC";
+				OTHER_LDFLAGS = "-lsamplerate -lfaustwithllvm -shared -Wl,-undefined,dynamic_lookup";
+				PRODUCT_BUNDLE_IDENTIFIER = design.dirt.DawDreamer;
+				PRODUCT_NAME = "dawdreamer.so";
+				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
+				VALID_ARCHS = "arm64 x86_64";
+			};
+			name = "Debug-arm64";
 		};
 		AB16223E4BC8E64E45689F63 /* Release-arm64 */ = {
 			isa = XCBuildConfiguration;
@@ -966,6 +1114,7 @@
 		2DB318F4D74C3E6033F2C720 = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
+				159D70D3F1FF3F00BB77ED43,
 				2AE45FF97A8B5B5B149589A2,
 				2EE6F8DDE5A27226BF02A8EA,
 				DC29D3DFF28DE3B67974C056,
@@ -978,6 +1127,7 @@
 			buildConfigurations = (
 				3814B4B8C62B709DD030FBEA,
 				502873F5F91BBCA42CF04FFC,
+				8D073076003E32EEAF67F8D7,
 				AB16223E4BC8E64E45689F63,
 			);
 			defaultConfigurationIsVisible = 0;
