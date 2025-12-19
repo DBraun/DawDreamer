@@ -86,43 +86,53 @@ def test_faust_soundfile_multichannel(output_path):
     assert np.mean(np.abs(audio)) > 0.01
 
 
-def download_grand_piano():
-    """Download the dataset if it's missing"""
+def generate_piano_sample(key_index: int, duration: float = 3.0) -> np.ndarray:
+    """Generate a synthetic piano-like sample for a given piano key (0-87).
 
-    try:
-        file_paths = [ASSETS / f"bitKlavierGrand_PianoBar/{i}v8.wav" for i in range(88)]
+    Args:
+        key_index: Piano key index (0 = A0, 87 = C8)
+        duration: Duration in seconds
 
-        import os.path
+    Returns:
+        Stereo audio array with shape (2, num_samples)
+    """
+    # Piano key frequencies: A0 (27.5 Hz) to C8 (4186 Hz)
+    # Formula: f = 27.5 * 2^(n/12) where n is the key index
+    frequency = 27.5 * (2 ** (key_index / 12.0))
 
-        if os.path.isfile(file_paths[0]):
-            return
+    num_samples = int(SAMPLE_RATE * duration)
+    t = np.arange(num_samples) / SAMPLE_RATE
 
-        bitKlavierURL = "https://ccrma.stanford.edu/~braun/assets/bitKlavierGrand_PianoBar.zip"
-        import requests
+    # Generate harmonics for a more piano-like sound
+    signal = np.sin(2 * np.pi * frequency * t)
+    signal += 0.5 * np.sin(2 * np.pi * frequency * 2 * t)
+    signal += 0.25 * np.sin(2 * np.pi * frequency * 3 * t)
 
-        # download the file contents in binary format
-        print(f"Downloading: {bitKlavierURL}")
-        r = requests.get(bitKlavierURL)
+    # Apply exponential decay envelope
+    decay_rate = 2.0
+    envelope = np.exp(-decay_rate * t)
+    signal = signal * envelope
 
-        path_to_zip_file = abspath(ASSETS / "bitKlavierGrand_PianoBar.zip")
-        with open(path_to_zip_file, "wb") as zip:
-            zip.write(r.content)
+    # Normalize
+    signal = signal / np.max(np.abs(signal) + 1e-10) * 0.8
 
-        import zipfile
+    # Create stereo by duplicating with slight variation
+    left = signal
+    right = signal * 0.95
 
-        with zipfile.ZipFile(path_to_zip_file, "r") as zip_ref:
-            zip_ref.extractall(ASSETS)
+    return np.stack([left, right])
 
-        os.remove(path_to_zip_file)
 
-    except Exception as e:
-        print("Something went wrong downloading the bitKlavier Grand Piano data.")
-        raise e
+def generate_grand_piano_samples() -> dict:
+    """Generate all 88 synthetic piano samples for testing.
+
+    Returns:
+        Dictionary mapping key index to audio array
+    """
+    return {i: generate_piano_sample(i, duration=3.0) for i in range(88)}
 
 
 def test_faust_soundfile_piano():
-    download_grand_piano()
-
     engine = daw.RenderEngine(SAMPLE_RATE, BUFFER_SIZE)
 
     faust_processor = engine.make_faust_processor("faust")
@@ -132,19 +142,13 @@ def test_faust_soundfile_piano():
 
     dsp_path = abspath(FAUST_DSP / "soundfile_piano.dsp")
 
-    # set_soundfiles
-    soundfiles = {
-        "mySound": [
-            load_audio_file(ASSETS / "bitKlavierGrand_PianoBar" / f"{i}v8.wav") for i in range(88)
-        ]
-    }
+    # Generate synthetic piano samples instead of downloading 148MB of audio
+    piano_samples = generate_grand_piano_samples()
+    soundfiles = {"mySound": [piano_samples[i] for i in range(88)]}
     faust_processor.set_soundfiles(soundfiles)
 
     faust_processor.set_dsp(dsp_path)
     faust_processor.compile()
-    # desc = faust_processor.get_parameters_description()
-    # for par in desc:
-    #   print(par)
 
     midi_path = (
         "MIDI-Unprocessed_SMF_02_R1_2004_01-05_ORIG_MID--AUDIO_02_R1_2004_05_Track05_wav.midi"
