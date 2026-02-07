@@ -166,19 +166,27 @@ cmake --build build_release --config Release
 cd ../..
 ```
 
-#### Build DawDreamer:
+#### Build, Copy, and Install:
+
+`setup.py` handles the full flow: building C++ via `make`, copying the `.so`, and installing the Python package. If the C++ sources haven't changed since the last build, it skips recompilation.
+
+```bash
+pip install -e .
+```
+
+To build manually (e.g., for debugging):
 ```bash
 cd Builds/LinuxMakefile
 make CONFIG=Release CXXFLAGS="-I$PYTHONINCLUDEPATH" LDFLAGS="-L$PYTHONLIBPATH"
 cd ../..
 ```
 
-Output: `dawdreamer/dawdreamer.so`
+Build output: `Builds/LinuxMakefile/build/libdawdreamer.so`
+`setup.py` copies this to `dawdreamer/dawdreamer.so` automatically.
 
-#### Install Python Package:
+**WSL2 Note**: The `make` build system may not detect source changes across the Windows/Linux filesystem boundary due to timestamp caching. If changes aren't picked up, delete the build directory first:
 ```bash
-python3 setup.py develop
-# Or for wheel: python3 -m build --wheel
+rm -rf Builds/LinuxMakefile/build
 ```
 
 ### macOS
@@ -262,11 +270,12 @@ See [Issue #82](https://github.com/DBraun/DawDreamer/issues/82#issuecomment-1097
 ### Modifying C++ Source
 
 1. Edit source files in `Source/`
-2. Open `DawDreamer.jucer` with [JUCE Projucer](https://juce.com/get-juce)
+2. If adding/removing files, open `DawDreamer.jucer` with [JUCE Projucer](https://juce.com/get-juce)
    - Projucer regenerates platform-specific build files
    - **DO NOT** edit .xcodeproj/.sln files directly
-3. Rebuild via platform-specific build system
-4. Reinstall: `python3 setup.py develop` (fast, just updates the .so)
+3. Rebuild and reinstall: `pip install -e .`
+   - Detects source changes, rebuilds C++, copies `.so`, installs package
+   - On WSL2, if changes aren't detected: `rm -rf Builds/LinuxMakefile/build` first
 
 **Adding a New Processor:**
 1. Create `Source/MyProcessor.h` (header-only or with .cpp)
@@ -413,6 +422,10 @@ python -m pip install dist/dawdreamer-*.whl
 **setup.py develop is slow (WSL2)**
 - Normal on WSL2 due to cross-filesystem I/O (1-2 minutes)
 - Processing ~200+ Faust library files
+
+**C++ changes not detected (WSL2)**
+- WSL2 cross-filesystem timestamps may be stale, causing `make` to skip rebuilds
+- Fix: `rm -rf Builds/LinuxMakefile/build` then run `pip install -e .` again
 
 ### Runtime Issues
 

@@ -543,41 +543,55 @@ bool FaustProcessor::compile()
                                  pathToFaustLibraries);
     }
 
-    //// print where faustlib is looking for stdfaust.lib and the other lib files.
-    // auto pathnames = m_factory->getIncludePathnames();
-    // std::cout << "pathnames:\n" << std::endl;
-    // for (auto name : pathnames) {
-    //    std::cout << name << "\n" << std::endl;
-    //}
-    // std::cout << "library list:\n" << std::endl;
-    // auto librarylist = m_factory->getLibraryList();
-    // for (auto name : librarylist) {
-    //    std::cout << name << "\n" << std::endl;
-    //}
+    return initFromFactory();
+}
+
+bool FaustProcessor::compileFromBitcode(const std::string& bitcode)
+{
+    m_compileState = kNotCompiled;
+    clear();
+
+    std::string error_msg;
+    m_factory = readDSPFactoryFromBitcode(bitcode, getTarget(), error_msg, m_llvmOptLevel);
+
+    if (!m_factory)
+    {
+        throw std::runtime_error("FaustProcessor::compileFromBitcode(): Failed to restore factory "
+                                 "from bitcode: " +
+                                 error_msg);
+    }
+
+    return initFromFactory();
+}
+
+bool FaustProcessor::initFromFactory()
+{
+    // Create DSP instance from the factory (either mono or poly).
+    // Called by compile() after creating the factory from source code,
+    // and by setPickleState() after restoring the factory from bitcode.
+    bool is_polyphonic = m_nvoices > 0;
 
     try
     {
         if (is_polyphonic)
         {
-            // (false, true) works
             m_dsp_poly =
                 m_poly_factory->createPolyDSPInstance(m_nvoices, m_dynamicVoices, m_groupVoices);
             if (!m_dsp_poly)
             {
                 clear();
                 throw std::runtime_error(
-                    "FaustProcessor::compile(): Cannot create Poly DSP instance.");
+                    "FaustProcessor::initFromFactory(): Cannot create Poly DSP instance.");
             }
-            // m_dsp_poly->setReleaseLength(m_releaseLengthSec); // Removed in Faust 2.81.10
         }
         else
         {
-            // create DSP instance
             m_dsp = m_factory->createDSPInstance();
             if (!m_dsp)
             {
                 clear();
-                throw std::runtime_error("FaustProcessor::compile(): Cannot create DSP instance.");
+                throw std::runtime_error(
+                    "FaustProcessor::initFromFactory(): Cannot create DSP instance.");
             }
         }
     }
@@ -585,20 +599,20 @@ bool FaustProcessor::compile()
     {
         clear();
         throw std::runtime_error(
-            std::string("FaustProcessor::compile(): Exception creating DSP instance: ") + e.what());
+            std::string("FaustProcessor::initFromFactory(): Exception creating DSP instance: ") +
+            e.what());
     }
     catch (...)
     {
         clear();
         throw std::runtime_error(
-            "FaustProcessor::compile(): Unknown exception creating DSP instance");
+            "FaustProcessor::initFromFactory(): Unknown exception creating DSP instance");
     }
 
     dsp* theDsp = is_polyphonic ? m_dsp_poly : m_dsp;
 
     try
     {
-        // get channels
         int inputs = theDsp->getNumInputs();
         int outputs = theDsp->getNumOutputs();
 
@@ -607,7 +621,6 @@ bool FaustProcessor::compile()
 
         setMainBusInputsAndOutputs(inputs, outputs);
 
-        // make new UI
         if (is_polyphonic)
         {
             m_midi_handler = rt_midi("my_midi");
@@ -625,7 +638,6 @@ bool FaustProcessor::compile()
         m_soundUI = new MySoundUI(&m_SoundfileMap, m_faustAssetsPaths, sr);
         theDsp->buildUserInterface(m_soundUI);
 
-        // init
         theDsp->init(sr);
 
         createParameterLayout();
@@ -636,14 +648,15 @@ bool FaustProcessor::compile()
     {
         clear();
         throw std::runtime_error(
-            std::string("FaustProcessor::compile(): Exception during DSP initialization: ") +
+            std::string(
+                "FaustProcessor::initFromFactory(): Exception during DSP initialization: ") +
             e.what());
     }
     catch (...)
     {
         clear();
         throw std::runtime_error(
-            "FaustProcessor::compile(): Unknown exception during DSP initialization");
+            "FaustProcessor::initFromFactory(): Unknown exception during DSP initialization");
     }
 
     return true;

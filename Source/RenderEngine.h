@@ -122,10 +122,16 @@ class RenderEngine : public AudioPlayHead
             state["bpm_automation"] = nb::ndarray<nb::numpy, float>(array_data, 1, shape, capsule);
         }
 
-        // Save processors with their types and states
+        // Save all registered processors (not just connected ones)
         nb::list processors_list;
-        for (auto* proc : m_connectedProcessors)
+        for (const auto& [proc_name, nodeID] : m_UniqueNameToNodeID)
         {
+            auto node = m_mainProcessorGraph->getNodeForId(nodeID);
+            if (!node)
+                continue;
+            auto* proc = dynamic_cast<ProcessorBase*>(node->getProcessor());
+            if (!proc)
+                continue;
             nb::dict proc_dict;
 
             // Helper lambda to save automation for any processor
@@ -400,13 +406,23 @@ class RenderEngine : public AudioPlayHead
                     faust_proc->setLLVMOpt(nb::cast<int>(proc_state["llvm_opt_level"]));
                     faust_proc->setReleaseLength(nb::cast<double>(proc_state["release_length"]));
 
-                    // Compile the Faust code
-                    faust_proc->compile();
-
-                    // Restore soundfiles
+                    // Restore soundfiles BEFORE compilation because
+                    // setSoundfiles resets m_compileState.
                     if (proc_state.contains("soundfiles"))
                     {
                         faust_proc->setSoundfiles(nb::cast<nb::dict>(proc_state["soundfiles"]));
+                    }
+
+                    // Restore from LLVM bitcode if available (fast path),
+                    // otherwise fall back to full recompilation from source.
+                    if (proc_state.contains("bitcode"))
+                    {
+                        faust_proc->compileFromBitcode(
+                            nb::cast<std::string>(proc_state["bitcode"]));
+                    }
+                    else
+                    {
+                        faust_proc->compile();
                     }
 
                     // Save parameters for later restoration (after graph is loaded)

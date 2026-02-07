@@ -10,6 +10,8 @@ import os
 import os.path
 import platform
 import shutil
+import subprocess
+import sysconfig
 from pathlib import Path
 
 import setuptools
@@ -42,6 +44,167 @@ class BinaryDistribution(Distribution):
         return True
 
 
+def _needs_build(build_so: str, source_dir: str) -> bool:
+    """Check if the .so needs rebuilding by comparing mtimes against C++ sources."""
+    if not os.path.isfile(build_so):
+        return True
+    so_mtime = os.path.getmtime(build_so)
+    for ext in ("*.cpp", "*.h"):
+        for src_file in glob.glob(os.path.join(source_dir, ext)):
+            if os.path.getmtime(src_file) > so_mtime:
+                return True
+    return False
+
+
+def _run(cmd: list[str], **kwargs):
+    """Run a subprocess, printing the command and raising on failure."""
+    print(f"  Running: {' '.join(cmd)}")
+    subprocess.check_call(cmd, **kwargs)
+
+
+def _build_libsamplerate():
+    """Build libsamplerate if not already built."""
+    libsr_dir = os.path.join(this_dir, "thirdparty", "libsamplerate")
+    build_dir = os.path.join(libsr_dir, "build_release")
+    # Check if already built (look for the library file)
+    if os.path.isdir(build_dir) and any(
+        f.endswith((".a", ".so", ".dylib", ".lib"))
+        for f in os.listdir(build_dir)
+        if os.path.isfile(os.path.join(build_dir, f))
+    ):
+        return
+    print("Building libsamplerate...")
+    cmake_args = ["-DCMAKE_BUILD_TYPE=Release", f"-B{build_dir}"]
+    if platform.system() == "Darwin":
+        archs = os.environ.get("ARCHS", "arm64" if os.uname().machine == "arm64" else "x86_64")
+        cmake_args.append(f"-DCMAKE_OSX_ARCHITECTURES={archs}")
+        cmake_args.append("-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0")
+    cmake_args.append("-DLIBSAMPLERATE_EXAMPLES=off")
+    _run(["cmake"] + cmake_args, cwd=libsr_dir)
+    _run(["cmake", "--build", build_dir, "--config", "Release"], cwd=libsr_dir)
+
+
+def _build_and_copy_linux() -> str:
+    """Build on Linux and return the destination .so path."""
+    dest_so = os.path.join(this_dir, "dawdreamer", "dawdreamer.so")
+    build_so = os.path.join(this_dir, "Builds", "LinuxMakefile", "build", "libdawdreamer.so")
+    source_dir = os.path.join(this_dir, "Source")
+
+    if (
+        not _needs_build(build_so, source_dir)
+        and os.path.isfile(dest_so)
+        and os.path.getmtime(dest_so) >= os.path.getmtime(build_so)
+    ):
+        return dest_so
+
+    if _needs_build(build_so, source_dir):
+        _build_libsamplerate()
+        python_include = sysconfig.get_path("include")
+        makefile_dir = os.path.join(this_dir, "Builds", "LinuxMakefile")
+        print(f"Building DawDreamer (Python include: {python_include})...")
+        _run(
+            ["make", "CONFIG=Release", f"CXXFLAGS=-I{python_include}", f"-j{os.cpu_count() or 1}"],
+            cwd=makefile_dir,
+        )
+
+    if not os.path.isfile(build_so):
+        raise FileNotFoundError(
+            f"Build output not found: {build_so}\n"
+            "  Try: cd Builds/LinuxMakefile && make CONFIG=Release"
+        )
+
+    print(f"Copying {build_so} -> {dest_so}")
+    shutil.copy2(build_so, dest_so)
+    return dest_so
+
+
+def _build_and_copy_darwin() -> str:
+    """Build on macOS and return the destination .so path."""
+    dest_so = os.path.join(this_dir, "dawdreamer", "dawdreamer.so")
+    archs = os.environ.get("ARCHS", "arm64" if os.uname().machine == "arm64" else "x86_64")
+    configuration = f"Release-{archs}"
+    build_folder = os.path.join(this_dir, "Builds", "MacOSX", "build", configuration)
+    build_so = os.path.join(build_folder, "dawdreamer.so")
+    build_dylib = os.path.join(build_folder, "dawdreamer.so.dylib")
+    source_dir = os.path.join(this_dir, "Source")
+
+    # Check if we need to build
+    effective_build = build_so if os.path.isfile(build_so) else build_dylib
+    if (
+        not _needs_build(effective_build, source_dir)
+        and os.path.isfile(dest_so)
+        and os.path.getmtime(dest_so) >= os.path.getmtime(effective_build)
+    ):
+        return dest_so
+
+    if _needs_build(effective_build, source_dir):
+        _build_libsamplerate()
+        print(f"Building DawDreamer (ARCHS={archs})...")
+        _run(
+            [
+                "xcodebuild",
+                f"ARCHS={archs}",
+                f"-configuration={configuration}",
+                "-project",
+                os.path.join(this_dir, "Builds", "MacOSX", "DawDreamer.xcodeproj"),
+                "CODE_SIGN_IDENTITY=",
+                "CODE_SIGNING_REQUIRED=NO",
+                "CODE_SIGN_ENTITLEMENTS=",
+                "CODE_SIGNING_ALLOWED=NO",
+            ]
+        )
+        # Xcode produces .dylib, rename to .so
+        if os.path.isfile(build_dylib) and not os.path.isfile(build_so):
+            os.rename(build_dylib, build_so)
+
+    if not os.path.isfile(build_so):
+        raise FileNotFoundError(
+            f"Build output not found: {build_so}\n" f"  Try: ARCHS={archs} ./build_macos.sh"
+        )
+
+    print(f"Copying {build_so} -> {dest_so}")
+    shutil.copy2(build_so, dest_so)
+    return dest_so
+
+
+def _build_and_copy_windows() -> str:
+    """Build on Windows and return the destination .pyd path."""
+    dest_pyd = os.path.join(this_dir, "dawdreamer", "dawdreamer.pyd")
+    build_folder = os.path.join(
+        this_dir, "Builds", "VisualStudio2022", "x64", "Release", "Dynamic Library"
+    )
+    build_dll = os.path.join(build_folder, "dawdreamer.dll")
+    source_dir = os.path.join(this_dir, "Source")
+
+    if (
+        not _needs_build(build_dll, source_dir)
+        and os.path.isfile(dest_pyd)
+        and os.path.getmtime(dest_pyd) >= os.path.getmtime(build_dll)
+    ):
+        return dest_pyd
+
+    if _needs_build(build_dll, source_dir):
+        _build_libsamplerate()
+        print("Building DawDreamer...")
+        _run(
+            [
+                "msbuild",
+                os.path.join(this_dir, "Builds", "VisualStudio2022", "DawDreamer.sln"),
+                "/property:Configuration=Release",
+            ]
+        )
+
+    if not os.path.isfile(build_dll):
+        raise FileNotFoundError(
+            f"Build output not found: {build_dll}\n"
+            "  Try: msbuild Builds/VisualStudio2022/DawDreamer.sln /property:Configuration=Release"
+        )
+
+    print(f"Copying {build_dll} -> {dest_pyd}")
+    shutil.copy2(build_dll, dest_pyd)
+    return dest_pyd
+
+
 ext_modules = []
 package_data = []
 
@@ -49,34 +212,16 @@ with contextlib.suppress(Exception):
     shutil.copytree("licenses", os.path.join("dawdreamer", "licenses"))
 
 if platform.system() == "Windows":
-    build_folder = os.path.join(
-        this_dir, "Builds", "VisualStudio2022", "x64", "Release", "Dynamic Library"
-    )
-    shutil.copy(
-        os.path.join(build_folder, "dawdreamer.dll"), os.path.join("dawdreamer", "dawdreamer.pyd")
-    )
-
-    package_data += ["dawdreamer/dawdreamer.pyd"]
+    dest = _build_and_copy_windows()
+    package_data += [dest]
 
 elif platform.system() == "Linux":
-    files = ["dawdreamer/dawdreamer.so"]
-    for file in files:
-        filepath = os.path.abspath(file)
-        assert os.path.isfile(filepath), ValueError("File not found: " + filepath)
-    # print("Using compiled files: ", str(files))
-
-    package_data += files
+    dest = _build_and_copy_linux()
+    package_data += [dest]
 
 elif platform.system() == "Darwin":
-    build_folder = os.path.join(
-        this_dir, "Builds", "MacOSX", "build", "Release-" + os.environ["ARCHS"]
-    )
-
-    shutil.copy(
-        os.path.join(build_folder, "dawdreamer.so"), os.path.join("dawdreamer", "dawdreamer.so")
-    )
-
-    package_data += ["dawdreamer/dawdreamer.so"]
+    dest = _build_and_copy_darwin()
+    package_data += [dest]
 
 else:
     raise NotImplementedError(f"setup.py hasn't been implemented for platform: {platform}.")

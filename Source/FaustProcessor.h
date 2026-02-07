@@ -198,6 +198,8 @@ class FaustProcessor : public ProcessorBase
     // faust stuff
     void clear();
     bool compile();
+    bool compileFromBitcode(const std::string& bitcode);
+    bool initFromFactory();
     bool setDSPString(const std::string& code);
     bool setDSPFile(const std::string& path);
     bool setParamWithIndex(const int index, float p);
@@ -309,6 +311,14 @@ class FaustProcessor : public ProcessorBase
         state["midi_qn"] = MidiSerialization::serializeMidiBuffer(myMidiBufferQN);
         state["midi_sec"] = MidiSerialization::serializeMidiBuffer(myMidiBufferSec);
 
+        // Serialize compiled LLVM bitcode to avoid recompilation on unpickle.
+        // Only supported for mono (non-polyphonic) factories.
+        // Polyphonic factories fall back to recompilation from source.
+        if (m_factory)
+        {
+            state["bitcode"] = writeDSPFactoryToBitcode(m_factory);
+        }
+
         return state;
     }
 
@@ -368,8 +378,23 @@ class FaustProcessor : public ProcessorBase
         m_llvmOptLevel = nb::cast<int>(state["llvm_opt_level"]);
         m_releaseLengthSec = nb::cast<double>(state["release_length"]);
 
-        // Compile the Faust code
-        if (!m_code.empty())
+        // Restore from compiled LLVM bitcode if available (fast path),
+        // otherwise fall back to full recompilation from source (slow path).
+        if (state.contains("bitcode"))
+        {
+            std::string bitcode = nb::cast<std::string>(state["bitcode"]);
+            std::string error_msg;
+            m_factory = readDSPFactoryFromBitcode(bitcode, getTarget(), error_msg, m_llvmOptLevel);
+            if (!m_factory)
+            {
+                throw std::runtime_error(
+                    "FaustProcessor::setPickleState(): Failed to restore factory "
+                    "from bitcode: " +
+                    error_msg);
+            }
+            initFromFactory();
+        }
+        else if (!m_code.empty())
         {
             compile();
         }
@@ -583,6 +608,10 @@ inline void create_bindings_for_faust_processor(nb::module_& m)
         .def("compile", &FaustProcessor::compile,
              "Compile the FAUST object. You must have already set a dsp file "
              "path or dsp string.")
+        .def("compile_from_bitcode", &FaustProcessor::compileFromBitcode, arg("bitcode"),
+             "Restore a compiled FAUST object from LLVM bitcode, avoiding "
+             "recompilation from source. Bitcode can be obtained from the "
+             "processor's pickle state dict.")
         .def_prop_rw("auto_import", &FaustProcessor::getAutoImport, &FaustProcessor::setAutoImport,
                      "The auto import string. Default is `import(\"stdfaust.lib\");`")
         .def("get_parameters_description", &FaustProcessor::getPluginParametersDescription,
