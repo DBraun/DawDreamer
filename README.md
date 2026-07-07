@@ -170,6 +170,7 @@ import dawdreamer as daw  # Importing after JAX can crash!
 * [API Reference](https://dbraun.github.io/DawDreamer/api_reference/index.html)
 * [Examples](https://github.com/DBraun/DawDreamer/tree/main/examples/)
 * [Tests](https://github.com/DBraun/DawDreamer/tree/main/tests)
+* [Changelog](CHANGELOG.md)
 
 ## License
 

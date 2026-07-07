@@ -204,7 +204,7 @@ Additional Resources
 The `tests/ directory <https://github.com/DBraun/DawDreamer/tree/main/tests>`_ contains comprehensive unit tests that also serve as usage examples:
 
 * ``test_faust_processor.py`` - Faust DSP examples
-* ``test_plugin_processor.py`` - VST plugin usage
+* ``test_plugins.py`` - VST plugin usage
 * ``test_faust_poly*.py`` - Polyphonic synthesis
 * ``test_faust_soundfile.py`` - Sample-based instruments
 * And many more...

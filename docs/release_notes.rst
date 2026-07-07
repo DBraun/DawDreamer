@@ -2,12 +2,16 @@ Release Notes
 =============
 
 This page documents major changes and new features across DawDreamer versions.
+The complete, canonical changelog is `CHANGELOG.md
+<https://github.com/DBraun/DawDreamer/blob/main/CHANGELOG.md>`_ in the
+repository root, which follows the `Keep a Changelog
+<https://keepachangelog.com/>`_ format.
 
 .. note::
    **Versioning**: DawDreamer uses effort-based versioning. Version numbers reflect the scope of changes rather than strict semantic versioning rules.
 
-v0.8.4 (2026)
--------------
+v0.8.4 (unreleased)
+-------------------
 
 **Infrastructure upgrades:**
 
@@ -139,7 +143,7 @@ v0.7.1 (2023-06-01)
 **Multiprocessing support:**
 
 * Added multiprocessing capabilities with new tests and examples
-* See ``tests/test_multiprocessing.py`` for usage examples
+* See ``examples/multiprocessing_plugins`` for usage examples
 
 **Architecture improvements:**
 
@@ -218,7 +222,7 @@ v0.6.0 (2022-03-24)
 * Revised Render Engine graph construction to warn instead of error when too many signals connect to a node
 * Upgraded JUCE, Faust, and pybind11 dependencies
 
-v0.5.8.1 (2021-01-13)
+v0.5.8.1 (2022-01-13)
 ---------------------
 
 **Multi-channel support:**
@@ -257,7 +261,7 @@ v0.5.6 (2021-05-09)
 * **Faust Processor added** - Real-time Faust DSP compilation and execution
 * Removed JUCE from global namespace (cleaner API)
 
-v0.5.0 (2021-04-01)
+v0.5.0 (2021-06-18)
 -------------------
 
 **Linux support:**
@@ -265,7 +269,7 @@ v0.5.0 (2021-04-01)
 * Added Linux build (thanks `@guillaumephd <https://github.com/guillaumephd>`_)
 * Expanded platform support to macOS, Windows, and Linux
 
-v0.4.0 (2020-12-01)
+v0.4.0 (2020-12-08)
 -------------------
 
 **Parameter automation:**
@@ -393,7 +397,7 @@ DawDreamer is open source (GPLv3). Contributions are welcome:
 * **Code contributions**: Submit a pull request
 * **Documentation**: Help improve these docs
 
-See the `Contributing Guide <https://github.com/DBraun/DawDreamer/blob/main/CONTRIBUTING.md>`_ for details.
+See `DEVELOPER.md <https://github.com/DBraun/DawDreamer/blob/main/DEVELOPER.md>`_ for the development workflow.
 
 See Also
 --------

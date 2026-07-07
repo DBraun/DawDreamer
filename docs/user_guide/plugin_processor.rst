@@ -98,11 +98,14 @@ Setting Parameters
 
 .. code-block:: python
 
-   # Set parameter by index
+   # Set parameter by index (values are normalized, 0.0 to 1.0)
    synth.set_parameter(1, 0.1234)
 
-   # Set parameter by name (if supported)
-   synth.set_parameter("A Pan", 0.5)
+   # Use get_parameters_description() to find the index of a named parameter
+   index = next(
+       par["index"] for par in synth.get_parameters_description() if par["name"] == "A Pan"
+   )
+   synth.set_parameter(index, 0.5)
 
 Getting Parameter Values
 ~~~~~~~~~~~~~~~~~~~~~~~~~

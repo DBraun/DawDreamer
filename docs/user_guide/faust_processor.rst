@@ -40,7 +40,7 @@ Loading DSP from File
 
 **faust_reverb.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    process = dm.zita_light;
 
@@ -150,7 +150,7 @@ Here's an example that mixes two stereo inputs into one stereo output with a low
 
 **dsp_4_channels.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    declare name "MyEffect";
    import("stdfaust.lib");
@@ -225,14 +225,14 @@ Set the number of voices to 1 or higher (default is 0, which disables polyphony)
 
 .. code-block:: python
 
-   faust_processor.set_num_voices(8)  # 8-voice polyphony
+   faust_processor.num_voices = 8  # 8-voice polyphony
 
 Example
 ~~~~~~~
 
 **poly_synth.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    import("stdfaust.lib");
 
@@ -248,7 +248,7 @@ Example
 .. code-block:: python
 
    faust_processor.set_dsp("/path/to/poly_synth.dsp")
-   faust_processor.set_num_voices(8)
+   faust_processor.num_voices = 8
 
    # Add MIDI notes (note, velocity, start_time, duration)
    faust_processor.add_midi_note(60, 100, 0.0, 1.0)  # C4
@@ -282,7 +282,7 @@ Example
 
 **soundfile_test.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    soundChoice = nentry("soundChoice", 0, 0, 2, 1);  // choose between 0, 1, 2
    process = soundChoice, _ ~ +(1) : soundfile("mySound", 2) : !, !, _, _;

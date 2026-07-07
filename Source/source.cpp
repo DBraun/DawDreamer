@@ -52,19 +52,10 @@ NB_MODULE(dawdreamer, m)
     -------
     None
 )pbdoc")
-        .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"), R"pbdoc(
-    Get a parameter's automation as a numpy array. It should return whatever array was passed previously to `set_automation`, whether it's PPQN-rate data or audio-rate data.
-
-    Parameters
-    ----------
-    parameter_name : str
-        The name of the parameter.
-
-    Returns
-    -------
-    np.array
-        The parameter's automation.
-)pbdoc")
+        .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"),
+             "Get a parameter's automation as a numpy array. It should return "
+             "whatever array was passed previously to `set_automation`, whether "
+             "it's PPQN-rate data or audio-rate data.")
         .def("get_automation", &ProcessorBase::getAutomationAll,
              "After rendering, get all of a parameter's automation as a dict of "
              "multi-channel numpy arrays. Before rendering, you should have set "
@@ -142,7 +133,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
             [](PlaybackWarpProcessor& self, nb::ndarray<float> value)
             { self.setWarpMarkers(value); }, nb::rv_policy::automatic,
             "Get/set the warp markers as an (N, 2) numpy array of time "
-            "positions in samples and positions in beats.")
+            "positions in seconds and positions in beats.")
         .def("reset_warp_markers", &PlaybackWarpProcessor::resetWarpMarkers, arg("bpm"),
              "Reset the warp markers with a BPM.")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"),

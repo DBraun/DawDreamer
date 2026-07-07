@@ -86,7 +86,7 @@ Basic Workflow
    .. code-block:: python
 
       synth.set_dsp_string("process = os.osc(440) * 0.1;")
-      effect.set_frequency(1000.0)
+      effect.frequency = 1000.0
 
 4. **Load the Graph**
 
@@ -122,9 +122,8 @@ Processors automatically handle channel counts. If a processor expects 2 channel
 
 .. code-block:: python
 
-   # Mix 4 channels to 2
-   mixer = engine.make_add_processor("mixer")
-   mixer.set_gain(0.5)  # Avoid clipping
+   # Mix two stereo inputs, scaling each by 0.5 to avoid clipping
+   mixer = engine.make_add_processor("mixer", [0.5, 0.5])
 
 Parallel Processing
 ~~~~~~~~~~~~~~~~~~~
@@ -171,7 +170,7 @@ One automation value per audio sample for sample-accurate control:
 
    # Sweep frequency from 100 Hz to 5000 Hz
    automation = np.linspace(100, 5000, num_samples)
-   filter_proc.set_automation("frequency", automation)
+   filter_proc.set_automation("freq", automation)
 
    # Or oscillating parameter between 0 and 1 at 0.5 Hz
    automation = 0.5 + 0.5 * make_sine(0.5, duration)

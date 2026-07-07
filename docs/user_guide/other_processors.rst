@@ -31,9 +31,6 @@ Setting Gain Levels
    # Adjust gain for each input
    add_proc.gain_levels = [0.5, 0.5, 0.5]  # 50% gain for 3 inputs
 
-   # Or set a single gain for all inputs
-   add_proc.set_gain(0.5)
-
 Complete Example
 ~~~~~~~~~~~~~~~~
 
@@ -98,7 +95,7 @@ Setting Parameters
 
    # Adjust parameters
    filter_proc.mode = "low"
-   filter_proc.freq = 500.0
+   filter_proc.frequency = 500.0
    filter_proc.q = 2.0
    filter_proc.gain = 1.5  # Only affects shelf modes
 
