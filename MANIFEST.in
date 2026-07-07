@@ -1,1 +1,18 @@
-graft dawdreamer # copy everything
+# Ship the whole dawdreamer package...
+graft dawdreamer
+
+# ...except pieces that are never read at runtime.
+# faustlibraries: keep the .lib files and their licenses; drop repo scaffolding,
+# documentation, tests, and the mesh2faust CAD sources (modalmodels are only
+# referenced in physmodels.lib comments).
+prune dawdreamer/faustlibraries/.git
+prune dawdreamer/faustlibraries/.github
+prune dawdreamer/faustlibraries/doc
+prune dawdreamer/faustlibraries/modalmodels
+prune dawdreamer/faustlibraries/tests
+exclude dawdreamer/faustlibraries/.git
+exclude dawdreamer/faustlibraries/.gitignore
+exclude dawdreamer/faustlibraries/Makefile
+
+# Python bytecode caches
+global-exclude __pycache__ *.py[cod]

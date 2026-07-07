@@ -27,7 +27,7 @@ DawDreamer is a **Digital Audio Workstation (DAW) framework for Python**. It ena
 - Transpilation: Faust to JAX/Flax, C++, Rust, WebAssembly, etc.
 
 **Platforms**: macOS 12.0+, Windows (x86_64), Linux (x86_64)
-**Python Support**: 3.11-3.14 (3.8-3.12 in wheel metadata)
+**Python Support**: 3.11-3.14
 
 ### High-Level Structure
 

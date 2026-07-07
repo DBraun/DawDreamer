@@ -9,9 +9,8 @@ SAMPLE_RATE = 44100
 
 HAS_JAX = True
 try:
-    import jax
     import jax.numpy as jnp
-    from flax import nnx
+    from jax import random
 except ImportError:
     HAS_JAX = False
 
@@ -40,10 +39,10 @@ def test1():
 
     MyDSP = custom_globals[module_name]
 
-    rngs = nnx.Rngs(0)
-    model = MyDSP(SAMPLE_RATE, rngs=rngs)
+    # MyDSP is a flax.linen Module (see thirdparty/faust/architecture/jax/minimal.py).
+    model = MyDSP(SAMPLE_RATE)
 
-    CHANNELS_IN = model.num_inputs
+    CHANNELS_IN = model.getNumInputs()
 
     # T is the number of audio samples of input and output
     T = int(SAMPLE_RATE * 1.0)
@@ -52,13 +51,8 @@ def test1():
 
     noise = -1.0 + 2.0 * jnp.array(np.random.random(input_shape))
 
-    model.eval()
-
-    @nnx.jit
-    def forward(model, x):
-        return model(x)
-
-    audio = forward(model, noise)
+    params = model.init({"params": random.PRNGKey(0)}, noise, T)["params"]
+    audio, mod_vars = model.apply({"params": params}, noise, T, mutable="intermediates")
 
     audio = np.array(audio)
     assert np.abs(audio).mean() > 0.001

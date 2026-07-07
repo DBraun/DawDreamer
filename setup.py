@@ -230,17 +230,17 @@ else:
 
 
 def copytree(src, dst, symlinks=False, ignore=None):
+    """Copy a tree, skipping ignored names and files whose mtime is unchanged."""
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
+        if ignore is not None and ignore(os.fspath(src), [item]):
+            continue
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
             copytree(s, d, symlinks, ignore)
         else:
-            if ignore is not None and ignore(os.fspath(src), [item]):
-                continue
-
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
@@ -249,6 +249,7 @@ destination = copytree(
     os.path.join(this_dir, "thirdparty", "faust", "architecture"),
     os.path.join(this_dir, "dawdreamer", "architecture"),
     ignore=shutil.ignore_patterns(
+        # binary and media files
         "*.dll",
         "*.so",
         "*.html",
@@ -260,6 +261,15 @@ destination = copytree(
         "*.a",
         "*.wasm",
         "*.data",
+        # app-project scaffolding and support-library sources that are not
+        # usable as `-a` architecture wrapper files
+        "AU",
+        "android",
+        "httpdlib",
+        "iOS",
+        "osclib",
+        "smartKeyboard",
+        "unsupported-arch",
     ),
 )
 
@@ -313,14 +323,13 @@ setup(
         "Programming Language :: C++",
         "Programming Language :: Python",
         "Topic :: Multimedia :: Sound/Audio",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
     keywords="audio music sound",
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     install_requires=[],
     packages=setuptools.find_packages(),
     py_modules=["dawdreamer"],
