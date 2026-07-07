@@ -1,19 +1,19 @@
-FROM quay.io/pypa/manylinux2014_x86_64
+FROM quay.io/pypa/manylinux_2_34_x86_64
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-# get pip
-RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python3.10 get-pip.py
+# Use the manylinux-provided CPython (it ships with pip)
+ENV PYTHON=/opt/python/cp312-cp312/bin/python
+ENV PYTHONLIBPATH=/opt/python/cp312-cp312/lib
+ENV PYTHONINCLUDEPATH=/opt/python/cp312-cp312/include/python3.12
 
 # clone repo by copying in
 COPY . /DawDreamer
 
 WORKDIR /DawDreamer/thirdparty/libfaust
-RUN python3.10 download_libfaust.py
+RUN $PYTHON download_libfaust.py
 
 WORKDIR /DawDreamer
-ENV PYTHONLIBPATH=/opt/python/cp310-cp310/lib
-ENV PYTHONINCLUDEPATH=/opt/python/cp310-cp310/include/python3.10
 
 # Install build dependencies
 RUN yum install -y \
@@ -43,5 +43,5 @@ RUN cd Builds/LinuxMakefile && \
 # Setup python virtual environment and requirements
 WORKDIR /DawDreamer
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/DawDreamer/dawdreamer:/DawDreamer/thirdparty/libfaust/ubuntu-x86_64/Release/lib
-RUN python3.10 -m venv test-env
+RUN $PYTHON -m venv test-env
 #RUN /bin/bash -c "source test-env/bin/activate && pip install -r test-requirements.txt && python -m build --wheel && pip install dist/dawdreamer*.whl && cd tests && pytest -v ."

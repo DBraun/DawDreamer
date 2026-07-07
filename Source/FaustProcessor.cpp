@@ -3,6 +3,7 @@
 #ifdef BUILD_DAWDREAMER_FAUST
 
 #include <filesystem>
+#include <iostream>
 
 #include "faust/midi/RtMidi.cpp"
 

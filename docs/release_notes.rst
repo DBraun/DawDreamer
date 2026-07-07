@@ -6,13 +6,16 @@ This page documents major changes and new features across DawDreamer versions.
 .. note::
    **Versioning**: DawDreamer uses effort-based versioning. Version numbers reflect the scope of changes rather than strict semantic versioning rules.
 
-v0.8.4 (2025)
+v0.8.4 (2026)
 -------------
 
 **Infrastructure upgrades:**
 
-* **Switched from pybind11 to nanobind** - Modern C++17 Python bindings with improved performance and smaller binary size
-* **Updated libfaust to 2.81.10** - Latest Faust compiler with bug fixes and improvements
+* **Switched from pybind11 to nanobind** (v2.13.0) - Modern C++17 Python bindings with improved performance and smaller binary size
+* **Updated Faust and libfaust to 2.85.9** and the Faust libraries to the matching release
+* **Python 3.11-3.14** supported and tested in CI
+* **New wheels**: Linux aarch64 and macOS Intel (x86_64) wheels are published alongside the existing Linux x86_64, macOS arm64, and Windows x86_64 wheels
+* **Smaller wheels**: documentation, test files, and app-project scaffolding are no longer bundled
 * **Comprehensive documentation overhaul**:
 
   * Migrated GitHub Wiki content to Sphinx documentation
@@ -24,8 +27,12 @@ v0.8.4 (2025)
 
 **Under the hood:**
 
+* Pickling support for ``RenderEngine`` and processors
+* Sampler updated for JUCE 8
+* The C++ build compiles without warnings; deprecated JUCE APIs were replaced
+* Fixed ``make_panner_processor`` not clamping pan values below -1
+* ``load_graph`` now validates input names immediately instead of failing later during render
 * Better cross-platform build system
-* Improved Python 3.10-3.12 compatibility
 * Enhanced type hints and docstrings
 
 v0.8.3 (2024-09-09)

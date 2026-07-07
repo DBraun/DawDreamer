@@ -14,5 +14,19 @@ exclude dawdreamer/faustlibraries/.git
 exclude dawdreamer/faustlibraries/.gitignore
 exclude dawdreamer/faustlibraries/Makefile
 
+# architecture: setup.py already skips copying these app-project and
+# support-library sources; prune too in case a local tree still has them.
+prune dawdreamer/architecture/AU
+prune dawdreamer/architecture/android
+prune dawdreamer/architecture/httpdlib
+prune dawdreamer/architecture/iOS
+prune dawdreamer/architecture/osclib
+prune dawdreamer/architecture/smartKeyboard
+prune dawdreamer/architecture/unsupported-arch
+
+# Local build artifact that must never ship in a wheel (the Windows wheel
+# links libfaust statically and only contains dawdreamer.pyd).
+exclude dawdreamer/faust.dll
+
 # Python bytecode caches
 global-exclude __pycache__ *.py[cod]

@@ -45,8 +45,7 @@ bool RenderEngine::loadGraph(DAG inDagNodes)
 
         for (auto inputName : node.inputs)
         {
-            if (m_UniqueNameToNodeID.find(processorBase->getUniqueName()) ==
-                m_UniqueNameToNodeID.end())
+            if (m_UniqueNameToNodeID.find(inputName) == m_UniqueNameToNodeID.end())
             {
                 m_stringDag.clear();
                 throw std::runtime_error(
@@ -358,7 +357,6 @@ void RenderEngine::setBPM(double bpm)
     if (bpm <= 0)
     {
         throw std::runtime_error("BPM must be positive.");
-        return;
     }
 
     m_bpmAutomation.setSize(1, 1);
@@ -538,8 +536,7 @@ ReverbProcessor* RenderEngine::makeReverbProcessor(const std::string& name, floa
 PannerProcessor* RenderEngine::makePannerProcessor(const std::string& name, std::string& rule,
                                                    float pan)
 {
-    float safeVal = std::fmax(-1.f, pan);
-    safeVal = std::fmin(1.f, pan);
+    float safeVal = std::clamp(pan, -1.f, 1.f);
 
     auto processor = new PannerProcessor{name, rule, safeVal};
     this->prepareProcessor(processor, name);

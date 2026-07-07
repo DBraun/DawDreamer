@@ -4,7 +4,6 @@
 # `python -m build --wheel`
 # Then in the `dist` directory, `pip install dawdreamer`
 
-import contextlib
 import glob
 import os
 import os.path
@@ -208,8 +207,9 @@ def _build_and_copy_windows() -> str:
 ext_modules = []
 package_data = []
 
-with contextlib.suppress(Exception):
-    shutil.copytree("licenses", os.path.join("dawdreamer", "licenses"))
+licenses_dst = os.path.join(this_dir, "dawdreamer", "licenses")
+if not os.path.isdir(licenses_dst):
+    shutil.copytree(os.path.join(this_dir, "licenses"), licenses_dst)
 
 if platform.system() == "Windows":
     dest = _build_and_copy_windows()
