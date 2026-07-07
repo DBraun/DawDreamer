@@ -547,7 +547,8 @@ pre-commit install
   - macOS arm64 (`macos-15`) and x86_64 (`macos-15-intel`)
   - Windows x86_64 (`windows-2025`)
 - Runs the test suite against every wheel
-- Publishes to PyPI on release
+- Publishes to PyPI when a version tag (e.g. `v0.8.6`) is pushed. The tag must
+  match the version in `DawDreamer.jucer`; no GitHub release is required.
 
 ---
 

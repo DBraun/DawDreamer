@@ -2,8 +2,9 @@ name: Compile, Test, and Deploy
 on:
   pull_request: {}
   workflow_dispatch: {}  # Allow manual trigger
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'  # Pushing a version tag (e.g. v0.8.6) builds wheels and uploads to PyPI
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -226,13 +227,24 @@ jobs:
     needs: [build-windows, build-ubuntu, build-macos]
     runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/download-artifact@v4
         with:
           pattern: artifact-*
           merge-multiple: true
           path: dist
+
+      - name: Verify tag matches wheel version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          for whl in dist/*.whl; do
+            if [[ "$(basename "$whl")" != "dawdreamer-${TAG_VERSION}-"* ]]; then
+              echo "Tag v${TAG_VERSION} does not match wheel $(basename "$whl")." >&2
+              echo "Update the version in DawDreamer.jucer before tagging." >&2
+              exit 1
+            fi
+          done
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
