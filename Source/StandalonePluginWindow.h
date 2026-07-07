@@ -107,12 +107,14 @@ class StandalonePluginWindow : public juce::DocumentWindow
     {
         setVisible(false);
 
+        const auto& processorParams = processor.getParameters();
         for (int j = 0; j < 2; j++)
         {
-            for (int i = 0; i < processor.getNumParameters(); ++i)
+            for (int i = 0; i < processorParams.size(); ++i)
             {
                 // give it a valid single sample of automation.
-                dawDreamerPluginProcessor.setAutomationValByIndex(i, processor.getParameter(i));
+                dawDreamerPluginProcessor.setAutomationValByIndex(
+                    i, processorParams.getUnchecked(i)->getValue());
             }
         }
     }

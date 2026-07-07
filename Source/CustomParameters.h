@@ -148,7 +148,11 @@ class AutomateParameterFloat : public AutomateParameter, public AudioParameterFl
 
           AutomateParameter(),
           AudioParameterFloat(parameterID, parameterName, normalisableRange, defaultValue,
-                              parameterLabel, parameterCategory, stringFromValue, valueFromString)
+                              juce::AudioParameterFloatAttributes()
+                                  .withLabel(parameterLabel)
+                                  .withCategory(parameterCategory)
+                                  .withStringFromValueFunction(stringFromValue)
+                                  .withValueFromStringFunction(valueFromString))
     {
     }
 

@@ -159,7 +159,7 @@ def _build_and_copy_darwin() -> str:
 
     if not os.path.isfile(build_so):
         raise FileNotFoundError(
-            f"Build output not found: {build_so}\n" f"  Try: ARCHS={archs} ./build_macos.sh"
+            f"Build output not found: {build_so}\n  Try: ARCHS={archs} ./build_macos.sh"
         )
 
     print(f"Copying {build_so} -> {dest_so}")

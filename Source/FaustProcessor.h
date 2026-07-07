@@ -549,8 +549,8 @@ class FaustProcessor : public ProcessorBase
     int myMidiMessagePositionQN = -1;
     int myMidiMessagePositionSec = -1;
 
-    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
-    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+    MidiBufferCursor myMidiIteratorQN;
+    MidiBufferCursor myMidiIteratorSec;
 
     bool myIsMessageBetweenQN = false;
     bool myIsMessageBetweenSec = false;

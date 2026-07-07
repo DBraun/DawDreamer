@@ -480,7 +480,7 @@ class ModularSynth:
             self._make_env(i + 1)
 
         for i in range(self._NUM_LFOS):
-            self._make_lfo(i + 1, cfg[f"LFO_{i+1}_TRIGGER"])
+            self._make_lfo(i + 1, cfg[f"LFO_{i + 1}_TRIGGER"])
 
         if OSC_A_TOGGLE:
             self._make_osc("A", OSC_A_CHOICE, OSC_A_UNISON)

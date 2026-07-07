@@ -487,9 +487,9 @@ def test_render_engine_with_sampler_processor():
 
     # Verify sample data is preserved before pickling
     retrieved_sample = sampler.get_data()
-    assert np.allclose(
-        sample_data, retrieved_sample
-    ), "Sample data should match original before pickle"
+    assert np.allclose(sample_data, retrieved_sample), (
+        "Sample data should match original before pickle"
+    )
 
     # Pickle and unpickle the sampler directly
     pickled = pickle.dumps(sampler)
@@ -497,9 +497,9 @@ def test_render_engine_with_sampler_processor():
 
     # Verify sample data is preserved after pickling
     restored_sample = restored_sampler.get_data()
-    assert np.allclose(
-        sample_data, restored_sample
-    ), "Sample data should match original after pickle"
+    assert np.allclose(sample_data, restored_sample), (
+        "Sample data should match original after pickle"
+    )
 
     # Verify parameters are preserved
     restored_attack = restored_sampler.get_parameter(0)
@@ -782,9 +782,9 @@ def test_render_engine_with_plugin_processor():
     restored_audio = restored_engine.get_audio()
 
     # Audio should match (verifies plugin state and parameters are preserved)
-    assert np.allclose(
-        original_audio, restored_audio, rtol=1e-04, atol=1e-05
-    ), "Audio output should match after pickle"
+    assert np.allclose(original_audio, restored_audio, rtol=1e-04, atol=1e-05), (
+        "Audio output should match after pickle"
+    )
 
 
 def test_render_engine_with_all_processors():

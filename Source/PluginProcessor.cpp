@@ -148,9 +148,6 @@ PluginProcessor::~PluginProcessor()
     myMidiBufferSec.clear();
     myRenderMidiBuffer.clear();
     myRecordedMidiSequence.clear();
-
-    delete myMidiIteratorQN;
-    delete myMidiIteratorSec;
 }
 
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
@@ -234,7 +231,7 @@ void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBu
             // steps for playing MIDI
             myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
             myMidiEventsDoRemainSec =
-                myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+                myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
             myIsMessageBetweenSec =
                 myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
         }
@@ -265,7 +262,7 @@ void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBu
                                         int((myMidiMessagePositionQN - pulseStart) * 60. *
                                             mySampleRate / (PPQN * *posInfo->getBpm())));
             myMidiEventsDoRemainQN =
-                myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+                myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
             myIsMessageBetweenQN =
                 myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
         }
@@ -315,17 +312,15 @@ void PluginProcessor::reset()
         myPlugin->reset();
     }
 
-    delete myMidiIteratorSec;
-    myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
+    myMidiIteratorSec = MidiBufferCursor(myMidiBufferSec);
 
     myMidiEventsDoRemainSec =
-        myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+        myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
 
-    delete myMidiIteratorQN;
-    myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+    myMidiIteratorQN = MidiBufferCursor(myMidiBufferQN);
 
     myMidiEventsDoRemainQN =
-        myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+        myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
     myRenderMidiBuffer.clear();
 
@@ -489,7 +484,7 @@ void PluginProcessor::setPatch(const PluginPatch patch)
     const Array<AudioProcessorParameter*>& pluginParameters = myPlugin->getParameters();
     for (auto pair : patch)
     {
-        if (pair.first < myPlugin->getNumParameters())
+        if (pair.first < pluginParameters.size())
         {
             pluginParameters.getUnchecked(pair.first)->setValue(pair.second);
             ProcessorBase::setAutomationValByIndex(pair.first, pair.second);
@@ -499,7 +494,7 @@ void PluginProcessor::setPatch(const PluginPatch patch)
             throw std::runtime_error("RenderEngine::setPatch error: Incorrect parameter index!"
                                      "\n- Current index:  " +
                                      std::to_string(pair.first) + "\n- Max index: " +
-                                     std::to_string(myPlugin->getNumParameters() - 1));
+                                     std::to_string(pluginParameters.size() - 1));
         }
         i++;
     }
@@ -521,7 +516,11 @@ int PluginProcessor::getLatencySamples()
 std::string PluginProcessor::getParameterAsText(const int parameter)
 {
     THROW_ERROR_IF_NO_PLUGIN
-    return myPlugin->getParameterText(parameter).toStdString();
+    if (auto* param = myPlugin->getParameters()[parameter])
+    {
+        return param->getCurrentValueAsText().toStdString();
+    }
+    throw std::runtime_error("Parameter not found for index: " + std::to_string(parameter));
 }
 
 //==============================================================================
@@ -532,7 +531,7 @@ const PluginPatch PluginProcessor::getPatch()
     THROW_ERROR_IF_NO_PLUGIN
 
     params.clear();
-    params.reserve(myPlugin->getNumParameters());
+    params.reserve(myPlugin->getParameters().size());
 
     AudioPlayHead::PositionInfo posInfo;
     posInfo.setTimeInSeconds(0.);
@@ -556,7 +555,7 @@ const size_t PluginProcessor::getPluginParameterSize()
 {
     THROW_ERROR_IF_NO_PLUGIN
 
-    return myPlugin->getNumParameters();
+    return myPlugin->getParameters().size();
 }
 
 int PluginProcessor::getNumMidiEvents()
@@ -716,7 +715,11 @@ nb::list PluginProcessorWrapper::wrapperGetPatch()
 
 std::string PluginProcessorWrapper::wrapperGetParameterName(const int& parameter)
 {
-    return myPlugin->getParameterName(parameter).toStdString();
+    if (auto* param = myPlugin->getParameters()[parameter])
+    {
+        return param->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+    }
+    throw std::runtime_error("Parameter not found for index: " + std::to_string(parameter));
 }
 
 bool PluginProcessorWrapper::wrapperSetParameter(const int& parameterIndex, const float& value)

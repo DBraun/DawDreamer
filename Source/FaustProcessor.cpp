@@ -90,9 +90,6 @@ FaustProcessor::~FaustProcessor()
     myMidiBufferQN.clear();
     myMidiBufferSec.clear();
     myRecordedMidiSequence.clear();
-
-    delete myMidiIteratorQN;
-    delete myMidiIteratorSec;
 }
 
 bool FaustProcessor::setAutomation(std::string& parameterName, nb::ndarray<float> input,
@@ -186,7 +183,7 @@ void FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuf
                     }
 
                     myMidiEventsDoRemainSec =
-                        myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+                        myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
                     myIsMessageBetweenSec =
                         myMidiMessagePositionSec >= start && myMidiMessagePositionSec < start + 1;
                 }
@@ -219,7 +216,7 @@ void FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuf
                     }
 
                     myMidiEventsDoRemainQN =
-                        myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+                        myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
                     myIsMessageBetweenQN = myMidiMessagePositionQN >= pulseStart &&
                                            myMidiMessagePositionQN < pulseStart + 1;
@@ -348,15 +345,13 @@ void FaustProcessor::reset()
         }
     }
 
-    delete myMidiIteratorQN;
-    myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+    myMidiIteratorQN = MidiBufferCursor(myMidiBufferQN);
     myMidiEventsDoRemainQN =
-        myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+        myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
-    delete myMidiIteratorSec;
-    myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
+    myMidiIteratorSec = MidiBufferCursor(myMidiBufferSec);
     myMidiEventsDoRemainSec =
-        myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+        myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
 
     myRecordedMidiSequence.clear();
     myRecordedMidiSequence.addEvent(juce::MidiMessage::midiStart());

@@ -6,6 +6,39 @@
 
 const int DAW_PARAMETER_MAX_NAME_LENGTH = 512;
 
+// Replacement for the deprecated juce::MidiBuffer::Iterator: pops messages
+// one at a time, in order, from a MidiBuffer. The buffer must outlive the
+// cursor and must not be modified while the cursor is in use.
+class MidiBufferCursor
+{
+  public:
+    MidiBufferCursor() = default;
+
+    explicit MidiBufferCursor(const juce::MidiBuffer& buffer)
+        : m_iterator{buffer.cbegin()}, m_end{buffer.cend()}
+    {
+    }
+
+    // Copy the next message and its sample position into the output arguments
+    // and advance. Return false if no messages remain.
+    bool getNextEvent(juce::MidiMessage& result, int& samplePosition)
+    {
+        if (m_iterator == m_end)
+        {
+            return false;
+        }
+        const auto metadata = *m_iterator;
+        result = metadata.getMessage();
+        samplePosition = metadata.samplePosition;
+        ++m_iterator;
+        return true;
+    }
+
+  private:
+    juce::MidiBufferIterator m_iterator;
+    juce::MidiBufferIterator m_end;
+};
+
 class ProcessorBase : public juce::AudioProcessor
 {
   public:

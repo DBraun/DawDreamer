@@ -38,8 +38,6 @@ class SamplerProcessor : public ProcessorBase
         myMidiBufferSec.clear();
         myRenderMidiBuffer.clear();
         myRecordedMidiSequence.clear();
-        delete myMidiIteratorSec;
-        delete myMidiIteratorQN;
     }
 
     bool acceptsMidi() const override { return true; }
@@ -60,17 +58,15 @@ class SamplerProcessor : public ProcessorBase
     {
         sampler.reset();
 
-        delete myMidiIteratorSec;
-        myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
+        myMidiIteratorSec = MidiBufferCursor(myMidiBufferSec);
 
         myMidiEventsDoRemainSec =
-            myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+            myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
 
-        delete myMidiIteratorQN;
-        myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+        myMidiIteratorQN = MidiBufferCursor(myMidiBufferQN);
 
         myMidiEventsDoRemainQN =
-            myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+            myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
         myRenderMidiBuffer.clear();
 
@@ -110,7 +106,7 @@ class SamplerProcessor : public ProcessorBase
                 myRenderMidiBuffer.addEvent(myMidiMessageSec,
                                             int(myMidiMessagePositionSec - start));
                 myMidiEventsDoRemainSec =
-                    myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+                    myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
                 myIsMessageBetweenSec =
                     myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
             }
@@ -141,7 +137,7 @@ class SamplerProcessor : public ProcessorBase
                                             int((myMidiMessagePositionQN - pulseStart) * 60. *
                                                 mySampleRate / (PPQN * *posInfo->getBpm())));
                 myMidiEventsDoRemainQN =
-                    myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+                    myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
                 myIsMessageBetweenQN =
                     myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
             }
@@ -354,15 +350,23 @@ class SamplerProcessor : public ProcessorBase
 
     std::string wrapperGetParameterName(int parameter)
     {
-        return sampler.getParameterName(parameter).toStdString();
+        if (auto* param = sampler.getParameters()[parameter])
+        {
+            return param->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+        }
+        throw std::runtime_error("Parameter not found for index: " + std::to_string(parameter));
     }
 
     std::string wrapperGetParameterAsText(const int parameter)
     {
-        return sampler.getParameterText(parameter).toStdString();
+        if (auto* param = sampler.getParameters()[parameter])
+        {
+            return param->getCurrentValueAsText().toStdString();
+        }
+        throw std::runtime_error("Parameter not found for index: " + std::to_string(parameter));
     }
 
-    int wrapperGetPluginParameterSize() { return sampler.getNumParameters(); }
+    int wrapperGetPluginParameterSize() { return sampler.getParameters().size(); }
 
     nb::list getParametersDescription()
     {
@@ -370,7 +374,7 @@ class SamplerProcessor : public ProcessorBase
 
         // get the parameters as an AudioProcessorParameter array
         const Array<AudioProcessorParameter*>& processorParams = sampler.getParameters();
-        for (int i = 0; i < sampler.getNumParameters(); i++)
+        for (int i = 0; i < processorParams.size(); i++)
         {
             int maximumStringLength = 64;
 
@@ -399,19 +403,21 @@ class SamplerProcessor : public ProcessorBase
     {
         juce::AudioProcessorParameterGroup group;
 
-        for (int i = 0; i < sampler.getNumParameters(); ++i)
+        const Array<AudioProcessorParameter*>& samplerParams = sampler.getParameters();
+
+        for (auto* samplerParam : samplerParams)
         {
-            auto parameterName = sampler.getParameterName(i);
+            auto parameterName = samplerParam->getName(DAW_PARAMETER_MAX_NAME_LENGTH);
             group.addChild(std::make_unique<AutomateParameterFloat>(
                 parameterName, parameterName, NormalisableRange<float>(0.f, 1.f), 0.f));
         }
 
         this->setParameterTree(std::move(group));
 
-        for (int i = 0; i < sampler.getNumParameters(); ++i)
+        for (int i = 0; i < samplerParams.size(); ++i)
         {
             // give it a valid single sample of automation.
-            ProcessorBase::setAutomationValByIndex(i, sampler.getParameter(i));
+            ProcessorBase::setAutomationValByIndex(i, samplerParams.getUnchecked(i)->getValue());
         }
     }
 
@@ -419,7 +425,7 @@ class SamplerProcessor : public ProcessorBase
     {
         auto allParameters = this->getParameters();
 
-        for (int i = 0; i < sampler.getNumParameters(); i++)
+        for (int i = 0; i < sampler.getParameters().size(); i++)
         {
             auto theParameter = (AutomateParameterFloat*)allParameters.getUnchecked(i);
             sampler.setParameterRawNotifyingHost(i, theParameter->sample(posInfo));
@@ -437,7 +443,7 @@ class SamplerProcessor : public ProcessorBase
 
         // Get all parameter values
         nb::list params;
-        for (int i = 0; i < sampler.getNumParameters(); i++)
+        for (int i = 0; i < sampler.getParameters().size(); i++)
         {
             params.append(getAutomationAtZeroByIndex(i));
         }
@@ -503,8 +509,8 @@ class SamplerProcessor : public ProcessorBase
     int myMidiMessagePositionQN = -1;
     int myMidiMessagePositionSec = -1;
 
-    MidiBuffer::Iterator* myMidiIteratorQN = nullptr;
-    MidiBuffer::Iterator* myMidiIteratorSec = nullptr;
+    MidiBufferCursor myMidiIteratorQN;
+    MidiBufferCursor myMidiIteratorSec;
 
     bool myIsMessageBetweenQN = false;
     bool myIsMessageBetweenSec = false;
