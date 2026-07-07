@@ -16,7 +16,7 @@ System Requirements
 **macOS:**
 
 * 64-bit Python 3.11-3.14
-* Apple Silicon (arm64)
+* Apple Silicon (arm64) or Intel (x86_64)
 * macOS 11.0 or higher
 
 **Windows:**
@@ -26,7 +26,7 @@ System Requirements
 
 **Linux:**
 
-* x86_64 CPU
+* x86_64 or aarch64 CPU
 * 64-bit Python 3.11-3.14 (tested with 3.12 on Ubuntu/WSL2)
 * For WSL2 users: Expect longer installation times (1-2 minutes) due to cross-filesystem I/O
 

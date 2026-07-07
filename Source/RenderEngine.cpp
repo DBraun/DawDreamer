@@ -1,5 +1,6 @@
 #include "RenderEngine.h"
 
+#include <algorithm>
 #include <unordered_map>
 
 RenderEngine::RenderEngine(double sr, int bs)
@@ -11,17 +12,6 @@ RenderEngine::RenderEngine(double sr, int bs)
 
     m_bpmAutomation.setSize(1, 1);
     m_bpmAutomation.setSample(0, 0, 120.); // default 120 bpm
-}
-
-bool RenderEngine::removeProcessor(const std::string& name)
-{
-    if (m_UniqueNameToNodeID.find(name) != m_UniqueNameToNodeID.end())
-    {
-        m_mainProcessorGraph->removeNode(m_UniqueNameToNodeID[name]);
-        m_UniqueNameToNodeID.erase(name);
-        return true;
-    }
-    return false;
 }
 
 bool RenderEngine::loadGraph(DAG inDagNodes)
@@ -60,155 +50,15 @@ bool RenderEngine::loadGraph(DAG inDagNodes)
     return success;
 }
 
-bool RenderEngine::connectGraph()
+bool RenderEngine::removeProcessor(const std::string& name)
 {
-    // remove all connections
-    for (auto& connection : m_mainProcessorGraph->getConnections())
+    if (m_UniqueNameToNodeID.find(name) != m_UniqueNameToNodeID.end())
     {
-        m_mainProcessorGraph->removeConnection(connection);
+        m_mainProcessorGraph->removeNode(m_UniqueNameToNodeID[name]);
+        m_UniqueNameToNodeID.erase(name);
+        return true;
     }
-
-    m_connectedProcessors.clear();
-
-    for (auto& entry : m_stringDag)
-    {
-        if (m_UniqueNameToNodeID.find(entry.first) == m_UniqueNameToNodeID.end())
-        {
-            m_stringDag.clear();
-            throw std::runtime_error(
-                "Error: Unable to find processor with unique name: " + entry.first + ".");
-        }
-
-        auto node = m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
-
-        auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
-        m_connectedProcessors.push_back(processor);
-
-        if (!processor)
-        {
-            throw std::runtime_error("Unable to cast to ProcessorBase during connectGraph.");
-        }
-
-        // Don't remove this prepareToPlay. In the case of Faust, it compiles the
-        // code. This makes the number of input/output channels correct, which we
-        // use a lines below in this function.
-        processor->prepareToPlay(mySampleRate, myBufferSize);
-
-        int numInputAudioChans = 0;
-
-        std::string myUniqueName = processor->getUniqueName();
-
-        auto inputNames = entry.second;
-
-        for (const std::string& inputName : inputNames)
-        {
-            if (m_UniqueNameToNodeID.find(inputName) == m_UniqueNameToNodeID.end())
-            {
-                m_stringDag.clear();
-                throw std::runtime_error(
-                    "Error: Unable to find processor with unique name: " + inputName + ".");
-            }
-
-            auto otherNode = m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[inputName]);
-
-            numInputAudioChans += otherNode->getProcessor()->getMainBusNumOutputChannels();
-        }
-
-        int numOutputAudioChans = processor->getMainBusNumOutputChannels();
-        int expectedInputChannels = processor->getMainBusNumInputChannels();
-        if (numInputAudioChans > expectedInputChannels)
-        {
-            std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName
-                      << " expects " << expectedInputChannels
-                      << " input signals, but you are trying to connect " << numInputAudioChans
-                      << " signals." << std::endl;
-        }
-
-        processor->setPlayConfigDetails(expectedInputChannels, numOutputAudioChans, mySampleRate,
-                                        myBufferSize);
-
-        int chanDest = 0;
-
-        for (const std::string& inputName : inputNames)
-        {
-            auto inputNode = m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[inputName]);
-
-            auto inputProcessor = inputNode->getProcessor();
-
-            for (int chanSource = 0; chanSource < inputProcessor->getMainBusNumOutputChannels();
-                 chanSource++)
-            {
-                AudioProcessorGraph::Connection connection = {{inputNode->nodeID, chanSource},
-                                                              {node->nodeID, chanDest}};
-
-                bool result = m_mainProcessorGraph->canConnect(connection) &&
-                              m_mainProcessorGraph->addConnection(connection);
-                if (!result)
-                {
-                    // todo: because we failed here, connectGraph should return false at
-                    // the very end or immediately.
-                    std::cerr << "Warning: Unable to connect " << inputName << " channel "
-                              << chanSource << " to " << myUniqueName << " channel " << chanDest
-                              << std::endl;
-                    // return false;
-                }
-
-                chanDest++;
-            }
-        }
-
-        processor->setConnectedInGraph(true);
-    }
-
-    m_mainProcessorGraph->setPlayConfigDetails(0, 0, mySampleRate, myBufferSize);
-    m_mainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
-
-    return true;
-}
-
-float RenderEngine::getBPM(double ppqPosition)
-{
-    int index = int(m_BPM_PPQN * ppqPosition);
-    index = std::min(m_bpmAutomation.getNumSamples() - 1, index);
-
-    auto bpm = m_bpmAutomation.getSample(0, index);
-
-    return bpm;
-}
-
-int64_t RenderEngine::getRenderLength(const double renderLength, bool isBeats)
-{
-    if (renderLength <= 0)
-    {
-        throw std::runtime_error("Render length must be greater than zero.");
-    }
-
-    if (!isBeats)
-    {
-        int64_t numRenderedSamples = (int64_t)(renderLength * mySampleRate);
-        return numRenderedSamples;
-    }
-    else
-    {
-        double stepInSeconds = double(myBufferSize) / mySampleRate;
-
-        PositionInfo posInfo;
-        // It's important to initialize these.
-        posInfo.setTimeInSamples(0);
-        posInfo.setTimeInSeconds(0);
-        posInfo.setPpqPosition(0);
-
-        while (*posInfo.getPpqPosition() < renderLength)
-        {
-            posInfo.setBpm(getBPM(*posInfo.getPpqPosition()));
-            posInfo.setTimeInSamples(*posInfo.getTimeInSamples() + (int64_t)myBufferSize);
-            posInfo.setTimeInSeconds(*posInfo.getTimeInSeconds() + stepInSeconds);
-            posInfo.setPpqPosition(*posInfo.getPpqPosition() +
-                                   (stepInSeconds / 60.) * (*posInfo.getBpm()));
-        }
-
-        return *posInfo.getTimeInSamples();
-    }
+    return false;
 }
 
 bool RenderEngine::render(const double renderLength, bool isBeats)
@@ -352,6 +202,41 @@ bool RenderEngine::render(const double renderLength, bool isBeats)
     return true;
 }
 
+int64_t RenderEngine::getRenderLength(const double renderLength, bool isBeats)
+{
+    if (renderLength <= 0)
+    {
+        throw std::runtime_error("Render length must be greater than zero.");
+    }
+
+    if (!isBeats)
+    {
+        int64_t numRenderedSamples = (int64_t)(renderLength * mySampleRate);
+        return numRenderedSamples;
+    }
+    else
+    {
+        double stepInSeconds = double(myBufferSize) / mySampleRate;
+
+        PositionInfo posInfo;
+        // It's important to initialize these.
+        posInfo.setTimeInSamples(0);
+        posInfo.setTimeInSeconds(0);
+        posInfo.setPpqPosition(0);
+
+        while (*posInfo.getPpqPosition() < renderLength)
+        {
+            posInfo.setBpm(getBPM(*posInfo.getPpqPosition()));
+            posInfo.setTimeInSamples(*posInfo.getTimeInSamples() + (int64_t)myBufferSize);
+            posInfo.setTimeInSeconds(*posInfo.getTimeInSeconds() + stepInSeconds);
+            posInfo.setPpqPosition(*posInfo.getPpqPosition() +
+                                   (stepInSeconds / 60.) * (*posInfo.getBpm()));
+        }
+
+        return *posInfo.getTimeInSamples();
+    }
+}
+
 void RenderEngine::setBPM(double bpm)
 {
     if (bpm <= 0)
@@ -439,21 +324,7 @@ void RenderEngine::transportRecord(bool shouldStartRecording) {}
 /** Rewinds the audio. */
 void RenderEngine::transportRewind() {}
 
-// pybind11 functions:
-
-void RenderEngine::prepareProcessor(ProcessorBase* processor, const std::string& name)
-{
-    if (this->removeProcessor(name))
-    {
-        std::cerr << "Warning: a processor with the name \"" << name
-                  << "\" already exists and was removed to make room for the new "
-                     "processor."
-                  << std::endl;
-    };
-
-    auto node = m_mainProcessorGraph->addNode((std::unique_ptr<ProcessorBase>)(processor));
-    m_UniqueNameToNodeID[name] = node->nodeID;
-}
+// Factory methods exposed to Python:
 
 OscillatorProcessor* RenderEngine::makeOscillatorProcessor(const std::string& name, float freq)
 {
@@ -659,4 +530,134 @@ bool RenderEngine::loadGraphWrapper(nb::object dagObj)
     }
 
     return result;
+}
+
+bool RenderEngine::connectGraph()
+{
+    // remove all connections
+    for (auto& connection : m_mainProcessorGraph->getConnections())
+    {
+        m_mainProcessorGraph->removeConnection(connection);
+    }
+
+    m_connectedProcessors.clear();
+
+    for (auto& entry : m_stringDag)
+    {
+        if (m_UniqueNameToNodeID.find(entry.first) == m_UniqueNameToNodeID.end())
+        {
+            m_stringDag.clear();
+            throw std::runtime_error(
+                "Error: Unable to find processor with unique name: " + entry.first + ".");
+        }
+
+        auto node = m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[entry.first]);
+
+        auto processor = dynamic_cast<ProcessorBase*>(node->getProcessor());
+        m_connectedProcessors.push_back(processor);
+
+        if (!processor)
+        {
+            throw std::runtime_error("Unable to cast to ProcessorBase during connectGraph.");
+        }
+
+        // Don't remove this prepareToPlay. In the case of Faust, it compiles the
+        // code. This makes the number of input/output channels correct, which we
+        // use a lines below in this function.
+        processor->prepareToPlay(mySampleRate, myBufferSize);
+
+        int numInputAudioChans = 0;
+
+        std::string myUniqueName = processor->getUniqueName();
+
+        auto inputNames = entry.second;
+
+        for (const std::string& inputName : inputNames)
+        {
+            if (m_UniqueNameToNodeID.find(inputName) == m_UniqueNameToNodeID.end())
+            {
+                m_stringDag.clear();
+                throw std::runtime_error(
+                    "Error: Unable to find processor with unique name: " + inputName + ".");
+            }
+
+            auto otherNode = m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[inputName]);
+
+            numInputAudioChans += otherNode->getProcessor()->getMainBusNumOutputChannels();
+        }
+
+        int numOutputAudioChans = processor->getMainBusNumOutputChannels();
+        int expectedInputChannels = processor->getMainBusNumInputChannels();
+        if (numInputAudioChans > expectedInputChannels)
+        {
+            std::cerr << "Warning: Signals will be skipped. Processor named " << myUniqueName
+                      << " expects " << expectedInputChannels
+                      << " input signals, but you are trying to connect " << numInputAudioChans
+                      << " signals." << std::endl;
+        }
+
+        processor->setPlayConfigDetails(expectedInputChannels, numOutputAudioChans, mySampleRate,
+                                        myBufferSize);
+
+        int chanDest = 0;
+
+        for (const std::string& inputName : inputNames)
+        {
+            auto inputNode = m_mainProcessorGraph->getNodeForId(m_UniqueNameToNodeID[inputName]);
+
+            auto inputProcessor = inputNode->getProcessor();
+
+            for (int chanSource = 0; chanSource < inputProcessor->getMainBusNumOutputChannels();
+                 chanSource++)
+            {
+                AudioProcessorGraph::Connection connection = {{inputNode->nodeID, chanSource},
+                                                              {node->nodeID, chanDest}};
+
+                bool result = m_mainProcessorGraph->canConnect(connection) &&
+                              m_mainProcessorGraph->addConnection(connection);
+                if (!result)
+                {
+                    // todo: because we failed here, connectGraph should return false at
+                    // the very end or immediately.
+                    std::cerr << "Warning: Unable to connect " << inputName << " channel "
+                              << chanSource << " to " << myUniqueName << " channel " << chanDest
+                              << std::endl;
+                    // return false;
+                }
+
+                chanDest++;
+            }
+        }
+
+        processor->setConnectedInGraph(true);
+    }
+
+    m_mainProcessorGraph->setPlayConfigDetails(0, 0, mySampleRate, myBufferSize);
+    m_mainProcessorGraph->prepareToPlay(mySampleRate, myBufferSize);
+
+    return true;
+}
+
+float RenderEngine::getBPM(double ppqPosition)
+{
+    int index = int(m_BPM_PPQN * ppqPosition);
+    index = std::min(m_bpmAutomation.getNumSamples() - 1, index);
+
+    auto bpm = m_bpmAutomation.getSample(0, index);
+
+    return bpm;
+}
+
+void RenderEngine::prepareProcessor(ProcessorBase* processor, const std::string& name)
+{
+    if (this->removeProcessor(name))
+    {
+        std::cerr << "Warning: a processor with the name \"" << name
+                  << "\" already exists and was removed to make room for the new "
+                     "processor."
+                  << std::endl;
+    };
+
+    auto node = m_mainProcessorGraph->addNode((std::unique_ptr<ProcessorBase>)(processor));
+    m_UniqueNameToNodeID[name] = node->nodeID;
 }
