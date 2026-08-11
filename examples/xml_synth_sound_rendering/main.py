@@ -16,13 +16,11 @@
 #
 
 import logging
-import multiprocessing
 import os
-import time
-import traceback
+import queue
 from collections import namedtuple
+from concurrent.futures import ThreadPoolExecutor
 from glob import glob
-from os import makedirs
 from pathlib import Path
 
 from scipy.io import wavfile
@@ -38,21 +36,29 @@ Item = namedtuple("Item", "preset_path")
 
 
 class TAL_UNO_Worker:
+    """A worker with a persistent RenderEngine that renders presets from a shared queue.
+
+    DawDreamer releases the GIL while rendering, so one worker per thread
+    renders in parallel inside a single process.
+    """
+
     def __init__(
         self,
-        queue: multiprocessing.Queue,
+        work_queue: queue.Queue,
+        pbar: tqdm,
         plugin_path: str,
-        sample_rate=44100,
-        block_size=512,
-        bpm=120,
-        note_duration=2,
-        render_duration=5,
-        pitch_low=60,
-        pitch_high=72,
-        velocity=100,
-        output_dir="output",
+        sample_rate: int = 44100,
+        block_size: int = 512,
+        bpm: float = 120,
+        note_duration: float = 2,
+        render_duration: float = 5,
+        pitch_low: int = 60,
+        pitch_high: int = 72,
+        velocity: int = 100,
+        output_dir: str = "output",
     ):
-        self.queue = queue
+        self.queue = work_queue
+        self.pbar = pbar
         self.sample_rate = sample_rate
         self.block_size = block_size
         self.bpm = bpm
@@ -63,7 +69,8 @@ class TAL_UNO_Worker:
         self.velocity = velocity
         self.output_dir = Path(output_dir)
 
-    def startup(self):
+    def startup(self) -> None:
+        """Create this worker's RenderEngine and load the plugin."""
         engine = daw.RenderEngine(self.sample_rate, self.block_size)
         engine.set_bpm(self.bpm)
 
@@ -75,7 +82,8 @@ class TAL_UNO_Worker:
         self.engine = engine
         self.synth = synth
 
-    def process_item(self, item: Item):
+    def process_item(self, item: Item) -> None:
+        """Apply one XML preset, render the pitch range, and write WAV files."""
         preset_path = item.preset_path
         json_mapping = make_json_parameter_mapping(
             self.synth, preset_path, os.path.join(os.path.dirname(__file__), "parameter_mappings")
@@ -91,17 +99,16 @@ class TAL_UNO_Worker:
             output_path = self.output_dir / f"{pitch}_{basename}.wav"
             wavfile.write(str(output_path), self.sample_rate, audio.transpose())
 
-    def run(self):
-        try:
-            self.startup()
-            while True:
-                try:
-                    item = self.queue.get_nowait()
-                    self.process_item(item)
-                except multiprocessing.queues.Empty:
-                    break
-        except Exception:
-            return traceback.format_exc()
+    def run(self) -> None:
+        """Consume the queue until it's empty."""
+        self.startup()
+        while True:
+            try:
+                item = self.queue.get_nowait()
+            except queue.Empty:
+                break
+            self.process_item(item)
+            self.pbar.update(1)
 
 
 def main(
@@ -128,32 +135,29 @@ def main(
     num_items = len(preset_paths)
 
     # Create a Queue and add items
-    input_queue = multiprocessing.Manager().Queue()
+    input_queue = queue.Queue()
     for preset_path in preset_paths:
         input_queue.put(Item(preset_path))
 
-    # Create a list to hold the worker processes
-    workers = []
-
-    # The number of workers to spawn
-    num_processes = num_workers or multiprocessing.cpu_count()
+    # The number of worker threads
+    num_threads = num_workers or os.cpu_count()
 
     # Debug info
     logger.info(f"Note duration: {note_duration}")
     logger.info(f"Render duration: {render_duration}")
-    logger.info(f"Using num workers: {num_processes}")
+    logger.info(f"Using num workers: {num_threads}")
     logger.info(f"Pitch low: {pitch_low}")
     logger.info(f"Pitch high: {pitch_high}")
     logger.info(f"Output directory: {output_dir}")
 
-    makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
-    # Create a multiprocessing Pool
-    with multiprocessing.Pool(processes=num_processes) as pool:
-        # Create and start a worker process for each CPU
-        for i in range(num_processes):
-            worker = TAL_UNO_Worker(
+    # tqdm's update() is thread-safe, so all workers share one progress bar.
+    with tqdm(total=num_items) as pbar, ThreadPoolExecutor(max_workers=num_threads) as executor:
+        workers = [
+            TAL_UNO_Worker(
                 input_queue,
+                pbar,
                 plugin_path,
                 note_duration=note_duration,
                 render_duration=render_duration,
@@ -161,32 +165,18 @@ def main(
                 pitch_high=pitch_high,
                 output_dir=output_dir,
             )
-            async_result = pool.apply_async(worker.run)
-            workers.append(async_result)
+            for _ in range(num_threads)
+        ]
+        futures = [executor.submit(worker.run) for worker in workers]
 
-        # Use tqdm to track progress. Update the progress bar in each iteration.
-        pbar = tqdm(total=num_items)
-        while True:
-            incomplete_count = sum(1 for w in workers if not w.ready())
-            pbar.update(pbar.total - incomplete_count - pbar.n)
-            if incomplete_count == 0:
-                break
-            time.sleep(0.1)
-        pbar.close()
-
-    # Check for exceptions in the worker processes
-    for i, worker in enumerate(workers):
-        exception = worker.get()
-        if exception is not None:
-            logger.error(f"Exception in worker {i}:\n{exception}")
+        # Propagate any exception raised in a worker thread.
+        for future in futures:
+            future.result()
 
     logger.info("All done!")
 
 
 if __name__ == "__main__":
-    # We're using multiprocessing.Pool, so our code MUST be inside __main__.
-    # See https://docs.python.org/3/library/multiprocessing.html
-
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -196,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument("--pitch-low", default=60, help="Lowest MIDI pitch to be used.")
     parser.add_argument("--pitch-high", default=64, help="Highest MIDI pitch to be used.")
     parser.add_argument("--render-duration", default=4, help="Render duration in seconds.")
-    parser.add_argument("--num-workers", default=None, help="Number of workers to use.")
+    parser.add_argument("--num-workers", default=None, help="Number of worker threads to use.")
     parser.add_argument(
         "--output-dir",
         default=os.path.join(os.path.dirname(__file__), "output"),

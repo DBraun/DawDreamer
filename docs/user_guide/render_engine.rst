@@ -133,6 +133,20 @@ Load a processor graph before rendering:
 
 See :doc:`index` for more details on graph construction.
 
+Looking Up and Removing Processors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Processors are registered with the engine by their unique name:
+
+.. code-block:: python
+
+   proc = engine.get_processor("processor_a")  # None if not found
+
+   removed = engine.remove_processor("processor_a")  # True if it existed
+
+.. warning::
+   After ``remove_processor``, existing Python references to that processor are invalid and must not be used.
+
 Re-rendering
 ~~~~~~~~~~~~
 
@@ -212,6 +226,7 @@ Performance Considerations
 * **Block size**: Affects real-time performance and automation granularity
 * **Processor types**: Some processors (Faust, VST plugins) are more CPU-intensive than others
 * **Automation**: Audio-rate automation is more expensive than static parameters
+* **Parallelism**: ``render`` releases the GIL, so multiple engines can render concurrently on Python threads. See :doc:`threading`.
 
 Example: Complete Workflow
 ---------------------------

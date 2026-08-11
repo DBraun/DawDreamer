@@ -12,6 +12,8 @@ This guide covers all aspects of using DawDreamer, from basic rendering concepts
    playback
    playback_warp
    other_processors
+   threading
+   pickling
 
 Overview
 --------
@@ -49,7 +51,9 @@ DawDreamer supports several processor types:
    See :doc:`plugin_processor` for details.
 
 **Playback Processor**
-   Plays back audio from memory with optional looping.
+   Plays back audio from memory once per render. For looping, use the Playback Warp Processor.
+
+   See :doc:`playback` for details.
 
 **Playback Warp Processor**
    Time-stretching, pitch-shifting, and warp marker support (Ableton Live compatible).
@@ -125,10 +129,10 @@ Processors automatically handle channel counts. If a processor expects 2 channel
    # Mix two stereo inputs, scaling each by 0.5 to avoid clipping
    mixer = engine.make_add_processor("mixer", [0.5, 0.5])
 
-Parallel Processing
-~~~~~~~~~~~~~~~~~~~
+Graph Fan-Out
+~~~~~~~~~~~~~
 
-Process the same input with multiple effects:
+Process the same input with multiple effects. (For rendering with multiple CPU cores, see :doc:`threading`.)
 
 .. code-block:: python
 

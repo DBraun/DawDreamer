@@ -133,6 +133,9 @@ The Faust APIs provide two complementary approaches to building audio processors
 
 See the `Faust Box API Example <https://github.com/DBraun/DawDreamer/tree/main/examples/Box_API>`_ for practical usage.
 
+.. note::
+   The listings below are a hand-picked subset of the most common functions. The bindings expose many hundreds of box and signal functions; use ``dir(dawdreamer.faust.box)`` and ``dir(dawdreamer.faust.signal)`` or ``help()`` in a Python session to browse everything.
+
 Faust Module
 ~~~~~~~~~~~~
 
@@ -140,7 +143,16 @@ The main ``dawdreamer.faust`` module provides:
 
 .. py:class:: dawdreamer.faust.FaustContext
 
-   Context manager for Faust compilation and execution.
+   Context manager that creates the Faust library context on entry and destroys it on exit. Use it with a ``with`` statement around any Box or Signal API work:
+
+   .. code-block:: python
+
+      from dawdreamer.faust import FaustContext
+      from dawdreamer.faust.box import boxReal
+
+      with FaustContext():
+          box = boxReal(0.5)
+          # ... build and compile boxes here ...
 
 .. py:function:: dawdreamer.faust.createLibContext()
 
@@ -394,10 +406,3 @@ Further Reading
 * `Faust Official Documentation <https://faustdoc.grame.fr/>`_
 * `Faust Signal API Reference <https://faustdoc.grame.fr/manual/syntax/#signals>`_
 * :doc:`../user_guide/faust_processor` - Using Faust DSP in DawDreamer
-
-Indices and Tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

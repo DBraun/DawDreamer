@@ -115,6 +115,17 @@ Getting Parameter Values
    value = synth.get_parameter(1)
    print(f"Parameter 1 value: {value}")
 
+Getting and Setting Patches
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A patch is all parameter values at once, as a list of ``(index, value)`` tuples. It's a lightweight way to snapshot and restore settings without a preset file:
+
+.. code-block:: python
+
+   patch = synth.get_patch()
+   # ... change parameters ...
+   synth.set_patch(patch)  # restore the snapshot
+
 Getting Parameter Ranges
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -240,6 +251,16 @@ Remove all MIDI notes and events:
 
    synth.clear_midi()
 
+Counting MIDI Events
+~~~~~~~~~~~~~~~~~~~~
+
+The ``n_midi_events`` property returns the number of buffered MIDI events. Note-ons and note-offs count separately, so one ``add_midi_note`` call adds two events:
+
+.. code-block:: python
+
+   synth.add_midi_note(60, 100, 0.0, 1.0)
+   assert synth.n_midi_events == 2
+
 Graph Integration
 -----------------
 
@@ -292,6 +313,12 @@ Checking Bus Support
    if plugin.can_set_bus(1, 9):
        plugin.set_bus(1, 9)
 
+   # Enable every bus the plugin offers; can help with non-stereo outputs
+   plugin.enable_all_buses()
+
+   # Or disable all aux and sidechain buses, keeping only the main ones
+   plugin.disable_nonmain_buses()
+
 Sidechain Processing
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -319,15 +346,16 @@ Some plugins accept multiple inputs (e.g., sidechain compressors):
 
    engine.load_graph(graph)
 
-Channel Counts
-~~~~~~~~~~~~~~
+Channel Counts and Latency
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Check a plugin's input/output channel configuration:
+Check a plugin's input/output channel configuration and reported latency:
 
 .. code-block:: python
 
    print("Inputs:", synth.get_num_input_channels())
    print("Outputs:", synth.get_num_output_channels())
+   print("Latency in samples:", synth.get_latency_samples())
 
 Complete Example
 ----------------

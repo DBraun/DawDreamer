@@ -331,7 +331,7 @@ Verify that the installation completed:
 
 .. code-block:: bash
 
-   python3 -c "import dawdreamer; print('Installed successfully')"
+   python3 -c "import dawdreamer; print('Installed', dawdreamer.__version__)"
 
 If it fails, try reinstalling:
 

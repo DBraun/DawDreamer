@@ -107,18 +107,18 @@ Demonstrates DJ-style mixing techniques including beatmatching, crossfading, and
 * Mix generation
 * Audio analysis and matching
 
-Multiprocessing with Plugins
------------------------------
+Parallel Rendering with Plugins
+-------------------------------
 
 **Location**: `examples/multiprocessing_plugins/ <https://github.com/DBraun/DawDreamer/tree/main/examples/multiprocessing_plugins>`_
 
-Shows how to use Python's multiprocessing to render multiple VST plugin instances in parallel.
+Shows how to render many VST plugin presets in parallel with a thread pool. DawDreamer releases the GIL while rendering, so worker threads with one engine each render concurrently in a single process (see :doc:`user_guide/threading`).
 
 **Topics covered:**
 
-* Parallel processing of plugin chains
+* One persistent engine per worker thread
 * Batch rendering optimization
-* Process pool management
+* Thread pool and work queue management
 * Combining results from multiple renders
 
 **Format**: Python script + README
@@ -192,7 +192,7 @@ Run standalone examples directly:
 .. code-block:: bash
 
    cd examples/dj_mixing/
-   python dj_mixing.py
+   python dj.py
 
 Check each example's README for specific instructions.
 
