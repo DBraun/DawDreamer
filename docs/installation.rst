@@ -323,7 +323,7 @@ Common Issues
 
 This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
 and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
-You'll see "Successfully installed dawdreamer-0.8.4" when done.
+You'll see "Successfully installed dawdreamer-0.9.0" when done.
 
 **ImportError after installation**
 

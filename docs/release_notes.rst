@@ -10,7 +10,7 @@ repository root, which follows the `Keep a Changelog
 .. note::
    **Versioning**: DawDreamer uses effort-based versioning. Version numbers reflect the scope of changes rather than strict semantic versioning rules.
 
-v0.8.4 (unreleased)
+v0.9.0 (unreleased)
 -------------------
 
 **Infrastructure upgrades:**
