@@ -4,8 +4,14 @@
 
 #include <filesystem>
 #include <iostream>
+#include <mutex>
 
 #include "faust/midi/RtMidi.cpp"
+
+// libfaust DSP factory creation and deletion are not thread-safe, and the
+// compile bindings release the GIL, so all compilation across every
+// FaustProcessor instance is serialized with this process-wide mutex.
+static std::mutex faustCompileMutex;
 
 #ifdef WIN32
 __declspec(selectany) std::list<GUI*> GUI::fGuiList;
@@ -86,7 +92,12 @@ FaustProcessor::FaustProcessor(std::string newUniqueName, double sampleRate, int
 
 FaustProcessor::~FaustProcessor()
 {
-    clear();
+    {
+        // clear() deletes DSP factories, which must not race a compile on
+        // another thread.
+        std::lock_guard<std::mutex> lock(faustCompileMutex);
+        clear();
+    }
 
     myMidiBufferQN.clear();
     myMidiBufferSec.clear();
@@ -247,8 +258,6 @@ void FaustProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBuf
 
     ProcessorBase::processBlock(buffer, midiBuffer);
 }
-
-#include <iostream>
 
 bool hasEnding(std::string const& fullString, std::string const& ending)
 {
@@ -466,6 +475,8 @@ std::string FaustProcessor::getTarget()
 
 bool FaustProcessor::compile()
 {
+    std::lock_guard<std::mutex> lock(faustCompileMutex);
+
     m_compileState = kNotCompiled;
 
     // clean up
@@ -544,6 +555,8 @@ bool FaustProcessor::compile()
 
 bool FaustProcessor::compileFromBitcode(const std::string& bitcode)
 {
+    std::lock_guard<std::mutex> lock(faustCompileMutex);
+
     m_compileState = kNotCompiled;
     clear();
 
@@ -660,6 +673,8 @@ bool FaustProcessor::initFromFactory()
 
 bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
 {
+    std::lock_guard<std::mutex> lock(faustCompileMutex);
+
     clear();
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
@@ -753,6 +768,8 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers)
 bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
                                     const std::vector<std::string>& in_argv)
 {
+    std::lock_guard<std::mutex> lock(faustCompileMutex);
+
     clear();
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
@@ -846,6 +863,8 @@ bool FaustProcessor::compileSignals(std::vector<SigWrapper>& wrappers,
 
 bool FaustProcessor::compileBox(BoxWrapper& box)
 {
+    std::lock_guard<std::mutex> lock(faustCompileMutex);
+
     clear();
 
     auto pathToFaustLibraries = getPathToFaustLibraries();
@@ -929,6 +948,8 @@ bool FaustProcessor::compileBox(BoxWrapper& box)
 
 bool FaustProcessor::compileBox(BoxWrapper& box, const std::vector<std::string>& in_argv)
 {
+    std::lock_guard<std::mutex> lock(faustCompileMutex);
+
     clear();
 
     auto pathToFaustLibraries = getPathToFaustLibraries();

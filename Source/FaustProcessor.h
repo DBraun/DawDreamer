@@ -605,10 +605,11 @@ inline void create_bindings_for_faust_processor(nb::module_& m)
              "Set the FAUST box process with a file.")
         .def("set_dsp_string", &FaustProcessor::setDSPString, arg("faust_code"),
              "Set the FAUST box process with a string containing FAUST code.")
-        .def("compile", &FaustProcessor::compile,
+        .def("compile", &FaustProcessor::compile, nb::call_guard<nb::gil_scoped_release>(),
              "Compile the FAUST object. You must have already set a dsp file "
              "path or dsp string.")
         .def("compile_from_bitcode", &FaustProcessor::compileFromBitcode, arg("bitcode"),
+             nb::call_guard<nb::gil_scoped_release>(),
              "Restore a compiled FAUST object from LLVM bitcode, avoiding "
              "recompilation from source. Bitcode can be obtained from the "
              "processor's pickle state dict.")
@@ -682,17 +683,17 @@ inline void create_bindings_for_faust_processor(nb::module_& m)
 
         .def("compile_signals",
              nb::overload_cast<std::vector<SigWrapper>&>(&FaustProcessor::compileSignals),
-             arg("signals"), returnPolicy)
+             arg("signals"), nb::call_guard<nb::gil_scoped_release>(), returnPolicy)
         .def("compile_signals",
              nb::overload_cast<std::vector<SigWrapper>&, const std::vector<std::string>&>(
                  &FaustProcessor::compileSignals),
-             arg("signals"), arg("argv"), returnPolicy)
+             arg("signals"), arg("argv"), nb::call_guard<nb::gil_scoped_release>(), returnPolicy)
         .def("compile_box", nb::overload_cast<BoxWrapper&>(&FaustProcessor::compileBox), arg("box"),
-             returnPolicy)
+             nb::call_guard<nb::gil_scoped_release>(), returnPolicy)
         .def("compile_box",
              nb::overload_cast<BoxWrapper&, const std::vector<std::string>&>(
                  &FaustProcessor::compileBox),
-             arg("box"), arg("argv"), returnPolicy)
+             arg("box"), arg("argv"), nb::call_guard<nb::gil_scoped_release>(), returnPolicy)
 
         .def("__getstate__", &FaustProcessor::getPickleState)
         .def("__setstate__", &FaustProcessor::setPickleState)

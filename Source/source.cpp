@@ -312,15 +312,17 @@ but the filter mode cannot under automation.";
         .def("disable_nonmain_buses", &PluginProcessorWrapper::disableNonMainBuses,
              "Disable all non-main buses (aux and sidechains).")
         .def("save_state", &PluginProcessorWrapper::saveStateInformation, arg("filepath"),
-             "Save the state to a file.")
+             nb::call_guard<nb::gil_scoped_release>(), "Save the state to a file.")
         .def("load_state", &PluginProcessorWrapper::loadStateInformation, arg("filepath"),
-             "Load the state from a file.")
+             nb::call_guard<nb::gil_scoped_release>(), "Load the state from a file.")
         .def("open_editor", &PluginProcessorWrapper::openEditor,
              "Open the UI editor for the plugin.")
         .def("load_preset", &PluginProcessorWrapper::loadPreset, arg("filepath"),
+             nb::call_guard<nb::gil_scoped_release>(),
              "Load an FXP preset with an absolute filepath and \".fxp\" "
              "extension.")
         .def("load_vst3_preset", &PluginProcessorWrapper::loadVST3Preset, arg("filepath"),
+             nb::call_guard<nb::gil_scoped_release>(),
              "Load a VST3 preset with an absolute filepath and \".vstpreset\" "
              "extension.")
         .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
@@ -468,9 +470,12 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
                              "A Render Engine loads and runs a graph of audio processors.")
         .def(nb::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngine::render, arg("duration"), kw_only(), arg("beats") = false,
+             nb::call_guard<nb::gil_scoped_release>(),
              "Render the most recently loaded graph. By default, when "
              "`beats` is "
-             "False, duration is measured in seconds, otherwise beats.")
+             "False, duration is measured in seconds, otherwise beats. "
+             "The GIL is released during rendering, so multiple engines can "
+             "render concurrently on Python threads.")
         .def("set_bpm", &RenderEngine::setBPM, arg("bpm"),
              "Set the beats-per-minute of the engine as a constant rate.")
         .def("set_bpm", &RenderEngine::setBPMwithPPQN, arg("bpm"), arg("ppqn"),
@@ -495,7 +500,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def("make_oscillator_processor", &RenderEngine::makeOscillatorProcessor, arg("name"),
              arg("frequency"), "Make an Oscillator Processor", returnPolicy)
         .def("make_plugin_processor", &RenderEngine::makePluginProcessor, arg("name"),
-             arg("plugin_path"), "Make a Plugin Processor", returnPolicy)
+             arg("plugin_path"), nb::call_guard<nb::gil_scoped_release>(),
+             "Make a Plugin Processor", returnPolicy)
         .def("make_sampler_processor", &RenderEngine::makeSamplerProcessor, arg("name"),
              arg("data"),
              "Make a Sampler Processor with audio data to be used as the "

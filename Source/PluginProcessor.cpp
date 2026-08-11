@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 
 #include <filesystem>
+#include <mutex>
 #include <regex>
 
 #include "StandalonePluginWindow.h"
@@ -65,6 +66,12 @@ void PluginProcessor::openEditor()
 
 bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock)
 {
+    // Plugin scanning and instantiation use shared JUCE machinery, and
+    // make_plugin_processor releases the GIL, so serialize loads across
+    // threads.
+    static std::mutex pluginLoadMutex;
+    std::lock_guard<std::mutex> lock(pluginLoadMutex);
+
     OwnedArray<PluginDescription> pluginDescriptions;
     KnownPluginList pluginList;
     AudioPluginFormatManager pluginFormatManager;

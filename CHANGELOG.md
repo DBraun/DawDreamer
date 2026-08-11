@@ -23,7 +23,13 @@ called out explicitly in each release's notes.
 ### Changed
 
 - Python bindings switched from pybind11 to [nanobind](https://github.com/wjakob/nanobind)
-  (v2.13.0).
+  (v2.14.0).
+- The GIL is released during `RenderEngine.render`, `make_plugin_processor`,
+  plugin state/preset loading, and all `FaustProcessor` compile methods, so
+  other Python threads (including other engines rendering) can run concurrently.
+  Faust compilation and plugin loading are internally serialized with a mutex
+  because libfaust factory creation and JUCE plugin scanning are not
+  thread-safe.
 - Faust and libfaust updated to 2.85.9, with the matching faustlibraries.
 - The Sampler processor was updated for JUCE 8.
 - Minimum Python version is now 3.11.

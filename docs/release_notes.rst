@@ -15,7 +15,8 @@ v0.8.4 (unreleased)
 
 **Infrastructure upgrades:**
 
-* **Switched from pybind11 to nanobind** (v2.13.0) - Modern C++17 Python bindings with improved performance and smaller binary size
+* **Switched from pybind11 to nanobind** (v2.14.0) - Modern C++17 Python bindings with improved performance and smaller binary size
+* **The GIL is released during rendering, plugin loading, and Faust compilation** - Multiple engines can render concurrently on Python threads
 * **Updated Faust and libfaust to 2.85.9** and the Faust libraries to the matching release
 * **Python 3.11-3.14** supported and tested in CI
 * **New wheels**: Linux aarch64 and macOS Intel (x86_64) wheels are published alongside the existing Linux x86_64, macOS arm64, and Windows x86_64 wheels
