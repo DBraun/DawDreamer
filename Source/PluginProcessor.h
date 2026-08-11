@@ -21,6 +21,11 @@ class PluginProcessor : public ProcessorBase
 
     bool setBusesLayout(const BusesLayout& arr) override;
 
+    // These shadow juce::AudioProcessor's non-virtual methods so that the
+    // Python bindings reach the hosted plugin, not just this wrapper.
+    bool enableAllBuses();
+    bool disableNonMainBuses();
+
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
     void releaseResources() override;

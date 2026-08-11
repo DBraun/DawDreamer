@@ -185,6 +185,8 @@ class SamplerProcessor : public ProcessorBase
 
     void setData(nb::ndarray<float> input)
     {
+        validateAudioNdarray(input, "SamplerProcessor::set_data");
+
         float* input_ptr = (float*)input.data();
 
         int num_channels = (int)input.shape(0);

@@ -426,6 +426,8 @@ void PlaybackWarpProcessor::reset()
 
 void PlaybackWarpProcessor::setData(nb::ndarray<float> input, double data_sr)
 {
+    validateAudioNdarray(input, "PlaybackWarpProcessor::set_data");
+
     float* input_ptr = (float*)input.data();
 
     m_numChannels = (int)input.shape(0);

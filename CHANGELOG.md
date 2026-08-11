@@ -42,6 +42,16 @@ called out explicitly in each release's notes.
 - `make_panner_processor` did not clamp pan values below -1.
 - `load_graph` now validates input names immediately instead of failing later
   during render.
+- Passing non-2D audio data to the Playback, PlaybackWarp, or Sampler
+  processors now raises a `RuntimeError` instead of crashing, and zero-sample
+  audio data renders silence ([#219](https://github.com/DBraun/DawDreamer/issues/219)).
+- `set_bus` deactivates the hosted plugin before changing the bus arrangement,
+  as VST3 requires ([#216](https://github.com/DBraun/DawDreamer/issues/216)).
+- `enable_all_buses` and `disable_nonmain_buses` now affect the hosted plugin;
+  previously they only touched the wrapper processor and were effectively no-ops.
+- Loading a plugin no longer probes the path with every plugin format, which
+  removes spurious stderr errors such as LV2's "attempt to map invalid URI"
+  for a `.vst3` path ([#218](https://github.com/DBraun/DawDreamer/issues/218)).
 
 ### Removed
 

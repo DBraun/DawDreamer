@@ -6,6 +6,19 @@
 
 const int DAW_PARAMETER_MAX_NAME_LENGTH = 512;
 
+// Throw with a clear message unless the array is 2D shaped (channels, samples).
+// Reading shape(1) on a 0-D or 1-D nanobind ndarray is undefined behavior, so
+// every audio-accepting entry point must call this before touching the shape.
+inline void validateAudioNdarray(const nb::ndarray<float>& input, const std::string& context)
+{
+    if (input.ndim() != 2)
+    {
+        throw std::runtime_error(context + ": audio data must be a 2D array shaped " +
+                                 "(channels, samples), but received an array with " +
+                                 std::to_string(input.ndim()) + " dimension(s).");
+    }
+}
+
 // Replacement for the deprecated juce::MidiBuffer::Iterator: pops messages
 // one at a time, in order, from a MidiBuffer. The buffer must outlive the
 // cursor and must not be modified while the cursor is in use.

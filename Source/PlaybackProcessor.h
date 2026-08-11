@@ -35,8 +35,11 @@ class PlaybackProcessor : public ProcessorBase
 
         buffer.clear();
 
-        int numSamples = std::min(buffer.getNumSamples(), myPlaybackData.getNumSamples() -
-                                                              (int)(*posInfo->getTimeInSamples()));
+        // The playhead can be past the end of the data (including data with
+        // zero samples), so clamp to zero to avoid a negative copy length.
+        int numSamples =
+            std::max(0, std::min(buffer.getNumSamples(), myPlaybackData.getNumSamples() -
+                                                             (int)(*posInfo->getTimeInSamples())));
 
         for (int chan = 0; chan < m_numChannels; chan++)
         {
@@ -82,6 +85,8 @@ class PlaybackProcessor : public ProcessorBase
 
     void setData(nb::ndarray<float> input)
     {
+        validateAudioNdarray(input, "PlaybackProcessor::set_data");
+
         float* input_ptr = (float*)input.data();
 
         m_numChannels = (int)input.shape(0);

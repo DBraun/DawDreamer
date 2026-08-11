@@ -80,8 +80,16 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock)
 
     for (int i = pluginFormatManager.getNumFormats(); --i >= 0;)
     {
-        pluginList.scanAndAddFile(String(myPluginPath), true, pluginDescriptions,
-                                  *pluginFormatManager.getFormat(i));
+        auto* format = pluginFormatManager.getFormat(i);
+
+        // Only scan with formats that might match the file. Probing a path
+        // with every format is slow and makes non-matching backends print
+        // errors to stderr (e.g. LV2's "attempt to map invalid URI" for a
+        // .vst3 path).
+        if (format->fileMightContainThisPluginType(String(myPluginPath)))
+        {
+            pluginList.scanAndAddFile(String(myPluginPath), true, pluginDescriptions, *format);
+        }
     }
 
     if (myPlugin.get())
@@ -177,7 +185,38 @@ bool PluginProcessor::setBusesLayout(const BusesLayout& arr)
 {
     THROW_ERROR_IF_NO_PLUGIN
     ProcessorBase::setBusesLayout(arr);
-    return myPlugin->setBusesLayout(arr);
+
+    // A plugin (VST3 in particular) must be deactivated before its bus
+    // arrangement changes, and reactivated afterwards.
+    myPlugin->releaseResources();
+    bool result = myPlugin->setBusesLayout(arr);
+    myPlugin->prepareToPlay(mySampleRate, this->getBlockSize());
+
+    return result;
+}
+
+bool PluginProcessor::enableAllBuses()
+{
+    THROW_ERROR_IF_NO_PLUGIN
+
+    myPlugin->releaseResources();
+    bool result = myPlugin->enableAllBuses();
+    ProcessorBase::setBusesLayout(myPlugin->getBusesLayout());
+    myPlugin->prepareToPlay(mySampleRate, this->getBlockSize());
+
+    return result;
+}
+
+bool PluginProcessor::disableNonMainBuses()
+{
+    THROW_ERROR_IF_NO_PLUGIN
+
+    myPlugin->releaseResources();
+    bool result = myPlugin->disableNonMainBuses();
+    ProcessorBase::setBusesLayout(myPlugin->getBusesLayout());
+    myPlugin->prepareToPlay(mySampleRate, this->getBlockSize());
+
+    return result;
 }
 
 void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
