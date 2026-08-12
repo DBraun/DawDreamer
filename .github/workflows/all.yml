@@ -113,11 +113,6 @@ jobs:
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
-      with:
-        # The projects are Projucer-generated for VS2022 (v143 toolset), so
-        # select VS2022's MSBuild. The windows-2025 image also carries VS2026,
-        # whose MSBuild would otherwise be picked up as the newest.
-        vs-version: '[17.0,18.0)'
 
     - name: Get CMake
       uses: lukka/get-cmake@latest
