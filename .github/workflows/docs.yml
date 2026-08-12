@@ -45,8 +45,7 @@ jobs:
       run: |
         cd thirdparty/libsamplerate
         cmake -DCMAKE_BUILD_TYPE=Release -Bbuild_release
-        cd build_release
-        msbuild libsamplerate.sln /property:Configuration=Release
+        cmake --build build_release --config Release
 
     - name: Build DawDreamer (Release)
       run: |
