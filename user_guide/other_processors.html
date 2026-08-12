@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Built-In Effect Processors &mdash; DawDreamer 0.8.4 documentation</title>
+  <title>Built-In Processors &mdash; DawDreamer 0.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=b41f4c93"></script>
+      <script src="../_static/documentation_options.js?v=39bb1c6d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="next" title="Multithreading and Multiprocessing" href="threading.html" />
     <link rel="prev" title="Playback Warp Processor" href="playback_warp.html" /> 
 </head>
 
@@ -98,6 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="render_engine.html#getting-audio-output">Getting Audio Output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="render_engine.html#graph-management">Graph Management</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#looking-up-and-removing-processors">Looking Up and Removing Processors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="render_engine.html#re-rendering">Re-rendering</a></li>
 </ul>
 </li>
@@ -129,9 +130,12 @@
 <li class="toctree-l3"><a class="reference internal" href="faust_processor.html#multi-channel-processing">Multi-Channel Processing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="faust_processor.html#polyphony">Polyphony</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="faust_processor.html#enabling-polyphony">Enabling Polyphony</a></li>
+<li class="toctree-l4"><a class="reference internal" href="faust_processor.html#tuning-polyphony">Tuning Polyphony</a></li>
 <li class="toctree-l4"><a class="reference internal" href="faust_processor.html#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#compilation-options">Compilation Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="faust_processor.html#compiling-from-the-box-and-signal-apis">Compiling from the Box and Signal APIs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="faust_processor.html#soundfiles">Soundfiles</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="faust_processor.html#id1">Example</a></li>
 <li class="toctree-l4"><a class="reference internal" href="faust_processor.html#advanced-example-88-key-piano">Advanced Example: 88-Key Piano</a></li>
@@ -158,6 +162,7 @@
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#listing-parameters">Listing Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#setting-parameters">Setting Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#getting-and-setting-patches">Getting and Setting Patches</a></li>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#getting-parameter-ranges">Getting Parameter Ranges</a></li>
 </ul>
 </li>
@@ -167,6 +172,7 @@
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#loading-midi-files">Loading MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#saving-midi-files">Saving MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#clearing-midi">Clearing MIDI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#counting-midi-events">Counting MIDI Events</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#graph-integration">Graph Integration</a><ul>
@@ -177,7 +183,7 @@
 <li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#multi-channel-buses">Multi-Channel Buses</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#checking-bus-support">Checking Bus Support</a></li>
 <li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#sidechain-processing">Sidechain Processing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#channel-counts">Channel Counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plugin_processor.html#channel-counts-and-latency">Channel Counts and Latency</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="plugin_processor.html#complete-example">Complete Example</a></li>
@@ -218,7 +224,7 @@
 <li class="toctree-l3"><a class="reference internal" href="playback_warp.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Built-In Effect Processors</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Built-In Processors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#add-processor-mixer">Add Processor (Mixer)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#setting-gain-levels">Setting Gain Levels</a></li>
@@ -256,7 +262,27 @@
 <li class="toctree-l4"><a class="reference internal" href="#id10">Adjusting Parameters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#sampler-processor">Sampler Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#discovering-parameters">Discovering Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#oscillator-processor">Oscillator Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#processor-specific-tips">Processor-Specific Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="threading.html">Multithreading and Multiprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="threading.html#rendering-on-a-thread-pool">Rendering on a Thread Pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading.html#internal-serialization">Internal Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading.html#thread-safety-rules">Thread-Safety Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="threading.html#when-to-use-multiprocessing">When to Use Multiprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pickling.html">Pickling and Serialization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pickling.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pickling.html#what-gets-preserved">What Gets Preserved</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pickling.html#format-versioning">Format Versioning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pickling.html#caveats">Caveats</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#overview">Overview</a></li>
@@ -264,7 +290,7 @@
 <li class="toctree-l2"><a class="reference internal" href="index.html#basic-workflow">Basic Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#common-patterns">Common Patterns</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="index.html#multi-channel-routing">Multi-Channel Routing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#parallel-processing">Parallel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#graph-fan-out">Graph Fan-Out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="index.html#parameter-automation">Parameter Automation</a></li>
 </ul>
 </li>
@@ -281,7 +307,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#faust-to-qdax">Faust to QDax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#mashup-generator">Mashup Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#dj-mixing">DJ Mixing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples.html#multiprocessing-with-plugins">Multiprocessing with Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#parallel-rendering-with-plugins">Parallel Rendering with Plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#xml-synth-sound-rendering">XML Synth Sound Rendering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#running-the-examples">Running the Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../examples.html#prerequisites">Prerequisites</a></li>
@@ -391,7 +417,6 @@
 <li class="toctree-l3"><a class="reference internal" href="../api_reference/index.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../api_reference/index.html#indices-and-tables">Indices and Tables</a></li>
 </ul>
 </li>
 </ul>
@@ -414,7 +439,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-4-2025">v0.8.4 (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-9-0-unreleased">v0.9.0 (unreleased)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
@@ -424,12 +449,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-3-2022-04-19">v0.6.3 (2022-04-19)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-1-2022-04-04">v0.6.1 (2022-04-04)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-0-2022-03-24">v0.6.0 (2022-03-24)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-8-1-2021-01-13">v0.5.8.1 (2021-01-13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-8-1-2022-01-13">v0.5.8.1 (2022-01-13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-7-8-2021-10-09">v0.5.7.8 (2021-10-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-7-2021-08-14">v0.5.7 (2021-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-6-2021-05-09">v0.5.6 (2021-05-09)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-0-2021-04-01">v0.5.0 (2021-04-01)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-4-0-2020-12-01">v0.4.0 (2020-12-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-0-2021-06-18">v0.5.0 (2021-06-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-4-0-2020-12-08">v0.4.0 (2020-12-08)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-1-0-2020-08-14">v0.1.0 (2020-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#upgrade-guide">Upgrade Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../release_notes.html#v0-8-0-breaking-changes">v0.8.0 Breaking Changes</a></li>
@@ -461,7 +486,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
-      <li class="breadcrumb-item active">Built-In Effect Processors</li>
+      <li class="breadcrumb-item active">Built-In Processors</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/DBraun/DawDreamer/blob/main/docs/user_guide/other_processors.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -471,9 +496,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="built-in-effect-processors">
-<h1>Built-In Effect Processors<a class="headerlink" href="#built-in-effect-processors" title="Link to this heading"></a></h1>
-<p>DawDreamer includes several built-in processors for common audio tasks: mixing, filtering, dynamics, spatial effects, and delays.</p>
+  <section id="built-in-processors">
+<h1>Built-In Processors<a class="headerlink" href="#built-in-processors" title="Link to this heading"></a></h1>
+<p>DawDreamer includes several built-in processors for common audio tasks: mixing, filtering, dynamics, spatial effects, delays, sample playback, and test signals.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
@@ -498,9 +523,6 @@
 <h3>Setting Gain Levels<a class="headerlink" href="#setting-gain-levels" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adjust gain for each input</span>
 <span class="n">add_proc</span><span class="o">.</span><span class="n">gain_levels</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>  <span class="c1"># 50% gain for 3 inputs</span>
-
-<span class="c1"># Or set a single gain for all inputs</span>
-<span class="n">add_proc</span><span class="o">.</span><span class="n">set_gain</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -563,7 +585,7 @@
 <h3>Setting Parameters<a class="headerlink" href="#setting-parameters" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adjust parameters</span>
 <span class="n">filter_proc</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;low&quot;</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="mf">500.0</span>
+<span class="n">filter_proc</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="mf">500.0</span>
 <span class="n">filter_proc</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="mf">2.0</span>
 <span class="n">filter_proc</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># Only affects shelf modes</span>
 </pre></div>
@@ -732,6 +754,55 @@
 </div>
 </section>
 </section>
+<section id="sampler-processor">
+<h2>Sampler Processor<a class="headerlink" href="#sampler-processor" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">SamplerProcessor</span></code> plays a single audio sample as a pitched MIDI instrument, based on JUCE’s sampler. It repitches the sample relative to a center note and shapes it with amplitude and filter envelopes.</p>
+<section id="id11">
+<h3>Basic Usage<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># data is a numpy array shaped (channels, samples)</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_sampler_processor</span><span class="p">(</span><span class="s2">&quot;sampler&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># The sample can be swapped later</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">other_data</span><span class="p">)</span>
+
+<span class="c1"># (MIDI note, velocity, start time in seconds, duration in seconds)</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">add_midi_note</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">sampler</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="discovering-parameters">
+<h3>Discovering Parameters<a class="headerlink" href="#discovering-parameters" title="Link to this heading"></a></h3>
+<p>The sampler’s parameters (all normalized ranges) are generated at runtime, so discover them with <code class="docutils literal notranslate"><span class="pre">get_parameters_description</span></code> and set them by index:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">desc</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">par_index</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">par</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">par</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> not found.&quot;</span><span class="p">)</span>
+
+<span class="n">sampler</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">par_index</span><span class="p">(</span><span class="s2">&quot;Center Note&quot;</span><span class="p">),</span> <span class="mf">60.0</span><span class="p">)</span>      <span class="c1"># sample plays unpitched at middle C</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">par_index</span><span class="p">(</span><span class="s2">&quot;Amp Active&quot;</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>        <span class="c1"># enable the amplitude envelope</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">par_index</span><span class="p">(</span><span class="s2">&quot;Amp Env Attack&quot;</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>    <span class="c1"># milliseconds</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">par_index</span><span class="p">(</span><span class="s2">&quot;Amp Env Release&quot;</span><span class="p">),</span> <span class="mf">100.0</span><span class="p">)</span> <span class="c1"># milliseconds</span>
+</pre></div>
+</div>
+<p>Parameter names include the center note, amplitude envelope (attack, decay, sustain, release), and filter envelope settings. Print <code class="docutils literal notranslate"><span class="pre">desc</span></code> to see them all. <a class="reference external" href="https://github.com/DBraun/DawDreamer/blob/main/tests/test_sampler.py">tests/test_sampler.py</a> has a complete example.</p>
+<p>The sampler accepts MIDI just like the plugin and Faust processors: <code class="docutils literal notranslate"><span class="pre">add_midi_note</span></code>, <code class="docutils literal notranslate"><span class="pre">load_midi</span></code>, <code class="docutils literal notranslate"><span class="pre">clear_midi</span></code>, <code class="docutils literal notranslate"><span class="pre">save_midi</span></code>, and the <code class="docutils literal notranslate"><span class="pre">n_midi_events</span></code> property.</p>
+</section>
+</section>
+<section id="oscillator-processor">
+<h2>Oscillator Processor<a class="headerlink" href="#oscillator-processor" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">OscillatorProcessor</span></code> produces a sine wave at a fixed frequency, mainly for testing graphs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">osc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_oscillator_processor</span><span class="p">(</span><span class="s2">&quot;osc&quot;</span><span class="p">,</span> <span class="mf">440.0</span><span class="p">)</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">osc</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="processor-specific-tips">
 <h2>Processor-Specific Tips<a class="headerlink" href="#processor-specific-tips" title="Link to this heading"></a></h2>
 <dl class="simple">
@@ -782,14 +853,14 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="playback_warp.html" class="btn btn-neutral float-left" title="Playback Warp Processor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="threading.html" class="btn btn-neutral float-right" title="Multithreading and Multiprocessing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Feb 07, 2026.
+      <span class="lastupdated">Last updated on Aug 12, 2026.
       </span></p>
   </div>
 

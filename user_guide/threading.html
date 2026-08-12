@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Render Engine and BPM &mdash; DawDreamer 0.9.0 documentation</title>
+  <title>Multithreading and Multiprocessing &mdash; DawDreamer 0.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Faust Processor" href="faust_processor.html" />
-    <link rel="prev" title="User Guide" href="index.html" /> 
+    <link rel="next" title="Pickling and Serialization" href="pickling.html" />
+    <link rel="prev" title="Built-In Processors" href="other_processors.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -83,33 +83,33 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Render Engine and BPM</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#creating-a-renderengine">Creating a RenderEngine</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#setting-bpm">Setting BPM</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#static-bpm">Static BPM</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#dynamic-bpm-automation">Dynamic BPM Automation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="render_engine.html">Render Engine and BPM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#creating-a-renderengine">Creating a RenderEngine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#setting-bpm">Setting BPM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#static-bpm">Static BPM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#dynamic-bpm-automation">Dynamic BPM Automation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#rendering-audio">Rendering Audio</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#render-by-duration">Render by Duration</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#render-by-beats">Render by Beats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#rendering-audio">Rendering Audio</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#render-by-duration">Render by Duration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#render-by-beats">Render by Beats</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#getting-audio-output">Getting Audio Output</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#graph-management">Graph Management</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#loading-a-graph">Loading a Graph</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#looking-up-and-removing-processors">Looking Up and Removing Processors</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#re-rendering">Re-rendering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#getting-audio-output">Getting Audio Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#graph-management">Graph Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#looking-up-and-removing-processors">Looking Up and Removing Processors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#re-rendering">Re-rendering</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#timing-and-synchronization">Timing and Synchronization</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#audio-rate-automation">Audio-Rate Automation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ppqn-rate-automation">PPQN-Rate Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#timing-and-synchronization">Timing and Synchronization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#audio-rate-automation">Audio-Rate Automation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="render_engine.html#ppqn-rate-automation">PPQN-Rate Automation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#best-practices">Best Practices</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#performance-considerations">Performance Considerations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example-complete-workflow">Example: Complete Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#best-practices">Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="render_engine.html#example-complete-workflow">Example: Complete Workflow</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="faust_processor.html">Faust Processor</a><ul>
@@ -271,11 +271,11 @@
 <li class="toctree-l3"><a class="reference internal" href="other_processors.html#processor-specific-tips">Processor-Specific Tips</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="threading.html">Multithreading and Multiprocessing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="threading.html#rendering-on-a-thread-pool">Rendering on a Thread Pool</a></li>
-<li class="toctree-l3"><a class="reference internal" href="threading.html#internal-serialization">Internal Serialization</a></li>
-<li class="toctree-l3"><a class="reference internal" href="threading.html#thread-safety-rules">Thread-Safety Rules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="threading.html#when-to-use-multiprocessing">When to Use Multiprocessing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Multithreading and Multiprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rendering-on-a-thread-pool">Rendering on a Thread Pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#internal-serialization">Internal Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#thread-safety-rules">Thread-Safety Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#when-to-use-multiprocessing">When to Use Multiprocessing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pickling.html">Pickling and Serialization</a><ul>
@@ -486,9 +486,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
-      <li class="breadcrumb-item active">Render Engine and BPM</li>
+      <li class="breadcrumb-item active">Multithreading and Multiprocessing</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/DBraun/DawDreamer/blob/main/docs/user_guide/render_engine.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/DBraun/DawDreamer/blob/main/docs/user_guide/threading.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -496,248 +496,66 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="render-engine-and-bpm">
-<h1>Render Engine and BPM<a class="headerlink" href="#render-engine-and-bpm" title="Link to this heading"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">RenderEngine</span></code> is the central orchestrator in DawDreamer. It manages the audio processing pipeline, tempo, timing, and graph execution.</p>
-<section id="creating-a-renderengine">
-<h2>Creating a RenderEngine<a class="headerlink" href="#creating-a-renderengine" title="Link to this heading"></a></h2>
-<p>Create a render engine by specifying the sample rate and block size:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
+  <section id="multithreading-and-multiprocessing">
+<h1>Multithreading and Multiprocessing<a class="headerlink" href="#multithreading-and-multiprocessing" title="Link to this heading"></a></h1>
+<p>DawDreamer releases Python’s Global Interpreter Lock (GIL) during its expensive operations, so multiple engines can do real work in parallel on ordinary Python threads. The GIL is released during:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RenderEngine.render</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RenderEngine.make_plugin_processor</span></code> (plugin scanning and instantiation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PluginProcessor.save_state</span></code> / <code class="docutils literal notranslate"><span class="pre">load_state</span></code> / <code class="docutils literal notranslate"><span class="pre">load_preset</span></code> / <code class="docutils literal notranslate"><span class="pre">load_vst3_preset</span></code></p></li>
+<li><p>All <code class="docutils literal notranslate"><span class="pre">FaustProcessor</span></code> compile methods (<code class="docutils literal notranslate"><span class="pre">compile</span></code>, <code class="docutils literal notranslate"><span class="pre">compile_box</span></code>, <code class="docutils literal notranslate"><span class="pre">compile_signals</span></code>, <code class="docutils literal notranslate"><span class="pre">compile_from_bitcode</span></code>)</p></li>
+</ul>
+<p>Everything else (<code class="docutils literal notranslate"><span class="pre">get_audio</span></code>, <code class="docutils literal notranslate"><span class="pre">set_parameter</span></code>, <code class="docutils literal notranslate"><span class="pre">add_midi_note</span></code>, graph loading, and so on) holds the GIL, but those calls are fast.</p>
+<section id="rendering-on-a-thread-pool">
+<h2>Rendering on a Thread Pool<a class="headerlink" href="#rendering-on-a-thread-pool" title="Link to this heading"></a></h2>
+<p>The recommended pattern is <strong>one engine per thread</strong>. Each worker owns a private <code class="docutils literal notranslate"><span class="pre">RenderEngine</span></code> and its processors, and workers never share objects:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
 
 <span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
-<span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">128</span>  <span class="c1"># Parameters will undergo automation at this block size</span>
+<span class="n">BLOCK_SIZE</span> <span class="o">=</span> <span class="mi">512</span>
 
-<span class="c1"># Make an engine. We typically only need one.</span>
-<span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_preset</span><span class="p">(</span><span class="n">preset_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BLOCK_SIZE</span><span class="p">)</span>
+    <span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/synth.vst3&quot;</span><span class="p">)</span>
+    <span class="n">synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="n">preset_path</span><span class="p">)</span>
+    <span class="n">synth</span><span class="o">.</span><span class="n">add_midi_note</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[])])</span>
+    <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">render_preset</span><span class="p">,</span> <span class="n">preset_paths</span><span class="p">))</span>
 </pre></div>
 </div>
-<p><strong>Parameters:</strong></p>
+<p>For long batches, create the engine once per worker and reuse it across items instead of rebuilding it per item. The <a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/examples/multiprocessing_plugins">parallel plugin rendering example</a> shows this pattern with a shared work queue.</p>
+</section>
+<section id="internal-serialization">
+<h2>Internal Serialization<a class="headerlink" href="#internal-serialization" title="Link to this heading"></a></h2>
+<p>Two operations are serialized internally with a process-wide mutex because the underlying libraries are not thread-safe:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">SAMPLE_RATE</span></code>: Audio sample rate in Hz (e.g., 44100, 48000)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BUFFER_SIZE</span></code>: Processing block size in samples (e.g., 128, 256, 512)</p></li>
+<li><p><strong>Faust compilation</strong> (libfaust DSP factory creation)</p></li>
+<li><p><strong>Plugin loading</strong> (JUCE plugin scanning and instantiation)</p></li>
 </ul>
-<p>The block size determines the granularity of parameter automation. Smaller block sizes provide finer control but may increase CPU usage.</p>
+<p>Concurrent calls are safe, but they run one at a time. Rendering is not serialized, so compile or load once per worker up front and then render in parallel.</p>
 </section>
-<section id="setting-bpm">
-<h2>Setting BPM<a class="headerlink" href="#setting-bpm" title="Link to this heading"></a></h2>
-<section id="static-bpm">
-<h3>Static BPM<a class="headerlink" href="#static-bpm" title="Link to this heading"></a></h3>
-<p>By default, the BPM (beats per minute) is 120, but you can change it:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set a fixed BPM</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">130.</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>This static BPM value is used when rendering time in beats:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Render 4 beats at 130 BPM</span>
-</pre></div>
-</div>
-</section>
-<section id="dynamic-bpm-automation">
-<h3>Dynamic BPM Automation<a class="headerlink" href="#dynamic-bpm-automation" title="Link to this heading"></a></h3>
-<p>The BPM can also be set as a numpy array that is interpreted with a fixed PPQN (Pulses Per Quarter Note). This allows for tempo changes during rendering.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">make_sine</span><span class="p">(</span><span class="n">freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return sine wave based on freq in Hz and duration in seconds&quot;&quot;&quot;</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">sr</span><span class="p">)</span>  <span class="c1"># Number of samples</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">/</span> <span class="n">sr</span><span class="p">)</span>
-
-<span class="n">PPQN</span> <span class="o">=</span> <span class="mi">960</span>  <span class="c1"># Pulses per quarter note</span>
-<span class="n">DURATION</span> <span class="o">=</span> <span class="mf">10.</span>  <span class="c1"># seconds</span>
-
-<span class="c1"># Create BPM automation that alternates between 120 and 150 BPM</span>
-<span class="n">bpm_automation</span> <span class="o">=</span> <span class="n">make_sine</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="n">DURATION</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">PPQN</span><span class="p">)</span>
-<span class="n">bpm_automation</span> <span class="o">=</span> <span class="mf">120.</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">*</span> <span class="p">(</span><span class="n">bpm_automation</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="n">bpm_automation</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">PPQN</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><strong>How it works:</strong></p>
+<section id="thread-safety-rules">
+<h2>Thread-Safety Rules<a class="headerlink" href="#thread-safety-rules" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>If you choose <code class="docutils literal notranslate"><span class="pre">ppqn=960</span></code> and the numpy array abruptly changes values every 960 samples, the tempo will abruptly change “on the beat”</p></li>
-<li><p>Higher PPQN values provide finer tempo resolution</p></li>
-<li><p>Common PPQN values: 24, 96, 480, 960</p></li>
+<li><p><strong>Do not share one engine (or its processors) across threads.</strong> Calling methods on an engine while another thread is rendering with it is a data race. Give each thread its own engine.</p></li>
+<li><p>Multiple plugin instances of the same plugin in one process is the normal DAW situation and works with well-behaved plugins. A plugin that keeps global state across instances can misbehave; isolate such plugins with <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">open_editor()</span></code> runs a GUI event loop and is not intended for worker threads.</p></li>
 </ul>
 </section>
-</section>
-<section id="rendering-audio">
-<h2>Rendering Audio<a class="headerlink" href="#rendering-audio" title="Link to this heading"></a></h2>
-<section id="render-by-duration">
-<h3>Render by Duration<a class="headerlink" href="#render-by-duration" title="Link to this heading"></a></h3>
-<p>Render a specific duration in seconds:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>  <span class="c1"># Render 4 seconds</span>
-<span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-<section id="render-by-beats">
-<h3>Render by Beats<a class="headerlink" href="#render-by-beats" title="Link to this heading"></a></h3>
-<p>Render a specific number of beats at the current BPM:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">8.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Render 8 beats (4 seconds at 120 BPM)</span>
-<span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="getting-audio-output">
-<h2>Getting Audio Output<a class="headerlink" href="#getting-audio-output" title="Link to this heading"></a></h2>
-<p>After rendering, retrieve the audio as a NumPy array:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="c1"># Shape: (num_channels, num_samples)</span>
-<span class="c1"># dtype: float32</span>
-</pre></div>
-</div>
-<p>Save the audio to a file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;output.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
-</pre></div>
-</div>
-</section>
-<section id="graph-management">
-<h2>Graph Management<a class="headerlink" href="#graph-management" title="Link to this heading"></a></h2>
-<section id="loading-a-graph">
-<h3>Loading a Graph<a class="headerlink" href="#loading-a-graph" title="Link to this heading"></a></h3>
-<p>Load a processor graph before rendering:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="n">processor_a</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">processor_b</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;processor_a&quot;</span><span class="p">])</span>
-<span class="p">]</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>See <a class="reference internal" href="index.html"><span class="doc">User Guide</span></a> for more details on graph construction.</p>
-</section>
-<section id="looking-up-and-removing-processors">
-<h3>Looking Up and Removing Processors<a class="headerlink" href="#looking-up-and-removing-processors" title="Link to this heading"></a></h3>
-<p>Processors are registered with the engine by their unique name:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_processor</span><span class="p">(</span><span class="s2">&quot;processor_a&quot;</span><span class="p">)</span>  <span class="c1"># None if not found</span>
-
-<span class="n">removed</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">remove_processor</span><span class="p">(</span><span class="s2">&quot;processor_a&quot;</span><span class="p">)</span>  <span class="c1"># True if it existed</span>
-</pre></div>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>After <code class="docutils literal notranslate"><span class="pre">remove_processor</span></code>, existing Python references to that processor are invalid and must not be used.</p>
-</div>
-</section>
-<section id="re-rendering">
-<h3>Re-rendering<a class="headerlink" href="#re-rendering" title="Link to this heading"></a></h3>
-<p>You can modify processor parameters and re-render without reloading the graph:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.</span><span class="p">)</span>
-<span class="n">audio1</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-
-<span class="c1"># Modify parameters (here on a Filter Processor)</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="mf">500.0</span>
-
-<span class="c1"># Re-render with new parameters</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.</span><span class="p">)</span>
-<span class="n">audio2</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="timing-and-synchronization">
-<h2>Timing and Synchronization<a class="headerlink" href="#timing-and-synchronization" title="Link to this heading"></a></h2>
-<section id="audio-rate-automation">
-<h3>Audio-Rate Automation<a class="headerlink" href="#audio-rate-automation" title="Link to this heading"></a></h3>
-<p>Automation data is interpreted at audio rate (one value per sample):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">duration</span> <span class="o">=</span> <span class="mf">4.0</span>
-<span class="n">num_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">SAMPLE_RATE</span><span class="p">)</span>
-<span class="n">automation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="n">automation</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="ppqn-rate-automation">
-<h3>PPQN-Rate Automation<a class="headerlink" href="#ppqn-rate-automation" title="Link to this heading"></a></h3>
-<p>Automation data is interpreted at PPQN rate (pulses per quarter note):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ppqn</span> <span class="o">=</span> <span class="mi">960</span>
-<span class="n">beats</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="n">num_pulses</span> <span class="o">=</span> <span class="n">beats</span> <span class="o">*</span> <span class="n">ppqn</span>
-<span class="n">automation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">num_pulses</span><span class="p">)</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="n">automation</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">ppqn</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">beats</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>PPQN-rate automation is ideal for musical timing because it automatically adapts to tempo changes.</p>
-</section>
-</section>
-<section id="best-practices">
-<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt><strong>Choose appropriate block size</strong></dt><dd><ul class="simple">
-<li><p>Smaller (128-256): Lower latency, finer automation, higher CPU usage</p></li>
-<li><p>Larger (512-1024): Higher latency, coarser automation, lower CPU usage</p></li>
-<li><p>512 is a good default for offline rendering</p></li>
-</ul>
-</dd>
-<dt><strong>BPM and beats</strong></dt><dd><ul class="simple">
-<li><p>Use beats=True when working with musical timing</p></li>
-<li><p>Use beats=False (seconds) for sound design or fixed-duration rendering</p></li>
-</ul>
-</dd>
-<dt><strong>Sample rate</strong></dt><dd><ul class="simple">
-<li><p>44100 Hz: CD quality, good for most applications</p></li>
-<li><p>48000 Hz: Professional video/film standard</p></li>
-<li><p>96000 Hz: High-resolution audio (higher CPU usage)</p></li>
-</ul>
-</dd>
-<dt><strong>Re-rendering</strong></dt><dd><ul class="simple">
-<li><p>The engine reuses internal buffers for efficiency</p></li>
-<li><p>You can render multiple times without recreating the engine</p></li>
-<li><p>Useful for batch processing or iterative parameter exploration</p></li>
-</ul>
-</dd>
-</dl>
-</section>
-<section id="performance-considerations">
-<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h2>
+<section id="when-to-use-multiprocessing">
+<h2>When to Use Multiprocessing<a class="headerlink" href="#when-to-use-multiprocessing" title="Link to this heading"></a></h2>
+<p>Threads are the better default: lower memory (one Python process), faster startup (the plugin binary loads into one process), and no pickling of work items. Prefer <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> when:</p>
 <ul class="simple">
-<li><p><strong>Graph complexity</strong>: More processors = more CPU usage</p></li>
-<li><p><strong>Block size</strong>: Affects real-time performance and automation granularity</p></li>
-<li><p><strong>Processor types</strong>: Some processors (Faust, VST plugins) are more CPU-intensive than others</p></li>
-<li><p><strong>Automation</strong>: Audio-rate automation is more expensive than static parameters</p></li>
-<li><p><strong>Parallelism</strong>: <code class="docutils literal notranslate"><span class="pre">render</span></code> releases the GIL, so multiple engines can render concurrently on Python threads. See <a class="reference internal" href="threading.html"><span class="doc">Multithreading and Multiprocessing</span></a>.</p></li>
+<li><p>A plugin misbehaves with multiple instances in one process.</p></li>
+<li><p>You want crash isolation: a plugin that segfaults takes down only its worker process.</p></li>
 </ul>
-</section>
-<section id="example-complete-workflow">
-<h2>Example: Complete Workflow<a class="headerlink" href="#example-complete-workflow" title="Link to this heading"></a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
-
-<span class="c1"># Setup</span>
-<span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
-<span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">512</span>
-<span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
-
-<span class="c1"># Create processors</span>
-<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">)</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">&quot;process = os.osc(440) * 0.1;&quot;</span><span class="p">)</span>
-
-<span class="c1"># Load graph</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[])])</span>
-
-<span class="c1"># Render with static BPM</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">audio1</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-
-<span class="c1"># Render with dynamic BPM</span>
-<span class="n">ppqn</span> <span class="o">=</span> <span class="mi">960</span>
-<span class="n">bpm_ramp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">ppqn</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="n">bpm_ramp</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">ppqn</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">audio2</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-
-<span class="c1"># Save outputs</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;static_bpm.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio1</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;dynamic_bpm.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio2</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
-</pre></div>
-</div>
+<p>The worker structure is the same in both cases; only the pool and queue types change.</p>
 </section>
 </section>
 
@@ -745,8 +563,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="faust_processor.html" class="btn btn-neutral float-right" title="Faust Processor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="other_processors.html" class="btn btn-neutral float-left" title="Built-In Processors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pickling.html" class="btn btn-neutral float-right" title="Pickling and Serialization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

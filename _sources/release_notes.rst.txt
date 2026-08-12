@@ -2,17 +2,25 @@ Release Notes
 =============
 
 This page documents major changes and new features across DawDreamer versions.
+The complete, canonical changelog is `CHANGELOG.md
+<https://github.com/DBraun/DawDreamer/blob/main/CHANGELOG.md>`_ in the
+repository root, which follows the `Keep a Changelog
+<https://keepachangelog.com/>`_ format.
 
 .. note::
    **Versioning**: DawDreamer uses effort-based versioning. Version numbers reflect the scope of changes rather than strict semantic versioning rules.
 
-v0.8.4 (2025)
--------------
+v0.9.0 (unreleased)
+-------------------
 
 **Infrastructure upgrades:**
 
-* **Switched from pybind11 to nanobind** - Modern C++17 Python bindings with improved performance and smaller binary size
-* **Updated libfaust to 2.81.10** - Latest Faust compiler with bug fixes and improvements
+* **Switched from pybind11 to nanobind** (v2.14.0) - Modern C++17 Python bindings with improved performance and smaller binary size
+* **The GIL is released during rendering, plugin loading, and Faust compilation** - Multiple engines can render concurrently on Python threads
+* **Updated Faust and libfaust to 2.85.9** and the Faust libraries to the matching release
+* **Python 3.11-3.14** supported and tested in CI
+* **New wheels**: Linux aarch64 and macOS Intel (x86_64) wheels are published alongside the existing Linux x86_64, macOS arm64, and Windows x86_64 wheels
+* **Smaller wheels**: documentation, test files, and app-project scaffolding are no longer bundled
 * **Comprehensive documentation overhaul**:
 
   * Migrated GitHub Wiki content to Sphinx documentation
@@ -24,8 +32,12 @@ v0.8.4 (2025)
 
 **Under the hood:**
 
+* Pickling support for ``RenderEngine`` and processors
+* Sampler updated for JUCE 8
+* The C++ build compiles without warnings; deprecated JUCE APIs were replaced
+* Fixed ``make_panner_processor`` not clamping pan values below -1
+* ``load_graph`` now validates input names immediately instead of failing later during render
 * Better cross-platform build system
-* Improved Python 3.10-3.12 compatibility
 * Enhanced type hints and docstrings
 
 v0.8.3 (2024-09-09)
@@ -132,7 +144,7 @@ v0.7.1 (2023-06-01)
 **Multiprocessing support:**
 
 * Added multiprocessing capabilities with new tests and examples
-* See ``tests/test_multiprocessing.py`` for usage examples
+* See ``examples/multiprocessing_plugins`` for usage examples
 
 **Architecture improvements:**
 
@@ -211,7 +223,7 @@ v0.6.0 (2022-03-24)
 * Revised Render Engine graph construction to warn instead of error when too many signals connect to a node
 * Upgraded JUCE, Faust, and pybind11 dependencies
 
-v0.5.8.1 (2021-01-13)
+v0.5.8.1 (2022-01-13)
 ---------------------
 
 **Multi-channel support:**
@@ -250,7 +262,7 @@ v0.5.6 (2021-05-09)
 * **Faust Processor added** - Real-time Faust DSP compilation and execution
 * Removed JUCE from global namespace (cleaner API)
 
-v0.5.0 (2021-04-01)
+v0.5.0 (2021-06-18)
 -------------------
 
 **Linux support:**
@@ -258,7 +270,7 @@ v0.5.0 (2021-04-01)
 * Added Linux build (thanks `@guillaumephd <https://github.com/guillaumephd>`_)
 * Expanded platform support to macOS, Windows, and Linux
 
-v0.4.0 (2020-12-01)
+v0.4.0 (2020-12-08)
 -------------------
 
 **Parameter automation:**
@@ -386,7 +398,7 @@ DawDreamer is open source (GPLv3). Contributions are welcome:
 * **Code contributions**: Submit a pull request
 * **Documentation**: Help improve these docs
 
-See the `Contributing Guide <https://github.com/DBraun/DawDreamer/blob/main/CONTRIBUTING.md>`_ for details.
+See `DEVELOPER.md <https://github.com/DBraun/DawDreamer/blob/main/DEVELOPER.md>`_ for the development workflow.
 
 See Also
 --------

@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plugin Compatibility &mdash; DawDreamer 0.8.4 documentation</title>
+  <title>Plugin Compatibility &mdash; DawDreamer 0.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b41f4c93"></script>
+      <script src="_static/documentation_options.js?v=39bb1c6d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -98,6 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#getting-audio-output">Getting Audio Output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#graph-management">Graph Management</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#looking-up-and-removing-processors">Looking Up and Removing Processors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#re-rendering">Re-rendering</a></li>
 </ul>
 </li>
@@ -129,9 +130,12 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#multi-channel-processing">Multi-Channel Processing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#polyphony">Polyphony</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#enabling-polyphony">Enabling Polyphony</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#tuning-polyphony">Tuning Polyphony</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#compilation-options">Compilation Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#compiling-from-the-box-and-signal-apis">Compiling from the Box and Signal APIs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#soundfiles">Soundfiles</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#id1">Example</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#advanced-example-88-key-piano">Advanced Example: 88-Key Piano</a></li>
@@ -158,6 +162,7 @@
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#listing-parameters">Listing Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#setting-parameters">Setting Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-and-setting-patches">Getting and Setting Patches</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-parameter-ranges">Getting Parameter Ranges</a></li>
 </ul>
 </li>
@@ -167,6 +172,7 @@
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#loading-midi-files">Loading MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#saving-midi-files">Saving MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#clearing-midi">Clearing MIDI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#counting-midi-events">Counting MIDI Events</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#graph-integration">Graph Integration</a><ul>
@@ -177,7 +183,7 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#multi-channel-buses">Multi-Channel Buses</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#checking-bus-support">Checking Bus Support</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#sidechain-processing">Sidechain Processing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#channel-counts">Channel Counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#channel-counts-and-latency">Channel Counts and Latency</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#complete-example">Complete Example</a></li>
@@ -218,7 +224,7 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/other_processors.html">Built-In Effect Processors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/other_processors.html">Built-In Processors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#add-processor-mixer">Add Processor (Mixer)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#basic-usage">Basic Usage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#setting-gain-levels">Setting Gain Levels</a></li>
@@ -256,7 +262,27 @@
 <li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id10">Adjusting Parameters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#sampler-processor">Sampler Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id11">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#discovering-parameters">Discovering Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#oscillator-processor">Oscillator Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#processor-specific-tips">Processor-Specific Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/threading.html">Multithreading and Multiprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#rendering-on-a-thread-pool">Rendering on a Thread Pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#internal-serialization">Internal Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#thread-safety-rules">Thread-Safety Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#when-to-use-multiprocessing">When to Use Multiprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pickling.html">Pickling and Serialization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#what-gets-preserved">What Gets Preserved</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#format-versioning">Format Versioning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#caveats">Caveats</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#overview">Overview</a></li>
@@ -264,7 +290,7 @@
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#basic-workflow">Basic Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#common-patterns">Common Patterns</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#multi-channel-routing">Multi-Channel Routing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#parallel-processing">Parallel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#graph-fan-out">Graph Fan-Out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#parameter-automation">Parameter Automation</a></li>
 </ul>
 </li>
@@ -281,7 +307,7 @@
 <li class="toctree-l2"><a class="reference internal" href="examples.html#faust-to-qdax">Faust to QDax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#mashup-generator">Mashup Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#dj-mixing">DJ Mixing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#multiprocessing-with-plugins">Multiprocessing with Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#parallel-rendering-with-plugins">Parallel Rendering with Plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#xml-synth-sound-rendering">XML Synth Sound Rendering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#running-the-examples">Running the Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="examples.html#prerequisites">Prerequisites</a></li>
@@ -391,7 +417,6 @@
 <li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference/index.html#indices-and-tables">Indices and Tables</a></li>
 </ul>
 </li>
 </ul>
@@ -414,7 +439,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-4-2025">v0.8.4 (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-9-0-unreleased">v0.9.0 (unreleased)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
@@ -424,12 +449,12 @@
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-6-3-2022-04-19">v0.6.3 (2022-04-19)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-6-1-2022-04-04">v0.6.1 (2022-04-04)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-6-0-2022-03-24">v0.6.0 (2022-03-24)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-8-1-2021-01-13">v0.5.8.1 (2021-01-13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-8-1-2022-01-13">v0.5.8.1 (2022-01-13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-7-8-2021-10-09">v0.5.7.8 (2021-10-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-7-2021-08-14">v0.5.7 (2021-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-6-2021-05-09">v0.5.6 (2021-05-09)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-0-2021-04-01">v0.5.0 (2021-04-01)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-4-0-2020-12-01">v0.4.0 (2020-12-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-0-2021-06-18">v0.5.0 (2021-06-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-4-0-2020-12-08">v0.4.0 (2020-12-08)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-1-0-2020-08-14">v0.1.0 (2020-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#upgrade-guide">Upgrade Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-8-0-breaking-changes">v0.8.0 Breaking Changes</a></li>
@@ -476,6 +501,10 @@
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This is a community-maintained list. If you’ve tested a plugin not listed here, please <a class="reference external" href="https://github.com/DBraun/DawDreamer/issues">open an issue</a> to share your results.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Most entries were reported between 2021 and 2023, before the JUCE 8 and nanobind updates in v0.9.0. A plugin marked as broken may work today (and vice versa), so re-testing with a current release is worthwhile.</p>
 </div>
 <section id="legend">
 <h2>Legend<a class="headerlink" href="#legend" title="Link to this heading"></a></h2>
@@ -789,29 +818,27 @@
 <section id="testing-your-plugins">
 <h2>Testing Your Plugins<a class="headerlink" href="#testing-your-plugins" title="Link to this heading"></a></h2>
 <p>To test a plugin’s compatibility:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">plugin</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/plugin.dll&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✔️ Plugin loaded successfully&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Outputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plugin</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/plugin.dll&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✔️ Plugin loaded successfully&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Outputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Try rendering</span>
-    <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">plugin</span><span class="p">,</span> <span class="p">[])])</span>
-    <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
+<span class="c1"># Try rendering</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">plugin</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
-    <span class="c1"># Check for NaN</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Output contains NaN values&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✔️ Rendering successful&quot;</span><span class="p">)</span>
-
-<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># Check for NaN</span>
+<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Output contains NaN values&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✔️ Rendering successful&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -838,7 +865,7 @@
 <p>If you encounter plugin compatibility issues, consider:</p>
 <ul class="simple">
 <li><p><strong>Faust Processor</strong>: Write custom DSP code (see <a class="reference internal" href="user_guide/faust_processor.html"><span class="doc">Faust Processor</span></a>)</p></li>
-<li><p><strong>Built-in processors</strong>: Use DawDreamer’s native effects (see <a class="reference internal" href="user_guide/other_processors.html"><span class="doc">Built-In Effect Processors</span></a>)</p></li>
+<li><p><strong>Built-in processors</strong>: Use DawDreamer’s native effects (see <a class="reference internal" href="user_guide/other_processors.html"><span class="doc">Built-In Processors</span></a>)</p></li>
 <li><p><strong>Different plugin format</strong>: Try .vst instead of .vst3, or .component on macOS</p></li>
 </ul>
 </section>
@@ -864,7 +891,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Feb 07, 2026.
+      <span class="lastupdated">Last updated on Aug 12, 2026.
       </span></p>
   </div>
 

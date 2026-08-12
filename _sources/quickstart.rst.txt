@@ -147,7 +147,7 @@ Process an existing audio file with effects and capture intermediate outputs:
 
    # Create a filter processor
    filter_proc = engine.make_filter_processor("filter", "high")
-   filter_proc.set_frequency(2000.0)  # High-pass at 2 kHz
+   filter_proc.frequency = 2000.0  # High-pass at 2 kHz
 
    # Enable recording to capture this processor's output
    filter_proc.record = True

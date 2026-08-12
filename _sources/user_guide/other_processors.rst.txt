@@ -1,7 +1,7 @@
-Built-In Effect Processors
-===========================
+Built-In Processors
+===================
 
-DawDreamer includes several built-in processors for common audio tasks: mixing, filtering, dynamics, spatial effects, and delays.
+DawDreamer includes several built-in processors for common audio tasks: mixing, filtering, dynamics, spatial effects, delays, sample playback, and test signals.
 
 .. seealso::
    * :doc:`playback` - Basic audio playback
@@ -30,9 +30,6 @@ Setting Gain Levels
 
    # Adjust gain for each input
    add_proc.gain_levels = [0.5, 0.5, 0.5]  # 50% gain for 3 inputs
-
-   # Or set a single gain for all inputs
-   add_proc.set_gain(0.5)
 
 Complete Example
 ~~~~~~~~~~~~~~~~
@@ -98,7 +95,7 @@ Setting Parameters
 
    # Adjust parameters
    filter_proc.mode = "low"
-   filter_proc.freq = 500.0
+   filter_proc.frequency = 500.0
    filter_proc.q = 2.0
    filter_proc.gain = 1.5  # Only affects shelf modes
 
@@ -267,6 +264,63 @@ Adjusting Parameters
 
 .. warning::
    Modifying ``delay.rule`` is not currently supported. It must be set at creation time.
+
+Sampler Processor
+-----------------
+
+The ``SamplerProcessor`` plays a single audio sample as a pitched MIDI instrument, based on JUCE's sampler. It repitches the sample relative to a center note and shapes it with amplitude and filter envelopes.
+
+Basic Usage
+~~~~~~~~~~~
+
+.. code-block:: python
+
+   # data is a numpy array shaped (channels, samples)
+   sampler = engine.make_sampler_processor("sampler", data)
+
+   # The sample can be swapped later
+   sampler.set_data(other_data)
+
+   # (MIDI note, velocity, start time in seconds, duration in seconds)
+   sampler.add_midi_note(60, 100, 0.0, 0.5)
+
+   engine.load_graph([(sampler, [])])
+   engine.render(2.0)
+
+Discovering Parameters
+~~~~~~~~~~~~~~~~~~~~~~
+
+The sampler's parameters (all normalized ranges) are generated at runtime, so discover them with ``get_parameters_description`` and set them by index:
+
+.. code-block:: python
+
+   desc = sampler.get_parameters_description()
+
+   def par_index(name: str) -> int:
+       for par in desc:
+           if par["name"] == name:
+               return par["index"]
+       raise ValueError(f"Parameter {name!r} not found.")
+
+   sampler.set_parameter(par_index("Center Note"), 60.0)      # sample plays unpitched at middle C
+   sampler.set_parameter(par_index("Amp Active"), 1.0)        # enable the amplitude envelope
+   sampler.set_parameter(par_index("Amp Env Attack"), 1.0)    # milliseconds
+   sampler.set_parameter(par_index("Amp Env Release"), 100.0) # milliseconds
+
+Parameter names include the center note, amplitude envelope (attack, decay, sustain, release), and filter envelope settings. Print ``desc`` to see them all. `tests/test_sampler.py <https://github.com/DBraun/DawDreamer/blob/main/tests/test_sampler.py>`_ has a complete example.
+
+The sampler accepts MIDI just like the plugin and Faust processors: ``add_midi_note``, ``load_midi``, ``clear_midi``, ``save_midi``, and the ``n_midi_events`` property.
+
+Oscillator Processor
+--------------------
+
+The ``OscillatorProcessor`` produces a sine wave at a fixed frequency, mainly for testing graphs:
+
+.. code-block:: python
+
+   osc = engine.make_oscillator_processor("osc", 440.0)
+   engine.load_graph([(osc, [])])
+   engine.render(1.0)
 
 Processor-Specific Tips
 ------------------------

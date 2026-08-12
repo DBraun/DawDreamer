@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; DawDreamer 0.8.4 documentation</title>
+  <title>API Reference &mdash; DawDreamer 0.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=b41f4c93"></script>
+      <script src="../_static/documentation_options.js?v=39bb1c6d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -98,6 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/render_engine.html#getting-audio-output">Getting Audio Output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/render_engine.html#graph-management">Graph Management</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/render_engine.html#looking-up-and-removing-processors">Looking Up and Removing Processors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/render_engine.html#re-rendering">Re-rendering</a></li>
 </ul>
 </li>
@@ -129,9 +130,12 @@
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/faust_processor.html#multi-channel-processing">Multi-Channel Processing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/faust_processor.html#polyphony">Polyphony</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/faust_processor.html#enabling-polyphony">Enabling Polyphony</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/faust_processor.html#tuning-polyphony">Tuning Polyphony</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/faust_processor.html#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/faust_processor.html#compilation-options">Compilation Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/faust_processor.html#compiling-from-the-box-and-signal-apis">Compiling from the Box and Signal APIs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/faust_processor.html#soundfiles">Soundfiles</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/faust_processor.html#id1">Example</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/faust_processor.html#advanced-example-88-key-piano">Advanced Example: 88-Key Piano</a></li>
@@ -158,6 +162,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#listing-parameters">Listing Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#setting-parameters">Setting Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#getting-and-setting-patches">Getting and Setting Patches</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#getting-parameter-ranges">Getting Parameter Ranges</a></li>
 </ul>
 </li>
@@ -167,6 +172,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#loading-midi-files">Loading MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#saving-midi-files">Saving MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#clearing-midi">Clearing MIDI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#counting-midi-events">Counting MIDI Events</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/plugin_processor.html#graph-integration">Graph Integration</a><ul>
@@ -177,7 +183,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/plugin_processor.html#multi-channel-buses">Multi-Channel Buses</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#checking-bus-support">Checking Bus Support</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#sidechain-processing">Sidechain Processing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#channel-counts">Channel Counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/plugin_processor.html#channel-counts-and-latency">Channel Counts and Latency</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/plugin_processor.html#complete-example">Complete Example</a></li>
@@ -218,7 +224,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/playback_warp.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../user_guide/other_processors.html">Built-In Effect Processors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/other_processors.html">Built-In Processors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/other_processors.html#add-processor-mixer">Add Processor (Mixer)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/other_processors.html#basic-usage">Basic Usage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/other_processors.html#setting-gain-levels">Setting Gain Levels</a></li>
@@ -256,7 +262,27 @@
 <li class="toctree-l4"><a class="reference internal" href="../user_guide/other_processors.html#id10">Adjusting Parameters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/other_processors.html#sampler-processor">Sampler Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/other_processors.html#id11">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../user_guide/other_processors.html#discovering-parameters">Discovering Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/other_processors.html#oscillator-processor">Oscillator Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/other_processors.html#processor-specific-tips">Processor-Specific Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/threading.html">Multithreading and Multiprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/threading.html#rendering-on-a-thread-pool">Rendering on a Thread Pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/threading.html#internal-serialization">Internal Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/threading.html#thread-safety-rules">Thread-Safety Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/threading.html#when-to-use-multiprocessing">When to Use Multiprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/pickling.html">Pickling and Serialization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/pickling.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/pickling.html#what-gets-preserved">What Gets Preserved</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/pickling.html#format-versioning">Format Versioning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/pickling.html#caveats">Caveats</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../user_guide/index.html#overview">Overview</a></li>
@@ -264,7 +290,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../user_guide/index.html#basic-workflow">Basic Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../user_guide/index.html#common-patterns">Common Patterns</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/index.html#multi-channel-routing">Multi-Channel Routing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../user_guide/index.html#parallel-processing">Parallel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/index.html#graph-fan-out">Graph Fan-Out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../user_guide/index.html#parameter-automation">Parameter Automation</a></li>
 </ul>
 </li>
@@ -281,7 +307,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#faust-to-qdax">Faust to QDax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#mashup-generator">Mashup Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#dj-mixing">DJ Mixing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples.html#multiprocessing-with-plugins">Multiprocessing with Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#parallel-rendering-with-plugins">Parallel Rendering with Plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#xml-synth-sound-rendering">XML Synth Sound Rendering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples.html#running-the-examples">Running the Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../examples.html#prerequisites">Prerequisites</a></li>
@@ -391,7 +417,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#indices-and-tables">Indices and Tables</a></li>
 </ul>
 </li>
 </ul>
@@ -414,7 +439,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-4-2025">v0.8.4 (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-9-0-unreleased">v0.9.0 (unreleased)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
@@ -424,12 +449,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-3-2022-04-19">v0.6.3 (2022-04-19)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-1-2022-04-04">v0.6.1 (2022-04-04)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-6-0-2022-03-24">v0.6.0 (2022-03-24)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-8-1-2021-01-13">v0.5.8.1 (2021-01-13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-8-1-2022-01-13">v0.5.8.1 (2022-01-13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-7-8-2021-10-09">v0.5.7.8 (2021-10-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-7-2021-08-14">v0.5.7 (2021-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-6-2021-05-09">v0.5.6 (2021-05-09)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-0-2021-04-01">v0.5.0 (2021-04-01)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-4-0-2020-12-01">v0.4.0 (2020-12-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-5-0-2021-06-18">v0.5.0 (2021-06-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-4-0-2020-12-08">v0.4.0 (2020-12-08)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#v0-1-0-2020-08-14">v0.1.0 (2020-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../release_notes.html#upgrade-guide">Upgrade Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../release_notes.html#v0-8-0-breaking-changes">v0.8.0 Breaking Changes</a></li>
@@ -591,7 +616,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="dawdreamer.RenderEngine.render">
 <span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">beats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#dawdreamer.RenderEngine.render" title="Link to this definition"></a></dt>
-<dd><p>Render the most recently loaded graph. By default, when <cite>beats</cite> is False, duration is measured in seconds, otherwise beats.</p>
+<dd><p>Render the most recently loaded graph. By default, when <cite>beats</cite> is False, duration is measured in seconds, otherwise beats. The GIL is released during rendering, so multiple engines can render concurrently on Python threads.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -632,20 +657,11 @@
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">get_automation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span></dt>
 <dd><p>Overloaded function.</p>
-<ol class="arabic">
-<li><p><code class="docutils literal notranslate"><span class="pre">get_automation(self,</span> <span class="pre">parameter_name:</span> <span class="pre">str)</span> <span class="pre">-&gt;</span> <span class="pre">numpy.ndarray[dtype=float32]</span></code></p>
-<blockquote>
-<div><p>Get a parameter’s automation as a numpy array. It should return whatever array was passed previously to <cite>set_automation</cite>, whether it’s PPQN-rate data or audio-rate data.</p>
-<dl class="simple">
-<dt>parameter_name<span class="classifier">str</span></dt><dd><p>The name of the parameter.</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>np.array</dt><dd><p>The parameter’s automation.</p>
-</dd>
-</dl>
-</div></blockquote>
-</li>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_automation(self,</span> <span class="pre">parameter_name:</span> <span class="pre">str)</span> <span class="pre">-&gt;</span> <span class="pre">numpy.ndarray[dtype=float32]</span></code></p></li>
+</ol>
+<p>Get a parameter’s automation as a numpy array. It should return whatever array was passed previously to <cite>set_automation</cite>, whether it’s PPQN-rate data or audio-rate data.</p>
+<ol class="arabic simple" start="2">
 <li><p><code class="docutils literal notranslate"><span class="pre">get_automation(self)</span> <span class="pre">-&gt;</span> <span class="pre">dict</span></code></p></li>
 </ol>
 <p>After rendering, get all of a parameter’s automation as a dict of multi-channel numpy arrays. Before rendering, you should have set <cite>record_automation</cite> to True on the processor. This function uses the engine’s BPM automation, if any, to bake the automation data into audio-rate data.</p>
@@ -1287,7 +1303,7 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="dawdreamer.PlaybackWarpProcessor.warp_markers">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">warp_markers</span></span><a class="headerlink" href="#dawdreamer.PlaybackWarpProcessor.warp_markers" title="Link to this definition"></a></dt>
-<dd><p>Get/set the warp markers as an (N, 2) numpy array of time positions in samples and positions in beats.</p>
+<dd><p>Get/set the warp markers as an (N, 2) numpy array of time positions in seconds and positions in beats.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1575,38 +1591,39 @@
 <li><p><strong>Signal API</strong>: Low-level, signal-processing approach for fine-grained control</p></li>
 </ul>
 <p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/examples/Box_API">Faust Box API Example</a> for practical usage.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The listings below are a hand-picked subset of the most common functions. The bindings expose many hundreds of box and signal functions; use <code class="docutils literal notranslate"><span class="pre">dir(dawdreamer.faust.box)</span></code> and <code class="docutils literal notranslate"><span class="pre">dir(dawdreamer.faust.signal)</span></code> or <code class="docutils literal notranslate"><span class="pre">help()</span></code> in a Python session to browse everything.</p>
+</div>
 <section id="faust-module">
 <h3>Faust Module<a class="headerlink" href="#faust-module" title="Link to this heading"></a></h3>
 <p>The main <code class="docutils literal notranslate"><span class="pre">dawdreamer.faust</span></code> module provides:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="dawdreamer.faust.FaustContext">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.</span></span><span class="sig-name descname"><span class="pre">FaustContext</span></span><a class="headerlink" href="#dawdreamer.faust.FaustContext" title="Link to this definition"></a></dt>
-<dd><p>Context manager for Faust compilation and execution.</p>
+<dd><p>Context manager that creates the Faust library context on entry and destroys it on exit. Use it with a <code class="docutils literal notranslate"><span class="pre">with</span></code> statement around any Box or Signal API work:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dawdreamer.faust</span><span class="w"> </span><span class="kn">import</span> <span class="n">FaustContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dawdreamer.faust.box</span><span class="w"> </span><span class="kn">import</span> <span class="n">boxReal</span>
+
+<span class="k">with</span> <span class="n">FaustContext</span><span class="p">():</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">boxReal</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="c1"># ... build and compile boxes here ...</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dawdreamer.faust.createLibContext">
 <span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.</span></span><span class="sig-name descname"><span class="pre">createLibContext</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dawdreamer.faust.createLibContext" title="Link to this definition"></a></dt>
-<dd><p>Create a Faust library context.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Faust library context</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#dawdreamer.faust.FaustContext" title="dawdreamer.faust.FaustContext">FaustContext</a></p>
-</dd>
-</dl>
+<dd><p>Create the global Faust library context. Call this before using the Box or
+Signal API.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dawdreamer.faust.destroyLibContext">
-<span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.</span></span><span class="sig-name descname"><span class="pre">destroyLibContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dawdreamer.faust.destroyLibContext" title="Link to this definition"></a></dt>
-<dd><p>Destroy a Faust library context.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>context</strong> (<a class="reference internal" href="#dawdreamer.faust.FaustContext" title="dawdreamer.faust.FaustContext"><em>FaustContext</em></a>) – The context to destroy</p>
-</dd>
-</dl>
+<span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.</span></span><span class="sig-name descname"><span class="pre">destroyLibContext</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dawdreamer.faust.destroyLibContext" title="Link to this definition"></a></dt>
+<dd><p>Destroy the global Faust library context. Call this when you are done using
+the Box or Signal API.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1634,14 +1651,16 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="dawdreamer.faust.box.Box">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.box.</span></span><span class="sig-name descname"><span class="pre">Box</span></span><a class="headerlink" href="#dawdreamer.faust.box.Box" title="Link to this definition"></a></dt>
-<dd><p>Base class for all Faust Box objects. Boxes can be combined using standard operators.</p>
-<p><strong>Operators:</strong></p>
+<dd><p>Base class for all Faust Box objects. Boxes support Python’s arithmetic and
+comparison operators, which map to the corresponding signal operations:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">+</span> <span class="pre">box2</span></code> - Parallel composition</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">*</span> <span class="pre">box2</span></code> - Sequential composition</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">,</span> <span class="pre">box2</span></code> - Split composition</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">:</span> <span class="pre">box2</span></code> - Sequential composition (alternative syntax)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">+</span> <span class="pre">box2</span></code> - Addition (<code class="docutils literal notranslate"><span class="pre">boxAdd</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">-</span> <span class="pre">box2</span></code> - Subtraction (<code class="docutils literal notranslate"><span class="pre">boxSub</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">*</span> <span class="pre">box2</span></code> - Multiplication (<code class="docutils literal notranslate"><span class="pre">boxMul</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">box1</span> <span class="pre">/</span> <span class="pre">box2</span></code> - Division (<code class="docutils literal notranslate"><span class="pre">boxDiv</span></code>)</p></li>
 </ul>
+<p>Faust’s parallel and sequential composition are available as functions:
+<code class="docutils literal notranslate"><span class="pre">boxPar(box1,</span> <span class="pre">box2)</span></code> and <code class="docutils literal notranslate"><span class="pre">boxSeq(box1,</span> <span class="pre">box2)</span></code>.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -1760,8 +1779,9 @@
 <h4>Delay and Memory<a class="headerlink" href="#delay-and-memory" title="Link to this heading"></a></h4>
 <dl class="py function">
 <dt class="sig sig-object py" id="dawdreamer.faust.box.boxDelay">
-<span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.box.</span></span><span class="sig-name descname"><span class="pre">boxDelay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dawdreamer.faust.box.boxDelay" title="Link to this definition"></a></dt>
-<dd><p>Create a one-sample delay</p>
+<span class="sig-prename descclassname"><span class="pre">dawdreamer.faust.box.</span></span><span class="sig-name descname"><span class="pre">boxDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dawdreamer.faust.box.boxDelay" title="Link to this definition"></a></dt>
+<dd><p>Delay a box by a number of samples (Faust’s <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> operator). With no
+arguments it creates the delay primitive itself</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1921,14 +1941,6 @@
 </ul>
 </section>
 </section>
-<section id="indices-and-tables">
-<h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="../search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-</section>
 </section>
 
 
@@ -1943,7 +1955,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Feb 07, 2026.
+      <span class="lastupdated">Last updated on Aug 12, 2026.
       </span></p>
   </div>
 

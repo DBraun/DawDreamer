@@ -12,6 +12,8 @@ This guide covers all aspects of using DawDreamer, from basic rendering concepts
    playback
    playback_warp
    other_processors
+   threading
+   pickling
 
 Overview
 --------
@@ -49,7 +51,9 @@ DawDreamer supports several processor types:
    See :doc:`plugin_processor` for details.
 
 **Playback Processor**
-   Plays back audio from memory with optional looping.
+   Plays back audio from memory once per render. For looping, use the Playback Warp Processor.
+
+   See :doc:`playback` for details.
 
 **Playback Warp Processor**
    Time-stretching, pitch-shifting, and warp marker support (Ableton Live compatible).
@@ -86,7 +90,7 @@ Basic Workflow
    .. code-block:: python
 
       synth.set_dsp_string("process = os.osc(440) * 0.1;")
-      effect.set_frequency(1000.0)
+      effect.frequency = 1000.0
 
 4. **Load the Graph**
 
@@ -122,14 +126,13 @@ Processors automatically handle channel counts. If a processor expects 2 channel
 
 .. code-block:: python
 
-   # Mix 4 channels to 2
-   mixer = engine.make_add_processor("mixer")
-   mixer.set_gain(0.5)  # Avoid clipping
+   # Mix two stereo inputs, scaling each by 0.5 to avoid clipping
+   mixer = engine.make_add_processor("mixer", [0.5, 0.5])
 
-Parallel Processing
-~~~~~~~~~~~~~~~~~~~
+Graph Fan-Out
+~~~~~~~~~~~~~
 
-Process the same input with multiple effects:
+Process the same input with multiple effects. (For rendering with multiple CPU cores, see :doc:`threading`.)
 
 .. code-block:: python
 
@@ -171,7 +174,7 @@ One automation value per audio sample for sample-accurate control:
 
    # Sweep frequency from 100 Hz to 5000 Hz
    automation = np.linspace(100, 5000, num_samples)
-   filter_proc.set_automation("frequency", automation)
+   filter_proc.set_automation("freq", automation)
 
    # Or oscillating parameter between 0 and 1 at 0.5 Hz
    automation = 0.5 + 0.5 * make_sine(0.5, duration)

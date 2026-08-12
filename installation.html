@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; DawDreamer 0.8.4 documentation</title>
+  <title>Installation &mdash; DawDreamer 0.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b41f4c93"></script>
+      <script src="_static/documentation_options.js?v=39bb1c6d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -98,6 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#getting-audio-output">Getting Audio Output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/render_engine.html#graph-management">Graph Management</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#loading-a-graph">Loading a Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#looking-up-and-removing-processors">Looking Up and Removing Processors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/render_engine.html#re-rendering">Re-rendering</a></li>
 </ul>
 </li>
@@ -129,9 +130,12 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#multi-channel-processing">Multi-Channel Processing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#polyphony">Polyphony</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#enabling-polyphony">Enabling Polyphony</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#tuning-polyphony">Tuning Polyphony</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#example">Example</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#compilation-options">Compilation Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#compiling-from-the-box-and-signal-apis">Compiling from the Box and Signal APIs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/faust_processor.html#soundfiles">Soundfiles</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#id1">Example</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/faust_processor.html#advanced-example-88-key-piano">Advanced Example: 88-Key Piano</a></li>
@@ -158,6 +162,7 @@
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#listing-parameters">Listing Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#setting-parameters">Setting Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-parameter-values">Getting Parameter Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-and-setting-patches">Getting and Setting Patches</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#getting-parameter-ranges">Getting Parameter Ranges</a></li>
 </ul>
 </li>
@@ -167,6 +172,7 @@
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#loading-midi-files">Loading MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#saving-midi-files">Saving MIDI Files</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#clearing-midi">Clearing MIDI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#counting-midi-events">Counting MIDI Events</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#graph-integration">Graph Integration</a><ul>
@@ -177,7 +183,7 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#multi-channel-buses">Multi-Channel Buses</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#checking-bus-support">Checking Bus Support</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#sidechain-processing">Sidechain Processing</a></li>
-<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#channel-counts">Channel Counts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/plugin_processor.html#channel-counts-and-latency">Channel Counts and Latency</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/plugin_processor.html#complete-example">Complete Example</a></li>
@@ -218,7 +224,7 @@
 <li class="toctree-l3"><a class="reference internal" href="user_guide/playback_warp.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="user_guide/other_processors.html">Built-In Effect Processors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/other_processors.html">Built-In Processors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#add-processor-mixer">Add Processor (Mixer)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#basic-usage">Basic Usage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#setting-gain-levels">Setting Gain Levels</a></li>
@@ -256,7 +262,27 @@
 <li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id10">Adjusting Parameters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#sampler-processor">Sampler Processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#id11">Basic Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="user_guide/other_processors.html#discovering-parameters">Discovering Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#oscillator-processor">Oscillator Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/other_processors.html#processor-specific-tips">Processor-Specific Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/threading.html">Multithreading and Multiprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#rendering-on-a-thread-pool">Rendering on a Thread Pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#internal-serialization">Internal Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#thread-safety-rules">Thread-Safety Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/threading.html#when-to-use-multiprocessing">When to Use Multiprocessing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_guide/pickling.html">Pickling and Serialization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#what-gets-preserved">What Gets Preserved</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#format-versioning">Format Versioning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/pickling.html#caveats">Caveats</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#overview">Overview</a></li>
@@ -264,7 +290,7 @@
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#basic-workflow">Basic Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_guide/index.html#common-patterns">Common Patterns</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#multi-channel-routing">Multi-Channel Routing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#parallel-processing">Parallel Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#graph-fan-out">Graph Fan-Out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_guide/index.html#parameter-automation">Parameter Automation</a></li>
 </ul>
 </li>
@@ -281,7 +307,7 @@
 <li class="toctree-l2"><a class="reference internal" href="examples.html#faust-to-qdax">Faust to QDax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#mashup-generator">Mashup Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#dj-mixing">DJ Mixing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#multiprocessing-with-plugins">Multiprocessing with Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#parallel-rendering-with-plugins">Parallel Rendering with Plugins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#xml-synth-sound-rendering">XML Synth Sound Rendering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#running-the-examples">Running the Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="examples.html#prerequisites">Prerequisites</a></li>
@@ -391,7 +417,6 @@
 <li class="toctree-l3"><a class="reference internal" href="api_reference/index.html#further-reading">Further Reading</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="api_reference/index.html#indices-and-tables">Indices and Tables</a></li>
 </ul>
 </li>
 </ul>
@@ -414,7 +439,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-4-2025">v0.8.4 (2025)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-9-0-unreleased">v0.9.0 (unreleased)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
@@ -424,12 +449,12 @@
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-6-3-2022-04-19">v0.6.3 (2022-04-19)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-6-1-2022-04-04">v0.6.1 (2022-04-04)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-6-0-2022-03-24">v0.6.0 (2022-03-24)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-8-1-2021-01-13">v0.5.8.1 (2021-01-13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-8-1-2022-01-13">v0.5.8.1 (2022-01-13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-7-8-2021-10-09">v0.5.7.8 (2021-10-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-7-2021-08-14">v0.5.7 (2021-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-6-2021-05-09">v0.5.6 (2021-05-09)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-0-2021-04-01">v0.5.0 (2021-04-01)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-4-0-2020-12-01">v0.4.0 (2020-12-01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-5-0-2021-06-18">v0.5.0 (2021-06-18)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-4-0-2020-12-08">v0.4.0 (2020-12-08)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-1-0-2020-08-14">v0.1.0 (2020-08-14)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#upgrade-guide">Upgrade Guide</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="release_notes.html#v0-8-0-breaking-changes">v0.8.0 Breaking Changes</a></li>
@@ -484,7 +509,7 @@
 <p><strong>macOS:</strong></p>
 <ul class="simple">
 <li><p>64-bit Python 3.11-3.14</p></li>
-<li><p>Apple Silicon (arm64)</p></li>
+<li><p>Apple Silicon (arm64) or Intel (x86_64)</p></li>
 <li><p>macOS 11.0 or higher</p></li>
 </ul>
 <p><strong>Windows:</strong></p>
@@ -494,7 +519,7 @@
 </ul>
 <p><strong>Linux:</strong></p>
 <ul class="simple">
-<li><p>x86_64 CPU</p></li>
+<li><p>x86_64 or aarch64 CPU</p></li>
 <li><p>64-bit Python 3.11-3.14 (tested with 3.12 on Ubuntu/WSL2)</p></li>
 <li><p>For WSL2 users: Expect longer installation times (1-2 minutes) due to cross-filesystem I/O</p></li>
 </ul>
@@ -775,10 +800,10 @@ python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </
 <p><strong>Linux: “setup.py develop” is taking a long time</strong></p>
 <p>This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
 and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
-You’ll see “Successfully installed dawdreamer-0.8.4” when done.</p>
+You’ll see “Successfully installed dawdreamer-0.9.0” when done.</p>
 <p><strong>ImportError after installation</strong></p>
 <p>Verify that the installation completed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import dawdreamer; print(&#39;Installed successfully&#39;)&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import dawdreamer; print(&#39;Installed&#39;, dawdreamer.__version__)&quot;</span>
 </pre></div>
 </div>
 <p>If it fails, try reinstalling:</p>
@@ -802,7 +827,7 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>develop
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Feb 07, 2026.
+      <span class="lastupdated">Last updated on Aug 12, 2026.
       </span></p>
   </div>
 
