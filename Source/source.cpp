@@ -52,19 +52,10 @@ NB_MODULE(dawdreamer, m)
     -------
     None
 )pbdoc")
-        .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"), R"pbdoc(
-    Get a parameter's automation as a numpy array. It should return whatever array was passed previously to `set_automation`, whether it's PPQN-rate data or audio-rate data.
-
-    Parameters
-    ----------
-    parameter_name : str
-        The name of the parameter.
-
-    Returns
-    -------
-    np.array
-        The parameter's automation.
-)pbdoc")
+        .def("get_automation", &ProcessorBase::getAutomationNumpy, arg("parameter_name"),
+             "Get a parameter's automation as a numpy array. It should return "
+             "whatever array was passed previously to `set_automation`, whether "
+             "it's PPQN-rate data or audio-rate data.")
         .def("get_automation", &ProcessorBase::getAutomationAll,
              "After rendering, get all of a parameter's automation as a dict of "
              "multi-channel numpy arrays. Before rendering, you should have set "
@@ -142,7 +133,7 @@ play the audio in double the amount of time, so it will sound slowed down.")
             [](PlaybackWarpProcessor& self, nb::ndarray<float> value)
             { self.setWarpMarkers(value); }, nb::rv_policy::automatic,
             "Get/set the warp markers as an (N, 2) numpy array of time "
-            "positions in samples and positions in beats.")
+            "positions in seconds and positions in beats.")
         .def("reset_warp_markers", &PlaybackWarpProcessor::resetWarpMarkers, arg("bpm"),
              "Reset the warp markers with a BPM.")
         .def("set_clip_file", &PlaybackWarpProcessor::loadAbletonClipInfo, arg("asd_file_path"),
@@ -321,15 +312,17 @@ but the filter mode cannot under automation.";
         .def("disable_nonmain_buses", &PluginProcessorWrapper::disableNonMainBuses,
              "Disable all non-main buses (aux and sidechains).")
         .def("save_state", &PluginProcessorWrapper::saveStateInformation, arg("filepath"),
-             "Save the state to a file.")
+             nb::call_guard<nb::gil_scoped_release>(), "Save the state to a file.")
         .def("load_state", &PluginProcessorWrapper::loadStateInformation, arg("filepath"),
-             "Load the state from a file.")
+             nb::call_guard<nb::gil_scoped_release>(), "Load the state from a file.")
         .def("open_editor", &PluginProcessorWrapper::openEditor,
              "Open the UI editor for the plugin.")
         .def("load_preset", &PluginProcessorWrapper::loadPreset, arg("filepath"),
+             nb::call_guard<nb::gil_scoped_release>(),
              "Load an FXP preset with an absolute filepath and \".fxp\" "
              "extension.")
         .def("load_vst3_preset", &PluginProcessorWrapper::loadVST3Preset, arg("filepath"),
+             nb::call_guard<nb::gil_scoped_release>(),
              "Load a VST3 preset with an absolute filepath and \".vstpreset\" "
              "extension.")
         .def("get_patch", &PluginProcessorWrapper::wrapperGetPatch)
@@ -477,9 +470,12 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
                              "A Render Engine loads and runs a graph of audio processors.")
         .def(nb::init<double, int>(), arg("sample_rate"), arg("block_size"))
         .def("render", &RenderEngine::render, arg("duration"), kw_only(), arg("beats") = false,
+             nb::call_guard<nb::gil_scoped_release>(),
              "Render the most recently loaded graph. By default, when "
              "`beats` is "
-             "False, duration is measured in seconds, otherwise beats.")
+             "False, duration is measured in seconds, otherwise beats. "
+             "The GIL is released during rendering, so multiple engines can "
+             "render concurrently on Python threads.")
         .def("set_bpm", &RenderEngine::setBPM, arg("bpm"),
              "Set the beats-per-minute of the engine as a constant rate.")
         .def("set_bpm", &RenderEngine::setBPMwithPPQN, arg("bpm"), arg("ppqn"),
@@ -504,7 +500,8 @@ Unlike a VST, the parameters don't need to be between 0 and 1. For example, you 
         .def("make_oscillator_processor", &RenderEngine::makeOscillatorProcessor, arg("name"),
              arg("frequency"), "Make an Oscillator Processor", returnPolicy)
         .def("make_plugin_processor", &RenderEngine::makePluginProcessor, arg("name"),
-             arg("plugin_path"), "Make a Plugin Processor", returnPolicy)
+             arg("plugin_path"), nb::call_guard<nb::gil_scoped_release>(),
+             "Make a Plugin Processor", returnPolicy)
         .def("make_sampler_processor", &RenderEngine::makeSamplerProcessor, arg("name"),
              arg("data"),
              "Make a Sampler Processor with audio data to be used as the "

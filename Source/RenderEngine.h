@@ -64,7 +64,7 @@ class RenderEngine : public AudioPlayHead
     void transportRecord(bool shouldStartRecording) override;
     void transportRewind() override;
 
-    // pybind11-related public:
+    // Factory methods exposed to Python:
     OscillatorProcessor* makeOscillatorProcessor(const std::string& name, float freq);
 
     PluginProcessorWrapper* makePluginProcessor(const std::string& name, const std::string& path);

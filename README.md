@@ -44,7 +44,7 @@ DawDreamer's foundation is [JUCE](https://github.com/julianstorer/JUCE), with a 
 
 macOS requirements:
 * 64-bit Python 3.11-3.14
-* Apple Silicon
+* Apple Silicon (arm64) or Intel (x86_64)
 * macOS 11.0 or higher
 
 Windows requirements:
@@ -52,7 +52,7 @@ Windows requirements:
 * 64-bit Python 3.11-3.14
 
 Linux requirements:
-* x86_64 CPU
+* x86_64 or aarch64 CPU
 * 64-bit Python 3.11-3.14
 
 Install with [PyPI](https://pypi.org/project/dawdreamer/):
@@ -170,6 +170,7 @@ import dawdreamer as daw  # Importing after JAX can crash!
 * [API Reference](https://dbraun.github.io/DawDreamer/api_reference/index.html)
 * [Examples](https://github.com/DBraun/DawDreamer/tree/main/examples/)
 * [Tests](https://github.com/DBraun/DawDreamer/tree/main/tests)
+* [Changelog](CHANGELOG.md)
 
 ## License
 

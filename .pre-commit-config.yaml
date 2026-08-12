@@ -5,14 +5,14 @@
 repos:
   # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: check-toml
       - id: end-of-file-fixer
-        exclude: '\\.jucer$'  # Don't modify JUCE project files
+        exclude: '\.jucer$'  # Don't modify JUCE project files
       - id: trailing-whitespace
-        exclude: '\\.jucer$'
+        exclude: '\.jucer$'
       - id: check-added-large-files
         args: ['--maxkb=1000']
       - id: check-merge-conflict
@@ -22,9 +22,9 @@ repos:
 
   # Python formatting and linting (ruff replaces black, flake8, isort)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
+    rev: v0.15.20
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
         exclude: '\.ipynb$'
       - id: ruff-format
@@ -32,7 +32,7 @@ repos:
 
   # C++ formatting
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v19.1.4
+    rev: v22.1.5
     hooks:
       - id: clang-format
         types_or: [c++, c]
@@ -40,16 +40,16 @@ repos:
 
   # Shell script checking
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
 
   # Spell checking
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.2
     hooks:
       - id: codespell
-        args: ['--skip=*.so,*.dll,*.dylib,*.pyd,*.a,*.lib,*.jucer', '--ignore-words=.codespellignore']
+        args: ['--skip=*.so,*.dll,*.dylib,*.pyd,*.a,*.lib,*.jucer,*.ipynb', '--ignore-words=.codespellignore']
         exclude: '^(thirdparty|JuceLibraryCode|Builds)/'
 
 # Exclude patterns for all hooks

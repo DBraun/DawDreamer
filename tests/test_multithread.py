@@ -30,12 +30,9 @@ class MockPoolApplyResult:
 def mock_pool_apply_async(monkeypatch):
     monkeypatch.setattr(
         "multiprocessing.pool.Pool.apply_async",
-        lambda self,
-        func,
-        args=(),
-        kwds={},
-        callback=None,
-        error_callback=None: MockPoolApplyResult(func, args),
+        lambda self, func, args=(), kwds={}, callback=None, error_callback=None: (
+            MockPoolApplyResult(func, args)
+        ),
     )
 
 

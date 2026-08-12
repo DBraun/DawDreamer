@@ -32,7 +32,7 @@ cd ../..
 xcodebuild ARCHS="$ARCHS" -configuration Release-$ARCHS -project Builds/MacOSX/DawDreamer.xcodeproj/ CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
 mv Builds/MacOSX/build/$CONFIGURATION/dawdreamer.so.dylib Builds/MacOSX/build/$CONFIGURATION/dawdreamer.so
 
-rm tests/dawdreamer.so
+rm -f tests/dawdreamer.so
 cp Builds/MacOSX/build/$CONFIGURATION/dawdreamer.so tests/dawdreamer.so
 
 # # To make a wheel locally:

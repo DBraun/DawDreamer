@@ -30,7 +30,7 @@ def test_plugin_mem_leak1(load_method):
 
 @pytest.mark.parametrize("plugin_path", ALL_PLUGIN_INSTRUMENTS)
 def test_plugin_mem_leak2(plugin_path):
-    """test that reloading the same graph with a re-used plugin doesn't leak"""
+    """test that reloading the same graph with a reused plugin doesn't leak"""
 
     DURATION = 0.3
 

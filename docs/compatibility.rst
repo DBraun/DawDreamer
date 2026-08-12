@@ -6,6 +6,9 @@ This page lists known compatibility information for VST/AU plugins with DawDream
 .. note::
    This is a community-maintained list. If you've tested a plugin not listed here, please `open an issue <https://github.com/DBraun/DawDreamer/issues>`_ to share your results.
 
+.. note::
+   Most entries were reported between 2021 and 2023, before the JUCE 8 and nanobind updates in v0.9.0. A plugin marked as broken may work today (and vice versa), so re-testing with a current release is worthwhile.
+
 Legend
 ------
 
@@ -262,29 +265,27 @@ To test a plugin's compatibility:
 
 .. code-block:: python
 
+   import numpy as np
+
    import dawdreamer as daw
 
    engine = daw.RenderEngine(44100, 512)
 
-   try:
-       plugin = engine.make_plugin_processor("test", "/path/to/plugin.dll")
-       print(f"✔️ Plugin loaded successfully")
-       print(f"Inputs: {plugin.get_num_input_channels()}")
-       print(f"Outputs: {plugin.get_num_output_channels()}")
+   plugin = engine.make_plugin_processor("test", "/path/to/plugin.dll")
+   print("✔️ Plugin loaded successfully")
+   print(f"Inputs: {plugin.get_num_input_channels()}")
+   print(f"Outputs: {plugin.get_num_output_channels()}")
 
-       # Try rendering
-       engine.load_graph([(plugin, [])])
-       engine.render(1.0)
-       audio = engine.get_audio()
+   # Try rendering
+   engine.load_graph([(plugin, [])])
+   engine.render(1.0)
+   audio = engine.get_audio()
 
-       # Check for NaN
-       if np.isnan(audio).any():
-           print("❌ Output contains NaN values")
-       else:
-           print("✔️ Rendering successful")
-
-   except Exception as e:
-       print(f"❌ Error: {e}")
+   # Check for NaN
+   if np.isnan(audio).any():
+       print("❌ Output contains NaN values")
+   else:
+       print("✔️ Rendering successful")
 
 Contributing Compatibility Info
 --------------------------------

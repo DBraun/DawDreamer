@@ -6,6 +6,52 @@
 
 const int DAW_PARAMETER_MAX_NAME_LENGTH = 512;
 
+// Throw with a clear message unless the array is 2D shaped (channels, samples).
+// Reading shape(1) on a 0-D or 1-D nanobind ndarray is undefined behavior, so
+// every audio-accepting entry point must call this before touching the shape.
+inline void validateAudioNdarray(const nb::ndarray<float>& input, const std::string& context)
+{
+    if (input.ndim() != 2)
+    {
+        throw std::runtime_error(context + ": audio data must be a 2D array shaped " +
+                                 "(channels, samples), but received an array with " +
+                                 std::to_string(input.ndim()) + " dimension(s).");
+    }
+}
+
+// Replacement for the deprecated juce::MidiBuffer::Iterator: pops messages
+// one at a time, in order, from a MidiBuffer. The buffer must outlive the
+// cursor and must not be modified while the cursor is in use.
+class MidiBufferCursor
+{
+  public:
+    MidiBufferCursor() = default;
+
+    explicit MidiBufferCursor(const juce::MidiBuffer& buffer)
+        : m_iterator{buffer.cbegin()}, m_end{buffer.cend()}
+    {
+    }
+
+    // Copy the next message and its sample position into the output arguments
+    // and advance. Return false if no messages remain.
+    bool getNextEvent(juce::MidiMessage& result, int& samplePosition)
+    {
+        if (m_iterator == m_end)
+        {
+            return false;
+        }
+        const auto metadata = *m_iterator;
+        result = metadata.getMessage();
+        samplePosition = metadata.samplePosition;
+        ++m_iterator;
+        return true;
+    }
+
+  private:
+    juce::MidiBufferIterator m_iterator;
+    juce::MidiBufferIterator m_end;
+};
+
 class ProcessorBase : public juce::AudioProcessor
 {
   public:

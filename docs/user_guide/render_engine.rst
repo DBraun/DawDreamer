@@ -133,6 +133,20 @@ Load a processor graph before rendering:
 
 See :doc:`index` for more details on graph construction.
 
+Looking Up and Removing Processors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Processors are registered with the engine by their unique name:
+
+.. code-block:: python
+
+   proc = engine.get_processor("processor_a")  # None if not found
+
+   removed = engine.remove_processor("processor_a")  # True if it existed
+
+.. warning::
+   After ``remove_processor``, existing Python references to that processor are invalid and must not be used.
+
 Re-rendering
 ~~~~~~~~~~~~
 
@@ -143,8 +157,8 @@ You can modify processor parameters and re-render without reloading the graph:
    engine.render(4.)
    audio1 = engine.get_audio()
 
-   # Modify parameters
-   processor.set_parameter("gain", 0.5)
+   # Modify parameters (here on a Filter Processor)
+   filter_proc.frequency = 500.0
 
    # Re-render with new parameters
    engine.render(4.)
@@ -163,7 +177,7 @@ Automation data is interpreted at audio rate (one value per sample):
    duration = 4.0
    num_samples = int(duration * SAMPLE_RATE)
    automation = np.linspace(100, 1000, num_samples)
-   processor.set_automation("frequency", automation)
+   filter_proc.set_automation("freq", automation)
    engine.render(duration)
 
 PPQN-Rate Automation
@@ -177,7 +191,7 @@ Automation data is interpreted at PPQN rate (pulses per quarter note):
    beats = 4
    num_pulses = beats * ppqn
    automation = np.linspace(100, 1000, num_pulses)
-   processor.set_automation("frequency", automation, ppqn=ppqn)
+   filter_proc.set_automation("freq", automation, ppqn=ppqn)
    engine.set_bpm(120.)
    engine.render(beats, beats=True)
 
@@ -212,6 +226,7 @@ Performance Considerations
 * **Block size**: Affects real-time performance and automation granularity
 * **Processor types**: Some processors (Faust, VST plugins) are more CPU-intensive than others
 * **Automation**: Audio-rate automation is more expensive than static parameters
+* **Parallelism**: ``render`` releases the GIL, so multiple engines can render concurrently on Python threads. See :doc:`threading`.
 
 Example: Complete Workflow
 ---------------------------

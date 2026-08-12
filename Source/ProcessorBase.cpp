@@ -203,7 +203,7 @@ void ProcessorBase::recordAutomation(AudioPlayHead::PositionInfo& posInfo, int n
 
         int j = 0;
 
-        for (int i = 0; i < this->getNumParameters(); i++)
+        for (int i = 0; i < processorParams.size(); i++)
         {
             auto theParameter = static_cast<AutomateParameterFloat*>(processorParams[i]);
 

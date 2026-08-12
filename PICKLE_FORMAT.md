@@ -206,12 +206,11 @@ Plugins use JUCE's binary state format:
 
 ## Versioning Considerations
 
-**Current Status**: No explicit version tracking (as of v0.8.4)
-
-Future versions may add:
-- Version number in pickle state dictionaries
-- Backward compatibility checks
-- Migration code for format changes
+Every processor's state dictionary contains a `pickle_version` entry
+(currently 1, defined as `DAWDREAMER_PICKLE_VERSION` in
+`Source/PickleVersion.h`). Unpickling requires an exact version match and
+raises a `RuntimeError` otherwise. Future versions may add backward
+compatibility checks and migration code for format changes.
 
 **Recommendation**: Store the DawDreamer version alongside pickled data:
 ```python

@@ -1,6 +1,7 @@
 #include "PluginProcessor.h"
 
 #include <filesystem>
+#include <mutex>
 #include <regex>
 
 #include "StandalonePluginWindow.h"
@@ -65,6 +66,12 @@ void PluginProcessor::openEditor()
 
 bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock)
 {
+    // Plugin scanning and instantiation use shared JUCE machinery, and
+    // make_plugin_processor releases the GIL, so serialize loads across
+    // threads.
+    static std::mutex pluginLoadMutex;
+    std::lock_guard<std::mutex> lock(pluginLoadMutex);
+
     OwnedArray<PluginDescription> pluginDescriptions;
     KnownPluginList pluginList;
     AudioPluginFormatManager pluginFormatManager;
@@ -73,8 +80,16 @@ bool PluginProcessor::loadPlugin(double sampleRate, int samplesPerBlock)
 
     for (int i = pluginFormatManager.getNumFormats(); --i >= 0;)
     {
-        pluginList.scanAndAddFile(String(myPluginPath), true, pluginDescriptions,
-                                  *pluginFormatManager.getFormat(i));
+        auto* format = pluginFormatManager.getFormat(i);
+
+        // Only scan with formats that might match the file. Probing a path
+        // with every format is slow and makes non-matching backends print
+        // errors to stderr (e.g. LV2's "attempt to map invalid URI" for a
+        // .vst3 path).
+        if (format->fileMightContainThisPluginType(String(myPluginPath)))
+        {
+            pluginList.scanAndAddFile(String(myPluginPath), true, pluginDescriptions, *format);
+        }
     }
 
     if (myPlugin.get())
@@ -148,9 +163,6 @@ PluginProcessor::~PluginProcessor()
     myMidiBufferSec.clear();
     myRenderMidiBuffer.clear();
     myRecordedMidiSequence.clear();
-
-    delete myMidiIteratorQN;
-    delete myMidiIteratorSec;
 }
 
 void PluginProcessor::setPlayHead(AudioPlayHead* newPlayHead)
@@ -173,7 +185,38 @@ bool PluginProcessor::setBusesLayout(const BusesLayout& arr)
 {
     THROW_ERROR_IF_NO_PLUGIN
     ProcessorBase::setBusesLayout(arr);
-    return myPlugin->setBusesLayout(arr);
+
+    // A plugin (VST3 in particular) must be deactivated before its bus
+    // arrangement changes, and reactivated afterwards.
+    myPlugin->releaseResources();
+    bool result = myPlugin->setBusesLayout(arr);
+    myPlugin->prepareToPlay(mySampleRate, this->getBlockSize());
+
+    return result;
+}
+
+bool PluginProcessor::enableAllBuses()
+{
+    THROW_ERROR_IF_NO_PLUGIN
+
+    myPlugin->releaseResources();
+    bool result = myPlugin->enableAllBuses();
+    ProcessorBase::setBusesLayout(myPlugin->getBusesLayout());
+    myPlugin->prepareToPlay(mySampleRate, this->getBlockSize());
+
+    return result;
+}
+
+bool PluginProcessor::disableNonMainBuses()
+{
+    THROW_ERROR_IF_NO_PLUGIN
+
+    myPlugin->releaseResources();
+    bool result = myPlugin->disableNonMainBuses();
+    ProcessorBase::setBusesLayout(myPlugin->getBusesLayout());
+    myPlugin->prepareToPlay(mySampleRate, this->getBlockSize());
+
+    return result;
 }
 
 void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
@@ -234,7 +277,7 @@ void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBu
             // steps for playing MIDI
             myRenderMidiBuffer.addEvent(myMidiMessageSec, int(myMidiMessagePositionSec - start));
             myMidiEventsDoRemainSec =
-                myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+                myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
             myIsMessageBetweenSec =
                 myMidiMessagePositionSec >= start && myMidiMessagePositionSec < end;
         }
@@ -265,7 +308,7 @@ void PluginProcessor::processBlock(juce::AudioSampleBuffer& buffer, juce::MidiBu
                                         int((myMidiMessagePositionQN - pulseStart) * 60. *
                                             mySampleRate / (PPQN * *posInfo->getBpm())));
             myMidiEventsDoRemainQN =
-                myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+                myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
             myIsMessageBetweenQN =
                 myMidiMessagePositionQN >= pulseStart && myMidiMessagePositionQN < pulseEnd;
         }
@@ -315,17 +358,15 @@ void PluginProcessor::reset()
         myPlugin->reset();
     }
 
-    delete myMidiIteratorSec;
-    myMidiIteratorSec = new MidiBuffer::Iterator(myMidiBufferSec); // todo: deprecated.
+    myMidiIteratorSec = MidiBufferCursor(myMidiBufferSec);
 
     myMidiEventsDoRemainSec =
-        myMidiIteratorSec->getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
+        myMidiIteratorSec.getNextEvent(myMidiMessageSec, myMidiMessagePositionSec);
 
-    delete myMidiIteratorQN;
-    myMidiIteratorQN = new MidiBuffer::Iterator(myMidiBufferQN); // todo: deprecated.
+    myMidiIteratorQN = MidiBufferCursor(myMidiBufferQN);
 
     myMidiEventsDoRemainQN =
-        myMidiIteratorQN->getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
+        myMidiIteratorQN.getNextEvent(myMidiMessageQN, myMidiMessagePositionQN);
 
     myRenderMidiBuffer.clear();
 
@@ -489,7 +530,7 @@ void PluginProcessor::setPatch(const PluginPatch patch)
     const Array<AudioProcessorParameter*>& pluginParameters = myPlugin->getParameters();
     for (auto pair : patch)
     {
-        if (pair.first < myPlugin->getNumParameters())
+        if (pair.first < pluginParameters.size())
         {
             pluginParameters.getUnchecked(pair.first)->setValue(pair.second);
             ProcessorBase::setAutomationValByIndex(pair.first, pair.second);
@@ -499,7 +540,7 @@ void PluginProcessor::setPatch(const PluginPatch patch)
             throw std::runtime_error("RenderEngine::setPatch error: Incorrect parameter index!"
                                      "\n- Current index:  " +
                                      std::to_string(pair.first) + "\n- Max index: " +
-                                     std::to_string(myPlugin->getNumParameters() - 1));
+                                     std::to_string(pluginParameters.size() - 1));
         }
         i++;
     }
@@ -521,7 +562,11 @@ int PluginProcessor::getLatencySamples()
 std::string PluginProcessor::getParameterAsText(const int parameter)
 {
     THROW_ERROR_IF_NO_PLUGIN
-    return myPlugin->getParameterText(parameter).toStdString();
+    if (auto* param = myPlugin->getParameters()[parameter])
+    {
+        return param->getCurrentValueAsText().toStdString();
+    }
+    throw std::runtime_error("Parameter not found for index: " + std::to_string(parameter));
 }
 
 //==============================================================================
@@ -532,7 +577,7 @@ const PluginPatch PluginProcessor::getPatch()
     THROW_ERROR_IF_NO_PLUGIN
 
     params.clear();
-    params.reserve(myPlugin->getNumParameters());
+    params.reserve(myPlugin->getParameters().size());
 
     AudioPlayHead::PositionInfo posInfo;
     posInfo.setTimeInSeconds(0.);
@@ -556,7 +601,7 @@ const size_t PluginProcessor::getPluginParameterSize()
 {
     THROW_ERROR_IF_NO_PLUGIN
 
-    return myPlugin->getNumParameters();
+    return myPlugin->getParameters().size();
 }
 
 int PluginProcessor::getNumMidiEvents()
@@ -716,7 +761,11 @@ nb::list PluginProcessorWrapper::wrapperGetPatch()
 
 std::string PluginProcessorWrapper::wrapperGetParameterName(const int& parameter)
 {
-    return myPlugin->getParameterName(parameter).toStdString();
+    if (auto* param = myPlugin->getParameters()[parameter])
+    {
+        return param->getName(DAW_PARAMETER_MAX_NAME_LENGTH).toStdString();
+    }
+    throw std::runtime_error("Parameter not found for index: " + std::to_string(parameter));
 }
 
 bool PluginProcessorWrapper::wrapperSetParameter(const int& parameterIndex, const float& value)

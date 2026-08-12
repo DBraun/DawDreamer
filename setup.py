@@ -4,7 +4,6 @@
 # `python -m build --wheel`
 # Then in the `dist` directory, `pip install dawdreamer`
 
-import contextlib
 import glob
 import os
 import os.path
@@ -101,9 +100,20 @@ def _build_and_copy_linux() -> str:
         _build_libsamplerate()
         python_include = sysconfig.get_path("include")
         makefile_dir = os.path.join(this_dir, "Builds", "LinuxMakefile")
+        # The Projucer-generated Makefile hardcodes the x86_64 libfaust
+        # directory, so pass the machine-specific one (e.g. aarch64) too.
+        libfaust_lib_dir = os.path.join(
+            this_dir, "thirdparty", "libfaust", f"ubuntu-{platform.machine()}", "Release", "lib"
+        )
         print(f"Building DawDreamer (Python include: {python_include})...")
         _run(
-            ["make", "CONFIG=Release", f"CXXFLAGS=-I{python_include}", f"-j{os.cpu_count() or 1}"],
+            [
+                "make",
+                "CONFIG=Release",
+                f"CXXFLAGS=-I{python_include}",
+                f"LDFLAGS=-L{libfaust_lib_dir}",
+                f"-j{os.cpu_count() or 1}",
+            ],
             cwd=makefile_dir,
         )
 
@@ -159,7 +169,7 @@ def _build_and_copy_darwin() -> str:
 
     if not os.path.isfile(build_so):
         raise FileNotFoundError(
-            f"Build output not found: {build_so}\n" f"  Try: ARCHS={archs} ./build_macos.sh"
+            f"Build output not found: {build_so}\n  Try: ARCHS={archs} ./build_macos.sh"
         )
 
     print(f"Copying {build_so} -> {dest_so}")
@@ -208,8 +218,9 @@ def _build_and_copy_windows() -> str:
 ext_modules = []
 package_data = []
 
-with contextlib.suppress(Exception):
-    shutil.copytree("licenses", os.path.join("dawdreamer", "licenses"))
+licenses_dst = os.path.join(this_dir, "dawdreamer", "licenses")
+if not os.path.isdir(licenses_dst):
+    shutil.copytree(os.path.join(this_dir, "licenses"), licenses_dst)
 
 if platform.system() == "Windows":
     dest = _build_and_copy_windows()
@@ -230,17 +241,17 @@ else:
 
 
 def copytree(src, dst, symlinks=False, ignore=None):
+    """Copy a tree, skipping ignored names and files whose mtime is unchanged."""
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
+        if ignore is not None and ignore(os.fspath(src), [item]):
+            continue
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
             copytree(s, d, symlinks, ignore)
         else:
-            if ignore is not None and ignore(os.fspath(src), [item]):
-                continue
-
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 shutil.copy2(s, d)
 
@@ -249,6 +260,7 @@ destination = copytree(
     os.path.join(this_dir, "thirdparty", "faust", "architecture"),
     os.path.join(this_dir, "dawdreamer", "architecture"),
     ignore=shutil.ignore_patterns(
+        # binary and media files
         "*.dll",
         "*.so",
         "*.html",
@@ -260,6 +272,15 @@ destination = copytree(
         "*.a",
         "*.wasm",
         "*.data",
+        # app-project scaffolding and support-library sources that are not
+        # usable as `-a` architecture wrapper files
+        "AU",
+        "android",
+        "httpdlib",
+        "iOS",
+        "osclib",
+        "smartKeyboard",
+        "unsupported-arch",
     ),
 )
 
@@ -313,14 +334,13 @@ setup(
         "Programming Language :: C++",
         "Programming Language :: Python",
         "Topic :: Multimedia :: Sound/Audio",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
     keywords="audio music sound",
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     install_requires=[],
     packages=setuptools.find_packages(),
     py_modules=["dawdreamer"],

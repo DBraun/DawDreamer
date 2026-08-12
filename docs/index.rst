@@ -19,7 +19,7 @@ Read the `introduction to DawDreamer <https://arxiv.org/abs/2111.09931>`_, which
 Key Features
 ------------
 
-* **Composable audio processor graphs** - Build complex signal processing chains with `DAG <https://en.wikipedia.org/wiki/Digital_audio_workstation>`_-based routing
+* **Composable audio processor graphs** - Build complex signal processing chains with `DAG <https://en.wikipedia.org/wiki/Directed_acyclic_graph>`_-based routing
 * **VST 2/3 support** - Host instrument and effect plugins with full state management and automation
 * **Faust DSP integration** - Real-time compilation of Faust code for custom effects and instruments
 * **Time-stretching and pitch-shifting** - RubberBand integration with Ableton Live warp marker support

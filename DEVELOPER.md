@@ -27,7 +27,7 @@ DawDreamer is a **Digital Audio Workstation (DAW) framework for Python**. It ena
 - Transpilation: Faust to JAX/Flax, C++, Rust, WebAssembly, etc.
 
 **Platforms**: macOS 12.0+, Windows (x86_64), Linux (x86_64)
-**Python Support**: 3.11-3.14 (3.8-3.12 in wheel metadata)
+**Python Support**: 3.11-3.14
 
 ### High-Level Structure
 
@@ -513,15 +513,17 @@ pre-commit install
 
 ## Key Dependencies
 
-| Dependency      | Purpose                     | Version/Notes             |
-|-----------------|-----------------------------|---------------------------|
-| JUCE            | Audio framework             | Latest main branch        |
-| nanobind        | C++/Python bindings         | Submodule, header-only    |
-| Faust           | DSP language compiler       | Submodule, embedded       |
-| libfaust        | Pre-compiled Faust runtime  | Downloaded via script     |
-| libsamplerate   | Sample rate conversion      | Built from source (CMake) |
-| RubberBand      | Time/pitch modification     | Submodule                 |
-| Python headers  | C API and dev files         | 3.11-3.14 required        |
+| Dependency      | Purpose                     | Version/Notes                                        |
+|-----------------|-----------------------------|------------------------------------------------------|
+| JUCE            | Audio framework             | Vendored in `JuceLibraryCode/modules`                |
+| JUCE submodule  | VST2 interface headers      | `thirdparty/JUCE` (5.3.1-era), used as vstLegacyFolder |
+| nanobind        | C++/Python bindings         | Submodule, header-only, pinned to a release tag      |
+| Faust           | DSP language compiler       | Submodule, pinned to a release tag                   |
+| libfaust        | Pre-compiled Faust runtime  | Downloaded via `thirdparty/libfaust/download_libfaust.py`; keep its default version in sync with the Faust submodule |
+| faustlibraries  | Faust standard library      | Submodule at `dawdreamer/faustlibraries`; keep in sync with the `libraries` pin inside the Faust submodule |
+| libsamplerate   | Sample rate conversion      | Built from source (CMake)                            |
+| RubberBand      | Time/pitch modification     | Submodule                                            |
+| Python headers  | C API and dev files         | 3.11-3.14 required                                   |
 
 ---
 
@@ -540,10 +542,13 @@ pre-commit install
 ## Continuous Integration
 
 **GitHub Actions** (`.github/workflows/all.yml`):
-- Builds on macOS, Windows, Linux
-- Runs test suite
-- Builds wheels for all platforms
-- Publishes to PyPI on release
+- Builds wheels for Python 3.11-3.14 on:
+  - Linux x86_64 (manylinux_2_34) and aarch64 (native arm64 runners)
+  - macOS arm64 (`macos-15`) and x86_64 (`macos-15-intel`)
+  - Windows x86_64 (`windows-2025`)
+- Runs the test suite against every wheel
+- Publishes to PyPI when a version tag (e.g. `v0.8.6`) is pushed. The tag must
+  match the version in `DawDreamer.jucer`; no GitHub release is required.
 
 ---
 

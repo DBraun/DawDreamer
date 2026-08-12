@@ -1,1 +1,32 @@
-graft dawdreamer # copy everything
+# Ship the whole dawdreamer package...
+graft dawdreamer
+
+# ...except pieces that are never read at runtime.
+# faustlibraries: keep the .lib files and their licenses; drop repo scaffolding,
+# documentation, tests, and the mesh2faust CAD sources (modalmodels are only
+# referenced in physmodels.lib comments).
+prune dawdreamer/faustlibraries/.git
+prune dawdreamer/faustlibraries/.github
+prune dawdreamer/faustlibraries/doc
+prune dawdreamer/faustlibraries/modalmodels
+prune dawdreamer/faustlibraries/tests
+exclude dawdreamer/faustlibraries/.git
+exclude dawdreamer/faustlibraries/.gitignore
+exclude dawdreamer/faustlibraries/Makefile
+
+# architecture: setup.py already skips copying these app-project and
+# support-library sources; prune too in case a local tree still has them.
+prune dawdreamer/architecture/AU
+prune dawdreamer/architecture/android
+prune dawdreamer/architecture/httpdlib
+prune dawdreamer/architecture/iOS
+prune dawdreamer/architecture/osclib
+prune dawdreamer/architecture/smartKeyboard
+prune dawdreamer/architecture/unsupported-arch
+
+# Local build artifact that must never ship in a wheel (the Windows wheel
+# links libfaust statically and only contains dawdreamer.pyd).
+exclude dawdreamer/faust.dll
+
+# Python bytecode caches
+global-exclude __pycache__ *.py[cod]

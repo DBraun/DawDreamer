@@ -40,7 +40,7 @@ Loading DSP from File
 
 **faust_reverb.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    process = dm.zita_light;
 
@@ -150,7 +150,7 @@ Here's an example that mixes two stereo inputs into one stereo output with a low
 
 **dsp_4_channels.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    declare name "MyEffect";
    import("stdfaust.lib");
@@ -225,14 +225,32 @@ Set the number of voices to 1 or higher (default is 0, which disables polyphony)
 
 .. code-block:: python
 
-   faust_processor.set_num_voices(8)  # 8-voice polyphony
+   faust_processor.num_voices = 8  # 8-voice polyphony
+
+Tuning Polyphony
+~~~~~~~~~~~~~~~~
+
+Three more properties control polyphonic behavior:
+
+.. code-block:: python
+
+   # If grouped, all voices share the same parameter values.
+   faust_processor.group_voices = True
+
+   # If enabled (default), voices are dynamically enabled and disabled
+   # to save computation.
+   faust_processor.dynamic_voices = True
+
+   # Specifying the release length (seconds) accurately helps avoid
+   # warnings about voices being stolen.
+   faust_processor.release_length = 0.5
 
 Example
 ~~~~~~~
 
 **poly_synth.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    import("stdfaust.lib");
 
@@ -248,7 +266,7 @@ Example
 .. code-block:: python
 
    faust_processor.set_dsp("/path/to/poly_synth.dsp")
-   faust_processor.set_num_voices(8)
+   faust_processor.num_voices = 8
 
    # Add MIDI notes (note, velocity, start_time, duration)
    faust_processor.add_midi_note(60, 100, 0.0, 1.0)  # C4
@@ -259,6 +277,61 @@ Example
    engine.render(3.0)
 
 See `tests/test_faust_poly*.py <https://github.com/DBraun/DawDreamer/tree/main/tests>`_ for more examples.
+
+Compilation Options
+-------------------
+
+Several properties configure how DSP code is compiled. Set them before calling ``compile()``:
+
+.. code-block:: python
+
+   # Prepended to your DSP code. Default: 'import("stdfaust.lib");'
+   faust_processor.auto_import = 'import("stdfaust.lib");'
+
+   # Extra Faust compiler flags.
+   faust_processor.compile_flags = ["-vec"]
+
+   # LLVM IR optimization level, -1 (maximum) through 4.
+   faust_processor.opt_level = -1
+
+   # Extra search paths for your custom .lib files.
+   faust_processor.faust_libraries_paths = ["/path/to/my/libs"]
+
+   # Search paths for audio used by the soundfile primitive.
+   faust_processor.faust_assets_paths = ["/path/to/audio"]
+
+After compiling, two read-only properties are useful:
+
+.. code-block:: python
+
+   faust_processor.compiled  # True if the most recent compile succeeded
+   faust_processor.code      # the most recently compiled DSP code
+
+Compiling from the Box and Signal APIs
+--------------------------------------
+
+Instead of DSP source code, a processor can compile a ``Box`` or list of ``Signal`` objects built programmatically with the :doc:`Box and Signal APIs <../api_reference/index>`:
+
+.. code-block:: python
+
+   from dawdreamer.faust import FaustContext
+   from dawdreamer.faust.box import boxMul, boxPar, boxReal, boxWire
+
+   faust_processor = engine.make_faust_processor("faust")
+
+   with FaustContext():
+       box_gain_half = boxMul(boxWire(), boxReal(0.5))
+       box = boxPar(box_gain_half, box_gain_half)
+       faust_processor.compile_box(box)
+
+``compile_signals`` works the same way for signals. Both accept an optional list of compiler arguments.
+
+A non-polyphonic processor can also be restored from LLVM bitcode without recompiling from source. The bitcode is available in the processor's pickle state, and pickling uses this internally (see :doc:`pickling`):
+
+.. code-block:: python
+
+   state = faust_processor.__getstate__()
+   other_processor.compile_from_bitcode(state["bitcode"])
 
 Soundfiles
 ----------
@@ -282,7 +355,7 @@ Example
 
 **soundfile_test.dsp:**
 
-.. code-block:: faust
+.. code-block:: text
 
    soundChoice = nentry("soundChoice", 0, 0, 2, 1);  // choose between 0, 1, 2
    process = soundChoice, _ ~ +(1) : soundfile("mySound", 2) : !, !, _, _;

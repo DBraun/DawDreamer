@@ -133,6 +133,9 @@ The Faust APIs provide two complementary approaches to building audio processors
 
 See the `Faust Box API Example <https://github.com/DBraun/DawDreamer/tree/main/examples/Box_API>`_ for practical usage.
 
+.. note::
+   The listings below are a hand-picked subset of the most common functions. The bindings expose many hundreds of box and signal functions; use ``dir(dawdreamer.faust.box)`` and ``dir(dawdreamer.faust.signal)`` or ``help()`` in a Python session to browse everything.
+
 Faust Module
 ~~~~~~~~~~~~
 
@@ -140,21 +143,26 @@ The main ``dawdreamer.faust`` module provides:
 
 .. py:class:: dawdreamer.faust.FaustContext
 
-   Context manager for Faust compilation and execution.
+   Context manager that creates the Faust library context on entry and destroys it on exit. Use it with a ``with`` statement around any Box or Signal API work:
+
+   .. code-block:: python
+
+      from dawdreamer.faust import FaustContext
+      from dawdreamer.faust.box import boxReal
+
+      with FaustContext():
+          box = boxReal(0.5)
+          # ... build and compile boxes here ...
 
 .. py:function:: dawdreamer.faust.createLibContext()
 
-   Create a Faust library context.
+   Create the global Faust library context. Call this before using the Box or
+   Signal API.
 
-   :return: Faust library context
-   :rtype: FaustContext
+.. py:function:: dawdreamer.faust.destroyLibContext()
 
-.. py:function:: dawdreamer.faust.destroyLibContext(context)
-
-   Destroy a Faust library context.
-
-   :param context: The context to destroy
-   :type context: FaustContext
+   Destroy the global Faust library context. Call this when you are done using
+   the Box or Signal API.
 
 .. py:function:: dawdreamer.faust.boxToSignals(box)
 
@@ -174,14 +182,16 @@ The Box API provides a functional, component-based approach to building audio pr
 
 .. py:class:: dawdreamer.faust.box.Box
 
-   Base class for all Faust Box objects. Boxes can be combined using standard operators.
+   Base class for all Faust Box objects. Boxes support Python's arithmetic and
+   comparison operators, which map to the corresponding signal operations:
 
-   **Operators:**
+   * ``box1 + box2`` - Addition (``boxAdd``)
+   * ``box1 - box2`` - Subtraction (``boxSub``)
+   * ``box1 * box2`` - Multiplication (``boxMul``)
+   * ``box1 / box2`` - Division (``boxDiv``)
 
-   * ``box1 + box2`` - Parallel composition
-   * ``box1 * box2`` - Sequential composition
-   * ``box1 , box2`` - Split composition
-   * ``box1 : box2`` - Sequential composition (alternative syntax)
+   Faust's parallel and sequential composition are available as functions:
+   ``boxPar(box1, box2)`` and ``boxSeq(box1, box2)``.
 
 .. py:class:: dawdreamer.faust.box.SType
 
@@ -265,9 +275,10 @@ Trigonometric Functions
 Delay and Memory
 ^^^^^^^^^^^^^^^^
 
-.. py:function:: dawdreamer.faust.box.boxDelay()
+.. py:function:: dawdreamer.faust.box.boxDelay(box, delay)
 
-   Create a one-sample delay
+   Delay a box by a number of samples (Faust's ``@`` operator). With no
+   arguments it creates the delay primitive itself
 
 .. py:function:: dawdreamer.faust.box.boxIntCast(box)
 
@@ -395,10 +406,3 @@ Further Reading
 * `Faust Official Documentation <https://faustdoc.grame.fr/>`_
 * `Faust Signal API Reference <https://faustdoc.grame.fr/manual/syntax/#signals>`_
 * :doc:`../user_guide/faust_processor` - Using Faust DSP in DawDreamer
-
-Indices and Tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

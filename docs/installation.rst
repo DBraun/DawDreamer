@@ -16,7 +16,7 @@ System Requirements
 **macOS:**
 
 * 64-bit Python 3.11-3.14
-* Apple Silicon (arm64)
+* Apple Silicon (arm64) or Intel (x86_64)
 * macOS 11.0 or higher
 
 **Windows:**
@@ -26,7 +26,7 @@ System Requirements
 
 **Linux:**
 
-* x86_64 CPU
+* x86_64 or aarch64 CPU
 * 64-bit Python 3.11-3.14 (tested with 3.12 on Ubuntu/WSL2)
 * For WSL2 users: Expect longer installation times (1-2 minutes) due to cross-filesystem I/O
 
@@ -323,7 +323,7 @@ Common Issues
 
 This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
 and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
-You'll see "Successfully installed dawdreamer-0.8.4" when done.
+You'll see "Successfully installed dawdreamer-0.9.0" when done.
 
 **ImportError after installation**
 
@@ -331,7 +331,7 @@ Verify that the installation completed:
 
 .. code-block:: bash
 
-   python3 -c "import dawdreamer; print('Installed successfully')"
+   python3 -c "import dawdreamer; print('Installed', dawdreamer.__version__)"
 
 If it fails, try reinstalling:
 

@@ -246,9 +246,6 @@ def test_playbackwarp_sample_rate_diff(warp_on: bool):
     Whether or not warp_on is on, the output should sound like the input.
     """
 
-    if not USE_LIBROSA:
-        return
-
     DURATION = 10.0
 
     engine = daw.RenderEngine(SAMPLE_RATE, 128)
@@ -256,14 +253,12 @@ def test_playbackwarp_sample_rate_diff(warp_on: bool):
     engine.set_bpm(110.0)  # we know that this file is 110 BPM.
 
     upsampled_rate = 96_000
-    # nb: sr=None makes it load at the native sample rate (96000 for this file)
-    audio, rate = librosa.load(
-        abspath(ASSETS / "Music Delta - Disco" / "drums_96kHz.wav"),
-        duration=DURATION,
-        mono=False,
-        sr=None,
+    # Load at the file's native sample rate (96000 for this file).
+    audio, rate = soundfile.read(
+        abspath(ASSETS / "Music Delta - Disco" / "drums_96kHz.wav"), always_2d=True
     )
     assert rate == upsampled_rate
+    audio = audio.T[:, : int(DURATION * rate)].astype(np.float32)
 
     drums = engine.make_playbackwarp_processor("drums", audio, sr=upsampled_rate)
 
