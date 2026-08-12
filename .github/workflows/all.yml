@@ -112,7 +112,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
 
     - name: Get CMake
       uses: lukka/get-cmake@latest
