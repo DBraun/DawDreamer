@@ -75,7 +75,7 @@ jobs:
         CIBW_TEST_COMMAND: "rm -rf dawdreamer/*.so* && cd {project}/tests && python -m pytest -v . --ignore=test_jax.py"
         CIBW_ARCHS: auto64
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: artifact-${{ matrix.cibwbuild}}
         path: ./wheelhouse/*.whl
@@ -151,7 +151,7 @@ jobs:
         CIBW_ARCHS: auto64
         CIBW_BUILD: ${{matrix.CIBW-BUILD}}
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: artifact-windows-${{ matrix.python-version}}
         path: ./wheelhouse/*.whl
@@ -217,7 +217,7 @@ jobs:
         CIBW_ARCHS_MACOS: ${{matrix.ARCHS}}
         CIBW_ENVIRONMENT_MACOS: ARCHS="${{matrix.ARCHS}}"
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: artifact-macos-${{ matrix.build}}
         path: ./wheelhouse/*.whl
