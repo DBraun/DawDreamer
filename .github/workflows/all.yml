@@ -67,7 +67,7 @@ jobs:
           cd Builds/LinuxMakefile &&
           make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L$PYTHONLIBPATH -L../../thirdparty/libfaust/ubuntu-$(uname -m)/Release/lib" CXXFLAGS="-I$PYTHONINCLUDEPATH" &&
           strip --strip-unneeded build/libdawdreamer.so &&
-          mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so &&
+          cp build/libdawdreamer.so ../../dawdreamer/dawdreamer.so &&
           cd ../..
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
           LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/dawdreamer:$PWD/thirdparty/libfaust/ubuntu-$(uname -m)/Release/lib && pip install auditwheel-symbols && (auditwheel repair -w {dest_dir} {wheel} || auditwheel-symbols --manylinux 2_34 {wheel})

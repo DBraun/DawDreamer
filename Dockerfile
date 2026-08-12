@@ -37,7 +37,7 @@ RUN cd thirdparty/libsamplerate && \
 RUN cd Builds/LinuxMakefile && \
     make CONFIG=Release LIBS="-lstdc++fs" LDFLAGS="-L$PYTHONLIBPATH" CXXFLAGS="-I$PYTHONINCLUDEPATH" && \
     strip --strip-unneeded build/libdawdreamer.so && \
-    mv build/libdawdreamer.so ../../dawdreamer/dawdreamer.so && \
+    cp build/libdawdreamer.so ../../dawdreamer/dawdreamer.so && \
     cd ../..
 
 # Setup python virtual environment and requirements

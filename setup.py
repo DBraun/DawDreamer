@@ -100,9 +100,20 @@ def _build_and_copy_linux() -> str:
         _build_libsamplerate()
         python_include = sysconfig.get_path("include")
         makefile_dir = os.path.join(this_dir, "Builds", "LinuxMakefile")
+        # The Projucer-generated Makefile hardcodes the x86_64 libfaust
+        # directory, so pass the machine-specific one (e.g. aarch64) too.
+        libfaust_lib_dir = os.path.join(
+            this_dir, "thirdparty", "libfaust", f"ubuntu-{platform.machine()}", "Release", "lib"
+        )
         print(f"Building DawDreamer (Python include: {python_include})...")
         _run(
-            ["make", "CONFIG=Release", f"CXXFLAGS=-I{python_include}", f"-j{os.cpu_count() or 1}"],
+            [
+                "make",
+                "CONFIG=Release",
+                f"CXXFLAGS=-I{python_include}",
+                f"LDFLAGS=-L{libfaust_lib_dir}",
+                f"-j{os.cpu_count() or 1}",
+            ],
             cwd=makefile_dir,
         )
 
