@@ -61,12 +61,21 @@ def install_linux(version: str, arch: str, force: bool = False) -> None:
     # version to avoid silently reusing a zip from an older release.
     zip_file = f"libfaust-{version}-ubuntu-{arch}.zip"
     url = f"https://github.com/grame-cncm/faust/releases/download/{version}/{asset}"
+    dir_path = f"ubuntu-{arch}/Release"
     if download_file(url, zip_file, force=force):
-        dir_path = f"ubuntu-{arch}/Release"
         # Remove any previously extracted release so stale files don't linger.
         shutil.rmtree(dir_path, ignore_errors=True)
         os.makedirs(dir_path, exist_ok=True)
         subprocess.run(["unzip", "-o", zip_file, "-d", dir_path], check=True)
+
+    if arch == "aarch64":
+        # The aarch64 release bundles a non-PIC ncurses inside
+        # libfaustwithllvm.a, which breaks linking dawdreamer.so.
+        # Idempotent, so it also repairs an archive extracted earlier.
+        from strip_nonpic_ncurses import strip_nonpic_members
+
+        archive = Path(__file__).parent / dir_path / "lib" / "libfaustwithllvm.a"
+        strip_nonpic_members(archive)
 
 
 def main(version: str, arch: str, force: bool = False) -> None:
