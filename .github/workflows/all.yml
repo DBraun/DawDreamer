@@ -227,6 +227,9 @@ jobs:
     runs-on: ubuntu-latest
     name: "Upload wheels to PyPI"
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      # Required for PyPI Trusted Publishing (OIDC).
+      id-token: write
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -247,5 +250,6 @@ jobs:
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          # Authentication uses PyPI Trusted Publishing (OIDC), so no token is needed.
+          # skip-existing lets a partially-uploaded release be completed by rerunning this job.
+          skip-existing: true
