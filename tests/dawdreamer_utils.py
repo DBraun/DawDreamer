@@ -7,24 +7,18 @@ import random
 import warnings
 from collections import defaultdict
 from itertools import product
+from math import gcd
 from os import getenv
 from os.path import abspath, basename, isdir, isfile, splitext
 from pathlib import Path
 
 import numpy as np
 import pytest
+import soundfile
 from scipy.io import wavfile
+from scipy.signal import resample_poly
 
 import dawdreamer as daw
-
-USE_LIBROSA = True
-try:
-    import librosa
-except ModuleNotFoundError:
-    import soundfile
-
-    USE_LIBROSA = False
-
 
 SAMPLE_RATE = 44100
 
@@ -41,24 +35,29 @@ def make_sine(freq: float, duration: float, sr=SAMPLE_RATE):
     return np.sin(np.pi * 2.0 * freq * np.arange(N) / sr)
 
 
-def load_audio_file(file_path: str, duration=None, offset=0):
-    file_path = str(file_path)
+def load_audio_file(file_path: str, duration=None, offset=0) -> np.ndarray:
+    """Load audio shaped (channels, samples) at SAMPLE_RATE as float32.
 
-    if USE_LIBROSA:
-        sig, rate = librosa.load(
-            file_path, duration=duration, mono=False, sr=SAMPLE_RATE, offset=offset
-        )
-        assert rate == SAMPLE_RATE
+    Args:
+        file_path: Path to the audio file.
+        duration: Seconds to keep, measured after the offset. None keeps everything.
+        offset: Seconds to skip from the start of the file.
 
-    else:
-        # todo: soundfile doesn't allow you to specify the duration or sample rate, unless the file is RAW
-        sig, rate = soundfile.read(file_path, always_2d=True)
-        sig = sig.T
+    Returns:
+        The audio, resampled to SAMPLE_RATE if the file uses another rate.
+    """
+    sig, rate = soundfile.read(str(file_path), always_2d=True)
+    sig = sig.T
 
-        if duration is not None:
-            sig = sig[:, : int(duration * rate)]
+    if offset:
+        sig = sig[:, int(offset * rate) :]
+    if duration is not None:
+        sig = sig[:, : int(duration * rate)]
+    if rate != SAMPLE_RATE:
+        g = gcd(rate, SAMPLE_RATE)
+        sig = resample_poly(sig, SAMPLE_RATE // g, rate // g, axis=1)
 
-    return sig
+    return sig.astype(np.float32)
 
 
 def render(engine, file_path=None, duration=5.0):

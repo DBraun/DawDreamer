@@ -96,10 +96,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - { os: windows-2025, python-version: "3.11", CIBW-BUILD: "cp311*"}
-        - { os: windows-2025, python-version: "3.12", CIBW-BUILD: "cp312*"}
-        - { os: windows-2025, python-version: "3.13", CIBW-BUILD: "cp313*"}
-        - { os: windows-2025, python-version: "3.14", CIBW-BUILD: "cp314*"}
+        - { os: windows-2025, python-version: "3.11", CIBW-BUILD: "cp311-*"}
+        - { os: windows-2025, python-version: "3.12", CIBW-BUILD: "cp312-*"}
+        - { os: windows-2025, python-version: "3.13", CIBW-BUILD: "cp313-*"}
+        - { os: windows-2025, python-version: "3.14", CIBW-BUILD: "cp314-*"}
 
     steps:
     - uses: actions/checkout@v5
