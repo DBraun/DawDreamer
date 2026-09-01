@@ -31,7 +31,7 @@ jobs:
         - { os: ubuntu-24.04-arm, python-version: "3.14", pythonLibPath: "/opt/python/cp314-cp314/lib", pythonInclude: "/opt/python/cp314-cp314/include/python3.14", cibwbuild: "cp314-manylinux_aarch64"}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
 
@@ -83,7 +83,7 @@ jobs:
   build-ubuntu-docker:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
 
@@ -102,7 +102,7 @@ jobs:
         - { os: windows-2025, python-version: "3.14", CIBW-BUILD: "cp314-*"}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
 
@@ -174,7 +174,7 @@ jobs:
         - { os: macos-15-intel, build: cp314-macosx_x86_64, python-version: "3.14", ARCHS: "x86_64" }
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
 
