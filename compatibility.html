@@ -824,10 +824,10 @@
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
-<span class="n">plugin</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/plugin.dll&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✔️ Plugin loaded successfully&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Outputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plugin</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="s2">"/path/to/plugin.dll"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"✔️ Plugin loaded successfully"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Inputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Outputs: </span><span class="si">{</span><span class="n">plugin</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># Try rendering</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">plugin</span><span class="p">,</span> <span class="p">[])])</span>
@@ -836,9 +836,9 @@
 
 <span class="c1"># Check for NaN</span>
 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">audio</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Output contains NaN values&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"❌ Output contains NaN values"</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✔️ Rendering successful&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"✔️ Rendering successful"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -891,7 +891,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

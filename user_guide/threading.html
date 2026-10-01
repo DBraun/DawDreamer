@@ -518,7 +518,7 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">render_preset</span><span class="p">(</span><span class="n">preset_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BLOCK_SIZE</span><span class="p">)</span>
-    <span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/synth.vst3&quot;</span><span class="p">)</span>
+    <span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">,</span> <span class="s2">"/path/to/synth.vst3"</span><span class="p">)</span>
     <span class="n">synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="n">preset_path</span><span class="p">)</span>
     <span class="n">synth</span><span class="o">.</span><span class="n">add_midi_note</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
     <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[])])</span>
@@ -571,7 +571,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

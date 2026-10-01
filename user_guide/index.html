@@ -642,13 +642,13 @@
 </div>
 </li>
 <li><p><strong>Create Processors</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">)</span>
-<span class="n">effect</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_filter_processor</span><span class="p">(</span><span class="s2">&quot;filter&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">)</span>
+<span class="n">effect</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_filter_processor</span><span class="p">(</span><span class="s2">"filter"</span><span class="p">,</span> <span class="s2">"low"</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 <li><p><strong>Configure Processors</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">&quot;process = os.osc(440) * 0.1;&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">"process = os.osc(440) * 0.1;"</span><span class="p">)</span>
 <span class="n">effect</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="mf">1000.0</span>
 </pre></div>
 </div>
@@ -656,7 +656,7 @@
 <li><p><strong>Load the Graph</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([</span>
     <span class="p">(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;synth&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="p">[</span><span class="s2">"synth"</span><span class="p">])</span>
 <span class="p">])</span>
 </pre></div>
 </div>
@@ -668,7 +668,7 @@
 </div>
 </li>
 <li><p><strong>Modify and Re-render</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">&quot;process = os.osc(880) * 0.1;&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">"process = os.osc(880) * 0.1;"</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
 <span class="c1"># ...and so on</span>
 </pre></div>
@@ -682,23 +682,23 @@
 <h3>Multi-Channel Routing<a class="headerlink" href="#multi-channel-routing" title="Link to this heading"></a></h3>
 <p>Processors automatically handle channel counts. If a processor expects 2 channels but receives 4, you can use mix-down or routing:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Mix two stereo inputs, scaling each by 0.5 to avoid clipping</span>
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">&quot;mixer&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">"mixer"</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
 <section id="graph-fan-out">
 <h3>Graph Fan-Out<a class="headerlink" href="#graph-fan-out" title="Link to this heading"></a></h3>
 <p>Process the same input with multiple effects. (For rendering with multiple CPU cores, see <a class="reference internal" href="threading.html"><span class="doc">Multithreading and Multiprocessing</span></a>.)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">input_proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
-<span class="n">delay</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_delay_processor</span><span class="p">(</span><span class="s2">&quot;delay&quot;</span><span class="p">)</span>
-<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_reverb_processor</span><span class="p">(</span><span class="s2">&quot;reverb&quot;</span><span class="p">)</span>
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">input_proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"input"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">delay</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_delay_processor</span><span class="p">(</span><span class="s2">"delay"</span><span class="p">)</span>
+<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_reverb_processor</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">)</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">"mix"</span><span class="p">)</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([</span>
     <span class="p">(</span><span class="n">input_proc</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]),</span>
-    <span class="p">(</span><span class="n">reverb</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]),</span>
-    <span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;delay&quot;</span><span class="p">,</span> <span class="s2">&quot;reverb&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="p">[</span><span class="s2">"input"</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">reverb</span><span class="p">,</span> <span class="p">[</span><span class="s2">"input"</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="p">[</span><span class="s2">"delay"</span><span class="p">,</span> <span class="s2">"reverb"</span><span class="p">])</span>
 <span class="p">])</span>
 </pre></div>
 </div>
@@ -711,7 +711,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">make_sine</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate sine wave for automation&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Generate sine wave for automation"""</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">sr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">/</span> <span class="n">sr</span><span class="p">)</span>
 
@@ -721,7 +721,7 @@
 
 <span class="c1"># Sweep frequency from 100 Hz to 5000 Hz</span>
 <span class="n">automation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="n">automation</span><span class="p">)</span>
+<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"freq"</span><span class="p">,</span> <span class="n">automation</span><span class="p">)</span>
 
 <span class="c1"># Or oscillating parameter between 0 and 1 at 0.5 Hz</span>
 <span class="n">automation</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">make_sine</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
@@ -774,7 +774,7 @@
 <span class="n">recorded_audio</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
 <span class="c1"># Or by processor name</span>
-<span class="n">recorded_audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">(</span><span class="s2">&quot;processor_name&quot;</span><span class="p">)</span>
+<span class="n">recorded_audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">(</span><span class="s2">"processor_name"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This is useful for:</p>
@@ -798,35 +798,35 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
 
 <span class="c1"># Load audio files</span>
-<span class="n">vocals_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;vocals.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">piano_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;piano.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">guitar_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;guitar.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">vocals_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"vocals.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">piano_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"piano.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">guitar_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"guitar.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Create playback processors</span>
-<span class="n">vocals</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="n">vocals_audio</span><span class="p">)</span>
-<span class="n">piano</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;piano&quot;</span><span class="p">,</span> <span class="n">piano_audio</span><span class="p">)</span>
-<span class="n">guitar</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;guitar&quot;</span><span class="p">,</span> <span class="n">guitar_audio</span><span class="p">)</span>
+<span class="n">vocals</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="n">vocals_audio</span><span class="p">)</span>
+<span class="n">piano</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"piano"</span><span class="p">,</span> <span class="n">piano_audio</span><span class="p">)</span>
+<span class="n">guitar</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"guitar"</span><span class="p">,</span> <span class="n">guitar_audio</span><span class="p">)</span>
 
 <span class="c1"># Add effect to guitar</span>
-<span class="n">filter_proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_filter_processor</span><span class="p">(</span><span class="s2">&quot;filter&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="mf">5000.</span><span class="p">,</span> <span class="mf">0.707</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">filter_proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_filter_processor</span><span class="p">(</span><span class="s2">"filter"</span><span class="p">,</span> <span class="s2">"low"</span><span class="p">,</span> <span class="mf">5000.</span><span class="p">,</span> <span class="mf">0.707</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 <span class="n">filter_proc</span><span class="o">.</span><span class="n">record</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Record filtered guitar</span>
 
 <span class="c1"># Create mixer</span>
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">&quot;mixer&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">"mixer"</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
 
 <span class="c1"># Add master effects</span>
-<span class="n">comp</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_compressor_processor</span><span class="p">(</span><span class="s2">&quot;comp&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">12.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>
-<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_reverb_processor</span><span class="p">(</span><span class="s2">&quot;reverb&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">comp</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_compressor_processor</span><span class="p">(</span><span class="s2">"comp"</span><span class="p">,</span> <span class="o">-</span><span class="mf">12.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">)</span>
+<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_reverb_processor</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
 <span class="c1"># Build processing graph</span>
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">vocals</span><span class="p">,</span> <span class="p">[]),</span>
     <span class="p">(</span><span class="n">piano</span><span class="p">,</span> <span class="p">[]),</span>
     <span class="p">(</span><span class="n">guitar</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">filter_proc</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;guitar&quot;</span><span class="p">]),</span>
-    <span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="s2">&quot;piano&quot;</span><span class="p">,</span> <span class="s2">&quot;filter&quot;</span><span class="p">]),</span>
-    <span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mixer&quot;</span><span class="p">]),</span>
-    <span class="p">(</span><span class="n">reverb</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;comp&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">filter_proc</span><span class="p">,</span> <span class="p">[</span><span class="s2">"guitar"</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="p">[</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="s2">"piano"</span><span class="p">,</span> <span class="s2">"filter"</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="p">[</span><span class="s2">"mixer"</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">reverb</span><span class="p">,</span> <span class="p">[</span><span class="s2">"comp"</span><span class="p">])</span>
 <span class="p">]</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
@@ -837,8 +837,8 @@
 <span class="n">filtered_guitar</span> <span class="o">=</span> <span class="n">filter_proc</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
 <span class="c1"># Save files</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;final_mix.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">final_mix</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;filtered_guitar_stem.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">filtered_guitar</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'final_mix.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">final_mix</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'filtered_guitar_stem.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">filtered_guitar</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -930,7 +930,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

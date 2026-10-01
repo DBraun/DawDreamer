@@ -517,13 +517,13 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
-<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;faust&quot;</span><span class="p">)</span>
+<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"faust"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="loading-dsp-from-file">
 <h3>Loading DSP from File<a class="headerlink" href="#loading-dsp-from-file" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DSP_PATH</span> <span class="o">=</span> <span class="s2">&quot;/absolute/path/to/faust_reverb.dsp&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DSP_PATH</span> <span class="o">=</span> <span class="s2">"/absolute/path/to/faust_reverb.dsp"</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="n">DSP_PATH</span><span class="p">)</span>  <span class="c1"># Must be absolute path</span>
 
 <span class="c1"># Compile early to catch errors</span>
@@ -542,12 +542,12 @@
 <section id="loading-dsp-from-string">
 <h3>Loading DSP from String<a class="headerlink" href="#loading-dsp-from-string" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    declare name &quot;MySine&quot;;</span>
-<span class="sd">    freq = hslider(&quot;freq&quot;, 440, 0, 20000, 0);</span>
-<span class="sd">    gain = hslider(&quot;vol[unit:dB]&quot;, 0, -120, 20, 0) : ba.db2linear;</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    declare name "MySine";</span>
+<span class="sd">    freq = hslider("freq", 440, 0, 20000, 0);</span>
+<span class="sd">    gain = hslider("vol[unit:dB]", 0, -120, 20, 0) : ba.db2linear;</span>
 <span class="sd">    process = freq : os.osc : _*gain &lt;: si.bus(2);</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -566,7 +566,7 @@
 <h3>Setting Parameters<a class="headerlink" href="#setting-parameters" title="Link to this heading"></a></h3>
 <p>Parameters can be set by address (string) or by index (integer):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># By address</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/Zita_Light/Dry/Wet_Mix&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/Zita_Light/Dry/Wet_Mix"</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
 <span class="c1"># By index</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -575,15 +575,15 @@
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Unlike VST plugins, Faust parameters aren’t necessarily normalized to 0-1. For example, a filter cutoff might accept values from 20 to 20000 Hz naturally:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/MyFilter/cutoff&quot;</span><span class="p">,</span> <span class="mi">15000</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/MyFilter/cutoff"</span><span class="p">,</span> <span class="mi">15000</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </section>
 <section id="getting-parameter-values">
 <h3>Getting Parameter Values<a class="headerlink" href="#getting-parameter-values" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">val</span> <span class="o">=</span> <span class="n">faust_processor</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;/Zita_Light/Dry/Wet_Mix&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Value:&#39;</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">val</span> <span class="o">=</span> <span class="n">faust_processor</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">"/Zita_Light/Dry/Wet_Mix"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Value:'</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -594,13 +594,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
 
-<span class="n">DSP_PATH</span> <span class="o">=</span> <span class="s2">&quot;/absolute/path/to/faust_reverb.dsp&quot;</span>
-<span class="n">INPUT_AUDIO_PATH</span> <span class="o">=</span> <span class="s2">&quot;/path/to/piano.wav&quot;</span>
+<span class="n">DSP_PATH</span> <span class="o">=</span> <span class="s2">"/absolute/path/to/faust_reverb.dsp"</span>
+<span class="n">INPUT_AUDIO_PATH</span> <span class="o">=</span> <span class="s2">"/path/to/piano.wav"</span>
 <span class="n">DURATION</span> <span class="o">=</span> <span class="mf">10.</span>
 <span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
-<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;faust&quot;</span><span class="p">)</span>
+<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"faust"</span><span class="p">)</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="n">DSP_PATH</span><span class="p">)</span>
 
 <span class="c1"># Compile early to catch errors</span>
@@ -609,23 +609,23 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">faust_processor</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">())</span>
 
 <span class="c1"># Set parameters</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/Zita_Light/Dry/Wet_Mix&quot;</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/Zita_Light/Dry/Wet_Mix"</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
 
 <span class="c1"># Load input audio</span>
 <span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">INPUT_AUDIO_PATH</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;piano&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"piano"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
 
 <span class="c1"># Build graph</span>
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">playback</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">faust_processor</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;piano&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">faust_processor</span><span class="p">,</span> <span class="p">[</span><span class="s2">"piano"</span><span class="p">])</span>
 <span class="p">]</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">DURATION</span><span class="p">)</span>
 
 <span class="n">output_audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;reverb_output.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">output_audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'reverb_output.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">output_audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -633,9 +633,9 @@
 <h2>Multi-Channel Processing<a class="headerlink" href="#multi-channel-processing" title="Link to this heading"></a></h2>
 <p>Here’s an example that mixes two stereo inputs into one stereo output with a low-pass filter:</p>
 <p><strong>dsp_4_channels.dsp:</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>declare name &quot;MyEffect&quot;;
-import(&quot;stdfaust.lib&quot;);
-myFilter = fi.lowpass(10, hslider(&quot;cutoff&quot;, 15000., 20, 20000, .01));
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>declare name "MyEffect";
+import("stdfaust.lib");
+myFilter = fi.lowpass(10, hslider("cutoff", 15000., 20, 20000, .01));
 process = si.bus(4) :&gt; sp.stereoize(myFilter);
 </pre></div>
 </div>
@@ -645,8 +645,8 @@ process = si.bus(4) :&gt; sp.stereoize(myFilter);
 <span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="n">INPUT_AUDIO_PATH1</span> <span class="o">=</span> <span class="s2">&quot;piano.wav&quot;</span>
-<span class="n">INPUT_AUDIO_PATH2</span> <span class="o">=</span> <span class="s2">&quot;vocals.wav&quot;</span>
+<span class="n">INPUT_AUDIO_PATH1</span> <span class="o">=</span> <span class="s2">"piano.wav"</span>
+<span class="n">INPUT_AUDIO_PATH2</span> <span class="o">=</span> <span class="s2">"vocals.wav"</span>
 <span class="n">DURATION</span> <span class="o">=</span> <span class="mf">10.</span>
 <span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
 
@@ -655,36 +655,36 @@ process = si.bus(4) :&gt; sp.stereoize(myFilter);
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">/</span> <span class="n">sr</span><span class="p">)</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
-<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;faust&quot;</span><span class="p">)</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="s2">&quot;/absolute/path/to/dsp_4_channels.dsp&quot;</span><span class="p">)</span>
+<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"faust"</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="s2">"/absolute/path/to/dsp_4_channels.dsp"</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">faust_processor</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">())</span>
 
 <span class="c1"># Set static parameter</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/MyEffect/cutoff&quot;</span><span class="p">,</span> <span class="mf">7000.0</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/MyEffect/cutoff"</span><span class="p">,</span> <span class="mf">7000.0</span><span class="p">)</span>
 
 <span class="c1"># Or use automation</span>
 <span class="n">cutoff_automation</span> <span class="o">=</span> <span class="mi">15000</span> <span class="o">+</span> <span class="mi">5000</span> <span class="o">*</span> <span class="n">make_sine</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">DURATION</span><span class="p">)</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;/MyEffect/cutoff&quot;</span><span class="p">,</span> <span class="n">cutoff_automation</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"/MyEffect/cutoff"</span><span class="p">,</span> <span class="n">cutoff_automation</span><span class="p">)</span>
 
 <span class="c1"># Load audio</span>
 <span class="n">audio1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">INPUT_AUDIO_PATH1</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">audio2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">INPUT_AUDIO_PATH2</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="n">playback1</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;piano&quot;</span><span class="p">,</span> <span class="n">audio1</span><span class="p">)</span>
-<span class="n">playback2</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="n">audio2</span><span class="p">)</span>
+<span class="n">playback1</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"piano"</span><span class="p">,</span> <span class="n">audio1</span><span class="p">)</span>
+<span class="n">playback2</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="n">audio2</span><span class="p">)</span>
 
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">playback1</span><span class="p">,</span> <span class="p">[]),</span>
     <span class="p">(</span><span class="n">playback2</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">faust_processor</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;piano&quot;</span><span class="p">,</span> <span class="s2">&quot;vocals&quot;</span><span class="p">])</span>  <span class="c1"># 4-channel input</span>
+    <span class="p">(</span><span class="n">faust_processor</span><span class="p">,</span> <span class="p">[</span><span class="s2">"piano"</span><span class="p">,</span> <span class="s2">"vocals"</span><span class="p">])</span>  <span class="c1"># 4-channel input</span>
 <span class="p">]</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">DURATION</span><span class="p">)</span>
 
 <span class="n">output</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mixed_output.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'mixed_output.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -723,18 +723,18 @@ process = si.bus(4) :&gt; sp.stereoize(myFilter);
 <section id="example">
 <h3>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h3>
 <p><strong>poly_synth.dsp:</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>import(&quot;stdfaust.lib&quot;);
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>import("stdfaust.lib");
 
-freq = nentry(&quot;freq&quot;, 440, 20, 20000, 1);
-gain = nentry(&quot;gain&quot;, 0.5, 0, 1, 0.01);
-gate = button(&quot;gate&quot;);
+freq = nentry("freq", 440, 20, 20000, 1);
+gain = nentry("gain", 0.5, 0, 1, 0.01);
+gate = button("gate");
 
 envelope = gain * en.adsr(0.01, 0.1, 0.8, 0.3, gate);
 process = os.sawtooth(freq) * envelope &lt;: _, _;
 </pre></div>
 </div>
 <p><strong>Python code:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="s2">&quot;/path/to/poly_synth.dsp&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="s2">"/path/to/poly_synth.dsp"</span><span class="p">)</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">num_voices</span> <span class="o">=</span> <span class="mi">8</span>
 
 <span class="c1"># Add MIDI notes (note, velocity, start_time, duration)</span>
@@ -752,20 +752,20 @@ process = os.sawtooth(freq) * envelope &lt;: _, _;
 <section id="compilation-options">
 <h2>Compilation Options<a class="headerlink" href="#compilation-options" title="Link to this heading"></a></h2>
 <p>Several properties configure how DSP code is compiled. Set them before calling <code class="docutils literal notranslate"><span class="pre">compile()</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prepended to your DSP code. Default: &#39;import(&quot;stdfaust.lib&quot;);&#39;</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">auto_import</span> <span class="o">=</span> <span class="s1">&#39;import(&quot;stdfaust.lib&quot;);&#39;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prepended to your DSP code. Default: 'import("stdfaust.lib");'</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">auto_import</span> <span class="o">=</span> <span class="s1">'import("stdfaust.lib");'</span>
 
 <span class="c1"># Extra Faust compiler flags.</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">compile_flags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;-vec&quot;</span><span class="p">]</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">compile_flags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"-vec"</span><span class="p">]</span>
 
 <span class="c1"># LLVM IR optimization level, -1 (maximum) through 4.</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">opt_level</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
 <span class="c1"># Extra search paths for your custom .lib files.</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">faust_libraries_paths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;/path/to/my/libs&quot;</span><span class="p">]</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">faust_libraries_paths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"/path/to/my/libs"</span><span class="p">]</span>
 
 <span class="c1"># Search paths for audio used by the soundfile primitive.</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">faust_assets_paths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;/path/to/audio&quot;</span><span class="p">]</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">faust_assets_paths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"/path/to/audio"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>After compiling, two read-only properties are useful:</p>
@@ -780,7 +780,7 @@ process = os.sawtooth(freq) * envelope &lt;: _, _;
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dawdreamer.faust</span><span class="w"> </span><span class="kn">import</span> <span class="n">FaustContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dawdreamer.faust.box</span><span class="w"> </span><span class="kn">import</span> <span class="n">boxMul</span><span class="p">,</span> <span class="n">boxPar</span><span class="p">,</span> <span class="n">boxReal</span><span class="p">,</span> <span class="n">boxWire</span>
 
-<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;faust&quot;</span><span class="p">)</span>
+<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"faust"</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">FaustContext</span><span class="p">():</span>
     <span class="n">box_gain_half</span> <span class="o">=</span> <span class="n">boxMul</span><span class="p">(</span><span class="n">boxWire</span><span class="p">(),</span> <span class="n">boxReal</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span>
@@ -791,7 +791,7 @@ process = os.sawtooth(freq) * envelope &lt;: _, _;
 <p><code class="docutils literal notranslate"><span class="pre">compile_signals</span></code> works the same way for signals. Both accept an optional list of compiler arguments.</p>
 <p>A non-polyphonic processor can also be restored from LLVM bitcode without recompiling from source. The bitcode is available in the processor’s pickle state, and pickling uses this internally (see <a class="reference internal" href="pickling.html"><span class="doc">Pickling and Serialization</span></a>):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">faust_processor</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
-<span class="n">other_processor</span><span class="o">.</span><span class="n">compile_from_bitcode</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;bitcode&quot;</span><span class="p">])</span>
+<span class="n">other_processor</span><span class="o">.</span><span class="n">compile_from_bitcode</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"bitcode"</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -804,14 +804,14 @@ process = os.sawtooth(freq) * envelope &lt;: _, _;
 <p><strong>Python code:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Suppose audio1, audio2, and audio3 are np.array shaped (channels, samples)</span>
 <span class="n">soundfiles</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;mySound&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">audio1</span><span class="p">,</span> <span class="n">audio2</span><span class="p">,</span> <span class="n">audio3</span><span class="p">]</span>
+    <span class="s1">'mySound'</span><span class="p">:</span> <span class="p">[</span><span class="n">audio1</span><span class="p">,</span> <span class="n">audio2</span><span class="p">,</span> <span class="n">audio3</span><span class="p">]</span>
 <span class="p">}</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">set_soundfiles</span><span class="p">(</span><span class="n">soundfiles</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>soundfile_test.dsp:</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>soundChoice = nentry(&quot;soundChoice&quot;, 0, 0, 2, 1);  // choose between 0, 1, 2
-process = soundChoice, _ ~ +(1) : soundfile(&quot;mySound&quot;, 2) : !, !, _, _;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>soundChoice = nentry("soundChoice", 0, 0, 2, 1);  // choose between 0, 1, 2
+process = soundChoice, _ ~ +(1) : soundfile("mySound", 2) : !, !, _, _;
 </pre></div>
 </div>
 <div class="admonition note">
@@ -841,14 +841,14 @@ process = soundChoice, _ ~ +(1) : soundfile(&quot;mySound&quot;, 2) : !, !, _, _
 
 <span class="c1"># Sweep frequency from 200 Hz to 2000 Hz</span>
 <span class="n">frequency_sweep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;/MySynth/freq&quot;</span><span class="p">,</span> <span class="n">frequency_sweep</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"/MySynth/freq"</span><span class="p">,</span> <span class="n">frequency_sweep</span><span class="p">)</span>
 
 <span class="c1"># PPQN-rate automation (musically-synced)</span>
 <span class="n">ppqn</span> <span class="o">=</span> <span class="mi">960</span>
 <span class="n">beats</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">num_pulses</span> <span class="o">=</span> <span class="n">beats</span> <span class="o">*</span> <span class="n">ppqn</span>
 <span class="n">freq_automation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">num_pulses</span><span class="p">)</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;/MySynth/freq&quot;</span><span class="p">,</span> <span class="n">freq_automation</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">ppqn</span><span class="p">)</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"/MySynth/freq"</span><span class="p">,</span> <span class="n">freq_automation</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">ppqn</span><span class="p">)</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">beats</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -942,7 +942,7 @@ process = soundChoice, _ ~ +(1) : soundfile(&quot;mySound&quot;, 2) : !, !, _, _
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

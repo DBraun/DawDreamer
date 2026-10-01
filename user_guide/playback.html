@@ -512,7 +512,7 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
 <span class="c1"># Create playback processor</span>
-<span class="n">vocals</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="n">load_audio_file</span><span class="p">(</span><span class="s2">&quot;vocals.wav&quot;</span><span class="p">))</span>
+<span class="n">vocals</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="n">load_audio_file</span><span class="p">(</span><span class="s2">"vocals.wav"</span><span class="p">))</span>
 
 <span class="c1"># Load graph and render</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">vocals</span><span class="p">,</span> <span class="p">[])])</span>
@@ -524,7 +524,7 @@
 <section id="changing-playback-data">
 <h2>Changing Playback Data<a class="headerlink" href="#changing-playback-data" title="Link to this heading"></a></h2>
 <p>You can change the audio data without recreating the processor:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vocals</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">load_audio_file</span><span class="p">(</span><span class="s2">&quot;other_vocals.wav&quot;</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vocals</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">load_audio_file</span><span class="p">(</span><span class="s2">"other_vocals.wav"</span><span class="p">))</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -539,16 +539,16 @@
 <h2>Multi-Channel Audio<a class="headerlink" href="#multi-channel-audio" title="Link to this heading"></a></h2>
 <p>The playback processor automatically handles mono, stereo, or multi-channel audio:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load mono audio (1 channel)</span>
-<span class="n">mono_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;mono.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">mono_playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;mono&quot;</span><span class="p">,</span> <span class="n">mono_audio</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">mono_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"mono.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">mono_playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"mono"</span><span class="p">,</span> <span class="n">mono_audio</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
 
 <span class="c1"># Load stereo audio (2 channels)</span>
-<span class="n">stereo_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;stereo.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">stereo_playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;stereo&quot;</span><span class="p">,</span> <span class="n">stereo_audio</span><span class="p">)</span>
+<span class="n">stereo_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"stereo.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">stereo_playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"stereo"</span><span class="p">,</span> <span class="n">stereo_audio</span><span class="p">)</span>
 
 <span class="c1"># Load 5.1 surround audio (6 channels)</span>
-<span class="n">surround_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;surround.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">surround_playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;surround&quot;</span><span class="p">,</span> <span class="n">surround_audio</span><span class="p">)</span>
+<span class="n">surround_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"surround.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">surround_playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"surround"</span><span class="p">,</span> <span class="n">surround_audio</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -575,13 +575,13 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
 <span class="c1"># Load audio at original sample rate</span>
-<span class="n">audio</span><span class="p">,</span> <span class="n">original_sr</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;file.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">original_sr</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"file.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="c1"># Resample to engine&#39;s sample rate</span>
+<span class="c1"># Resample to engine's sample rate</span>
 <span class="k">if</span> <span class="n">original_sr</span> <span class="o">!=</span> <span class="mi">44100</span><span class="p">:</span>
     <span class="n">audio</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">orig_sr</span><span class="o">=</span><span class="n">original_sr</span><span class="p">,</span> <span class="n">target_sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">)</span>
 
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;audio&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"audio"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -595,24 +595,24 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
 <span class="c1"># Load multiple audio files</span>
-<span class="n">vocals</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;vocals.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">drums</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drums.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">bass</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bass.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">vocals</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"vocals.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">drums</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"drums.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">bass</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"bass.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Create playback processors</span>
-<span class="n">vocals_pb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="n">vocals</span><span class="p">)</span>
-<span class="n">drums_pb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">drums</span><span class="p">)</span>
-<span class="n">bass_pb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;bass&quot;</span><span class="p">,</span> <span class="n">bass</span><span class="p">)</span>
+<span class="n">vocals_pb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="n">vocals</span><span class="p">)</span>
+<span class="n">drums_pb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"drums"</span><span class="p">,</span> <span class="n">drums</span><span class="p">)</span>
+<span class="n">bass_pb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"bass"</span><span class="p">,</span> <span class="n">bass</span><span class="p">)</span>
 
 <span class="c1"># Create mixer</span>
-<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">&quot;mixer&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<span class="n">mixer</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_add_processor</span><span class="p">(</span><span class="s2">"mixer"</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
 
 <span class="c1"># Build graph</span>
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">vocals_pb</span><span class="p">,</span> <span class="p">[]),</span>
     <span class="p">(</span><span class="n">drums_pb</span><span class="p">,</span> <span class="p">[]),</span>
     <span class="p">(</span><span class="n">bass_pb</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="s2">&quot;bass&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">mixer</span><span class="p">,</span> <span class="p">[</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="s2">"drums"</span><span class="p">,</span> <span class="s2">"bass"</span><span class="p">])</span>
 <span class="p">]</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
@@ -623,7 +623,7 @@
 
 <span class="c1"># Save result</span>
 <span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mix.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'mix.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -690,10 +690,10 @@
 <h2>Advanced: Time-Stretching and Pitch-Shifting<a class="headerlink" href="#advanced-time-stretching-and-pitch-shifting" title="Link to this heading"></a></h2>
 <p>For advanced time and pitch manipulation, use <a class="reference internal" href="playback_warp.html"><span class="doc">Playback Warp Processor</span></a> instead:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># For basic playback: PlaybackProcessor</span>
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;audio&quot;</span><span class="p">,</span> <span class="n">audio_data</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"audio"</span><span class="p">,</span> <span class="n">audio_data</span><span class="p">)</span>
 
 <span class="c1"># For time-stretch/pitch-shift: PlaybackWarpProcessor</span>
-<span class="n">warp</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;audio&quot;</span><span class="p">,</span> <span class="n">audio_data</span><span class="p">)</span>
+<span class="n">warp</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">"audio"</span><span class="p">,</span> <span class="n">audio_data</span><span class="p">)</span>
 <span class="n">warp</span><span class="o">.</span><span class="n">time_ratio</span> <span class="o">=</span> <span class="mf">2.0</span>      <span class="c1"># Slow down 2x</span>
 <span class="n">warp</span><span class="o">.</span><span class="n">transpose</span> <span class="o">=</span> <span class="o">-</span><span class="mf">5.0</span>      <span class="c1"># Down 5 semitones</span>
 </pre></div>
@@ -721,7 +721,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

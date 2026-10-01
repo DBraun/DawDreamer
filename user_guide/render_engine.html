@@ -538,7 +538,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">make_sine</span><span class="p">(</span><span class="n">freq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return sine wave based on freq in Hz and duration in seconds&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return sine wave based on freq in Hz and duration in seconds"""</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">sr</span><span class="p">)</span>  <span class="c1"># Number of samples</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">/</span> <span class="n">sr</span><span class="p">)</span>
 
@@ -590,7 +590,7 @@
 </div>
 <p>Save the audio to a file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;output.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'output.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -601,7 +601,7 @@
 <p>Load a processor graph before rendering:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">processor_a</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">processor_b</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;processor_a&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">processor_b</span><span class="p">,</span> <span class="p">[</span><span class="s2">"processor_a"</span><span class="p">])</span>
 <span class="p">]</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 </pre></div>
@@ -611,9 +611,9 @@
 <section id="looking-up-and-removing-processors">
 <h3>Looking Up and Removing Processors<a class="headerlink" href="#looking-up-and-removing-processors" title="Link to this heading"></a></h3>
 <p>Processors are registered with the engine by their unique name:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_processor</span><span class="p">(</span><span class="s2">&quot;processor_a&quot;</span><span class="p">)</span>  <span class="c1"># None if not found</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_processor</span><span class="p">(</span><span class="s2">"processor_a"</span><span class="p">)</span>  <span class="c1"># None if not found</span>
 
-<span class="n">removed</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">remove_processor</span><span class="p">(</span><span class="s2">&quot;processor_a&quot;</span><span class="p">)</span>  <span class="c1"># True if it existed</span>
+<span class="n">removed</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">remove_processor</span><span class="p">(</span><span class="s2">"processor_a"</span><span class="p">)</span>  <span class="c1"># True if it existed</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -645,7 +645,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">duration</span> <span class="o">=</span> <span class="mf">4.0</span>
 <span class="n">num_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">SAMPLE_RATE</span><span class="p">)</span>
 <span class="n">automation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="n">automation</span><span class="p">)</span>
+<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"freq"</span><span class="p">,</span> <span class="n">automation</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -657,7 +657,7 @@
 <span class="n">beats</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">num_pulses</span> <span class="o">=</span> <span class="n">beats</span> <span class="o">*</span> <span class="n">ppqn</span>
 <span class="n">automation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">num_pulses</span><span class="p">)</span>
-<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;freq&quot;</span><span class="p">,</span> <span class="n">automation</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">ppqn</span><span class="p">)</span>
+<span class="n">filter_proc</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"freq"</span><span class="p">,</span> <span class="n">automation</span><span class="p">,</span> <span class="n">ppqn</span><span class="o">=</span><span class="n">ppqn</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">beats</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -715,8 +715,8 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
 
 <span class="c1"># Create processors</span>
-<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">)</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">&quot;process = os.osc(440) * 0.1;&quot;</span><span class="p">)</span>
+<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">"process = os.osc(440) * 0.1;"</span><span class="p">)</span>
 
 <span class="c1"># Load graph</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[])])</span>
@@ -734,8 +734,8 @@
 <span class="n">audio2</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
 <span class="c1"># Save outputs</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;static_bpm.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio1</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;dynamic_bpm.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio2</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'static_bpm.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio1</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'dynamic_bpm.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio2</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -753,7 +753,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

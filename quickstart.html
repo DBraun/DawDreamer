@@ -518,27 +518,27 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>  <span class="c1"># 512 sample block size</span>
 
 <span class="c1"># Create a Faust processor</span>
-<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;faust&quot;</span><span class="p">)</span>
+<span class="n">faust_processor</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"faust"</span><span class="p">)</span>
 
 <span class="c1"># Set the DSP code</span>
 <span class="n">faust_processor</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    declare name &quot;MySine&quot;;</span>
-<span class="sd">    freq = hslider(&quot;freq&quot;, 440, 0, 20000, 0);</span>
-<span class="sd">    gain = hslider(&quot;vol[unit:dB]&quot;, 0, -120, 20, 0) : ba.db2linear;</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    declare name "MySine";</span>
+<span class="sd">    freq = hslider("freq", 440, 0, 20000, 0);</span>
+<span class="sd">    gain = hslider("vol[unit:dB]", 0, -120, 20, 0) : ba.db2linear;</span>
 <span class="sd">    process = freq : os.osc : _*gain &lt;: si.bus(2);</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 <span class="p">)</span>
 
 <span class="c1"># Inspect available parameters</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">faust_processor</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">())</span>
 
-<span class="c1"># Load the processor into the engine&#39;s graph</span>
+<span class="c1"># Load the processor into the engine's graph</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">faust_processor</span><span class="p">,</span> <span class="p">[])])</span>
 
 <span class="c1"># Set parameters by address or by index</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/MySine/freq&quot;</span><span class="p">,</span> <span class="mf">440.</span><span class="p">)</span>  <span class="c1"># 440 Hz</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/MySine/vol&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.</span><span class="p">)</span>    <span class="c1"># -6 dB volume</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/MySine/freq"</span><span class="p">,</span> <span class="mf">440.</span><span class="p">)</span>  <span class="c1"># 440 Hz</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/MySine/vol"</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.</span><span class="p">)</span>    <span class="c1"># -6 dB volume</span>
 
 <span class="c1"># Render 4 beats at 120 BPM</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
@@ -548,10 +548,10 @@
 <span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>  <span class="c1"># shape: (2, num_samples)</span>
 
 <span class="c1"># Save to file</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;sine_demo.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'sine_demo.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 
 <span class="c1"># Change settings and re-render</span>
-<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">&quot;/MySine/freq&quot;</span><span class="p">,</span> <span class="mf">880.</span><span class="p">)</span>  <span class="c1"># 880 Hz</span>
+<span class="n">faust_processor</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="s2">"/MySine/freq"</span><span class="p">,</span> <span class="mf">880.</span><span class="p">)</span>  <span class="c1"># 880 Hz</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">4.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 <span class="c1"># ...and so on</span>
@@ -565,26 +565,26 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavfile</span>
 
 <span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
-<span class="n">INSTRUMENT_PATH</span> <span class="o">=</span> <span class="s2">&quot;path/to/instrument.dll&quot;</span>  <span class="c1"># .vst3 or .dll on Windows</span>
-<span class="n">EFFECT_PATH</span> <span class="o">=</span> <span class="s2">&quot;path/to/effect.dll&quot;</span>
+<span class="n">INSTRUMENT_PATH</span> <span class="o">=</span> <span class="s2">"path/to/instrument.dll"</span>  <span class="c1"># .vst3 or .dll on Windows</span>
+<span class="n">EFFECT_PATH</span> <span class="o">=</span> <span class="s2">"path/to/effect.dll"</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
 
 <span class="c1"># Load a VST instrument</span>
-<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">,</span> <span class="n">INSTRUMENT_PATH</span><span class="p">)</span>
+<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">,</span> <span class="n">INSTRUMENT_PATH</span><span class="p">)</span>
 
 <span class="c1"># Inspect the plugin</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;inputs:&#39;</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;outputs:&#39;</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'inputs:'</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'outputs:'</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">synth</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">())</span>
 
 <span class="c1"># Get parameter range information (useful for discrete parameters)</span>
 <span class="n">parameter_index</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">par_range</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameter_range</span><span class="p">(</span><span class="n">parameter_index</span><span class="p">,</span> <span class="n">search_steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># par_range is a dict with (min, max) tuples as keys and values/labels as dict values</span>
-<span class="c1"># If convert=True, values are floats; if False, they&#39;re strings to interpret</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter </span><span class="si">{</span><span class="n">parameter_index</span><span class="si">}</span><span class="s2"> range:&quot;</span><span class="p">,</span> <span class="n">par_range</span><span class="p">)</span>
+<span class="c1"># If convert=True, values are floats; if False, they're strings to interpret</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Parameter </span><span class="si">{</span><span class="n">parameter_index</span><span class="si">}</span><span class="s2"> range:"</span><span class="p">,</span> <span class="n">par_range</span><span class="p">)</span>
 
 <span class="c1"># Set a parameter by index (values are always 0.0 to 1.0)</span>
 <span class="n">synth</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mf">0.1234</span><span class="p">)</span>
@@ -593,7 +593,7 @@
 <span class="n">synth</span><span class="o">.</span><span class="n">add_midi_note</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># Middle C for 2 seconds</span>
 
 <span class="c1"># Load an effect plugin</span>
-<span class="n">effect</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;effect&quot;</span><span class="p">,</span> <span class="n">EFFECT_PATH</span><span class="p">)</span>
+<span class="n">effect</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"effect"</span><span class="p">,</span> <span class="n">EFFECT_PATH</span><span class="p">)</span>
 
 <span class="c1"># Create the processing graph</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([</span>
@@ -606,7 +606,7 @@
 <span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
 <span class="c1"># Save to file</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;synth_demo.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'synth_demo.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 
 <span class="c1"># Clear MIDI and render again</span>
 <span class="n">synth</span><span class="o">.</span><span class="n">clear_midi</span><span class="p">()</span>
@@ -627,22 +627,22 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
 <span class="c1"># Load an audio file</span>
-<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;input.wav&#39;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'input.wav'</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Create a playback processor</span>
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;playback&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"playback"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
 
 <span class="c1"># Create a filter processor</span>
-<span class="n">filter_proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_filter_processor</span><span class="p">(</span><span class="s2">&quot;filter&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">)</span>
+<span class="n">filter_proc</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_filter_processor</span><span class="p">(</span><span class="s2">"filter"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">)</span>
 <span class="n">filter_proc</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="mf">2000.0</span>  <span class="c1"># High-pass at 2 kHz</span>
 
-<span class="c1"># Enable recording to capture this processor&#39;s output</span>
+<span class="c1"># Enable recording to capture this processor's output</span>
 <span class="n">filter_proc</span><span class="o">.</span><span class="n">record</span> <span class="o">=</span> <span class="kc">True</span>
 
 <span class="c1"># Create the graph</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([</span>
     <span class="p">(</span><span class="n">playback</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">filter_proc</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;playback&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">filter_proc</span><span class="p">,</span> <span class="p">[</span><span class="s2">"playback"</span><span class="p">])</span>
 <span class="p">])</span>
 
 <span class="c1"># Render the full audio</span>
@@ -652,13 +652,13 @@
 <span class="c1"># Get the final output (from last processor in graph)</span>
 <span class="n">filtered_audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
-<span class="c1"># Get the filter&#39;s output specifically (because we enabled recording)</span>
+<span class="c1"># Get the filter's output specifically (because we enabled recording)</span>
 <span class="n">filter_output</span> <span class="o">=</span> <span class="n">filter_proc</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="c1"># Or: filter_output = engine.get_audio(&quot;filter&quot;)</span>
+<span class="c1"># Or: filter_output = engine.get_audio("filter")</span>
 
 <span class="c1"># Save both outputs</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;filtered.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">filtered_audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;filter_only.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">filter_output</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'filtered.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">filtered_audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'filter_only.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">filter_output</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -689,8 +689,8 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">processor_a</span><span class="p">,</span> <span class="p">[]),</span>                      <span class="c1"># No inputs</span>
     <span class="p">(</span><span class="n">processor_b</span><span class="p">,</span> <span class="p">[]),</span>                      <span class="c1"># No inputs</span>
-    <span class="p">(</span><span class="n">processor_c</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;processor_a&quot;</span><span class="p">]),</span>         <span class="c1"># Takes A&#39;s output</span>
-    <span class="p">(</span><span class="n">processor_d</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;processor_b&quot;</span><span class="p">,</span> <span class="s2">&quot;processor_c&quot;</span><span class="p">])</span>  <span class="c1"># Takes B and C</span>
+    <span class="p">(</span><span class="n">processor_c</span><span class="p">,</span> <span class="p">[</span><span class="s2">"processor_a"</span><span class="p">]),</span>         <span class="c1"># Takes A's output</span>
+    <span class="p">(</span><span class="n">processor_d</span><span class="p">,</span> <span class="p">[</span><span class="s2">"processor_b"</span><span class="p">,</span> <span class="s2">"processor_c"</span><span class="p">])</span>  <span class="c1"># Takes B and C</span>
 <span class="p">]</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 </pre></div>
@@ -707,7 +707,7 @@
 <span class="n">frequency_automation</span> <span class="o">=</span> <span class="mi">440</span> <span class="o">+</span> <span class="mi">440</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">))</span>
 
 <span class="c1"># Apply automation</span>
-<span class="n">processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;/MySine/freq&quot;</span><span class="p">,</span> <span class="n">frequency_automation</span><span class="p">)</span>
+<span class="n">processor</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"/MySine/freq"</span><span class="p">,</span> <span class="n">frequency_automation</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -744,7 +744,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

@@ -536,8 +536,8 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
 
 <span class="c1"># Add a Faust processor</span>
-<span class="n">faust</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">)</span>
-<span class="n">faust</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">&quot;process = os.osc(440) * 0.1;&quot;</span><span class="p">)</span>
+<span class="n">faust</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_faust_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">)</span>
+<span class="n">faust</span><span class="o">.</span><span class="n">set_dsp_string</span><span class="p">(</span><span class="s2">"process = os.osc(440) * 0.1;"</span><span class="p">)</span>
 
 <span class="c1"># Load graph and render</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">faust</span><span class="p">,</span> <span class="p">[])])</span>
@@ -664,7 +664,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

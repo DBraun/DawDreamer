@@ -822,20 +822,20 @@ repository root, which follows the <a class="reference external" href="https://k
     <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
     <span class="n">synth</span><span class="o">.</span><span class="n">set_dsp</span><span class="p">(</span><span class="n">dsp_path</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="v0-5-7-breaking-changes">
 <h3>v0.5.7 Breaking Changes<a class="headerlink" href="#v0-5-7-breaking-changes" title="Link to this heading"></a></h3>
 <p><strong>Old code:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">&quot;A Pan&quot;</span><span class="p">,</span> <span class="n">automation_data</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="s2">"A Pan"</span><span class="p">,</span> <span class="n">automation_data</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>New code:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get parameter index first</span>
 <span class="n">params</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">()</span>
-<span class="c1"># Find index of &quot;A Pan&quot; parameter</span>
+<span class="c1"># Find index of "A Pan" parameter</span>
 <span class="n">index</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Example</span>
 
 <span class="n">synth</span><span class="o">.</span><span class="n">set_automation</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">automation_data</span><span class="p">)</span>
@@ -901,7 +901,7 @@ repository root, which follows the <a class="reference external" href="https://k
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

@@ -507,13 +507,13 @@
 
 <span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
 <span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">128</span>
-<span class="n">SYNTH_PLUGIN</span> <span class="o">=</span> <span class="s2">&quot;/path/to/synth.dll&quot;</span>  <span class="c1"># .dll, .vst3, .vst, .component</span>
+<span class="n">SYNTH_PLUGIN</span> <span class="o">=</span> <span class="s2">"/path/to/synth.dll"</span>  <span class="c1"># .dll, .vst3, .vst, .component</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
 
 <span class="c1"># Make a processor with a unique name</span>
-<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;my_synth&quot;</span><span class="p">,</span> <span class="n">SYNTH_PLUGIN</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;my_synth&quot;</span>
+<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"my_synth"</span><span class="p">,</span> <span class="n">SYNTH_PLUGIN</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"my_synth"</span>
 </pre></div>
 </div>
 <p><strong>Supported formats:</strong></p>
@@ -529,7 +529,7 @@
 <section id="opening-the-editor">
 <h3>Opening the Editor<a class="headerlink" href="#opening-the-editor" title="Link to this heading"></a></h3>
 <p>Many plugins have graphical user interfaces (GUIs) that you can open to tweak parameters visually:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">open_editor</span><span class="p">()</span>  <span class="c1"># Opens the plugin&#39;s UI window</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span><span class="o">.</span><span class="n">open_editor</span><span class="p">()</span>  <span class="c1"># Opens the plugin's UI window</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -541,10 +541,10 @@
 <h3>Saving and Loading State<a class="headerlink" href="#saving-and-loading-state" title="Link to this heading"></a></h3>
 <p>Save the plugin’s complete state (all parameter values, internal buffers, etc.):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save state after editing</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">save_state</span><span class="p">(</span><span class="s1">&#39;/path/to/state1&#39;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">save_state</span><span class="p">(</span><span class="s1">'/path/to/state1'</span><span class="p">)</span>
 
 <span class="c1"># Load state without opening editor</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">load_state</span><span class="p">(</span><span class="s1">&#39;/path/to/state1&#39;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">load_state</span><span class="p">(</span><span class="s1">'/path/to/state1'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>State files contain all plugin settings in a format specific to DawDreamer.</p>
@@ -553,10 +553,10 @@
 <h3>Loading Presets<a class="headerlink" href="#loading-presets" title="Link to this heading"></a></h3>
 <p>Load plugin-specific preset files:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># VST2 FXP format</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="s1">&#39;/path/to/preset.fxp&#39;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="s1">'/path/to/preset.fxp'</span><span class="p">)</span>
 
 <span class="c1"># VST3 preset format</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">load_vst3_preset</span><span class="p">(</span><span class="s1">&#39;/path/to/preset.vstpreset&#39;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">load_vst3_preset</span><span class="p">(</span><span class="s1">'/path/to/preset.vstpreset'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -572,7 +572,7 @@
 
 <span class="c1"># Get specific parameter name by index</span>
 <span class="n">param_name</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameter_name</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>  <span class="c1"># Example: &quot;A Pan&quot; for Serum oscillator A panning</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>  <span class="c1"># Example: "A Pan" for Serum oscillator A panning</span>
 </pre></div>
 </div>
 </section>
@@ -587,7 +587,7 @@
 
 <span class="c1"># Use get_parameters_description() to find the index of a named parameter</span>
 <span class="n">index</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-    <span class="n">par</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">()</span> <span class="k">if</span> <span class="n">par</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;A Pan&quot;</span>
+    <span class="n">par</span><span class="p">[</span><span class="s2">"index"</span><span class="p">]</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameters_description</span><span class="p">()</span> <span class="k">if</span> <span class="n">par</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"A Pan"</span>
 <span class="p">)</span>
 <span class="n">synth</span><span class="o">.</span><span class="n">set_parameter</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
@@ -596,7 +596,7 @@
 <section id="getting-parameter-values">
 <h3>Getting Parameter Values<a class="headerlink" href="#getting-parameter-values" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter 1 value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Parameter 1 value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -625,7 +625,7 @@
 <span class="c1"># Get parameter range as strings (useful for text labels)</span>
 <span class="n">par_range_str</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_parameter_range</span><span class="p">(</span><span class="n">parameter_index</span><span class="p">,</span> <span class="n">search_steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">par_range_str</span><span class="p">)</span>
-<span class="c1"># Example output: {(0.0, 0.25): &quot;Saw&quot;, (0.25, 0.5): &quot;Square&quot;, (0.5, 0.75): &quot;Triangle&quot;, (0.75, 1.0): &quot;Sine&quot;}</span>
+<span class="c1"># Example output: {(0.0, 0.25): "Saw", (0.25, 0.5): "Square", (0.5, 0.75): "Triangle", (0.75, 1.0): "Sine"}</span>
 </pre></div>
 </div>
 <p><strong>Parameters:</strong></p>
@@ -685,9 +685,9 @@
 <section id="loading-midi-files">
 <h3>Loading MIDI Files<a class="headerlink" href="#loading-midi-files" title="Link to this heading"></a></h3>
 <p>Load MIDI files with absolute time (seconds):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MIDI_PATH</span> <span class="o">=</span> <span class="s2">&quot;/path/to/song.mid&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MIDI_PATH</span> <span class="o">=</span> <span class="s2">"/path/to/song.mid"</span>
 
-<span class="c1"># Load in absolute time (seconds) - BPM changes won&#39;t affect timing</span>
+<span class="c1"># Load in absolute time (seconds) - BPM changes won't affect timing</span>
 <span class="n">synth</span><span class="o">.</span><span class="n">load_midi</span><span class="p">(</span><span class="n">MIDI_PATH</span><span class="p">,</span> <span class="n">clear_previous</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">all_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -707,7 +707,7 @@
 <h3>Saving MIDI Files<a class="headerlink" href="#saving-midi-files" title="Link to this heading"></a></h3>
 <p>Export MIDI data with absolute time:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># After rendering</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">save_midi</span><span class="p">(</span><span class="s2">&quot;my_midi_output.mid&quot;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">save_midi</span><span class="p">(</span><span class="s2">"my_midi_output.mid"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -731,8 +731,8 @@
 <h2>Graph Integration<a class="headerlink" href="#graph-integration" title="Link to this heading"></a></h2>
 <section id="basic-chain">
 <h3>Basic Chain<a class="headerlink" href="#basic-chain" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">,</span> <span class="n">SYNTH_PLUGIN</span><span class="p">)</span>
-<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;reverb&quot;</span><span class="p">,</span> <span class="n">REVERB_PLUGIN</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">,</span> <span class="n">SYNTH_PLUGIN</span><span class="p">)</span>
+<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">,</span> <span class="n">REVERB_PLUGIN</span><span class="p">)</span>
 
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[]),</span>                          <span class="c1"># No inputs</span>
@@ -751,7 +751,7 @@
 <span class="n">audio1</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
 
 <span class="c1"># Modify plugin</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="s2">&quot;/path/to/other_preset.fxp&quot;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">load_preset</span><span class="p">(</span><span class="s2">"/path/to/other_preset.fxp"</span><span class="p">)</span>
 
 <span class="c1"># Re-render (MIDI is still loaded)</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
@@ -765,7 +765,7 @@
 <p>Some plugins support multiple input/output channel configurations (e.g., ambisonics, surround).</p>
 <section id="checking-bus-support">
 <h3>Checking Bus Support<a class="headerlink" href="#checking-bus-support" title="Link to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plugin</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;amb&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/ambisonics.dll&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plugin</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"amb"</span><span class="p">,</span> <span class="s2">"/path/to/ambisonics.dll"</span><span class="p">)</span>
 
 <span class="c1"># Check if 1 input, 9 outputs is supported</span>
 <span class="k">if</span> <span class="n">plugin</span><span class="o">.</span><span class="n">can_set_bus</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
@@ -785,19 +785,19 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
 
 <span class="c1"># Create processors</span>
-<span class="n">sidechain_comp</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;sidechain&quot;</span><span class="p">,</span> <span class="s2">&quot;/path/to/sidechain.dll&quot;</span><span class="p">)</span>
+<span class="n">sidechain_comp</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"sidechain"</span><span class="p">,</span> <span class="s2">"/path/to/sidechain.dll"</span><span class="p">)</span>
 
-<span class="n">vocals_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;vocals.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">piano_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;piano.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">vocals_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"vocals.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">piano_audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"piano.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="n">vocals</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="n">vocals_audio</span><span class="p">)</span>
-<span class="n">piano</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">&quot;piano&quot;</span><span class="p">,</span> <span class="n">piano_audio</span><span class="p">)</span>
+<span class="n">vocals</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="n">vocals_audio</span><span class="p">)</span>
+<span class="n">piano</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playback_processor</span><span class="p">(</span><span class="s2">"piano"</span><span class="p">,</span> <span class="n">piano_audio</span><span class="p">)</span>
 
 <span class="c1"># Sidechain: reduce vocals volume based on piano</span>
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">vocals</span><span class="p">,</span> <span class="p">[]),</span>
     <span class="p">(</span><span class="n">piano</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">sidechain_comp</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;vocals&quot;</span><span class="p">,</span> <span class="s2">&quot;piano&quot;</span><span class="p">])</span>  <span class="c1"># First input = main, second = sidechain</span>
+    <span class="p">(</span><span class="n">sidechain_comp</span><span class="p">,</span> <span class="p">[</span><span class="s2">"vocals"</span><span class="p">,</span> <span class="s2">"piano"</span><span class="p">])</span>  <span class="c1"># First input = main, second = sidechain</span>
 <span class="p">]</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
@@ -807,9 +807,9 @@
 <section id="channel-counts-and-latency">
 <h3>Channel Counts and Latency<a class="headerlink" href="#channel-counts-and-latency" title="Link to this heading"></a></h3>
 <p>Check a plugin’s input/output channel configuration and reported latency:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Inputs:&quot;</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputs:&quot;</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Latency in samples:&quot;</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_latency_samples</span><span class="p">())</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Inputs:"</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_input_channels</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Outputs:"</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_num_output_channels</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Latency in samples:"</span><span class="p">,</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_latency_samples</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -823,17 +823,17 @@
 <span class="n">SAMPLE_RATE</span> <span class="o">=</span> <span class="mi">44100</span>
 <span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">PPQN</span> <span class="o">=</span> <span class="mi">960</span>
-<span class="n">SYNTH_PLUGIN</span> <span class="o">=</span> <span class="s2">&quot;/path/to/synth.dll&quot;</span>
-<span class="n">REVERB_PLUGIN</span> <span class="o">=</span> <span class="s2">&quot;/path/to/reverb.dll&quot;</span>
+<span class="n">SYNTH_PLUGIN</span> <span class="o">=</span> <span class="s2">"/path/to/synth.dll"</span>
+<span class="n">REVERB_PLUGIN</span> <span class="o">=</span> <span class="s2">"/path/to/reverb.dll"</span>
 
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
 
 <span class="c1"># Create synth</span>
-<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;synth&quot;</span><span class="p">,</span> <span class="n">SYNTH_PLUGIN</span><span class="p">)</span>
+<span class="n">synth</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"synth"</span><span class="p">,</span> <span class="n">SYNTH_PLUGIN</span><span class="p">)</span>
 
 <span class="c1"># Edit and save state</span>
 <span class="n">synth</span><span class="o">.</span><span class="n">open_editor</span><span class="p">()</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">save_state</span><span class="p">(</span><span class="s1">&#39;/path/to/state1&#39;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">save_state</span><span class="p">(</span><span class="s1">'/path/to/state1'</span><span class="p">)</span>
 
 <span class="c1"># Setup automation</span>
 <span class="n">synth</span><span class="o">.</span><span class="n">record_automation</span> <span class="o">=</span> <span class="kc">True</span>
@@ -847,12 +847,12 @@
 <span class="n">synth</span><span class="o">.</span><span class="n">add_midi_note</span><span class="p">(</span><span class="mi">67</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
 
 <span class="c1"># Create effect</span>
-<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">&quot;reverb&quot;</span><span class="p">,</span> <span class="n">REVERB_PLUGIN</span><span class="p">)</span>
+<span class="n">reverb</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_plugin_processor</span><span class="p">(</span><span class="s2">"reverb"</span><span class="p">,</span> <span class="n">REVERB_PLUGIN</span><span class="p">)</span>
 
 <span class="c1"># Build graph</span>
 <span class="n">graph</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="n">synth</span><span class="p">,</span> <span class="p">[]),</span>
-    <span class="p">(</span><span class="n">reverb</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;synth&quot;</span><span class="p">])</span>
+    <span class="p">(</span><span class="n">reverb</span><span class="p">,</span> <span class="p">[</span><span class="s2">"synth"</span><span class="p">])</span>
 <span class="p">]</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
@@ -861,13 +861,13 @@
 
 <span class="c1"># Save audio</span>
 <span class="n">audio</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;plugin_output.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'plugin_output.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 
 <span class="c1"># Get automation data</span>
 <span class="n">recorded_automation</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">get_automation</span><span class="p">()</span>
 
 <span class="c1"># Save MIDI</span>
-<span class="n">synth</span><span class="o">.</span><span class="n">save_midi</span><span class="p">(</span><span class="s1">&#39;output.mid&#39;</span><span class="p">)</span>
+<span class="n">synth</span><span class="o">.</span><span class="n">save_midi</span><span class="p">(</span><span class="s1">'output.mid'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -964,7 +964,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

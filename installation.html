@@ -605,7 +605,7 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build_release<span c
 </li>
 <li><p>Build DawDreamer:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Builds/LinuxMakefile
-make<span class="w"> </span><span class="nv">CONFIG</span><span class="o">=</span>Release<span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-I</span><span class="nv">$PYTHONINCLUDEPATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-L</span><span class="nv">$PYTHONLIBPATH</span><span class="s2">&quot;</span>
+make<span class="w"> </span><span class="nv">CONFIG</span><span class="o">=</span>Release<span class="w"> </span><span class="nv">CXXFLAGS</span><span class="o">=</span><span class="s2">"-I</span><span class="nv">$PYTHONINCLUDEPATH</span><span class="s2">"</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">"-L</span><span class="nv">$PYTHONLIBPATH</span><span class="s2">"</span>
 <span class="nb">cd</span><span class="w"> </span>../..
 </pre></div>
 </div>
@@ -624,7 +624,7 @@ which indicates progress is being made.</p>
 </div>
 </li>
 <li><p>Verify the installation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import dawdreamer as daw; engine = daw.RenderEngine(44100, 512); print(&#39;Success!&#39;)&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">c</span> <span class="s2">"import dawdreamer as daw; engine = daw.RenderEngine(44100, 512); print('Success!')"</span>
 </pre></div>
 </div>
 </li>
@@ -632,14 +632,14 @@ which indicates progress is being made.</p>
 <p><strong>Streamlined Installation for Automation/LLMs:</strong></p>
 <p>If you want minimal command-line output (useful for LLMs or automated builds):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick install if C++ library already exists (minimal output)</span>
-python3<span class="w"> </span>setup.py<span class="w"> </span>develop<span class="w"> </span>--quiet<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;(Successfully|ERROR|Failed)&#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="o">(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Installing (1-2 min on WSL2)...&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+python3<span class="w"> </span>setup.py<span class="w"> </span>develop<span class="w"> </span>--quiet<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'(Successfully|ERROR|Failed)'</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Installing (1-2 min on WSL2)..."</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>python3<span class="w"> </span>setup.py<span class="w"> </span>develop<span class="w"> </span>--quiet<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Installed successfully&quot;</span><span class="o">)</span>
+<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"✓ Installed successfully"</span><span class="o">)</span>
 
 <span class="c1"># Verify silently</span>
-python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import dawdreamer; dawdreamer.RenderEngine(44100, 512)&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Working&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✗ Failed&quot;</span>
+python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import dawdreamer; dawdreamer.RenderEngine(44100, 512)"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"✓ Working"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"✗ Failed"</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -778,7 +778,7 @@ python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </
 <p>Test your installation:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dawdreamer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">daw</span>
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DawDreamer installed successfully!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DawDreamer installed successfully!"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For more comprehensive testing, see the <a class="reference external" href="https://github.com/DBraun/DawDreamer/tree/main/tests">tests directory</a>.</p>
@@ -803,7 +803,7 @@ and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minu
 You’ll see “Successfully installed dawdreamer-0.9.0” when done.</p>
 <p><strong>ImportError after installation</strong></p>
 <p>Verify that the installation completed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import dawdreamer; print(&#39;Installed&#39;, dawdreamer.__version__)&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import dawdreamer; print('Installed', dawdreamer.__version__)"</span>
 </pre></div>
 </div>
 <p>If it fails, try reinstalling:</p>
@@ -827,7 +827,7 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>develop
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 

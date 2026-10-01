@@ -516,10 +516,10 @@
 <span class="n">engine</span> <span class="o">=</span> <span class="n">daw</span><span class="o">.</span><span class="n">RenderEngine</span><span class="p">(</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">)</span>
 
 <span class="c1"># Load audio</span>
-<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drums.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"drums.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Create playback warp processor</span>
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">"drums"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
 
 <span class="c1"># Time-stretch: play in twice the amount of time (slowed down)</span>
 <span class="n">playback</span><span class="o">.</span><span class="n">time_ratio</span> <span class="o">=</span> <span class="mf">2.0</span>
@@ -570,11 +570,11 @@
 <span class="c1"># but we want to play it back at 130 BPM</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">130.</span><span class="p">)</span>
 
-<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"drum_loop.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">"drums"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
 
 <span class="c1"># Load warp markers from .asd file</span>
-<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_file</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav.asd&quot;</span><span class="p">)</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_file</span><span class="p">(</span><span class="s2">"drum_loop.wav.asd"</span><span class="p">)</span>
 
 <span class="n">engine</span><span class="o">.</span><span class="n">load_graph</span><span class="p">([(</span><span class="n">playback</span><span class="p">,</span> <span class="p">[])])</span>
 <span class="n">engine</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="mf">8.</span><span class="p">,</span> <span class="n">beats</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Render 8 beats at 130 BPM</span>
@@ -652,13 +652,13 @@
 <span class="n">engine</span><span class="o">.</span><span class="n">set_bpm</span><span class="p">(</span><span class="mf">130.</span><span class="p">)</span>
 
 <span class="c1"># Load audio</span>
-<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">audio</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"drum_loop.wav"</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Create processor</span>
-<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">&quot;drums&quot;</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
+<span class="n">playback</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">make_playbackwarp_processor</span><span class="p">(</span><span class="s2">"drums"</span><span class="p">,</span> <span class="n">audio</span><span class="p">)</span>
 
 <span class="c1"># Load Ableton warp markers</span>
-<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_file</span><span class="p">(</span><span class="s2">&quot;drum_loop.wav.asd&quot;</span><span class="p">)</span>
+<span class="n">playback</span><span class="o">.</span><span class="n">set_clip_file</span><span class="p">(</span><span class="s2">"drum_loop.wav.asd"</span><span class="p">)</span>
 
 <span class="c1"># Adjust clip properties</span>
 <span class="n">playback</span><span class="o">.</span><span class="n">loop_on</span> <span class="o">=</span> <span class="kc">True</span>
@@ -683,7 +683,7 @@
 
 <span class="c1"># Save</span>
 <span class="n">audio_out</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">get_audio</span><span class="p">()</span>
-<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;warped_drums.wav&#39;</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio_out</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">'warped_drums.wav'</span><span class="p">,</span> <span class="n">SAMPLE_RATE</span><span class="p">,</span> <span class="n">audio_out</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>
@@ -772,7 +772,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Aug 12, 2026.
+      <span class="lastupdated">Last updated on Oct 01, 2026.
       </span></p>
   </div>
 
