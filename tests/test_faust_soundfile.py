@@ -3,6 +3,29 @@ from dawdreamer_utils import *
 BUFFER_SIZE = 1024
 
 
+@pytest.mark.parametrize("num_channels", [1, 2, 3])
+def test_faust_soundfile_channel_wrap(num_channels):
+    """Python-provided soundfiles cyclically reuse distinct physical channels."""
+    engine = daw.RenderEngine(SAMPLE_RATE, 64)
+    processor = engine.make_faust_processor("faust")
+    samples = np.stack(
+        [np.full(512, (channel + 1) / 8, dtype=np.float32) for channel in range(num_channels)]
+    )
+    processor.set_soundfiles({"mySound": [samples]})
+    # Stay below the old compiler's MAX_CHAN so the test covers both runtimes.
+    outputs = 7
+    processor.set_dsp_string(
+        f'process = 0,0 : soundfile("mySound",{outputs}) : !,!,si.bus({outputs});'
+    )
+    processor.compile()
+    engine.load_graph([(processor, [])])
+    engine.render(128 / SAMPLE_RATE)
+    audio = engine.get_audio()
+    assert audio.shape == (outputs, 128)
+    for channel in range(outputs):
+        np.testing.assert_array_equal(audio[channel], samples[channel % num_channels, :128])
+
+
 # # Load a stereo audio sample and pass it to Faust
 @pytest.mark.parametrize(
     "audio_path,output_path,sound_choice",
