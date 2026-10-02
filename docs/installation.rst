@@ -314,7 +314,7 @@ If you encounter issues:
 4. On Windows, ensure you're using the x64 Native Tools Command Prompt
 5. On Linux/WSL2, ``setup.py develop`` taking 1-2 minutes is normal when processing Faust libraries
 6. If the C++ library is already built (``dawdreamer/dawdreamer.so`` exists), you can skip the build steps and just run ``python3 setup.py develop``
-7. See the `CLAUDE.md <https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md>`_ file for detailed troubleshooting
+7. See the `AGENTS.md <https://github.com/DBraun/DawDreamer/blob/main/AGENTS.md>`_ file for detailed troubleshooting
 
 Common Issues
 ~~~~~~~~~~~~~
@@ -323,7 +323,7 @@ Common Issues
 
 This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
 and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
-You'll see "Successfully installed dawdreamer-0.9.0" when done.
+You'll see "Successfully installed dawdreamer-0.9.1" when done.
 
 **ImportError after installation**
 

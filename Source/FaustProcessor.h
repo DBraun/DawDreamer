@@ -20,6 +20,7 @@
 
 #include "FaustArgvBuilder.h"
 #include "FaustSignalAPI.h"
+#include "SoundfileCompatibility.h"
 
 /*
 A custom implementation of SoundUI. For a requested soundfile primitive in
@@ -113,9 +114,8 @@ class MySoundUI : public SoundUI
                 soundfile->emptyFile(i, offset);
             }
 
-            // Share the same buffers for all other channels so that we have
-            // max_chan channels available
-            soundfile->shareBuffers(numChannels, MAX_CHAN);
+            // Only older Faust runtimes need duplicated channel pointers.
+            dawdreamer::shareSoundfileBuffers(soundfile, numChannels, MAX_CHAN, 0);
             fSoundfileMap[saved_url_real] = std::shared_ptr<Soundfile>(soundfile);
 
             // Get the soundfile pointer

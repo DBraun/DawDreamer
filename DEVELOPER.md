@@ -1,6 +1,6 @@
 # DawDreamer Developer Guide
 
-> **For quick build/install instructions optimized for LLMs and automation, see [CLAUDE.md](CLAUDE.md)**
+> **For quick build/install instructions optimized for LLMs and automation, see [AGENTS.md](AGENTS.md)**
 
 ## Table of Contents
 - [Architecture Overview](#architecture-overview)
@@ -552,4 +552,4 @@ pre-commit install
 
 ---
 
-For quick build instructions optimized for LLMs and automation, see **[CLAUDE.md](CLAUDE.md)**.
+For quick build instructions optimized for LLMs and automation, see **[AGENTS.md](AGENTS.md)**.

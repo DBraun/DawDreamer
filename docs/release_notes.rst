@@ -10,7 +10,13 @@ repository root, which follows the `Keep a Changelog
 .. note::
    **Versioning**: DawDreamer uses effort-based versioning. Version numbers reflect the scope of changes rather than strict semantic versioning rules.
 
-v0.9.0 (unreleased)
+v0.9.1 (unreleased)
+-------------------
+
+* Faust soundfile loading supports newer runtimes that omit ``Soundfile::shareBuffers``, while retaining compatibility with older runtimes.
+* Agent build instructions moved from ``CLAUDE.md`` to ``AGENTS.md``.
+
+v0.9.0 (2026-08-12)
 -------------------
 
 **Infrastructure upgrades:**

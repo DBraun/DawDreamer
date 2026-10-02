@@ -7,6 +7,14 @@ DawDreamer uses effort-based versioning: version numbers reflect the scope of
 changes rather than strict semantic versioning rules. Breaking changes are
 called out explicitly in each release's notes.
 
+## [Unreleased]
+
+### Changed
+
+- Faust soundfile loading supports newer runtimes that omit
+  `Soundfile::shareBuffers`, while retaining compatibility with older runtimes.
+- Agent build instructions moved from `CLAUDE.md` to `AGENTS.md`.
+
 ## [0.9.0] - 2026-08-12
 
 ### Added
