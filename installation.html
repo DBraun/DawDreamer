@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; DawDreamer 0.9.0 documentation</title>
+  <title>Installation &mdash; DawDreamer 0.9.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=39bb1c6d"></script>
+      <script src="_static/documentation_options.js?v=9dc39874"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -439,7 +439,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-9-0-unreleased">v0.9.0 (unreleased)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-9-1-unreleased">v0.9.1 (unreleased)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-9-0-2026-08-12">v0.9.0 (2026-08-12)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-3-2024-09-09">v0.8.3 (2024-09-09)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-8-0-2023-11-17">v0.8.0 (2023-11-17)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="release_notes.html#v0-7-4-2023-09-26">v0.7.4 (2023-09-26)</a></li>
@@ -793,14 +794,14 @@ python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </
 <li><p>On Windows, ensure you’re using the x64 Native Tools Command Prompt</p></li>
 <li><p>On Linux/WSL2, <code class="docutils literal notranslate"><span class="pre">setup.py</span> <span class="pre">develop</span></code> taking 1-2 minutes is normal when processing Faust libraries</p></li>
 <li><p>If the C++ library is already built (<code class="docutils literal notranslate"><span class="pre">dawdreamer/dawdreamer.so</span></code> exists), you can skip the build steps and just run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">setup.py</span> <span class="pre">develop</span></code></p></li>
-<li><p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/blob/main/CLAUDE.md">CLAUDE.md</a> file for detailed troubleshooting</p></li>
+<li><p>See the <a class="reference external" href="https://github.com/DBraun/DawDreamer/blob/main/AGENTS.md">AGENTS.md</a> file for detailed troubleshooting</p></li>
 </ol>
 <section id="common-issues">
 <h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
 <p><strong>Linux: “setup.py develop” is taking a long time</strong></p>
 <p>This is expected behavior on WSL2/NTFS. The installation processes ~200+ architecture files
 and ~50+ Faust library directories across the filesystem boundary. Wait 1-2 minutes for completion.
-You’ll see “Successfully installed dawdreamer-0.9.0” when done.</p>
+You’ll see “Successfully installed dawdreamer-0.9.1” when done.</p>
 <p><strong>ImportError after installation</strong></p>
 <p>Verify that the installation completed:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import dawdreamer; print('Installed', dawdreamer.__version__)"</span>
@@ -827,7 +828,7 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>develop
 
   <div role="contentinfo">
     <p>&#169; Copyright 2026, David Braun.
-      <span class="lastupdated">Last updated on Oct 01, 2026.
+      <span class="lastupdated">Last updated on Oct 02, 2026.
       </span></p>
   </div>
 
