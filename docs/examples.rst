@@ -3,6 +3,23 @@ Examples
 
 DawDreamer includes several complete examples demonstrating real-world use cases. All examples are available in the `examples/ directory <https://github.com/DBraun/DawDreamer/tree/main/examples>`_ on GitHub.
 
+Ambience 2.0.2 Reverb
+--------------------
+
+**Location**: ``examples/ambience_reverb/``
+
+Hosts the Windows-only Ambience VST3 reverb, opens its native editor for
+interactive parameter adjustments, and renders a mono or stereo input with a
+configurable reverb tail. The plugin is a separate AGPL-3.0 project; its binary
+is not bundled with DawDreamer. See the example README for download and setup
+instructions.
+
+**Topics covered:**
+
+* Hosting an effect plugin and its native editor
+* Processing input audio and rendering an effect tail
+* Adjusting plugin settings before offline rendering
+
 Faust Box API
 -------------
 
